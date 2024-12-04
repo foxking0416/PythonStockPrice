@@ -5,8 +5,8 @@ import datetime
 from QtStockPriceMainWindow import Ui_MainWindow  # 導入轉換後的 UI 類
 from QtStockPriceEditDialog import Ui_Dialog
 from PySide6.QtWidgets import QApplication, QMainWindow, QDialog
-from PySide6.QtGui import QStandardItemModel, QStandardItem
-from PySide6.QtCore import QModelIndex
+from PySide6.QtGui import QStandardItemModel, QStandardItem, QIcon
+from PySide6.QtCore import Qt, QModelIndex
 from enum import Enum
 
 # 要把.ui檔變成.py
@@ -320,7 +320,24 @@ class MainWindow( QMainWindow ):
         n_stock_inventory = 0
         n_accumulated_total_cost = 0
 
+        current_dir = os.path.dirname(__file__)
+        edit_icon_file_path = os.path.join( current_dir, 'icon\\Edit.svg' ) 
+        edit_icon = QIcon( edit_icon_file_path ) 
+        edit_icon_item = QStandardItem("")
+        edit_icon_item.setIcon( edit_icon )
+        edit_icon_item.setFlags( edit_icon_item.flags() & ~Qt.ItemIsEditable )
+
+        delete_icon_file_path = os.path.join( current_dir, 'icon\\Delete.svg' ) 
+        delete_icon = QIcon( delete_icon_file_path ) 
+        delete_icon_item = QStandardItem("")
+        delete_icon_item.setIcon( delete_icon )
+        delete_icon_item.setFlags( delete_icon_item.flags() & ~Qt.ItemIsEditable )
+        
         for index, dict_per_trading_data in enumerate( sorted_list ):
+
+            # self.per_stock_trading_data_model.setItem( index, 0, edit_icon_item )
+
+
             e_trading_type = dict_per_trading_data[ TradingData.TRADING_TYPE ]
             if e_trading_type == TradingType.TEMPLATE:
                 continue
