@@ -212,6 +212,7 @@ class MainWindow( QMainWindow ):
             self.dict_all_stock_trading_data[ str_first_four_chars ] = [ dict_trading_data ]
 
             self.refresh_stock_list_table()
+            self.func_save_trading_data()
 
 
     def on_add_new_data_push_button_clicked( self ):
@@ -240,8 +241,23 @@ class MainWindow( QMainWindow ):
     def func_save_trading_data( self ):
         current_dir = os.path.dirname( __file__ )
         json_file_path = os.path.join( current_dir, 'TradingData.json' )
-        with open( json_file_path,'r', encoding='utf-8' ) as f:
-            data = json.load( f )
+        
+        export_data = []
+        for key, value in self.dict_all_stock_trading_data.items():
+            for item in value:
+                dict_per_trading_data = {}
+                dict_per_trading_data[ "stock_number" ] = item[ TradingData.STOCK_NUMBER ]
+                dict_per_trading_data[ "trading_date" ] = item[ TradingData.TRADING_DATE ]
+                dict_per_trading_data[ "trading_type" ] = int( item[ TradingData.TRADING_TYPE ].value )
+                dict_per_trading_data[ "trading_price" ] = item[ TradingData.TRADING_PRICE ]
+                dict_per_trading_data[ "trading_count" ] = item[ TradingData.TRADING_COUNT ]
+                dict_per_trading_data[ "trading_fee_discount" ] = item[ TradingData.TRADING_FEE_DISCOUNT ]
+
+                export_data.append( dict_per_trading_data )
+
+
+        with open( json_file_path, 'w', encoding='utf-8' ) as f:
+            json.dump( export_data, f, ensure_ascii=False, indent=4 )
 
     def func_load_existing_trading_data( self ):
         current_dir = os.path.dirname( __file__ )
