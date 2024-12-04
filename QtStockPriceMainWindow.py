@@ -69,11 +69,11 @@ class Ui_MainWindow(object):
 
         self.verticalLayout.addWidget(self.qtStockPositionTableView)
 
-        self.qtTradeDataTableView = QTableView(self.centralwidget)
-        self.qtTradeDataTableView.setObjectName(u"qtTradeDataTableView")
-        self.qtTradeDataTableView.setMinimumSize(QSize(0, 300))
+        self.qtTradingDataTableView = QTableView(self.centralwidget)
+        self.qtTradingDataTableView.setObjectName(u"qtTradingDataTableView")
+        self.qtTradingDataTableView.setMinimumSize(QSize(0, 300))
 
-        self.verticalLayout.addWidget(self.qtTradeDataTableView)
+        self.verticalLayout.addWidget(self.qtTradingDataTableView)
 
         self.horizontalLayout_3 = QHBoxLayout()
         self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")

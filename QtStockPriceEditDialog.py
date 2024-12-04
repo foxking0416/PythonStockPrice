@@ -100,6 +100,7 @@ class Ui_Dialog(object):
         self.qtPriceDoubleSpinBox.setObjectName(u"qtPriceDoubleSpinBox")
         self.qtPriceDoubleSpinBox.setMinimumSize(QSize(75, 0))
         self.qtPriceDoubleSpinBox.setMaximum(9999.989999999999782)
+        self.qtPriceDoubleSpinBox.setValue(10.000000000000000)
 
         self.horizontalLayout_3.addWidget(self.qtPriceDoubleSpinBox)
 
@@ -312,7 +313,7 @@ class Ui_Dialog(object):
         self.qtOddTradeRadioButton.setText(QCoreApplication.translate("Dialog", u"\u96f6\u80a1\u4ea4\u6613", None))
         self.label_5.setText(QCoreApplication.translate("Dialog", u"\u80a1", None))
         self.label_3.setText(QCoreApplication.translate("Dialog", u"\u91d1\u984d", None))
-        self.qtTradingValueLineEdit.setText(QCoreApplication.translate("Dialog", u"0.0", None))
+        self.qtTradingValueLineEdit.setText(QCoreApplication.translate("Dialog", u"0", None))
         self.label_6.setText(QCoreApplication.translate("Dialog", u"\u624b\u7e8c\u8cbb", None))
         self.qtFeeLineEdit.setText(QCoreApplication.translate("Dialog", u"0", None))
         self.label_7.setText(QCoreApplication.translate("Dialog", u"\u4ea4\u6613\u7a05", None))
