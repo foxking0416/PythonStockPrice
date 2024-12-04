@@ -105,7 +105,7 @@ class TradingDataDialog( QDialog ):
 
     def accept_data( self ):
 
-        if float( self.ui.qtTotalCostLineEdit.text() ) != 0:
+        if float( self.ui.qtTotalCostLineEdit.text().replace( ',', '' ) ) != 0:
             
             self.dict_trading_data = Utility.generate_trading_data( self.ui.qtStockNumberLabel.text(), self.ui.qtDateEdit.date().toString( "yyyy-MM-dd" ), self.get_trading_type(), self.ui.qtPriceDoubleSpinBox.value(), self.get_trading_count(), self.get_trading_fee_discount() )
             self.accept()
@@ -152,9 +152,9 @@ class TradingDataDialog( QDialog ):
         dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, True, False )
 
         self.ui.qtTradingValueLineEdit.setText( format( dict_result[ TradingCost.TRADING_VALUE ], ',' ) )
-        self.ui.qtFeeLineEdit.setText( format( dict_result[ TradingCost.TRADING_FEE ] ), ',' )
-        self.ui.qtTaxLineEdit.setText( format( dict_result[ TradingCost.TRADING_TAX ] ), ',' )
-        self.ui.qtTotalCostLineEdit.setText( format( dict_result[ TradingCost.TRADING_TOTAL_COST ] ), ',' )
+        self.ui.qtFeeLineEdit.setText( format( dict_result[ TradingCost.TRADING_FEE ], ',' ) )
+        self.ui.qtTaxLineEdit.setText( format( dict_result[ TradingCost.TRADING_TAX ], ',' ) )
+        self.ui.qtTotalCostLineEdit.setText( format( dict_result[ TradingCost.TRADING_TOTAL_COST ], ',' ) )
 
 class MainWindow( QMainWindow ):
     def __init__(self):
@@ -180,6 +180,7 @@ class MainWindow( QMainWindow ):
         # self.ui.qtDeleteDataPushButton.clicked.connect( self.on_delete_data_push_button_clicked )
         # self.ui.qtEditDataPushButton.clicked.connect( self.on_edit_data_push_button_clicked )
 
+        self.str_picked_stock_number = None
         self.dict_all_stock_trading_data = {}
 
         self.func_load_existing_trading_data()
@@ -216,7 +217,9 @@ class MainWindow( QMainWindow ):
 
 
     def on_add_new_data_push_button_clicked( self ):
-        str_stock_number = '2887'
+        if self.str_picked_stock_number is None:
+            return
+        str_stock_number = self.str_picked_stock_number
         dialog = TradingDataDialog( str_stock_number, self.ui.qtDiscountCheckBox.isChecked(), self.ui.qtDiscountRateDoubleSpinBox.value(), self.ui.qtExtraInsuranceFeeCheckBox.isChecked(), self )
 
         if dialog.exec():
@@ -225,13 +228,14 @@ class MainWindow( QMainWindow ):
             list_trading_data = self.dict_all_stock_trading_data[ str_stock_number ]
             sorted_list = sorted( list_trading_data, key=lambda x: ( datetime.datetime.strptime( x[ TradingData.TRADING_DATE ], "%Y-%m-%d"), x[ TradingData.TRADING_TYPE ] ) )
             self.refresh_trading_data_table( sorted_list )
+            self.func_save_trading_data()
 
     def on_table_item_clicked( self, index: QModelIndex, table_model ):
         item = table_model.itemFromIndex( index )
         if item is not None:
             header_text = table_model.verticalHeaderItem( index.row() ).text()
             str_stock_number = header_text[:4]
-            self.str_detail_data_stock_number = str_stock_number
+            self.str_picked_stock_number = str_stock_number
 
             if str_stock_number in self.dict_all_stock_trading_data:
                 list_trading_data = self.dict_all_stock_trading_data[ str_stock_number ]
