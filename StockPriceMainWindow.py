@@ -208,7 +208,7 @@ class MainWindow( QMainWindow ):
         
 
         if str_first_four_chars not in self.dict_all_stock_trading_data:
-            dict_trading_data = Utility.generate_trading_data( str_first_four_chars, "0001-01-01", TradingType.BUY, 0, 0, 1 )
+            dict_trading_data = Utility.generate_trading_data( str_first_four_chars, "0001-01-01", TradingType.TEMPLATE, 0, 0, 1 )
             self.dict_all_stock_trading_data[ str_first_four_chars ] = [ dict_trading_data ]
 
             self.refresh_stock_list_table()
@@ -318,6 +318,8 @@ class MainWindow( QMainWindow ):
 
         for index, dict_per_trading_data in enumerate( sorted_list ):
             e_trading_type = dict_per_trading_data[ TradingData.TRADING_TYPE ]
+            if e_trading_type == TradingType.TEMPLATE:
+                continue
             f_trading_price = dict_per_trading_data[ TradingData.TRADING_PRICE ]
             n_trading_count = dict_per_trading_data[ TradingData.TRADING_COUNT ]
             f_trading_fee_discount = dict_per_trading_data[ TradingData.TRADING_FEE_DISCOUNT ]
