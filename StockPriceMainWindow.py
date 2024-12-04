@@ -14,15 +14,17 @@ from enum import Enum
 # pyside6-uic QtStockPriceMainWindow.ui -o QtStockPriceMainWindow.py
 
 class TradingType( Enum ):
-    BUY = 0
-    SELL = 1
+    TEMPLATE = 0
+    BUY = 1
+    SELL = 2
 
 class TradingData( Enum ):
-    TRADING_DATE = 0
-    TRADING_TYPE = 1 # 0:買進, 1:賣出
-    TRADING_PRICE = 2
-    TRADING_COUNT = 3
-    TRADING_FEE_DISCOUNT = 4
+    STOCK_NUMBER = 0
+    TRADING_DATE = 1
+    TRADING_TYPE = 2 # 0:買進, 1:賣出
+    TRADING_PRICE = 3
+    TRADING_COUNT = 4
+    TRADING_FEE_DISCOUNT = 5
 
 class TradingCost( Enum ):
     TRADING_VALUE = 0
@@ -31,14 +33,14 @@ class TradingCost( Enum ):
     TRADING_INSURANCE = 3
     TRADING_TOTAL_COST = 4
 
-class Computer():
-    def compute_cost( n_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, b_extra_insurance, b_daying_trading ):
+class Utility():
+    def compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, b_extra_insurance, b_daying_trading ):
 
         n_trading_value = int( f_trading_price * n_trading_count )
         n_trading_fee = int( n_trading_value * 0.001425 * f_trading_fee_discount )
         if n_trading_fee < 20:
             n_trading_fee = 20
-        if n_trading_type == TradingType.SELL:
+        if e_trading_type == TradingType.SELL:
             if b_daying_trading:
                 n_trading_tax = int( n_trading_value * 0.0015 )
             else:
@@ -54,6 +56,15 @@ class Computer():
         dict_result[ TradingCost.TRADING_TOTAL_COST ] = n_trading_value + n_trading_fee + n_trading_tax
         return dict_result
 
+    def generate_trading_data( str_stock_number, str_trading_date, e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount ):
+        dict_trading_data = {}
+        dict_trading_data[ TradingData.STOCK_NUMBER ] = str_stock_number
+        dict_trading_data[ TradingData.TRADING_DATE ] = str_trading_date
+        dict_trading_data[ TradingData.TRADING_TYPE ] = e_trading_type
+        dict_trading_data[ TradingData.TRADING_PRICE ] = f_trading_price
+        dict_trading_data[ TradingData.TRADING_COUNT ] = n_trading_count
+        dict_trading_data[ TradingData.TRADING_FEE_DISCOUNT ] = f_trading_fee_discount
+        return dict_trading_data
 
 class TradingDataDialog( QDialog ):
     def __init__( self, b_discount, f_discount_value, b_extra_insurance, parent = None ):
@@ -141,7 +152,7 @@ class TradingDataDialog( QDialog ):
         n_trading_count = self.get_trading_count()
         f_trading_fee_discount = self.get_trading_fee_discount() 
         
-        dict_result = Computer.compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, True, False )
+        dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, True, False )
 
         self.ui.qtTradingValueLineEdit.setText( format( dict_result[ TradingCost.TRADING_VALUE ], ',' ) )
         self.ui.qtFeeLineEdit.setText( format( dict_result[ TradingCost.TRADING_FEE ] ), ',' )
@@ -162,8 +173,9 @@ class MainWindow( QMainWindow ):
 
         self.ui.qtDiscountCheckBox.stateChanged.connect( self.on_discount_check_box_state_changed )
         self.ui.qtAddTradingDataPushButton.clicked.connect( self.on_add_new_data_push_button_clicked )
-        self.ui.qtDeleteDataPushButton.clicked.connect( self.on_delete_data_push_button_clicked )
-        self.ui.qtEditDataPushButton.clicked.connect( self.on_edit_data_push_button_clicked )
+        self.ui.qtAddStockPushButton.clicked.connect( self.on_add_stock_push_button_clicked )
+        # self.ui.qtDeleteDataPushButton.clicked.connect( self.on_delete_data_push_button_clicked )
+        # self.ui.qtEditDataPushButton.clicked.connect( self.on_edit_data_push_button_clicked )
 
 
         self.list_trading_data = []
@@ -176,6 +188,32 @@ class MainWindow( QMainWindow ):
         else:
             self.ui.qtDiscountRateDoubleSpinBox.setEnabled( False )
 
+    def on_add_stock_push_button_clicked( self ):
+        str_stock_input = self.ui.qtStockInputLineEdit.text()
+        self.ui.qtStockInputLineEdit.clear()
+        str_first_four_chars = str_stock_input[:4]
+        # if str_first_four_chars not in self.dict_all_company_stock_info:
+        #     b_find = False
+        #     for stock_number, stock_info in self.dict_all_company_stock_info.items():
+        #         stock_name = stock_info[ StockCore.ModifiedDataType.NAME ]
+        #         if str_first_four_chars == stock_name:
+        #             str_first_four_chars = stock_number
+        #             b_find = True
+        #             break
+        #     if not b_find:
+        #         QMessageBox.warning( self, "警告", "輸入的股票代碼不存在", QMessageBox.Ok )
+        #         return
+        
+        b_already_exist = False
+        for item in self.list_trading_data:
+            if item[ TradingData.STOCK_NUMBER ] == str_first_four_chars:
+                b_already_exist = True
+                break
+        if not b_already_exist:
+            dict_trading_data = Utility.generate_trading_data( str_first_four_chars, "0001-01-01", TradingType.BUY, 0, 0, 1 )
+            self.list_trading_data.append( dict_trading_data )
+
+
     def on_add_new_data_push_button_clicked( self ):
         dialog = TradingDataDialog( self.ui.qtDiscountCheckBox.isChecked(), self.ui.qtDiscountRateDoubleSpinBox.value(), self.ui.qtExtraInsuranceFeeCheckBox.isChecked(), self )
 
@@ -185,6 +223,12 @@ class MainWindow( QMainWindow ):
 
             sorted_list = sorted( self.list_trading_data, key=lambda x: ( datetime.datetime.strptime( x[ TradingData.TRADING_DATE ], "%Y-%m-%d"), x[ TradingData.TRADING_TYPE ] ) )
             self.refresh_table( sorted_list )
+
+    def func_save_trading_data( self ):
+        current_dir = os.path.dirname( __file__ )
+        json_file_path = os.path.join( current_dir, 'TradingData.json' )
+        with open( json_file_path,'r', encoding='utf-8' ) as f:
+            data = json.load( f )
 
     def func_load_existing_trading_data( self ):
         # 取得目前工作目錄
@@ -196,24 +240,21 @@ class MainWindow( QMainWindow ):
             data = json.load( f )
 
         for item in data:
-            dict_per_trading_data = {}
-            if( item[ "stock_number" ] ):
-                str_stock_number = item[ "stock_number" ]
+            if ( item[ "stock_number" ] != None and 
+                 item[ "trading_date" ] != None and 
+                 item[ "trading_type" ] != None and 
+                 item[ "trading_price" ] != None and 
+                 item[ "trading_count" ] != None and 
+                 item[ "trading_fee_discount" ] != None ):
 
-            if item[ "trading_date" ] != None:
-                dict_per_trading_data[ TradingData.TRADING_DATE ] = item[ "trading_date" ]
-            if item[ "trading_type" ] != None:
-                if item[ "trading_type" ] == 0:
-                    dict_per_trading_data[ TradingData.TRADING_TYPE ] = TradingType.BUY
-                elif item[ "trading_type" ] == 1:
-                    dict_per_trading_data[ TradingData.TRADING_TYPE ] = TradingType.SELL
-            if item[ "trading_price" ] != None:
-                dict_per_trading_data[ TradingData.TRADING_PRICE ] = float( item[ "trading_price" ] )
-            if item[ "trading_count" ] != None:
-                dict_per_trading_data[ TradingData.TRADING_COUNT ] = int( item[ "trading_count" ] )
-            if item[ "trading_fee_discount" ] != None:
-                dict_per_trading_data[ TradingData.TRADING_FEE_DISCOUNT ] = float( item[ "trading_fee_discount" ] )
-            self.list_trading_data.append( dict_per_trading_data )
+                dict_per_trading_data = Utility.generate_trading_data( item[ "stock_number" ], 
+                                                                    item[ "trading_date" ], 
+                                                                    TradingType( item[ "trading_type" ] ), 
+                                                                    item[ "trading_price" ],
+                                                                    item[ "trading_count" ], 
+                                                                    item[ "trading_fee_discount" ] )
+                self.list_trading_data.append( dict_per_trading_data )
+
         
         sorted_list = sorted( self.list_trading_data, key=lambda x: ( datetime.datetime.strptime( x[ TradingData.TRADING_DATE ], "%Y-%m-%d"), x[ TradingData.TRADING_TYPE ] ) )
         self.refresh_table( sorted_list )
@@ -228,18 +269,18 @@ class MainWindow( QMainWindow ):
         n_accumulated_total_cost = 0
 
         for index, dict_per_trading_data in enumerate( sorted_list ):
-            n_trading_type = dict_per_trading_data[ TradingData.TRADING_TYPE ]
+            e_trading_type = dict_per_trading_data[ TradingData.TRADING_TYPE ]
             f_trading_price = dict_per_trading_data[ TradingData.TRADING_PRICE ]
             n_trading_count = dict_per_trading_data[ TradingData.TRADING_COUNT ]
             f_trading_fee_discount = dict_per_trading_data[ TradingData.TRADING_FEE_DISCOUNT ]
-            dict_result = Computer.compute_cost( n_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, True, False )
+            dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, True, False )
             n_trading_value = dict_result[ TradingCost.TRADING_VALUE ]
             n_trading_fee = dict_result[ TradingCost.TRADING_FEE ]
             n_trading_tax = dict_result[ TradingCost.TRADING_TAX ]
             n_trading_insurance = dict_result[ TradingCost.TRADING_INSURANCE ]  
             n_per_trading_total_cost = dict_result[ TradingCost.TRADING_TOTAL_COST ]
 
-            if n_trading_type == TradingType.BUY:
+            if e_trading_type == TradingType.BUY:
                 n_stock_inventory += n_trading_count
                 str_trading_type = "買進"
                 n_accumulated_total_cost += n_per_trading_total_cost

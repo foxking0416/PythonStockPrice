@@ -16,15 +16,15 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QCheckBox, QDoubleSpinBox, QHBoxLayout,
-    QHeaderView, QMainWindow, QMenuBar, QPushButton,
-    QSizePolicy, QSpacerItem, QStatusBar, QTableView,
-    QVBoxLayout, QWidget)
+    QHeaderView, QLineEdit, QMainWindow, QMenuBar,
+    QPushButton, QSizePolicy, QSpacerItem, QStatusBar,
+    QTableView, QVBoxLayout, QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(800, 557)
+        MainWindow.resize(800, 701)
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         self.verticalLayout = QVBoxLayout(self.centralwidget)
@@ -63,15 +63,51 @@ class Ui_MainWindow(object):
 
         self.verticalLayout.addLayout(self.horizontalLayout)
 
+        self.horizontalLayout_2 = QHBoxLayout()
+        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
+        self.verticalLayout_2 = QVBoxLayout()
+        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
+        self.qtStockInputLineEdit = QLineEdit(self.centralwidget)
+        self.qtStockInputLineEdit.setObjectName(u"qtStockInputLineEdit")
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.qtStockInputLineEdit.sizePolicy().hasHeightForWidth())
+        self.qtStockInputLineEdit.setSizePolicy(sizePolicy)
+        self.qtStockInputLineEdit.setMaximumSize(QSize(100, 16777215))
+
+        self.verticalLayout_2.addWidget(self.qtStockInputLineEdit)
+
+        self.qtAddStockPushButton = QPushButton(self.centralwidget)
+        self.qtAddStockPushButton.setObjectName(u"qtAddStockPushButton")
+        self.qtAddStockPushButton.setMaximumSize(QSize(100, 16777215))
+
+        self.verticalLayout_2.addWidget(self.qtAddStockPushButton)
+
+        self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+
+        self.verticalLayout_2.addItem(self.verticalSpacer)
+
+        self.qtDeleteStockPushButton = QPushButton(self.centralwidget)
+        self.qtDeleteStockPushButton.setObjectName(u"qtDeleteStockPushButton")
+
+        self.verticalLayout_2.addWidget(self.qtDeleteStockPushButton)
+
+
+        self.horizontalLayout_2.addLayout(self.verticalLayout_2)
+
         self.qtStockPositionTableView = QTableView(self.centralwidget)
         self.qtStockPositionTableView.setObjectName(u"qtStockPositionTableView")
         self.qtStockPositionTableView.setMinimumSize(QSize(0, 100))
 
-        self.verticalLayout.addWidget(self.qtStockPositionTableView)
+        self.horizontalLayout_2.addWidget(self.qtStockPositionTableView)
+
+
+        self.verticalLayout.addLayout(self.horizontalLayout_2)
 
         self.qtTradingDataTableView = QTableView(self.centralwidget)
         self.qtTradingDataTableView.setObjectName(u"qtTradingDataTableView")
-        self.qtTradingDataTableView.setMinimumSize(QSize(0, 300))
+        self.qtTradingDataTableView.setMinimumSize(QSize(0, 400))
 
         self.verticalLayout.addWidget(self.qtTradingDataTableView)
 
@@ -100,16 +136,6 @@ class Ui_MainWindow(object):
 
         self.verticalLayout.addLayout(self.horizontalLayout_3)
 
-        self.qtEditDataPushButton = QPushButton(self.centralwidget)
-        self.qtEditDataPushButton.setObjectName(u"qtEditDataPushButton")
-
-        self.verticalLayout.addWidget(self.qtEditDataPushButton)
-
-        self.qtDeleteDataPushButton = QPushButton(self.centralwidget)
-        self.qtDeleteDataPushButton.setObjectName(u"qtDeleteDataPushButton")
-
-        self.verticalLayout.addWidget(self.qtDeleteDataPushButton)
-
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
@@ -128,11 +154,11 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"MainWindow", None))
         self.qtDiscountCheckBox.setText(QCoreApplication.translate("MainWindow", u"\u624b\u7e8c\u8cbb\u6298\u6263", None))
         self.qtExtraInsuranceFeeCheckBox.setText(QCoreApplication.translate("MainWindow", u"\u88dc\u5145\u4fdd\u8cbb", None))
+        self.qtAddStockPushButton.setText(QCoreApplication.translate("MainWindow", u"\u65b0\u589e\u80a1\u7968", None))
+        self.qtDeleteStockPushButton.setText(QCoreApplication.translate("MainWindow", u"\u522a\u9664\u80a1\u7968\u4ea4\u6613\u8cc7\u6599", None))
         self.qtAddTradingDataPushButton.setText(QCoreApplication.translate("MainWindow", u"\u65b0\u589e\u4ea4\u6613\u7d00\u9304", None))
         self.qtAddDividendDataPushButton.setText(QCoreApplication.translate("MainWindow", u"\u65b0\u589e\u914d\u80a1\u914d\u606f\u7d00\u9304", None))
         self.pushButton_2.setText(QCoreApplication.translate("MainWindow", u"\u65b0\u589e\u6e1b\u8cc7\u7d00\u9304", None))
         self.pushButton.setText(QCoreApplication.translate("MainWindow", u"\u65b0\u589e\u589e\u8cc7\u7d00\u9304", None))
-        self.qtEditDataPushButton.setText(QCoreApplication.translate("MainWindow", u"\u7de8\u8f2f", None))
-        self.qtDeleteDataPushButton.setText(QCoreApplication.translate("MainWindow", u"\u522a\u9664", None))
     # retranslateUi
 
