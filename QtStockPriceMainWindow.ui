@@ -140,7 +140,7 @@
        </layout>
       </item>
       <item>
-       <widget class="QTableView" name="qtStockPositionTableView">
+       <widget class="QTableView" name="qtStockListTableView">
         <property name="minimumSize">
          <size>
           <width>0</width>

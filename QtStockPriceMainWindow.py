@@ -96,11 +96,11 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_2.addLayout(self.verticalLayout_2)
 
-        self.qtStockPositionTableView = QTableView(self.centralwidget)
-        self.qtStockPositionTableView.setObjectName(u"qtStockPositionTableView")
-        self.qtStockPositionTableView.setMinimumSize(QSize(0, 100))
+        self.qtStockListTableView = QTableView(self.centralwidget)
+        self.qtStockListTableView.setObjectName(u"qtStockListTableView")
+        self.qtStockListTableView.setMinimumSize(QSize(0, 100))
 
-        self.horizontalLayout_2.addWidget(self.qtStockPositionTableView)
+        self.horizontalLayout_2.addWidget(self.qtStockListTableView)
 
 
         self.verticalLayout.addLayout(self.horizontalLayout_2)

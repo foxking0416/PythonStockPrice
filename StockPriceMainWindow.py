@@ -6,6 +6,7 @@ from QtStockPriceMainWindow import Ui_MainWindow  # 導入轉換後的 UI 類
 from QtStockPriceEditDialog import Ui_Dialog
 from PySide6.QtWidgets import QApplication, QMainWindow, QDialog
 from PySide6.QtGui import QStandardItemModel, QStandardItem
+from PySide6.QtCore import QModelIndex
 from enum import Enum
 
 # 要把.ui檔變成.py
@@ -67,12 +68,13 @@ class Utility():
         return dict_trading_data
 
 class TradingDataDialog( QDialog ):
-    def __init__( self, b_discount, f_discount_value, b_extra_insurance, parent = None ):
+    def __init__( self, str_stock_number, b_discount, f_discount_value, b_extra_insurance, parent = None ):
         super().__init__( parent )
 
         self.ui = Ui_Dialog()
         self.ui.setupUi( self )
 
+        self.ui.qtStockNumberLabel.setText( str_stock_number )
         obj_current_date = datetime.datetime.today()
         self.ui.qtDateEdit.setDate( obj_current_date.date() )
         self.ui.qtDateEdit.setCalendarPopup( True )
@@ -104,18 +106,13 @@ class TradingDataDialog( QDialog ):
     def accept_data( self ):
 
         if float( self.ui.qtTotalCostLineEdit.text() ) != 0:
-            self.dict_trading_data[ TradingData.TRADING_DATE ] = self.ui.qtDateEdit.date().toString( "yyyy-MM-dd" )
-            self.dict_trading_data[ TradingData.TRADING_TYPE ] = self.get_trading_type()
-            self.dict_trading_data[ TradingData.TRADING_PRICE ] = self.ui.qtPriceDoubleSpinBox.value()
-            self.dict_trading_data[ TradingData.TRADING_COUNT ] = self.get_trading_count()
-            self.dict_trading_data[ TradingData.TRADING_FEE_DISCOUNT ] = self.get_trading_fee_discount() 
-
+            
+            self.dict_trading_data = Utility.generate_trading_data( self.ui.qtStockNumberLabel.text(), self.ui.qtDateEdit.date().toString( "yyyy-MM-dd" ), self.get_trading_type(), self.ui.qtPriceDoubleSpinBox.value(), self.get_trading_count(), self.get_trading_fee_discount() )
             self.accept()
         else:
             self.reject()
     
     def cancel( self ):
-        print("cancel")
         self.reject()
 
     def on_trading_type_changed( self ):
@@ -159,16 +156,22 @@ class TradingDataDialog( QDialog ):
         self.ui.qtTaxLineEdit.setText( format( dict_result[ TradingCost.TRADING_TAX ] ), ',' )
         self.ui.qtTotalCostLineEdit.setText( format( dict_result[ TradingCost.TRADING_TOTAL_COST ] ), ',' )
 
-
 class MainWindow( QMainWindow ):
     def __init__(self):
         super( MainWindow, self ).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi( self )  # 設置 UI
 
-        self.per_stock_trading_data_model = QStandardItemModel( 0, 5 ) 
+        self.stock_list_model = QStandardItemModel( 0, 0 )
+        self.stock_list_model.setHorizontalHeaderLabels( [ '股票代碼', '公司名稱', '庫存股數', '總成本', '均價' ] )
+        self.ui.qtStockListTableView.setModel( self.stock_list_model )
+        self.ui.qtStockListTableView.clicked.connect( lambda index: self.on_table_item_clicked( index, self.stock_list_model ) )
+
+        self.per_stock_trading_data_model = QStandardItemModel( 0, 0 ) 
+        self.per_stock_trading_data_model.setVerticalHeaderLabels( [ '交易日', '交易種類', '交易價格', '交易股數', '交易金額', '手續費', 
+                                                                     '交易稅', '補充保費', '單筆總成本', '累計總成本', '庫存股數', '均價'] )
         self.ui.qtTradingDataTableView.setModel( self.per_stock_trading_data_model )
-        self.ui.qtTradingDataTableView.horizontalHeader().setSectionsMovable( True )
+        self.ui.qtTradingDataTableView.horizontalHeader().hide()
 
 
         self.ui.qtDiscountCheckBox.stateChanged.connect( self.on_discount_check_box_state_changed )
@@ -177,8 +180,7 @@ class MainWindow( QMainWindow ):
         # self.ui.qtDeleteDataPushButton.clicked.connect( self.on_delete_data_push_button_clicked )
         # self.ui.qtEditDataPushButton.clicked.connect( self.on_edit_data_push_button_clicked )
 
-
-        self.list_trading_data = []
+        self.dict_all_stock_trading_data = {}
 
         self.func_load_existing_trading_data()
 
@@ -204,25 +206,36 @@ class MainWindow( QMainWindow ):
         #         QMessageBox.warning( self, "警告", "輸入的股票代碼不存在", QMessageBox.Ok )
         #         return
         
-        b_already_exist = False
-        for item in self.list_trading_data:
-            if item[ TradingData.STOCK_NUMBER ] == str_first_four_chars:
-                b_already_exist = True
-                break
-        if not b_already_exist:
+
+        if str_first_four_chars not in self.dict_all_stock_trading_data:
             dict_trading_data = Utility.generate_trading_data( str_first_four_chars, "0001-01-01", TradingType.BUY, 0, 0, 1 )
-            self.list_trading_data.append( dict_trading_data )
+            self.dict_all_stock_trading_data[ str_first_four_chars ] = [ dict_trading_data ]
+
+            self.refresh_stock_list_table()
 
 
     def on_add_new_data_push_button_clicked( self ):
-        dialog = TradingDataDialog( self.ui.qtDiscountCheckBox.isChecked(), self.ui.qtDiscountRateDoubleSpinBox.value(), self.ui.qtExtraInsuranceFeeCheckBox.isChecked(), self )
+        str_stock_number = '2887'
+        dialog = TradingDataDialog( str_stock_number, self.ui.qtDiscountCheckBox.isChecked(), self.ui.qtDiscountRateDoubleSpinBox.value(), self.ui.qtExtraInsuranceFeeCheckBox.isChecked(), self )
 
         if dialog.exec():
             dict_trading_data = dialog.dict_trading_data
-            self.list_trading_data.append( dict_trading_data )
+            self.dict_all_stock_trading_data[ str_stock_number ].append( dict_trading_data )
+            list_trading_data = self.dict_all_stock_trading_data[ str_stock_number ]
+            sorted_list = sorted( list_trading_data, key=lambda x: ( datetime.datetime.strptime( x[ TradingData.TRADING_DATE ], "%Y-%m-%d"), x[ TradingData.TRADING_TYPE ] ) )
+            self.refresh_trading_data_table( sorted_list )
 
-            sorted_list = sorted( self.list_trading_data, key=lambda x: ( datetime.datetime.strptime( x[ TradingData.TRADING_DATE ], "%Y-%m-%d"), x[ TradingData.TRADING_TYPE ] ) )
-            self.refresh_table( sorted_list )
+    def on_table_item_clicked( self, index: QModelIndex, table_model ):
+        item = table_model.itemFromIndex( index )
+        if item is not None:
+            header_text = table_model.verticalHeaderItem( index.row() ).text()
+            str_stock_number = header_text[:4]
+            self.str_detail_data_stock_number = str_stock_number
+
+            if str_stock_number in self.dict_all_stock_trading_data:
+                list_trading_data = self.dict_all_stock_trading_data[ str_stock_number ]
+                sorted_list = sorted( list_trading_data, key=lambda x: ( datetime.datetime.strptime( x[ TradingData.TRADING_DATE ], "%Y-%m-%d"), x[ TradingData.TRADING_TYPE ] ) )
+                self.refresh_trading_data_table( sorted_list )
 
     def func_save_trading_data( self ):
         current_dir = os.path.dirname( __file__ )
@@ -231,9 +244,7 @@ class MainWindow( QMainWindow ):
             data = json.load( f )
 
     def func_load_existing_trading_data( self ):
-        # 取得目前工作目錄
         current_dir = os.path.dirname( __file__ )
-        # 組合JSON檔案的路徑
         json_file_path = os.path.join( current_dir, 'TradingData.json' )
 
         with open( json_file_path,'r', encoding='utf-8' ) as f:
@@ -248,18 +259,39 @@ class MainWindow( QMainWindow ):
                  item[ "trading_fee_discount" ] != None ):
 
                 dict_per_trading_data = Utility.generate_trading_data( item[ "stock_number" ], 
-                                                                    item[ "trading_date" ], 
-                                                                    TradingType( item[ "trading_type" ] ), 
-                                                                    item[ "trading_price" ],
-                                                                    item[ "trading_count" ], 
-                                                                    item[ "trading_fee_discount" ] )
-                self.list_trading_data.append( dict_per_trading_data )
+                                                                       item[ "trading_date" ], 
+                                                                       TradingType( item[ "trading_type" ] ), 
+                                                                       item[ "trading_price" ],
+                                                                       item[ "trading_count" ], 
+                                                                       item[ "trading_fee_discount" ] )
 
-        
-        sorted_list = sorted( self.list_trading_data, key=lambda x: ( datetime.datetime.strptime( x[ TradingData.TRADING_DATE ], "%Y-%m-%d"), x[ TradingData.TRADING_TYPE ] ) )
-        self.refresh_table( sorted_list )
+                if item[ "stock_number" ] not in self.dict_all_stock_trading_data:
+                    self.dict_all_stock_trading_data[ item[ "stock_number" ] ] = [ dict_per_trading_data ]
+                else:
+                    self.dict_all_stock_trading_data[ item[ "stock_number" ] ].append( dict_per_trading_data )
 
-    def refresh_table( self, sorted_list ):
+        self.refresh_stock_list_table()
+
+    def refresh_stock_list_table( self ):
+        self.stock_list_model.clear()
+        self.stock_list_model.setHorizontalHeaderLabels( ['股票代碼', '公司名稱', '庫存股數', '總成本', '均價'] )
+
+        list_vertical_labels = []
+        for index,( key, value ) in enumerate( self.dict_all_stock_trading_data.items() ):
+            list_vertical_labels.append( key )
+            stock_number_item = QStandardItem( key )
+            # stock_name_item = QStandardItem( '公司名稱' )
+            # stock_inventory_item = QStandardItem( '庫存股數' )
+            # total_cost_item = QStandardItem( '總成本' )
+            # average_price_item = QStandardItem( '均價' )
+
+            # condition_item.setFlags( condition_item.flags() & ~Qt.ItemIsEditable )
+            # condition_item.setTextAlignment( Qt.AlignHCenter | Qt.AlignVCenter )
+            self.stock_list_model.setItem( index, 0, stock_number_item )
+
+        self.stock_list_model.setVerticalHeaderLabels( list_vertical_labels )
+
+    def refresh_trading_data_table( self, sorted_list ):
         self.per_stock_trading_data_model.clear()
         self.per_stock_trading_data_model.setVerticalHeaderLabels( ['交易日', '交易種類', '交易價格', '交易股數', '交易金額', '手續費', 
                                                                     '交易稅', '補充保費', '單筆總成本', '累計總成本', '庫存股數', '均價'] )
@@ -302,7 +334,6 @@ class MainWindow( QMainWindow ):
             stock_inventory_item = QStandardItem( format( n_stock_inventory, "," ) )
 
 
-            # condition_item = QStandardItem( str_value )
             # condition_item.setFlags( condition_item.flags() & ~Qt.ItemIsEditable )
             # condition_item.setTextAlignment( Qt.AlignHCenter | Qt.AlignVCenter )
             self.per_stock_trading_data_model.setItem( 0, index, trading_date_item ) # 交易日期

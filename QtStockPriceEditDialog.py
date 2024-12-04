@@ -25,9 +25,28 @@ class Ui_Dialog(object):
     def setupUi(self, Dialog):
         if not Dialog.objectName():
             Dialog.setObjectName(u"Dialog")
-        Dialog.resize(257, 345)
+        Dialog.resize(257, 369)
         self.verticalLayout = QVBoxLayout(Dialog)
         self.verticalLayout.setObjectName(u"verticalLayout")
+        self.horizontalLayout_12 = QHBoxLayout()
+        self.horizontalLayout_12.setObjectName(u"horizontalLayout_12")
+        self.qtStockNumberLabel = QLabel(Dialog)
+        self.qtStockNumberLabel.setObjectName(u"qtStockNumberLabel")
+
+        self.horizontalLayout_12.addWidget(self.qtStockNumberLabel)
+
+        self.qtStockNameLabel = QLabel(Dialog)
+        self.qtStockNameLabel.setObjectName(u"qtStockNameLabel")
+
+        self.horizontalLayout_12.addWidget(self.qtStockNameLabel)
+
+        self.horizontalSpacer_11 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout_12.addItem(self.horizontalSpacer_11)
+
+
+        self.verticalLayout.addLayout(self.horizontalLayout_12)
+
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.label = QLabel(Dialog)
@@ -301,6 +320,8 @@ class Ui_Dialog(object):
 
     def retranslateUi(self, Dialog):
         Dialog.setWindowTitle(QCoreApplication.translate("Dialog", u"Dialog", None))
+        self.qtStockNumberLabel.setText(QCoreApplication.translate("Dialog", u"TextLabel", None))
+        self.qtStockNameLabel.setText(QCoreApplication.translate("Dialog", u"TextLabel", None))
         self.label.setText(QCoreApplication.translate("Dialog", u"\u65e5\u671f", None))
         self.qtBuyRadioButton.setText(QCoreApplication.translate("Dialog", u"\u8cb7", None))
         self.qtSellRadioButton.setText(QCoreApplication.translate("Dialog", u"\u8ce3", None))
