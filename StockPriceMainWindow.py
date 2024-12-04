@@ -36,6 +36,8 @@ class Computer():
 
         n_trading_value = int( f_trading_price * n_trading_count )
         n_trading_fee = int( n_trading_value * 0.001425 * f_trading_fee_discount )
+        if n_trading_fee < 20:
+            n_trading_fee = 20
         if n_trading_type == TradingType.SELL:
             if b_daying_trading:
                 n_trading_tax = int( n_trading_value * 0.0015 )
