@@ -7,6 +7,7 @@ from QtStockPriceEditDialog import Ui_Dialog
 from PySide6.QtWidgets import QApplication, QMainWindow, QDialog
 from PySide6.QtGui import QStandardItemModel, QStandardItem, QIcon
 from PySide6.QtCore import Qt, QModelIndex
+from openpyxl import Workbook
 from enum import Enum
 
 # 要把.ui檔變成.py
@@ -165,13 +166,14 @@ class MainWindow( QMainWindow ):
         self.stock_list_model = QStandardItemModel( 0, 0 )
         self.stock_list_model.setHorizontalHeaderLabels( [ '股票代碼', '公司名稱', '庫存股數', '總成本', '均價' ] )
         self.ui.qtStockListTableView.setModel( self.stock_list_model )
-        self.ui.qtStockListTableView.clicked.connect( lambda index: self.on_table_item_clicked( index, self.stock_list_model ) )
+        self.ui.qtStockListTableView.clicked.connect( lambda index: self.on_stock_list_table_item_clicked( index, self.stock_list_model ) )
 
         self.per_stock_trading_data_model = QStandardItemModel( 0, 0 ) 
         self.per_stock_trading_data_model.setVerticalHeaderLabels( [ '交易日', '交易種類', '交易價格', '交易股數', '交易金額', '手續費', 
                                                                      '交易稅', '補充保費', '單筆總成本', '累計總成本', '庫存股數', '均價'] )
         self.ui.qtTradingDataTableView.setModel( self.per_stock_trading_data_model )
         self.ui.qtTradingDataTableView.horizontalHeader().hide()
+        self.ui.qtTradingDataTableView.clicked.connect( lambda index: self.on_trading_data_table_item_clicked( index, self.per_stock_trading_data_model ) )
 
 
         self.ui.qtDiscountCheckBox.stateChanged.connect( self.on_discount_check_box_state_changed )
@@ -230,7 +232,7 @@ class MainWindow( QMainWindow ):
             self.refresh_trading_data_table( sorted_list )
             self.func_save_trading_data()
 
-    def on_table_item_clicked( self, index: QModelIndex, table_model ):
+    def on_stock_list_table_item_clicked( self, index: QModelIndex, table_model ):
         item = table_model.itemFromIndex( index )
         if item is not None:
             header_text = table_model.verticalHeaderItem( index.row() ).text()
@@ -241,6 +243,15 @@ class MainWindow( QMainWindow ):
                 list_trading_data = self.dict_all_stock_trading_data[ str_stock_number ]
                 sorted_list = sorted( list_trading_data, key=lambda x: ( datetime.datetime.strptime( x[ TradingData.TRADING_DATE ], "%Y-%m-%d"), x[ TradingData.TRADING_TYPE ] ) )
                 self.refresh_trading_data_table( sorted_list )
+
+    def on_trading_data_table_item_clicked( self, index: QModelIndex, table_model ):
+        item = table_model.itemFromIndex( index )
+        if item is not None:
+            column = index.column()  # 獲取列索引
+            header_text = table_model.verticalHeaderItem( index.row() ).text()
+            str_stock_number = header_text[:4]
+            if column == 0:
+                pass
 
     def func_save_trading_data( self ):
         current_dir = os.path.dirname( __file__ )
@@ -330,9 +341,6 @@ class MainWindow( QMainWindow ):
         index = 0
         for dict_per_trading_data in sorted_list:
 
-            
-
-
             e_trading_type = dict_per_trading_data[ TradingData.TRADING_TYPE ]
             if e_trading_type == TradingType.TEMPLATE:
                 continue
@@ -370,7 +378,7 @@ class MainWindow( QMainWindow ):
             for row, data in enumerate( list_data ):
                 standard_item = QStandardItem( data )
                 standard_item.setTextAlignment( Qt.AlignHCenter | Qt.AlignVCenter )
-                edit_icon_item.setFlags( edit_icon_item.flags() & ~Qt.ItemIsEditable )
+                standard_item.setFlags( standard_item.flags() & ~Qt.ItemIsEditable )
                 self.per_stock_trading_data_model.setItem( row, index, standard_item ) 
 
             edit_icon_item = QStandardItem("")
@@ -393,6 +401,16 @@ class MainWindow( QMainWindow ):
         print("on_edit_data_push_button_clicked")
         # dialog = EditDialog()
         # dialog.exec()
+
+    def on_export_selected_to_excell_button_clicked( self ):
+        workbook = Workbook()
+        worksheet = workbook.active
+        # worksheet.title = str_tab_title
+        
+        pass
+
+    def on_export_all_to_excell_button_clicked( self ):
+        pass
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)  # 創建應用程式
