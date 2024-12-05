@@ -314,7 +314,8 @@ class MainWindow( QMainWindow ):
     def refresh_trading_data_table( self, sorted_list ):
         self.per_stock_trading_data_model.clear()
         self.per_stock_trading_data_model.setVerticalHeaderLabels( ['交易日', '交易種類', '交易價格', '交易股數', '交易金額', '手續費', 
-                                                                    '交易稅', '補充保費', '單筆總成本', '累計總成本', '庫存股數', '均價'] )
+                                                                    '交易稅', '補充保費', '單筆總成本', '累計總成本', '庫存股數', '均價'
+                                                                    '', ''] )
         self.ui.qtTradingDataTableView.horizontalHeader().hide()
 
         n_stock_inventory = 0
@@ -323,19 +324,13 @@ class MainWindow( QMainWindow ):
         current_dir = os.path.dirname(__file__)
         edit_icon_file_path = os.path.join( current_dir, 'icon\\Edit.svg' ) 
         edit_icon = QIcon( edit_icon_file_path ) 
-        edit_icon_item = QStandardItem("")
-        edit_icon_item.setIcon( edit_icon )
-        edit_icon_item.setFlags( edit_icon_item.flags() & ~Qt.ItemIsEditable )
-
         delete_icon_file_path = os.path.join( current_dir, 'icon\\Delete.svg' ) 
         delete_icon = QIcon( delete_icon_file_path ) 
-        delete_icon_item = QStandardItem("")
-        delete_icon_item.setIcon( delete_icon )
-        delete_icon_item.setFlags( delete_icon_item.flags() & ~Qt.ItemIsEditable )
         
-        for index, dict_per_trading_data in enumerate( sorted_list ):
+        index = 0
+        for dict_per_trading_data in sorted_list:
 
-            # self.per_stock_trading_data_model.setItem( index, 0, edit_icon_item )
+            
 
 
             e_trading_type = dict_per_trading_data[ TradingData.TRADING_TYPE ]
@@ -359,34 +354,36 @@ class MainWindow( QMainWindow ):
                 n_stock_inventory -= n_trading_count
                 str_trading_type = "賣出"
 
+            list_data = [ dict_per_trading_data[ TradingData.TRADING_DATE ], # 交易日期
+                          str_trading_type, # 交易種類
+                          format( f_trading_price, "," ), # 交易價格
+                          format( n_trading_count, "," ), # 交易股數
+                          format( n_trading_value, "," ), # 交易金額
+                          format( n_trading_fee, "," ), # 手續費
+                          format( n_trading_tax, "," ), # 交易稅
+                          format( n_trading_insurance, "," ), # 補充保費
+                          format( n_per_trading_total_cost, "," ), # 單筆總成本
+                          format( n_accumulated_total_cost, "," ), # 累計總成本
+                          format( n_stock_inventory, "," ),
+                          'XXXX' ] # 庫存股數
 
-            trading_date_item = QStandardItem( dict_per_trading_data[ TradingData.TRADING_DATE ] )
-            trading_type_item = QStandardItem( str_trading_type )
-            trading_price_item = QStandardItem( format( f_trading_price, "," ) )
-            trading_count_item = QStandardItem( format( n_trading_count, "," ) )
-            trading_value_item = QStandardItem( format( n_trading_value, "," ) )
-            trading_fee_item = QStandardItem( format( n_trading_fee, "," ) )
-            trading_tax_item = QStandardItem( format( n_trading_tax, "," ) )
-            trading_insurance_item = QStandardItem( format( n_trading_insurance, "," ) )
-            per_trading_total_cost_item = QStandardItem( format( n_per_trading_total_cost, "," ) )
-            accumulated_total_cost_item = QStandardItem( format( n_accumulated_total_cost, "," ) )
-            stock_inventory_item = QStandardItem( format( n_stock_inventory, "," ) )
+            for row, data in enumerate( list_data ):
+                standard_item = QStandardItem( data )
+                standard_item.setTextAlignment( Qt.AlignHCenter | Qt.AlignVCenter )
+                edit_icon_item.setFlags( edit_icon_item.flags() & ~Qt.ItemIsEditable )
+                self.per_stock_trading_data_model.setItem( row, index, standard_item ) 
 
+            edit_icon_item = QStandardItem("")
+            edit_icon_item.setIcon( edit_icon )
+            edit_icon_item.setFlags( edit_icon_item.flags() & ~Qt.ItemIsEditable )
+            delete_icon_item = QStandardItem("")
+            delete_icon_item.setIcon( delete_icon )
+            delete_icon_item.setFlags( delete_icon_item.flags() & ~Qt.ItemIsEditable )
+            delete_icon_item.setTextAlignment( Qt.AlignHCenter | Qt.AlignVCenter )
 
-            # condition_item.setFlags( condition_item.flags() & ~Qt.ItemIsEditable )
-            # condition_item.setTextAlignment( Qt.AlignHCenter | Qt.AlignVCenter )
-            self.per_stock_trading_data_model.setItem( 0, index, trading_date_item ) # 交易日期
-            self.per_stock_trading_data_model.setItem( 1, index, trading_type_item ) # 交易種類
-            self.per_stock_trading_data_model.setItem( 2, index, trading_price_item ) # 交易價格
-            self.per_stock_trading_data_model.setItem( 3, index, trading_count_item ) # 交易股數
-            self.per_stock_trading_data_model.setItem( 4, index, trading_value_item ) # 交易金額
-            self.per_stock_trading_data_model.setItem( 5, index, trading_fee_item ) # 手續費
-            self.per_stock_trading_data_model.setItem( 6, index, trading_tax_item ) # 交易稅
-            self.per_stock_trading_data_model.setItem( 7, index, trading_insurance_item ) # 補充保費
-            self.per_stock_trading_data_model.setItem( 8, index, per_trading_total_cost_item ) # 單筆總成本
-            self.per_stock_trading_data_model.setItem( 9, index, accumulated_total_cost_item ) # 累計總成本
-            self.per_stock_trading_data_model.setItem( 10, index, stock_inventory_item ) # 庫存股數
-            # self.per_stock_trading_data_model.setItem( 11, index, average_price_item ) # 均價
+            self.per_stock_trading_data_model.setItem( len( list_data ), index, edit_icon_item )
+            self.per_stock_trading_data_model.setItem( len( list_data ) + 1, index, delete_icon_item )
+            index += 1
             pass
 
     def on_delete_data_push_button_clicked( self ):
