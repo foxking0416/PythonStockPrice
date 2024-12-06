@@ -3,8 +3,9 @@ import os
 import sys
 import datetime
 from QtStockPriceMainWindow import Ui_MainWindow  # 導入轉換後的 UI 類
-from QtStockPriceEditDialog import Ui_Dialog
-from PySide6.QtWidgets import QApplication, QMainWindow, QDialog
+from QtStockTradingEditDialog import Ui_Dialog as Ui_StockTradingDialog
+from QtStockDividendEditDialog import Ui_Dialog as Ui_StockDividendDialog
+from PySide6.QtWidgets import QApplication, QMainWindow, QDialog, QButtonGroup
 from PySide6.QtGui import QStandardItemModel, QStandardItem, QIcon
 from PySide6.QtCore import Qt, QModelIndex
 from openpyxl import Workbook
@@ -12,13 +13,16 @@ from enum import Enum
 
 # 要把.ui檔變成.py
 # cd D:\_2.code\PythonStockPrice
-# pyside6-uic QtStockPriceEditDialog.ui -o QtStockPriceEditDialog.py
 # pyside6-uic QtStockPriceMainWindow.ui -o QtStockPriceMainWindow.py
+# pyside6-uic QtStockTradingEditDialog.ui -o QtStockTradingEditDialog.py
+# pyside6-uic QtStockDividendEditDialog.ui -o QtStockDividendEditDialog.py
 
 class TradingType( Enum ):
     TEMPLATE = 0
     BUY = 1
     SELL = 2
+    DIVIDEND = 3
+    CAPITAL_REDUCTION = 4
 
 class TradingData( Enum ):
     STOCK_NUMBER = 0
@@ -27,6 +31,8 @@ class TradingData( Enum ):
     TRADING_PRICE = 3
     TRADING_COUNT = 4
     TRADING_FEE_DISCOUNT = 5
+    STOCK_DIVIDEND = 6
+    CASH_DIVIDEND = 7
 
 class TradingCost( Enum ):
     TRADING_VALUE = 0
@@ -58,7 +64,14 @@ class Utility():
         dict_result[ TradingCost.TRADING_TOTAL_COST ] = n_trading_value + n_trading_fee + n_trading_tax
         return dict_result
 
-    def generate_trading_data( str_stock_number, str_trading_date, e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount ):
+    def generate_trading_data( str_stock_number,            #股票代碼
+                               str_trading_date,            #交易日期
+                               e_trading_type,              #交易種類
+                               f_trading_price,             #交易價格
+                               n_trading_count,             #交易股數
+                               f_trading_fee_discount,      #手續費折扣
+                               f_stock_dividend_per_share,  #每股股票股利
+                               f_cash_dividend_per_share ): #每股現金股利
         dict_trading_data = {}
         dict_trading_data[ TradingData.STOCK_NUMBER ] = str_stock_number
         dict_trading_data[ TradingData.TRADING_DATE ] = str_trading_date
@@ -66,13 +79,50 @@ class Utility():
         dict_trading_data[ TradingData.TRADING_PRICE ] = f_trading_price
         dict_trading_data[ TradingData.TRADING_COUNT ] = n_trading_count
         dict_trading_data[ TradingData.TRADING_FEE_DISCOUNT ] = f_trading_fee_discount
+        dict_trading_data[ TradingData.STOCK_DIVIDEND ] = f_stock_dividend_per_share
+        dict_trading_data[ TradingData.CASH_DIVIDEND ] = f_cash_dividend_per_share
         return dict_trading_data
 
-class TradingDataDialog( QDialog ):
+class StockDividendEditDialog( QDialog ):
+    def __init__( self, str_stock_number, parent = None ):
+        super().__init__( parent )
+
+        self.ui = Ui_StockDividendDialog()
+        self.ui.setupUi( self )
+
+        self.ui.qtStockNumberLabel.setText( str_stock_number )
+        obj_current_date = datetime.datetime.today()
+        self.ui.qtDateEdit.setDate( obj_current_date.date() )
+        self.ui.qtDateEdit.setCalendarPopup( True )
+        self.ui.qtOkButtonBox.accepted.connect( self.accept_data )
+        self.ui.qtOkButtonBox.rejected.connect( self.cancel )
+        self.dict_trading_data = {}
+
+    def accept_data( self ):
+        f_stock_dividend_per_share = self.ui.qtStockDividendDoubleSpinBox.value()
+        f_cash_dividend_per_share = self.ui.qtCashDividendDoubleSpinBox.value()
+        if f_stock_dividend_per_share != 0 or f_cash_dividend_per_share != 0:
+
+            self.dict_trading_data = Utility.generate_trading_data( self.ui.qtStockNumberLabel.text(),                  #股票代碼
+                                                                    self.ui.qtDateEdit.date().toString( "yyyy-MM-dd" ), #交易日期
+                                                                    TradingType.DIVIDEND,                               #交易種類
+                                                                    0,                                                  #交易價格                         
+                                                                    0,                                                  #交易股數
+                                                                    1,                                                  #手續費折扣                                   
+                                                                    f_stock_dividend_per_share,                         #每股股票股利
+                                                                    f_cash_dividend_per_share )                         #每股現金股利
+            self.accept()
+        else:
+            self.reject()
+    
+    def cancel( self ):
+        self.reject()
+
+class StockTradingEditDialog( QDialog ):
     def __init__( self, str_stock_number, b_discount, f_discount_value, b_extra_insurance, parent = None ):
         super().__init__( parent )
 
-        self.ui = Ui_Dialog()
+        self.ui = Ui_StockTradingDialog()
         self.ui.setupUi( self )
 
         self.ui.qtStockNumberLabel.setText( str_stock_number )
@@ -108,7 +158,14 @@ class TradingDataDialog( QDialog ):
 
         if float( self.ui.qtTotalCostLineEdit.text().replace( ',', '' ) ) != 0:
             
-            self.dict_trading_data = Utility.generate_trading_data( self.ui.qtStockNumberLabel.text(), self.ui.qtDateEdit.date().toString( "yyyy-MM-dd" ), self.get_trading_type(), self.ui.qtPriceDoubleSpinBox.value(), self.get_trading_count(), self.get_trading_fee_discount() )
+            self.dict_trading_data = Utility.generate_trading_data( self.ui.qtStockNumberLabel.text(),                  #股票代碼
+                                                                    self.ui.qtDateEdit.date().toString( "yyyy-MM-dd" ), #交易日期
+                                                                    self.get_trading_type(),                            #交易種類
+                                                                    self.ui.qtPriceDoubleSpinBox.value(),               #交易價格
+                                                                    self.get_trading_count(),                           #交易股數
+                                                                    self.get_trading_fee_discount(),                    #手續費折扣
+                                                                    0,                                                  #每股股票股利
+                                                                    0 )                                                 #每股現金股利
             self.accept()
         else:
             self.reject()
@@ -175,10 +232,22 @@ class MainWindow( QMainWindow ):
         self.ui.qtTradingDataTableView.horizontalHeader().hide()
         self.ui.qtTradingDataTableView.clicked.connect( lambda index: self.on_trading_data_table_item_clicked( index, self.per_stock_trading_data_model ) )
 
+        button_group_1 = QButtonGroup(self)
+        button_group_1.addButton( self.ui.qtFromNewToOldRadioButton )
+        button_group_1.addButton( self.ui.qtFromOldToNewRadioButton )
+        self.ui.qtFromNewToOldRadioButton.setChecked( True )
 
-        self.ui.qtDiscountCheckBox.stateChanged.connect( self.on_discount_check_box_state_changed )
-        self.ui.qtAddTradingDataPushButton.clicked.connect( self.on_add_new_data_push_button_clicked )
+        button_group_2 = QButtonGroup(self)
+        button_group_2.addButton( self.ui.qtShowAllRadioButton )
+        button_group_2.addButton( self.ui.qtShow10RadioButton )
+        self.ui.qtShowAllRadioButton.setChecked( True )
+
+
         self.ui.qtAddStockPushButton.clicked.connect( self.on_add_stock_push_button_clicked )
+        self.ui.qtDiscountCheckBox.stateChanged.connect( self.on_discount_check_box_state_changed )
+
+        self.ui.qtAddTradingDataPushButton.clicked.connect( self.on_add_new_trading_data_push_button_clicked )
+        self.ui.qtAddDividendDataPushButton.clicked.connect( self.on_add_new_dividend_data_push_button_clicked )
         # self.ui.qtDeleteDataPushButton.clicked.connect( self.on_delete_data_push_button_clicked )
         # self.ui.qtEditDataPushButton.clicked.connect( self.on_edit_data_push_button_clicked )
 
@@ -209,20 +278,26 @@ class MainWindow( QMainWindow ):
         #         QMessageBox.warning( self, "警告", "輸入的股票代碼不存在", QMessageBox.Ok )
         #         return
         
-
         if str_first_four_chars not in self.dict_all_stock_trading_data:
-            dict_trading_data = Utility.generate_trading_data( str_first_four_chars, "0001-01-01", TradingType.TEMPLATE, 0, 0, 1 )
+            dict_trading_data = Utility.generate_trading_data( str_first_four_chars, #股票代碼
+                                                               "0001-01-01",         #交易日期
+                                                               TradingType.TEMPLATE, #交易種類
+                                                               0,                    #交易價格
+                                                               0,                    #交易股數
+                                                               1,                    #手續費折扣
+                                                               0,                    #每股股票股利
+                                                               0 )                   #每股現金股利
             self.dict_all_stock_trading_data[ str_first_four_chars ] = [ dict_trading_data ]
 
             self.refresh_stock_list_table()
             self.func_save_trading_data()
 
 
-    def on_add_new_data_push_button_clicked( self ):
+    def on_add_new_trading_data_push_button_clicked( self ):
         if self.str_picked_stock_number is None:
             return
         str_stock_number = self.str_picked_stock_number
-        dialog = TradingDataDialog( str_stock_number, self.ui.qtDiscountCheckBox.isChecked(), self.ui.qtDiscountRateDoubleSpinBox.value(), self.ui.qtExtraInsuranceFeeCheckBox.isChecked(), self )
+        dialog = StockTradingEditDialog( str_stock_number, self.ui.qtDiscountCheckBox.isChecked(), self.ui.qtDiscountRateDoubleSpinBox.value(), self.ui.qtExtraInsuranceFeeCheckBox.isChecked(), self )
 
         if dialog.exec():
             dict_trading_data = dialog.dict_trading_data
@@ -231,6 +306,21 @@ class MainWindow( QMainWindow ):
             sorted_list = sorted( list_trading_data, key=lambda x: ( datetime.datetime.strptime( x[ TradingData.TRADING_DATE ], "%Y-%m-%d"), x[ TradingData.TRADING_TYPE ] ) )
             self.refresh_trading_data_table( sorted_list )
             self.func_save_trading_data()
+
+    def on_add_new_dividend_data_push_button_clicked( self ):
+        if self.str_picked_stock_number is None:
+            return
+        str_stock_number = self.str_picked_stock_number
+        dialog = StockDividendEditDialog( str_stock_number, self )
+
+        if dialog.exec():
+            dict_trading_data = dialog.dict_trading_data
+            self.dict_all_stock_trading_data[ str_stock_number ].append( dict_trading_data )
+            list_trading_data = self.dict_all_stock_trading_data[ str_stock_number ]
+            sorted_list = sorted( list_trading_data, key=lambda x: ( datetime.datetime.strptime( x[ TradingData.TRADING_DATE ], "%Y-%m-%d"), x[ TradingData.TRADING_TYPE ] ) )
+            self.refresh_trading_data_table( sorted_list )
+            self.func_save_trading_data()
+            pass
 
     def on_stock_list_table_item_clicked( self, index: QModelIndex, table_model ):
         item = table_model.itemFromIndex( index )
@@ -247,10 +337,11 @@ class MainWindow( QMainWindow ):
     def on_trading_data_table_item_clicked( self, index: QModelIndex, table_model ):
         item = table_model.itemFromIndex( index )
         if item is not None:
-            column = index.column()  # 獲取列索引
+            n_column = index.column()  # 獲取列索引
+            n_row = index.row()  # 獲取行索引
             header_text = table_model.verticalHeaderItem( index.row() ).text()
             str_stock_number = header_text[:4]
-            if column == 0:
+            if n_column == 0:
                 pass
 
     def func_save_trading_data( self ):
@@ -267,6 +358,9 @@ class MainWindow( QMainWindow ):
                 dict_per_trading_data[ "trading_price" ] = item[ TradingData.TRADING_PRICE ]
                 dict_per_trading_data[ "trading_count" ] = item[ TradingData.TRADING_COUNT ]
                 dict_per_trading_data[ "trading_fee_discount" ] = item[ TradingData.TRADING_FEE_DISCOUNT ]
+                dict_per_trading_data[ "stock_dividend" ] = item[ TradingData.STOCK_DIVIDEND ]
+                dict_per_trading_data[ "cash_dividend" ] = item[ TradingData.CASH_DIVIDEND ]
+
 
                 export_data.append( dict_per_trading_data )
 
@@ -290,19 +384,25 @@ class MainWindow( QMainWindow ):
                  item[ "trading_type" ] != None and 
                  item[ "trading_price" ] != None and 
                  item[ "trading_count" ] != None and 
-                 item[ "trading_fee_discount" ] != None ):
+                 item[ "trading_fee_discount" ] != None and 
+                 item[ "stock_dividend" ] != None and
+                 item[ "cash_dividend" ] != None ):
 
-                dict_per_trading_data = Utility.generate_trading_data( item[ "stock_number" ], 
-                                                                       item[ "trading_date" ], 
-                                                                       TradingType( item[ "trading_type" ] ), 
-                                                                       item[ "trading_price" ],
-                                                                       item[ "trading_count" ], 
-                                                                       item[ "trading_fee_discount" ] )
+                dict_per_trading_data = Utility.generate_trading_data( item[ "stock_number" ],                #股票代碼
+                                                                       item[ "trading_date" ],                #交易日期
+                                                                       TradingType( item[ "trading_type" ] ), #交易種類
+                                                                       item[ "trading_price" ],               #交易價格
+                                                                       item[ "trading_count" ],               #交易股數
+                                                                       item[ "trading_fee_discount" ],        #手續費折扣
+                                                                       item[ "stock_dividend" ],              #每股股票股利
+                                                                       item[ "cash_dividend" ] )              #每股現金股利
 
                 if item[ "stock_number" ] not in self.dict_all_stock_trading_data:
                     self.dict_all_stock_trading_data[ item[ "stock_number" ] ] = [ dict_per_trading_data ]
                 else:
                     self.dict_all_stock_trading_data[ item[ "stock_number" ] ].append( dict_per_trading_data )
+
+                
 
         self.refresh_stock_list_table()
 
@@ -361,22 +461,26 @@ class MainWindow( QMainWindow ):
                 n_stock_inventory += n_trading_count
                 str_trading_type = "買進"
                 n_accumulated_total_cost += n_per_trading_total_cost
-            else:
+            elif e_trading_type == TradingType.SELL:
                 n_stock_inventory -= n_trading_count
                 str_trading_type = "賣出"
+            elif e_trading_type == TradingType.DIVIDEND:
+                str_trading_type = "股利分配"
+            elif e_trading_type == TradingType.CAPITAL_REDUCTION:
+                str_trading_type = "減資"
 
-            list_data = [ dict_per_trading_data[ TradingData.TRADING_DATE ], # 交易日期
-                          str_trading_type, # 交易種類
-                          format( f_trading_price, "," ), # 交易價格
-                          format( n_trading_count, "," ), # 交易股數
-                          format( n_trading_value, "," ), # 交易金額
-                          format( n_trading_fee, "," ), # 手續費
-                          format( n_trading_tax, "," ), # 交易稅
-                          format( n_trading_insurance, "," ), # 補充保費
-                          format( n_per_trading_total_cost, "," ), # 單筆總成本
-                          format( n_accumulated_total_cost, "," ), # 累計總成本
-                          format( n_stock_inventory, "," ),
-                          'XXXX' ] # 庫存股數
+            list_data = [ dict_per_trading_data[ TradingData.TRADING_DATE ], #交易日期
+                          str_trading_type,                                  #交易種類
+                          format( f_trading_price, "," ),                    #交易價格
+                          format( n_trading_count, "," ),                    #交易股數
+                          format( n_trading_value, "," ),                    #交易金額
+                          format( n_trading_fee, "," ),                      #手續費
+                          format( n_trading_tax, "," ),                      #交易稅
+                          format( n_trading_insurance, "," ),                #補充保費
+                          format( n_per_trading_total_cost, "," ),           #單筆總成本
+                          format( n_accumulated_total_cost, "," ),           #累計總成本
+                          format( n_stock_inventory, "," ),                  #庫存股數
+                          'XXXX' ]                                           #均價
 
             for row, data in enumerate( list_data ):
                 standard_item = QStandardItem( data )

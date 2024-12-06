@@ -17,18 +17,19 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QCheckBox, QDoubleSpinBox, QHBoxLayout,
     QHeaderView, QLineEdit, QMainWindow, QMenuBar,
-    QPushButton, QSizePolicy, QSpacerItem, QStatusBar,
-    QTableView, QVBoxLayout, QWidget)
+    QPushButton, QRadioButton, QSizePolicy, QSpacerItem,
+    QStatusBar, QTableView, QVBoxLayout, QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(800, 701)
+        MainWindow.resize(800, 794)
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         self.verticalLayout = QVBoxLayout(self.centralwidget)
         self.verticalLayout.setObjectName(u"verticalLayout")
+        self.verticalLayout.setContentsMargins(-1, 0, -1, 0)
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.qtDiscountCheckBox = QCheckBox(self.centralwidget)
@@ -105,9 +106,55 @@ class Ui_MainWindow(object):
 
         self.verticalLayout.addLayout(self.horizontalLayout_2)
 
+        self.horizontalLayout_4 = QHBoxLayout()
+        self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
+        self.verticalLayout_4 = QVBoxLayout()
+        self.verticalLayout_4.setObjectName(u"verticalLayout_4")
+        self.qtFromNewToOldRadioButton = QRadioButton(self.centralwidget)
+        self.qtFromNewToOldRadioButton.setObjectName(u"qtFromNewToOldRadioButton")
+        self.qtFromNewToOldRadioButton.setChecked(True)
+
+        self.verticalLayout_4.addWidget(self.qtFromNewToOldRadioButton)
+
+        self.qtFromOldToNewRadioButton = QRadioButton(self.centralwidget)
+        self.qtFromOldToNewRadioButton.setObjectName(u"qtFromOldToNewRadioButton")
+
+        self.verticalLayout_4.addWidget(self.qtFromOldToNewRadioButton)
+
+
+        self.horizontalLayout_4.addLayout(self.verticalLayout_4)
+
+        self.horizontalSpacer_4 = QSpacerItem(40, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout_4.addItem(self.horizontalSpacer_4)
+
+        self.verticalLayout_3 = QVBoxLayout()
+        self.verticalLayout_3.setObjectName(u"verticalLayout_3")
+        self.qtShowAllRadioButton = QRadioButton(self.centralwidget)
+        self.qtShowAllRadioButton.setObjectName(u"qtShowAllRadioButton")
+        self.qtShowAllRadioButton.setChecked(True)
+
+        self.verticalLayout_3.addWidget(self.qtShowAllRadioButton)
+
+        self.qtShow10RadioButton = QRadioButton(self.centralwidget)
+        self.qtShow10RadioButton.setObjectName(u"qtShow10RadioButton")
+
+        self.verticalLayout_3.addWidget(self.qtShow10RadioButton)
+
+
+        self.horizontalLayout_4.addLayout(self.verticalLayout_3)
+
+        self.horizontalSpacer_3 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout_4.addItem(self.horizontalSpacer_3)
+
+
+        self.verticalLayout.addLayout(self.horizontalLayout_4)
+
         self.qtTradingDataTableView = QTableView(self.centralwidget)
         self.qtTradingDataTableView.setObjectName(u"qtTradingDataTableView")
-        self.qtTradingDataTableView.setMinimumSize(QSize(0, 400))
+        self.qtTradingDataTableView.setMinimumSize(QSize(0, 450))
+        self.qtTradingDataTableView.verticalHeader().setMinimumSectionSize(15)
 
         self.verticalLayout.addWidget(self.qtTradingDataTableView)
 
@@ -115,26 +162,47 @@ class Ui_MainWindow(object):
         self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
         self.qtAddTradingDataPushButton = QPushButton(self.centralwidget)
         self.qtAddTradingDataPushButton.setObjectName(u"qtAddTradingDataPushButton")
+        self.qtAddTradingDataPushButton.setEnabled(False)
 
         self.horizontalLayout_3.addWidget(self.qtAddTradingDataPushButton)
 
         self.qtAddDividendDataPushButton = QPushButton(self.centralwidget)
         self.qtAddDividendDataPushButton.setObjectName(u"qtAddDividendDataPushButton")
+        self.qtAddDividendDataPushButton.setEnabled(False)
 
         self.horizontalLayout_3.addWidget(self.qtAddDividendDataPushButton)
 
-        self.pushButton_2 = QPushButton(self.centralwidget)
-        self.pushButton_2.setObjectName(u"pushButton_2")
+        self.qtAddCapitalReductionDataPushButton = QPushButton(self.centralwidget)
+        self.qtAddCapitalReductionDataPushButton.setObjectName(u"qtAddCapitalReductionDataPushButton")
+        self.qtAddCapitalReductionDataPushButton.setEnabled(False)
 
-        self.horizontalLayout_3.addWidget(self.pushButton_2)
+        self.horizontalLayout_3.addWidget(self.qtAddCapitalReductionDataPushButton)
 
-        self.pushButton = QPushButton(self.centralwidget)
-        self.pushButton.setObjectName(u"pushButton")
+        self.qtAddCapitalIncreaseDataPushButton = QPushButton(self.centralwidget)
+        self.qtAddCapitalIncreaseDataPushButton.setObjectName(u"qtAddCapitalIncreaseDataPushButton")
+        self.qtAddCapitalIncreaseDataPushButton.setEnabled(False)
 
-        self.horizontalLayout_3.addWidget(self.pushButton)
+        self.horizontalLayout_3.addWidget(self.qtAddCapitalIncreaseDataPushButton)
 
 
         self.verticalLayout.addLayout(self.horizontalLayout_3)
+
+        self.horizontalLayout_5 = QHBoxLayout()
+        self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
+        self.pushButton_4 = QPushButton(self.centralwidget)
+        self.pushButton_4.setObjectName(u"pushButton_4")
+        self.pushButton_4.setEnabled(False)
+
+        self.horizontalLayout_5.addWidget(self.pushButton_4)
+
+        self.pushButton_3 = QPushButton(self.centralwidget)
+        self.pushButton_3.setObjectName(u"pushButton_3")
+        self.pushButton_3.setEnabled(False)
+
+        self.horizontalLayout_5.addWidget(self.pushButton_3)
+
+
+        self.verticalLayout.addLayout(self.horizontalLayout_5)
 
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
@@ -156,9 +224,15 @@ class Ui_MainWindow(object):
         self.qtExtraInsuranceFeeCheckBox.setText(QCoreApplication.translate("MainWindow", u"\u88dc\u5145\u4fdd\u8cbb", None))
         self.qtAddStockPushButton.setText(QCoreApplication.translate("MainWindow", u"\u65b0\u589e\u80a1\u7968", None))
         self.qtDeleteStockPushButton.setText(QCoreApplication.translate("MainWindow", u"\u522a\u9664\u80a1\u7968\u4ea4\u6613\u8cc7\u6599", None))
+        self.qtFromNewToOldRadioButton.setText(QCoreApplication.translate("MainWindow", u"\u7531\u65b0\u5230\u820a", None))
+        self.qtFromOldToNewRadioButton.setText(QCoreApplication.translate("MainWindow", u"\u7531\u820a\u5230\u65b0", None))
+        self.qtShowAllRadioButton.setText(QCoreApplication.translate("MainWindow", u"\u986f\u793a\u5168\u90e8\u4ea4\u6613\u7d00\u9304", None))
+        self.qtShow10RadioButton.setText(QCoreApplication.translate("MainWindow", u"\u986f\u793a10\u7b46\u4ea4\u6613\u7d00\u9304", None))
         self.qtAddTradingDataPushButton.setText(QCoreApplication.translate("MainWindow", u"\u65b0\u589e\u4ea4\u6613\u7d00\u9304", None))
         self.qtAddDividendDataPushButton.setText(QCoreApplication.translate("MainWindow", u"\u65b0\u589e\u914d\u80a1\u914d\u606f\u7d00\u9304", None))
-        self.pushButton_2.setText(QCoreApplication.translate("MainWindow", u"\u65b0\u589e\u6e1b\u8cc7\u7d00\u9304", None))
-        self.pushButton.setText(QCoreApplication.translate("MainWindow", u"\u65b0\u589e\u589e\u8cc7\u7d00\u9304", None))
+        self.qtAddCapitalReductionDataPushButton.setText(QCoreApplication.translate("MainWindow", u"\u65b0\u589e\u6e1b\u8cc7\u7d00\u9304", None))
+        self.qtAddCapitalIncreaseDataPushButton.setText(QCoreApplication.translate("MainWindow", u"\u65b0\u589e\u589e\u8cc7\u7d00\u9304", None))
+        self.pushButton_4.setText(QCoreApplication.translate("MainWindow", u"PushButton", None))
+        self.pushButton_3.setText(QCoreApplication.translate("MainWindow", u"PushButton", None))
     # retranslateUi
 

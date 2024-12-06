@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'QtStockPriceEditDialog.ui'
+## Form generated from reading UI file 'QtStockTradingEditDialog.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.8.0
 ##
@@ -25,7 +25,12 @@ class Ui_Dialog(object):
     def setupUi(self, Dialog):
         if not Dialog.objectName():
             Dialog.setObjectName(u"Dialog")
-        Dialog.resize(257, 369)
+        Dialog.resize(225, 369)
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(Dialog.sizePolicy().hasHeightForWidth())
+        Dialog.setSizePolicy(sizePolicy)
         self.verticalLayout = QVBoxLayout(Dialog)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.horizontalLayout_12 = QHBoxLayout()
@@ -146,11 +151,11 @@ class Ui_Dialog(object):
 
         self.qtCommonTradeCountSpinBox = QSpinBox(self.groupBox)
         self.qtCommonTradeCountSpinBox.setObjectName(u"qtCommonTradeCountSpinBox")
-        sizePolicy = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.qtCommonTradeCountSpinBox.sizePolicy().hasHeightForWidth())
-        self.qtCommonTradeCountSpinBox.setSizePolicy(sizePolicy)
+        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
+        sizePolicy1.setHorizontalStretch(0)
+        sizePolicy1.setVerticalStretch(0)
+        sizePolicy1.setHeightForWidth(self.qtCommonTradeCountSpinBox.sizePolicy().hasHeightForWidth())
+        self.qtCommonTradeCountSpinBox.setSizePolicy(sizePolicy1)
         self.qtCommonTradeCountSpinBox.setMinimumSize(QSize(75, 0))
         self.qtCommonTradeCountSpinBox.setMaximum(99999)
 
@@ -319,7 +324,7 @@ class Ui_Dialog(object):
     # setupUi
 
     def retranslateUi(self, Dialog):
-        Dialog.setWindowTitle(QCoreApplication.translate("Dialog", u"Dialog", None))
+        Dialog.setWindowTitle(QCoreApplication.translate("Dialog", u"\u80a1\u7968\u4ea4\u6613", None))
         self.qtStockNumberLabel.setText(QCoreApplication.translate("Dialog", u"TextLabel", None))
         self.qtStockNameLabel.setText(QCoreApplication.translate("Dialog", u"TextLabel", None))
         self.label.setText(QCoreApplication.translate("Dialog", u"\u65e5\u671f", None))
