@@ -7,7 +7,7 @@ import datetime
 from QtStockPriceMainWindow import Ui_MainWindow  # 導入轉換後的 UI 類
 from QtStockTradingEditDialog import Ui_Dialog as Ui_StockTradingDialog
 from QtStockDividendEditDialog import Ui_Dialog as Ui_StockDividendDialog
-from PySide6.QtWidgets import QApplication, QMainWindow, QDialog, QButtonGroup
+from PySide6.QtWidgets import QApplication, QMainWindow, QDialog, QButtonGroup, QMessageBox
 from PySide6.QtGui import QStandardItemModel, QStandardItem, QIcon
 from PySide6.QtCore import Qt, QModelIndex
 from openpyxl import Workbook
@@ -368,12 +368,20 @@ class MainWindow( QMainWindow ):
     def on_stock_list_table_item_clicked( self, index: QModelIndex, table_model ):
         item = table_model.itemFromIndex( index )
         if item is not None:
+            n_column = index.column()  # 獲取列索引
+            n_row = index.row()  # 獲取行索引
             header_text = table_model.verticalHeaderItem( index.row() ).text()
             str_stock_number = header_text[:4]
             self.str_picked_stock_number = str_stock_number
             
-
-            if str_stock_number in self.dict_all_stock_trading_data:
+            if n_column == len( g_list_stock_list_table_vertical_header ) - 1:
+                result = self.func_show_message_box( "警告", f"確定要刪掉『{header_text}』的所有資料嗎?" )
+                if result:
+                    del self.dict_all_stock_trading_data[ str_stock_number ]
+                    self.refresh_stock_list_table()
+                    self.per_stock_trading_data_model.clear()
+                    self.func_save_trading_data()
+            elif str_stock_number in self.dict_all_stock_trading_data:
                 list_trading_data = self.dict_all_stock_trading_data[ str_stock_number ]
                 self.refresh_trading_data_table( list_trading_data )
 
@@ -395,6 +403,23 @@ class MainWindow( QMainWindow ):
                 pass
             elif n_row == len( g_list_trading_data_table_vertical_header ) - 1: #刪除
                 pass
+
+    def func_show_message_box( self, str_title, str_message ):
+        message_box = QMessageBox( self )
+        message_box.setIcon( QMessageBox.Warning )  # 設置為警告圖示
+        message_box.setWindowTitle( str_title )
+        message_box.setText( str_message )
+
+        # 添加自訂按鈕
+        button_ok = message_box.addButton("確定", QMessageBox.AcceptRole)
+        button_cancel = message_box.addButton("取消", QMessageBox.RejectRole)
+
+        message_box.exec()
+
+        if message_box.clickedButton() == button_ok:
+            return True
+        elif message_box.clickedButton() == button_cancel:
+            return False
 
     def func_update_button_status( self ):
         if self.str_picked_stock_number is None:

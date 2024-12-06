@@ -136,13 +136,6 @@
           </property>
          </spacer>
         </item>
-        <item>
-         <widget class="QPushButton" name="qtDeleteStockPushButton">
-          <property name="text">
-           <string>刪除股票交易資料</string>
-          </property>
-         </widget>
-        </item>
        </layout>
       </item>
       <item>

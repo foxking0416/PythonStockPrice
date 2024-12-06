@@ -89,11 +89,6 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_2.addItem(self.verticalSpacer)
 
-        self.qtDeleteStockPushButton = QPushButton(self.centralwidget)
-        self.qtDeleteStockPushButton.setObjectName(u"qtDeleteStockPushButton")
-
-        self.verticalLayout_2.addWidget(self.qtDeleteStockPushButton)
-
 
         self.horizontalLayout_2.addLayout(self.verticalLayout_2)
 
@@ -223,7 +218,6 @@ class Ui_MainWindow(object):
         self.qtDiscountCheckBox.setText(QCoreApplication.translate("MainWindow", u"\u624b\u7e8c\u8cbb\u6298\u6263", None))
         self.qtExtraInsuranceFeeCheckBox.setText(QCoreApplication.translate("MainWindow", u"\u88dc\u5145\u4fdd\u8cbb", None))
         self.qtAddStockPushButton.setText(QCoreApplication.translate("MainWindow", u"\u65b0\u589e\u80a1\u7968", None))
-        self.qtDeleteStockPushButton.setText(QCoreApplication.translate("MainWindow", u"\u522a\u9664\u80a1\u7968\u4ea4\u6613\u8cc7\u6599", None))
         self.qtFromNewToOldRadioButton.setText(QCoreApplication.translate("MainWindow", u"\u7531\u65b0\u5230\u820a", None))
         self.qtFromOldToNewRadioButton.setText(QCoreApplication.translate("MainWindow", u"\u7531\u820a\u5230\u65b0", None))
         self.qtShowAllRadioButton.setText(QCoreApplication.translate("MainWindow", u"\u986f\u793a\u5168\u90e8\u4ea4\u6613\u7d00\u9304", None))
