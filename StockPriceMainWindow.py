@@ -1,3 +1,5 @@
+import requests
+from bs4 import BeautifulSoup
 import json
 import os
 import sys
@@ -20,6 +22,14 @@ from enum import Enum
 g_list_trading_data_table_vertical_header = ['交易日', '交易種類', '交易價格', '交易股數', '交易金額', '手續費', 
                                              '交易稅', '補充保費', '單筆總成本', '累計總成本', '庫存股數', '均價',
                                              '編輯', '刪除' ]
+g_list_stock_list_table_vertical_header = [ '庫存股數', '總成本', '平均成本', '今日股價', '刪除' ]
+g_current_dir = os.path.dirname(__file__)
+edit_icon_file_path = os.path.join( g_current_dir, 'icon\\Edit.svg' ) 
+edit_icon = QIcon( edit_icon_file_path ) 
+delete_icon_file_path = os.path.join( g_current_dir, 'icon\\Delete.svg' ) 
+delete_icon = QIcon( delete_icon_file_path ) 
+trading_data_json_file_path = os.path.join( g_current_dir, 'TradingData.json' )
+
 
 class TradingType( Enum ):
     TEMPLATE = 0
@@ -88,13 +98,14 @@ class Utility():
         return dict_trading_data
 
 class StockDividendEditDialog( QDialog ):
-    def __init__( self, str_stock_number, parent = None ):
+    def __init__( self, str_stock_number, str_stock_name, parent = None ):
         super().__init__( parent )
 
         self.ui = Ui_StockDividendDialog()
         self.ui.setupUi( self )
 
         self.ui.qtStockNumberLabel.setText( str_stock_number )
+        self.ui.qtStockNameLabel.setText( str_stock_name )
         obj_current_date = datetime.datetime.today()
         self.ui.qtDateEdit.setDate( obj_current_date.date() )
         self.ui.qtDateEdit.setCalendarPopup( True )
@@ -123,13 +134,14 @@ class StockDividendEditDialog( QDialog ):
         self.reject()
 
 class StockTradingEditDialog( QDialog ):
-    def __init__( self, str_stock_number, b_discount, f_discount_value, b_extra_insurance, parent = None ):
+    def __init__( self, str_stock_number, str_stock_name, b_discount, f_discount_value, b_extra_insurance, parent = None ):
         super().__init__( parent )
 
         self.ui = Ui_StockTradingDialog()
         self.ui.setupUi( self )
 
         self.ui.qtStockNumberLabel.setText( str_stock_number )
+        self.ui.qtStockNameLabel.setText( str_stock_name )
         obj_current_date = datetime.datetime.today()
         self.ui.qtDateEdit.setDate( obj_current_date.date() )
         self.ui.qtDateEdit.setCalendarPopup( True )
@@ -225,7 +237,7 @@ class MainWindow( QMainWindow ):
         self.ui.setupUi( self )  # 設置 UI
 
         self.stock_list_model = QStandardItemModel( 0, 0 )
-        self.stock_list_model.setHorizontalHeaderLabels( [ '股票代碼', '公司名稱', '庫存股數', '總成本', '均價' ] )
+        self.stock_list_model.setHorizontalHeaderLabels( g_list_stock_list_table_vertical_header )
         self.ui.qtStockListTableView.setModel( self.stock_list_model )
         self.ui.qtStockListTableView.clicked.connect( lambda index: self.on_stock_list_table_item_clicked( index, self.stock_list_model ) )
 
@@ -255,6 +267,8 @@ class MainWindow( QMainWindow ):
         self.ui.qtAddCapitalIncreaseDataPushButton.clicked.connect( self.on_add_capital_increase_data_push_button_clicked )
         # self.ui.qtDeleteDataPushButton.clicked.connect( self.on_delete_data_push_button_clicked )
         # self.ui.qtEditDataPushButton.clicked.connect( self.on_edit_data_push_button_clicked )
+
+        self.dict_all_company_number_and_name = self.download_all_company_stock_number()
 
         self.str_picked_stock_number = None
         self.dict_all_stock_trading_data = {}
@@ -301,7 +315,8 @@ class MainWindow( QMainWindow ):
         if self.str_picked_stock_number is None:
             return
         str_stock_number = self.str_picked_stock_number
-        dialog = StockTradingEditDialog( str_stock_number, self.ui.qtDiscountCheckBox.isChecked(), self.ui.qtDiscountRateDoubleSpinBox.value(), self.ui.qtExtraInsuranceFeeCheckBox.isChecked(), self )
+        str_stock_name = self.dict_all_company_number_and_name[ str_stock_number ]
+        dialog = StockTradingEditDialog( str_stock_number, str_stock_name, self.ui.qtDiscountCheckBox.isChecked(), self.ui.qtDiscountRateDoubleSpinBox.value(), self.ui.qtExtraInsuranceFeeCheckBox.isChecked(), self )
 
         if dialog.exec():
             dict_trading_data = dialog.dict_trading_data
@@ -314,7 +329,8 @@ class MainWindow( QMainWindow ):
         if self.str_picked_stock_number is None:
             return
         str_stock_number = self.str_picked_stock_number
-        dialog = StockDividendEditDialog( str_stock_number, self )
+        str_stock_name = self.dict_all_company_number_and_name[ str_stock_number ]
+        dialog = StockDividendEditDialog( str_stock_number, str_stock_name, self )
 
         if dialog.exec():
             dict_trading_data = dialog.dict_trading_data
@@ -368,8 +384,13 @@ class MainWindow( QMainWindow ):
         if item is not None:
             n_column = index.column()  # 獲取列索引
             n_row = index.row()  # 獲取行索引
-            header_text = table_model.verticalHeaderItem( index.row() ).text()
-            str_stock_number = header_text[:4]
+            n_index = 0
+            list_trading_data = self.dict_all_stock_trading_data[ self.str_picked_stock_number ]
+            if self.ui.qtFromNewToOldRadioButton.isChecked():
+                n_index = n_column
+            else:
+                n_index = len( list_trading_data ) - n_column - 1
+
             if n_row == len( g_list_trading_data_table_vertical_header ) - 2: #編輯
                 pass
             elif n_row == len( g_list_trading_data_table_vertical_header ) - 1: #刪除
@@ -399,9 +420,7 @@ class MainWindow( QMainWindow ):
             self.func_sort_single_trading_data( key_stock_number )
 
     def func_save_trading_data( self ):
-        current_dir = os.path.dirname( __file__ )
-        json_file_path = os.path.join( current_dir, 'TradingData.json' )
-        
+
         export_data = []
         for key, value in self.dict_all_stock_trading_data.items():
             for item in value:
@@ -419,17 +438,14 @@ class MainWindow( QMainWindow ):
                 export_data.append( dict_per_trading_data )
 
 
-        with open( json_file_path, 'w', encoding='utf-8' ) as f:
+        with open( trading_data_json_file_path, 'w', encoding='utf-8' ) as f:
             json.dump( export_data, f, ensure_ascii=False, indent=4 )
 
     def func_load_existing_trading_data( self ):
-        current_dir = os.path.dirname( __file__ )
-        json_file_path = os.path.join( current_dir, 'TradingData.json' )
 
-        os.makedirs( os.path.dirname( json_file_path ), exist_ok = True )
-        if not os.path.exists( json_file_path ):
+        if not os.path.exists( trading_data_json_file_path ):
             return
-        with open( json_file_path,'r', encoding='utf-8' ) as f:
+        with open( trading_data_json_file_path,'r', encoding='utf-8' ) as f:
             data = json.load( f )
 
         for item in data:
@@ -462,20 +478,26 @@ class MainWindow( QMainWindow ):
 
     def refresh_stock_list_table( self ):
         self.stock_list_model.clear()
-        self.stock_list_model.setHorizontalHeaderLabels( ['股票代碼', '公司名稱', '庫存股數', '總成本', '均價'] )
+        self.stock_list_model.setHorizontalHeaderLabels( g_list_stock_list_table_vertical_header )
 
         list_vertical_labels = []
-        for index,( key, value ) in enumerate( self.dict_all_stock_trading_data.items() ):
-            list_vertical_labels.append( key )
-            stock_number_item = QStandardItem( key )
-            # stock_name_item = QStandardItem( '公司名稱' )
+        for index,( key_stock_number, value ) in enumerate( self.dict_all_stock_trading_data.items() ):
+            str_stock_name = self.dict_all_company_number_and_name[ key_stock_number ]
+            list_vertical_labels.append( f"{key_stock_number} {str_stock_name}" )
+
+            delete_icon_item = QStandardItem("")
+            delete_icon_item.setIcon( delete_icon )
+            delete_icon_item.setFlags( delete_icon_item.flags() & ~Qt.ItemIsEditable )
+            delete_icon_item.setTextAlignment( Qt.AlignHCenter | Qt.AlignVCenter )
+
+            self.stock_list_model.setItem( index, len( g_list_stock_list_table_vertical_header ) - 1, delete_icon_item )
+            # table_model.setItem( index, 0, icon_item )
             # stock_inventory_item = QStandardItem( '庫存股數' )
             # total_cost_item = QStandardItem( '總成本' )
             # average_price_item = QStandardItem( '均價' )
 
             # condition_item.setFlags( condition_item.flags() & ~Qt.ItemIsEditable )
             # condition_item.setTextAlignment( Qt.AlignHCenter | Qt.AlignVCenter )
-            self.stock_list_model.setItem( index, 0, stock_number_item )
 
         self.stock_list_model.setVerticalHeaderLabels( list_vertical_labels )
 
@@ -487,12 +509,6 @@ class MainWindow( QMainWindow ):
         n_stock_inventory = 0
         n_accumulated_total_cost = 0
 
-        current_dir = os.path.dirname(__file__)
-        edit_icon_file_path = os.path.join( current_dir, 'icon\\Edit.svg' ) 
-        edit_icon = QIcon( edit_icon_file_path ) 
-        delete_icon_file_path = os.path.join( current_dir, 'icon\\Delete.svg' ) 
-        delete_icon = QIcon( delete_icon_file_path ) 
-        
         index = 0
         for dict_per_trading_data in sorted_list:
 
@@ -563,6 +579,92 @@ class MainWindow( QMainWindow ):
     def on_export_all_to_excell_button_clicked( self ):
         pass
 
+    def download_all_company_stock_number( self ): 
+        all_company_name_and_number = {}
+        obj_current_date = datetime.datetime.today()
+        str_date = obj_current_date.strftime('%Y%m%d')
+
+        file_path = os.path.join( os.path.dirname(__file__), 'StockNumber.txt' )
+        b_need_to_download = False
+        if os.path.exists( file_path ):
+            with open( file_path, 'r', encoding='utf-8' ) as f:
+                data = f.readlines()
+                for i, row in enumerate( data ):
+                    if i == 0:
+                        if row.strip() != str_date:
+                            b_need_to_download = True
+                            break
+                    else:
+                        ele = row.strip().split( ',' )
+                        all_company_name_and_number[ ele[ 0 ] ] = ele[ 1 ]
+        else:
+            b_need_to_download = True
+
+        if b_need_to_download:
+            # 上市公司股票代碼
+            companyNymUrl = "https://isin.twse.com.tw/isin/C_public.jsp?strMode=2"
+            res = requests.get( companyNymUrl )
+            soup = BeautifulSoup( res.text, "lxml" )
+            tr = soup.findAll( 'tr' )
+
+            total_company_count = 0
+            tds = []
+            for raw in tr:
+                data = [ td.get_text() for td in raw.findAll("td" )]
+                if len( data ) == 7 and data[ 5 ] == 'ESVUFR': 
+                    total_company_count += 1
+                    if '\u3000' in data[ 0 ]:
+                        modified_data = data[ 0 ].split("\u3000")
+                        if '-創' in modified_data[ 1 ]:
+                            continue
+                        modified_data_after_strip = [ modified_data[ 0 ].strip(), modified_data[ 1 ].strip() ]
+                        tds.append( modified_data_after_strip )
+
+            # 上櫃公司股票代碼
+            companyNymUrl = "https://isin.twse.com.tw/isin/C_public.jsp?strMode=4"
+            res = requests.get( companyNymUrl )
+            soup = BeautifulSoup( res.text, "lxml" )
+            tr = soup.findAll( 'tr' )
+            for raw in tr:
+                data = [ td.get_text() for td in raw.findAll("td") ]
+                if len( data ) == 7 and data[ 5 ] == 'ESVUFR': 
+                    total_company_count += 1
+                    if '\u3000' in data[ 0 ]:
+                        modified_data = data[ 0 ].split("\u3000")
+                        if '-創' in modified_data[ 1 ]:
+                            continue
+                        modified_data_after_strip = [ modified_data[ 0 ].strip(), modified_data[ 1 ].strip() ]
+                        tds.append( modified_data_after_strip )
+
+            # 興櫃公司股票代碼
+            companyNymUrl = "https://isin.twse.com.tw/isin/C_public.jsp?strMode=5"
+            res = requests.get( companyNymUrl )
+            soup = BeautifulSoup( res.text, "lxml" )
+            tr = soup.findAll( 'tr' )
+            for raw in tr:
+                data = [ td.get_text() for td in raw.findAll("td") ]
+                if len( data ) == 7 and data[ 5 ] == 'ESVUFR': 
+                    total_company_count += 1
+                    if '\u3000' in data[ 0 ]:
+                        modified_data = data[ 0 ].split("\u3000")
+                        if '-創' in modified_data[ 1 ]:
+                            continue
+                        modified_data_after_strip = [ modified_data[ 0 ].strip(), modified_data[ 1 ].strip() ]
+                        tds.append( modified_data_after_strip )
+
+            if len( tds ) == 0:
+                return
+            
+            # 確保目錄存在，若不存在則遞歸創建
+            os.makedirs( os.path.dirname( file_path ), exist_ok = True )
+            with open( file_path, 'w', encoding='utf-8' ) as f:
+                f.write( str_date + '\n' )
+                for row in tds:
+                    f.write( str( row[ 0 ] ) + ',' + str( row[ 1 ] ) + '\n' )
+                    all_company_name_and_number[ row[ 0 ] ] = row[ 1 ]
+
+        return all_company_name_and_number
+    
 if __name__ == "__main__":
     app = QApplication(sys.argv)  # 創建應用程式
     app.setStyle('Fusion')
