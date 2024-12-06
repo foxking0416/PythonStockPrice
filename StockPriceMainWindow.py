@@ -17,6 +17,10 @@ from enum import Enum
 # pyside6-uic QtStockTradingEditDialog.ui -o QtStockTradingEditDialog.py
 # pyside6-uic QtStockDividendEditDialog.ui -o QtStockDividendEditDialog.py
 
+g_list_trading_data_table_vertical_header = ['交易日', '交易種類', '交易價格', '交易股數', '交易金額', '手續費', 
+                                             '交易稅', '補充保費', '單筆總成本', '累計總成本', '庫存股數', '均價',
+                                             '編輯', '刪除' ]
+
 class TradingType( Enum ):
     TEMPLATE = 0
     BUY = 1
@@ -226,8 +230,7 @@ class MainWindow( QMainWindow ):
         self.ui.qtStockListTableView.clicked.connect( lambda index: self.on_stock_list_table_item_clicked( index, self.stock_list_model ) )
 
         self.per_stock_trading_data_model = QStandardItemModel( 0, 0 ) 
-        self.per_stock_trading_data_model.setVerticalHeaderLabels( [ '交易日', '交易種類', '交易價格', '交易股數', '交易金額', '手續費', 
-                                                                     '交易稅', '補充保費', '單筆總成本', '累計總成本', '庫存股數', '均價'] )
+        self.per_stock_trading_data_model.setVerticalHeaderLabels( g_list_trading_data_table_vertical_header )
         self.ui.qtTradingDataTableView.setModel( self.per_stock_trading_data_model )
         self.ui.qtTradingDataTableView.horizontalHeader().hide()
         self.ui.qtTradingDataTableView.clicked.connect( lambda index: self.on_trading_data_table_item_clicked( index, self.per_stock_trading_data_model ) )
@@ -246,8 +249,10 @@ class MainWindow( QMainWindow ):
         self.ui.qtAddStockPushButton.clicked.connect( self.on_add_stock_push_button_clicked )
         self.ui.qtDiscountCheckBox.stateChanged.connect( self.on_discount_check_box_state_changed )
 
-        self.ui.qtAddTradingDataPushButton.clicked.connect( self.on_add_new_trading_data_push_button_clicked )
-        self.ui.qtAddDividendDataPushButton.clicked.connect( self.on_add_new_dividend_data_push_button_clicked )
+        self.ui.qtAddTradingDataPushButton.clicked.connect( self.on_add_trading_data_push_button_clicked )
+        self.ui.qtAddDividendDataPushButton.clicked.connect( self.on_add_dividend_data_push_button_clicked )
+        self.ui.qtAddCapitalReductionDataPushButton.clicked.connect( self.on_add_capital_reduction_data_push_button_clicked )
+        self.ui.qtAddCapitalIncreaseDataPushButton.clicked.connect( self.on_add_capital_increase_data_push_button_clicked )
         # self.ui.qtDeleteDataPushButton.clicked.connect( self.on_delete_data_push_button_clicked )
         # self.ui.qtEditDataPushButton.clicked.connect( self.on_edit_data_push_button_clicked )
 
@@ -292,8 +297,7 @@ class MainWindow( QMainWindow ):
             self.refresh_stock_list_table()
             self.func_save_trading_data()
 
-
-    def on_add_new_trading_data_push_button_clicked( self ):
+    def on_add_trading_data_push_button_clicked( self ):
         if self.str_picked_stock_number is None:
             return
         str_stock_number = self.str_picked_stock_number
@@ -302,12 +306,11 @@ class MainWindow( QMainWindow ):
         if dialog.exec():
             dict_trading_data = dialog.dict_trading_data
             self.dict_all_stock_trading_data[ str_stock_number ].append( dict_trading_data )
-            list_trading_data = self.dict_all_stock_trading_data[ str_stock_number ]
-            sorted_list = sorted( list_trading_data, key=lambda x: ( datetime.datetime.strptime( x[ TradingData.TRADING_DATE ], "%Y-%m-%d"), x[ TradingData.TRADING_TYPE ] ) )
+            sorted_list = self.func_sort_single_trading_data( str_stock_number )
             self.refresh_trading_data_table( sorted_list )
             self.func_save_trading_data()
 
-    def on_add_new_dividend_data_push_button_clicked( self ):
+    def on_add_dividend_data_push_button_clicked( self ):
         if self.str_picked_stock_number is None:
             return
         str_stock_number = self.str_picked_stock_number
@@ -316,11 +319,35 @@ class MainWindow( QMainWindow ):
         if dialog.exec():
             dict_trading_data = dialog.dict_trading_data
             self.dict_all_stock_trading_data[ str_stock_number ].append( dict_trading_data )
-            list_trading_data = self.dict_all_stock_trading_data[ str_stock_number ]
-            sorted_list = sorted( list_trading_data, key=lambda x: ( datetime.datetime.strptime( x[ TradingData.TRADING_DATE ], "%Y-%m-%d"), x[ TradingData.TRADING_TYPE ] ) )
+            sorted_list = self.func_sort_single_trading_data( str_stock_number )
             self.refresh_trading_data_table( sorted_list )
             self.func_save_trading_data()
-            pass
+
+    def on_add_capital_reduction_data_push_button_clicked( self ):
+        if self.str_picked_stock_number is None:
+            return
+        str_stock_number = self.str_picked_stock_number
+        sorted_list = self.func_sort_single_trading_data( str_stock_number )
+        self.refresh_trading_data_table( sorted_list )
+        self.func_save_trading_data()
+        pass
+
+    def on_add_capital_increase_data_push_button_clicked( self ):
+        if self.str_picked_stock_number is None:
+            return
+        str_stock_number = self.str_picked_stock_number
+        sorted_list = self.func_sort_single_trading_data( str_stock_number )
+        self.refresh_trading_data_table( sorted_list )
+        self.func_save_trading_data()
+        pass
+
+    def on_delete_data_push_button_clicked( self ):
+        print("on_delete_data_push_button_clicked")
+
+    def on_edit_data_push_button_clicked( self ):
+        print("on_edit_data_push_button_clicked")
+        # dialog = EditDialog()
+        # dialog.exec()
 
     def on_stock_list_table_item_clicked( self, index: QModelIndex, table_model ):
         item = table_model.itemFromIndex( index )
@@ -328,11 +355,13 @@ class MainWindow( QMainWindow ):
             header_text = table_model.verticalHeaderItem( index.row() ).text()
             str_stock_number = header_text[:4]
             self.str_picked_stock_number = str_stock_number
+            
 
             if str_stock_number in self.dict_all_stock_trading_data:
                 list_trading_data = self.dict_all_stock_trading_data[ str_stock_number ]
-                sorted_list = sorted( list_trading_data, key=lambda x: ( datetime.datetime.strptime( x[ TradingData.TRADING_DATE ], "%Y-%m-%d"), x[ TradingData.TRADING_TYPE ] ) )
-                self.refresh_trading_data_table( sorted_list )
+                self.refresh_trading_data_table( list_trading_data )
+
+        self.func_update_button_status()
 
     def on_trading_data_table_item_clicked( self, index: QModelIndex, table_model ):
         item = table_model.itemFromIndex( index )
@@ -341,8 +370,33 @@ class MainWindow( QMainWindow ):
             n_row = index.row()  # 獲取行索引
             header_text = table_model.verticalHeaderItem( index.row() ).text()
             str_stock_number = header_text[:4]
-            if n_column == 0:
+            if n_row == len( g_list_trading_data_table_vertical_header ) - 2: #編輯
                 pass
+            elif n_row == len( g_list_trading_data_table_vertical_header ) - 1: #刪除
+                pass
+
+    def func_update_button_status( self ):
+        if self.str_picked_stock_number is None:
+            self.ui.qtAddTradingDataPushButton.setEnabled( False )
+            self.ui.qtAddDividendDataPushButton.setEnabled( False )
+            self.ui.qtAddCapitalReductionDataPushButton.setEnabled( False )
+            self.ui.qtAddCapitalIncreaseDataPushButton.setEnabled( False )
+        else:
+            self.ui.qtAddTradingDataPushButton.setEnabled( True )
+            self.ui.qtAddDividendDataPushButton.setEnabled( True )
+            self.ui.qtAddCapitalReductionDataPushButton.setEnabled( True )
+            self.ui.qtAddCapitalIncreaseDataPushButton.setEnabled( True)
+        pass
+
+    def func_sort_single_trading_data( self, str_stock_number ):
+        list_trading_data = self.dict_all_stock_trading_data[ str_stock_number ]
+        sorted_list = sorted( list_trading_data, key=lambda x: ( datetime.datetime.strptime( x[ TradingData.TRADING_DATE ], "%Y-%m-%d"), x[ TradingData.TRADING_TYPE ] ) )
+        self.dict_all_stock_trading_data[ str_stock_number ] = sorted_list
+        return sorted_list
+
+    def func_sort_all_trading_data( self ):
+        for key_stock_number, value_list_trading_data in self.dict_all_stock_trading_data.items():
+            self.func_sort_single_trading_data( key_stock_number )
 
     def func_save_trading_data( self ):
         current_dir = os.path.dirname( __file__ )
@@ -379,14 +433,14 @@ class MainWindow( QMainWindow ):
             data = json.load( f )
 
         for item in data:
-            if ( item[ "stock_number" ] != None and 
-                 item[ "trading_date" ] != None and 
-                 item[ "trading_type" ] != None and 
-                 item[ "trading_price" ] != None and 
-                 item[ "trading_count" ] != None and 
-                 item[ "trading_fee_discount" ] != None and 
-                 item[ "stock_dividend" ] != None and
-                 item[ "cash_dividend" ] != None ):
+            if ( "stock_number" in item and
+                 "trading_date" in item and
+                 "trading_type" in item and
+                 "trading_price" in item and
+                 "trading_count" in item and
+                 "trading_fee_discount" in item and
+                 "stock_dividend" in item and
+                 "cash_dividend" in item ):
 
                 dict_per_trading_data = Utility.generate_trading_data( item[ "stock_number" ],                #股票代碼
                                                                        item[ "trading_date" ],                #交易日期
@@ -403,7 +457,7 @@ class MainWindow( QMainWindow ):
                     self.dict_all_stock_trading_data[ item[ "stock_number" ] ].append( dict_per_trading_data )
 
                 
-
+        self.func_sort_all_trading_data()
         self.refresh_stock_list_table()
 
     def refresh_stock_list_table( self ):
@@ -427,9 +481,7 @@ class MainWindow( QMainWindow ):
 
     def refresh_trading_data_table( self, sorted_list ):
         self.per_stock_trading_data_model.clear()
-        self.per_stock_trading_data_model.setVerticalHeaderLabels( ['交易日', '交易種類', '交易價格', '交易股數', '交易金額', '手續費', 
-                                                                    '交易稅', '補充保費', '單筆總成本', '累計總成本', '庫存股數', '均價'
-                                                                    '', ''] )
+        self.per_stock_trading_data_model.setVerticalHeaderLabels( g_list_trading_data_table_vertical_header )
         self.ui.qtTradingDataTableView.horizontalHeader().hide()
 
         n_stock_inventory = 0
@@ -500,14 +552,6 @@ class MainWindow( QMainWindow ):
             self.per_stock_trading_data_model.setItem( len( list_data ) + 1, index, delete_icon_item )
             index += 1
             pass
-
-    def on_delete_data_push_button_clicked( self ):
-        print("on_delete_data_push_button_clicked")
-
-    def on_edit_data_push_button_clicked( self ):
-        print("on_edit_data_push_button_clicked")
-        # dialog = EditDialog()
-        # dialog.exec()
 
     def on_export_selected_to_excell_button_clicked( self ):
         workbook = Workbook()
