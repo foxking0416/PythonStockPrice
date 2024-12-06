@@ -278,6 +278,9 @@ class MainWindow( QMainWindow ):
         current_dir = os.path.dirname( __file__ )
         json_file_path = os.path.join( current_dir, 'TradingData.json' )
 
+        os.makedirs( os.path.dirname( json_file_path ), exist_ok = True )
+        if not os.path.exists( json_file_path ):
+            return
         with open( json_file_path,'r', encoding='utf-8' ) as f:
             data = json.load( f )
 
