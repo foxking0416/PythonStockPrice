@@ -328,8 +328,6 @@ class MainWindow( QMainWindow ):
         self.ui.qtAddDividendDataPushButton.clicked.connect( self.on_add_dividend_data_push_button_clicked )
         self.ui.qtAddCapitalReductionDataPushButton.clicked.connect( self.on_add_capital_reduction_data_push_button_clicked )
         self.ui.qtAddCapitalIncreaseDataPushButton.clicked.connect( self.on_add_capital_increase_data_push_button_clicked )
-        # self.ui.qtDeleteDataPushButton.clicked.connect( self.on_delete_data_push_button_clicked )
-        # self.ui.qtEditDataPushButton.clicked.connect( self.on_edit_data_push_button_clicked )
 
         self.dict_all_company_number_and_name = self.download_all_company_stock_number()
 
@@ -418,15 +416,6 @@ class MainWindow( QMainWindow ):
         sorted_list = self.func_sort_single_trading_data( str_stock_number )
         self.refresh_trading_data_table( sorted_list )
         self.func_save_trading_data()
-        pass
-
-    def on_delete_data_push_button_clicked( self ):
-        print("on_delete_data_push_button_clicked")
-
-    def on_edit_data_push_button_clicked( self ):
-        print("on_edit_data_push_button_clicked")
-        # dialog = EditDialog()
-        # dialog.exec()
 
     def on_stock_list_table_item_clicked( self, index: QModelIndex, table_model ):
         item = table_model.itemFromIndex( index )
