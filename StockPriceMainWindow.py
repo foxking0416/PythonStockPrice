@@ -7,9 +7,9 @@ import datetime
 from QtStockPriceMainWindow import Ui_MainWindow  # 導入轉換後的 UI 類
 from QtStockTradingEditDialog import Ui_Dialog as Ui_StockTradingDialog
 from QtStockDividendEditDialog import Ui_Dialog as Ui_StockDividendDialog
-from PySide6.QtWidgets import QApplication, QMainWindow, QDialog, QButtonGroup, QMessageBox
+from PySide6.QtWidgets import QApplication, QMainWindow, QDialog, QButtonGroup, QMessageBox, QStyledItemDelegate
 from PySide6.QtGui import QStandardItemModel, QStandardItem, QIcon
-from PySide6.QtCore import Qt, QModelIndex
+from PySide6.QtCore import Qt, QModelIndex, QRect
 from openpyxl import Workbook
 from enum import Enum
 
@@ -30,6 +30,26 @@ delete_icon_file_path = os.path.join( g_current_dir, 'icon\\Delete.svg' )
 delete_icon = QIcon( delete_icon_file_path ) 
 trading_data_json_file_path = os.path.join( g_current_dir, 'TradingData.json' )
 
+class CenterIconDelegate( QStyledItemDelegate ):
+    def paint( self, painter, option, index ):
+        # 获取单元格数据
+        icon = index.data( Qt.DecorationRole )  # 获取图标
+        
+        # 如果有图标
+        if icon:
+            rect = option.rect  # 单元格的绘制区域
+            size = icon.actualSize( rect.size() ) * 0.7  # 图标实际尺寸
+            
+            # 计算居中位置
+            x = rect.x() + ( rect.width() - size.width() ) // 2
+            y = rect.y() + ( rect.height() - size.height() ) // 2
+            target_rect = QRect( x, y, size.width(), size.height() )
+            
+            # 绘制图标
+            icon.paint( painter, target_rect, Qt.AlignCenter )
+        else:
+            # 如果没有图标，使用默认绘制方法
+            super().paint( painter, option, index )
 
 class TradingType( Enum ):
     TEMPLATE = 0
@@ -236,14 +256,17 @@ class MainWindow( QMainWindow ):
         self.ui = Ui_MainWindow()
         self.ui.setupUi( self )  # 設置 UI
 
+        delegate = CenterIconDelegate()
         self.stock_list_model = QStandardItemModel( 0, 0 )
         self.stock_list_model.setHorizontalHeaderLabels( g_list_stock_list_table_vertical_header )
         self.ui.qtStockListTableView.setModel( self.stock_list_model )
+        self.ui.qtStockListTableView.setItemDelegate( delegate )
         self.ui.qtStockListTableView.clicked.connect( lambda index: self.on_stock_list_table_item_clicked( index, self.stock_list_model ) )
 
         self.per_stock_trading_data_model = QStandardItemModel( 0, 0 ) 
         self.per_stock_trading_data_model.setVerticalHeaderLabels( g_list_trading_data_table_vertical_header )
         self.ui.qtTradingDataTableView.setModel( self.per_stock_trading_data_model )
+        self.ui.qtTradingDataTableView.setItemDelegate( delegate )
         self.ui.qtTradingDataTableView.horizontalHeader().hide()
         self.ui.qtTradingDataTableView.clicked.connect( lambda index: self.on_trading_data_table_item_clicked( index, self.per_stock_trading_data_model ) )
 
