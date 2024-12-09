@@ -45,7 +45,7 @@
          <double>10.000000000000000</double>
         </property>
         <property name="singleStep">
-         <double>0.100000000000000</double>
+         <double>0.500000000000000</double>
         </property>
         <property name="value">
          <double>6.000000000000000</double>
@@ -109,6 +109,9 @@
            </size>
           </property>
          </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="qtStockSelectComboBox"/>
         </item>
         <item>
          <widget class="QPushButton" name="qtAddStockPushButton">
@@ -285,22 +288,22 @@
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_5">
       <item>
-       <widget class="QPushButton" name="pushButton_4">
+       <widget class="QPushButton" name="qtExportAllStockTradingDataPushButton">
         <property name="enabled">
          <bool>false</bool>
         </property>
         <property name="text">
-         <string>PushButton</string>
+         <string>輸出所有股票交易紀錄</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_3">
+       <widget class="QPushButton" name="qtExportSelectedStockTradingDataPushButton">
         <property name="enabled">
          <bool>false</bool>
         </property>
         <property name="text">
-         <string>PushButton</string>
+         <string>輸出單支股票交易紀錄</string>
         </property>
        </widget>
       </item>

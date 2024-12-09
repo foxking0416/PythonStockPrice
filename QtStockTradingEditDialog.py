@@ -25,7 +25,7 @@ class Ui_Dialog(object):
     def setupUi(self, Dialog):
         if not Dialog.objectName():
             Dialog.setObjectName(u"Dialog")
-        Dialog.resize(225, 369)
+        Dialog.resize(255, 369)
         sizePolicy = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -98,6 +98,7 @@ class Ui_Dialog(object):
         self.qtDiscountRateDoubleSpinBox.setObjectName(u"qtDiscountRateDoubleSpinBox")
         self.qtDiscountRateDoubleSpinBox.setDecimals(1)
         self.qtDiscountRateDoubleSpinBox.setMaximum(10.000000000000000)
+        self.qtDiscountRateDoubleSpinBox.setSingleStep(0.500000000000000)
 
         self.horizontalLayout_11.addWidget(self.qtDiscountRateDoubleSpinBox)
 

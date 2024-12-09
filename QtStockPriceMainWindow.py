@@ -15,10 +15,11 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QCheckBox, QDoubleSpinBox, QHBoxLayout,
-    QHeaderView, QLineEdit, QMainWindow, QMenuBar,
-    QPushButton, QRadioButton, QSizePolicy, QSpacerItem,
-    QStatusBar, QTableView, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QApplication, QCheckBox, QComboBox, QDoubleSpinBox,
+    QHBoxLayout, QHeaderView, QLineEdit, QMainWindow,
+    QMenuBar, QPushButton, QRadioButton, QSizePolicy,
+    QSpacerItem, QStatusBar, QTableView, QVBoxLayout,
+    QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -43,7 +44,7 @@ class Ui_MainWindow(object):
         self.qtDiscountRateDoubleSpinBox.setEnabled(True)
         self.qtDiscountRateDoubleSpinBox.setDecimals(1)
         self.qtDiscountRateDoubleSpinBox.setMaximum(10.000000000000000)
-        self.qtDiscountRateDoubleSpinBox.setSingleStep(0.100000000000000)
+        self.qtDiscountRateDoubleSpinBox.setSingleStep(0.500000000000000)
         self.qtDiscountRateDoubleSpinBox.setValue(6.000000000000000)
 
         self.horizontalLayout.addWidget(self.qtDiscountRateDoubleSpinBox)
@@ -78,6 +79,11 @@ class Ui_MainWindow(object):
         self.qtStockInputLineEdit.setMaximumSize(QSize(100, 16777215))
 
         self.verticalLayout_2.addWidget(self.qtStockInputLineEdit)
+
+        self.qtStockSelectComboBox = QComboBox(self.centralwidget)
+        self.qtStockSelectComboBox.setObjectName(u"qtStockSelectComboBox")
+
+        self.verticalLayout_2.addWidget(self.qtStockSelectComboBox)
 
         self.qtAddStockPushButton = QPushButton(self.centralwidget)
         self.qtAddStockPushButton.setObjectName(u"qtAddStockPushButton")
@@ -184,17 +190,17 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_5 = QHBoxLayout()
         self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
-        self.pushButton_4 = QPushButton(self.centralwidget)
-        self.pushButton_4.setObjectName(u"pushButton_4")
-        self.pushButton_4.setEnabled(False)
+        self.qtExportAllStockTradingDataPushButton = QPushButton(self.centralwidget)
+        self.qtExportAllStockTradingDataPushButton.setObjectName(u"qtExportAllStockTradingDataPushButton")
+        self.qtExportAllStockTradingDataPushButton.setEnabled(False)
 
-        self.horizontalLayout_5.addWidget(self.pushButton_4)
+        self.horizontalLayout_5.addWidget(self.qtExportAllStockTradingDataPushButton)
 
-        self.pushButton_3 = QPushButton(self.centralwidget)
-        self.pushButton_3.setObjectName(u"pushButton_3")
-        self.pushButton_3.setEnabled(False)
+        self.qtExportSelectedStockTradingDataPushButton = QPushButton(self.centralwidget)
+        self.qtExportSelectedStockTradingDataPushButton.setObjectName(u"qtExportSelectedStockTradingDataPushButton")
+        self.qtExportSelectedStockTradingDataPushButton.setEnabled(False)
 
-        self.horizontalLayout_5.addWidget(self.pushButton_3)
+        self.horizontalLayout_5.addWidget(self.qtExportSelectedStockTradingDataPushButton)
 
 
         self.verticalLayout.addLayout(self.horizontalLayout_5)
@@ -226,7 +232,7 @@ class Ui_MainWindow(object):
         self.qtAddDividendDataPushButton.setText(QCoreApplication.translate("MainWindow", u"\u65b0\u589e\u914d\u80a1\u914d\u606f\u7d00\u9304", None))
         self.qtAddCapitalReductionDataPushButton.setText(QCoreApplication.translate("MainWindow", u"\u65b0\u589e\u6e1b\u8cc7\u7d00\u9304", None))
         self.qtAddCapitalIncreaseDataPushButton.setText(QCoreApplication.translate("MainWindow", u"\u65b0\u589e\u589e\u8cc7\u7d00\u9304", None))
-        self.pushButton_4.setText(QCoreApplication.translate("MainWindow", u"PushButton", None))
-        self.pushButton_3.setText(QCoreApplication.translate("MainWindow", u"PushButton", None))
+        self.qtExportAllStockTradingDataPushButton.setText(QCoreApplication.translate("MainWindow", u"\u8f38\u51fa\u6240\u6709\u80a1\u7968\u4ea4\u6613\u7d00\u9304", None))
+        self.qtExportSelectedStockTradingDataPushButton.setText(QCoreApplication.translate("MainWindow", u"\u8f38\u51fa\u55ae\u652f\u80a1\u7968\u4ea4\u6613\u7d00\u9304", None))
     # retranslateUi
 
