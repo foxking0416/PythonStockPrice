@@ -22,7 +22,7 @@ from enum import Enum
 g_list_trading_data_table_vertical_header = ['交易日', '交易種類', '交易價格', '交易股數', '交易金額', '手續費', 
                                              '交易稅', '補充保費', '單筆總成本', '累計總成本', '庫存股數', '均價',
                                              '編輯', '刪除' ]
-g_list_stock_list_table_vertical_header = [ '庫存股數', '總成本', '平均成本', '今日股價', '刪除' ]
+g_list_stock_list_table_vertical_header = [ '總成本', '庫存股數', '平均成本', '今日股價', '刪除' ]
 g_current_dir = os.path.dirname(__file__)
 edit_icon_file_path = os.path.join( g_current_dir, 'icon\\Edit.svg' ) 
 edit_icon = QIcon( edit_icon_file_path ) 
@@ -73,8 +73,8 @@ class TradingData( Enum ):
     TRADING_TAX = 11 #不會記錄
     TRADING_INSURANCE = 12 #不會記錄
     TRADING_COST = 13 #不會記錄
-    ACCUMULATED_INVENTORY = 14 #不會記錄
-    ACCUMULATED_COST = 15 #不會記錄
+    ACCUMULATED_COST = 14 #不會記錄
+    ACCUMULATED_INVENTORY = 15 #不會記錄
     AVERAGE_COST = 16 #不會記錄
 
 
@@ -623,8 +623,8 @@ class MainWindow( QMainWindow ):
                 str_trading_type = "股利分配"
             elif e_trading_type == TradingType.CAPITAL_REDUCTION:
                 str_trading_type = "減資"
-            item[ TradingData.ACCUMULATED_INVENTORY ] = n_accumulated_inventory
             item[ TradingData.ACCUMULATED_COST ] = n_accumulated_cost
+            item[ TradingData.ACCUMULATED_INVENTORY ] = n_accumulated_inventory
             item[ TradingData.AVERAGE_COST ] = n_accumulated_cost / n_accumulated_inventory if n_accumulated_inventory != 0 else 0
 
         self.dict_all_stock_trading_data[ str_stock_number ] = sorted_list
@@ -696,23 +696,31 @@ class MainWindow( QMainWindow ):
         self.stock_list_model.setHorizontalHeaderLabels( g_list_stock_list_table_vertical_header )
 
         list_vertical_labels = []
-        for index,( key_stock_number, value ) in enumerate( self.dict_all_stock_trading_data.items() ):
+        for index_row,( key_stock_number, value ) in enumerate( self.dict_all_stock_trading_data.items() ):
             str_stock_name = self.dict_all_company_number_and_name[ key_stock_number ]
             list_vertical_labels.append( f"{key_stock_number} {str_stock_name}" )
 
             delete_icon_item = QStandardItem("")
             delete_icon_item.setIcon( delete_icon )
             delete_icon_item.setFlags( delete_icon_item.flags() & ~Qt.ItemIsEditable )
-            delete_icon_item.setTextAlignment( Qt.AlignHCenter | Qt.AlignVCenter )
 
-            self.stock_list_model.setItem( index, len( g_list_stock_list_table_vertical_header ) - 1, delete_icon_item )
-            # table_model.setItem( index, 0, icon_item )
-            # stock_inventory_item = QStandardItem( '庫存股數' )
-            # total_cost_item = QStandardItem( '總成本' )
-            # average_price_item = QStandardItem( '均價' )
+            self.stock_list_model.setItem( index_row, len( g_list_stock_list_table_vertical_header ) - 1, delete_icon_item )
 
-            # condition_item.setFlags( condition_item.flags() & ~Qt.ItemIsEditable )
-            # condition_item.setTextAlignment( Qt.AlignHCenter | Qt.AlignVCenter )
+            dict_trading_data = value[ len( value ) - 1 ]
+            n_accumulated_cost = dict_trading_data[ TradingData.ACCUMULATED_COST ]
+            n_accumulated_inventory = dict_trading_data[ TradingData.ACCUMULATED_INVENTORY ]
+            f_average_cost = round( dict_trading_data[ TradingData.AVERAGE_COST ], 3 )
+
+            list_data = [ format( n_accumulated_cost, "," ),      #總成本
+                          format( n_accumulated_inventory, "," ), #庫存股數
+                          format( f_average_cost, "," )  ]        #平均成本
+                               
+            for column, data in enumerate( list_data ):
+                standard_item = QStandardItem( data )
+                standard_item.setTextAlignment( Qt.AlignHCenter | Qt.AlignVCenter )
+                standard_item.setFlags( standard_item.flags() & ~Qt.ItemIsEditable )
+                self.stock_list_model.setItem( index_row, column, standard_item ) 
+            
 
         self.stock_list_model.setVerticalHeaderLabels( list_vertical_labels )
 
@@ -772,7 +780,7 @@ class MainWindow( QMainWindow ):
                           format( n_per_trading_total_cost, "," ),           #單筆總成本
                           format( n_accumulated_cost, "," ),                 #累計總成本
                           format( n_accumulated_inventory, "," ),            #庫存股數
-                          format( f_average_cost) ]                          #均價
+                          format( f_average_cost, "," ) ]                    #均價
 
             for row, data in enumerate( list_data ):
                 standard_item = QStandardItem( data )
