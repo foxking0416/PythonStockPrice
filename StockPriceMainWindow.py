@@ -179,6 +179,7 @@ class StockTradingEditDialog( QDialog ):
         self.ui.qtDiscountRateDoubleSpinBox.setValue( f_discount_value )
 
         self.ui.qtDiscountCheckBox.stateChanged.connect( self.on_discount_check_box_state_changed )
+        self.ui.qtDiscountRateDoubleSpinBox.valueChanged.connect( self.compute_cost )
         self.ui.qtBuyRadioButton.toggled.connect( self.compute_cost )
         self.ui.qtSellRadioButton.toggled.connect( self.compute_cost )
         self.ui.qtCommonTradeRadioButton.toggled.connect( self.on_trading_type_changed )
