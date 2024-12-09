@@ -402,7 +402,18 @@ class MainWindow( QMainWindow ):
             if n_row == len( g_list_trading_data_table_vertical_header ) - 2: #編輯
                 pass
             elif n_row == len( g_list_trading_data_table_vertical_header ) - 1: #刪除
+                result = self.func_show_message_box( "警告", f"確定要刪掉這筆交易資料嗎?" )
                 pass
+
+    def on_export_selected_to_excell_button_clicked( self ):
+        workbook = Workbook()
+        worksheet = workbook.active
+        # worksheet.title = str_tab_title
+        
+        pass
+
+    def on_export_all_to_excell_button_clicked( self ):
+        pass
 
     def func_show_message_box( self, str_title, str_message ):
         message_box = QMessageBox( self )
@@ -593,16 +604,6 @@ class MainWindow( QMainWindow ):
             self.per_stock_trading_data_model.setItem( len( list_data ) + 1, index, delete_icon_item )
             index += 1
             pass
-
-    def on_export_selected_to_excell_button_clicked( self ):
-        workbook = Workbook()
-        worksheet = workbook.active
-        # worksheet.title = str_tab_title
-        
-        pass
-
-    def on_export_all_to_excell_button_clicked( self ):
-        pass
 
     def download_all_company_stock_number( self ): 
         all_company_name_and_number = {}
