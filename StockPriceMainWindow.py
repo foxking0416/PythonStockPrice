@@ -386,17 +386,16 @@ class MainWindow( QMainWindow ):
         str_stock_input = self.ui.qtStockInputLineEdit.text()
         self.ui.qtStockInputLineEdit.clear()
         str_first_four_chars = str_stock_input[:4]
-        # if str_first_four_chars not in self.dict_all_company_stock_info:
-        #     b_find = False
-        #     for stock_number, stock_info in self.dict_all_company_stock_info.items():
-        #         stock_name = stock_info[ StockCore.ModifiedDataType.NAME ]
-        #         if str_first_four_chars == stock_name:
-        #             str_first_four_chars = stock_number
-        #             b_find = True
-        #             break
-        #     if not b_find:
-        #         QMessageBox.warning( self, "警告", "輸入的股票代碼不存在", QMessageBox.Ok )
-        #         return
+        if str_first_four_chars not in self.dict_all_company_number_and_name:
+            b_find = False
+            for stock_number, stock_name in self.dict_all_company_number_and_name.items():
+                if str_first_four_chars == stock_name:
+                    str_first_four_chars = stock_number
+                    b_find = True
+                    break
+            if not b_find:
+                QMessageBox.warning( self, "警告", "輸入的股票代碼不存在", QMessageBox.Ok )
+                return
         
         if str_first_four_chars not in self.dict_all_stock_trading_data:
             dict_trading_data = Utility.generate_trading_data( str_first_four_chars, #股票代碼
