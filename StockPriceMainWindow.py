@@ -455,12 +455,7 @@ class MainWindow( QMainWindow ):
         if item is not None:
             n_column = index.column()  # 獲取列索引
             n_row = index.row()  # 獲取行索引
-            n_index = 0
             list_trading_data = self.dict_all_stock_trading_data[ self.str_picked_stock_number ]
-            if self.ui.qtFromNewToOldRadioButton.isChecked():
-                n_index = n_column
-            else:
-                n_index = len( list_trading_data ) - n_column - 1
 
             if ( n_row == len( g_list_trading_data_table_vertical_header ) - 2 or #編輯
                 n_row == len( g_list_trading_data_table_vertical_header ) - 1 ): #刪除
