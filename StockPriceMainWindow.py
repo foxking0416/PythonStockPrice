@@ -442,6 +442,7 @@ class MainWindow( QMainWindow ):
             dict_trading_data = dialog.dict_trading_data
             self.dict_all_stock_trading_data[ str_stock_number ].append( dict_trading_data )
             sorted_list = self.func_sort_single_trading_data( str_stock_number )
+            self.refresh_stock_list_table()
             self.refresh_trading_data_table( sorted_list )
             self.func_save_trading_data()
 
@@ -456,6 +457,7 @@ class MainWindow( QMainWindow ):
             dict_trading_data = dialog.dict_trading_data
             self.dict_all_stock_trading_data[ str_stock_number ].append( dict_trading_data )
             sorted_list = self.func_sort_single_trading_data( str_stock_number )
+            self.refresh_stock_list_table()
             self.refresh_trading_data_table( sorted_list )
             self.func_save_trading_data()
 
@@ -464,6 +466,7 @@ class MainWindow( QMainWindow ):
             return
         str_stock_number = self.str_picked_stock_number
         sorted_list = self.func_sort_single_trading_data( str_stock_number )
+        self.refresh_stock_list_table()
         self.refresh_trading_data_table( sorted_list )
         self.func_save_trading_data()
         pass
@@ -473,6 +476,7 @@ class MainWindow( QMainWindow ):
             return
         str_stock_number = self.str_picked_stock_number
         sorted_list = self.func_sort_single_trading_data( str_stock_number )
+        self.refresh_stock_list_table()
         self.refresh_trading_data_table( sorted_list )
         self.func_save_trading_data()
 
@@ -543,6 +547,7 @@ class MainWindow( QMainWindow ):
                         dict_trading_data = dialog.dict_trading_data
                         self.dict_all_stock_trading_data[ str_stock_number ][ n_findindex ] = dict_trading_data
                         sorted_list = self.func_sort_single_trading_data( str_stock_number )
+                        self.refresh_stock_list_table()
                         self.refresh_trading_data_table( sorted_list )
                         self.func_save_trading_data()
 
@@ -551,6 +556,7 @@ class MainWindow( QMainWindow ):
                     if result:
                         del self.dict_all_stock_trading_data[ str_stock_number ][ n_findindex ]
                         sorted_list = self.func_sort_single_trading_data( str_stock_number )
+                        self.refresh_stock_list_table()
                         self.refresh_trading_data_table( sorted_list )
                         self.func_save_trading_data()
 
