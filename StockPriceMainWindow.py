@@ -320,6 +320,8 @@ class MainWindow( QMainWindow ):
         button_group_2.addButton( self.ui.qtShowAllRadioButton )
         button_group_2.addButton( self.ui.qtShow10RadioButton )
         self.ui.qtShowAllRadioButton.setChecked( True )
+        self.ui.qtShowAllRadioButton.toggled.connect( self.on_show_all_radio_button_toggled )
+        
 
 
         self.ui.qtAddStockPushButton.clicked.connect( self.on_add_stock_push_button_clicked )
@@ -344,11 +346,12 @@ class MainWindow( QMainWindow ):
             self.ui.qtDiscountRateDoubleSpinBox.setEnabled( False )
 
     def on_new_to_old_radio_button_toggled( self ):
-        if self.str_picked_stock_number is None:
-            return
-        str_stock_number = self.str_picked_stock_number
-        sorted_list = self.func_sort_single_trading_data( str_stock_number )
-        self.refresh_trading_data_table( sorted_list )
+        if self.str_picked_stock_number != None:
+            self.refresh_trading_data_table( self.dict_all_stock_trading_data[ self.str_picked_stock_number ] )
+
+    def on_show_all_radio_button_toggled( self ):
+        if self.str_picked_stock_number != None:
+            self.refresh_trading_data_table( self.dict_all_stock_trading_data[ self.str_picked_stock_number ] )
 
     def on_add_stock_push_button_clicked( self ):
         str_stock_input = self.ui.qtStockInputLineEdit.text()
@@ -654,8 +657,13 @@ class MainWindow( QMainWindow ):
 
         if self.ui.qtFromNewToOldRadioButton.isChecked():
             loop_list = sorted_list[::-1]
+            if self.ui.qtShow10RadioButton.isChecked():
+                loop_list = loop_list[:10]
         else:
             loop_list = sorted_list
+            if self.ui.qtShow10RadioButton.isChecked():
+                loop_list = loop_list[:11]
+
 
         for dict_per_trading_data in loop_list:
 
