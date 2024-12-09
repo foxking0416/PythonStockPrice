@@ -77,7 +77,6 @@ class TradingData( Enum ):
     ACCUMULATED_INVENTORY = 15 #不會記錄
     AVERAGE_COST = 16 #不會記錄
 
-
 class TradingCost( Enum ):
     TRADING_VALUE = 0
     TRADING_FEE = 1
@@ -343,6 +342,8 @@ class MainWindow( QMainWindow ):
 
         self.ui.qtAddStockPushButton.clicked.connect( self.on_add_stock_push_button_clicked )
         self.ui.qtDiscountCheckBox.stateChanged.connect( self.on_discount_check_box_state_changed )
+        self.ui.qtDiscountRateDoubleSpinBox.valueChanged.connect( self.save_filter_stock_UI_state )
+        self.ui.qtExtraInsuranceFeeCheckBox.stateChanged.connect( self.save_filter_stock_UI_state )
 
         self.ui.qtAddTradingDataPushButton.clicked.connect( self.on_add_trading_data_push_button_clicked )
         self.ui.qtAddDividendDataPushButton.clicked.connect( self.on_add_dividend_data_push_button_clicked )
@@ -355,7 +356,8 @@ class MainWindow( QMainWindow ):
 
         self.str_picked_stock_number = None
         self.dict_all_stock_trading_data = {}
-
+        
+        self.load_filter_stock_UI_state()
         self.func_load_existing_trading_data()
 
     def on_discount_check_box_state_changed( self, state ):
@@ -363,6 +365,8 @@ class MainWindow( QMainWindow ):
             self.ui.qtDiscountRateDoubleSpinBox.setEnabled( True )
         else:
             self.ui.qtDiscountRateDoubleSpinBox.setEnabled( False )
+
+        self.save_filter_stock_UI_state()
 
     def on_stock_input_text_changed( self ):
         with QSignalBlocker( self.ui.qtStockSelectComboBox ), QSignalBlocker( self.ui.qtStockInputLineEdit ):
@@ -390,9 +394,13 @@ class MainWindow( QMainWindow ):
         if self.str_picked_stock_number != None:
             self.refresh_trading_data_table( self.dict_all_stock_trading_data[ self.str_picked_stock_number ] )
 
+        self.save_filter_stock_UI_state()
+
     def on_show_all_radio_button_toggled( self ):
         if self.str_picked_stock_number != None:
             self.refresh_trading_data_table( self.dict_all_stock_trading_data[ self.str_picked_stock_number ] )
+
+        self.save_filter_stock_UI_state()
 
     def on_add_stock_push_button_clicked( self ):
         str_stock_input = self.ui.qtStockInputLineEdit.text()
@@ -690,6 +698,52 @@ class MainWindow( QMainWindow ):
                 
         self.func_sort_all_trading_data()
         self.refresh_stock_list_table()
+
+    def save_filter_stock_UI_state( self ):
+        output_path = os.path.join( os.path.dirname(__file__), 'UISetting.config' )
+        # 確保目錄存在，若不存在則遞歸創建
+        os.makedirs( os.path.dirname( output_path ), exist_ok = True )
+
+        with open( output_path, 'w', encoding='utf-8' ) as f:
+            f.write( "手續費折扣," + str( self.ui.qtDiscountCheckBox.isChecked() ) + '\n' )
+            f.write( "手續費折數," + str( self.ui.qtDiscountRateDoubleSpinBox.value() ) + '\n' )
+            f.write( "補充保費," + str( self.ui.qtExtraInsuranceFeeCheckBox.isChecked() ) + '\n' )
+            f.write( "顯示排序," + str( self.ui.qtFromNewToOldRadioButton.isChecked() ) + '\n' )
+            f.write( "顯示數量," + str( self.ui.qtShowAllRadioButton.isChecked() ) + '\n' )
+
+
+    def load_filter_stock_UI_state( self ):
+        with ( QSignalBlocker( self.ui.qtDiscountCheckBox ),
+               QSignalBlocker( self.ui.qtDiscountRateDoubleSpinBox ),
+               QSignalBlocker( self.ui.qtExtraInsuranceFeeCheckBox ), 
+               QSignalBlocker( self.ui.qtFromNewToOldRadioButton ),
+               QSignalBlocker( self.ui.qtFromOldToNewRadioButton ), 
+               QSignalBlocker( self.ui.qtShowAllRadioButton ), 
+               QSignalBlocker( self.ui.qtShow10RadioButton ) ):
+
+            file_path = os.path.join( os.path.dirname(__file__), 'UISetting.config' )
+            if os.path.exists( file_path ):
+                with open( file_path, 'r', encoding='utf-8' ) as f:
+                    data = f.readlines()
+                    for i, row in enumerate( data ):
+                        row = row.strip().split( ',' )
+                        if row[0] == "手續費折扣":
+                            self.ui.qtDiscountCheckBox.setChecked( row[ 1 ] == 'True' )
+                            self.ui.qtDiscountRateDoubleSpinBox.setEnabled( row[ 1 ] == 'True' )
+                        elif row[0] == "手續費折數":
+                            self.ui.qtDiscountRateDoubleSpinBox.setValue( float(row[ 1 ]) )
+                        elif row[0] == "補充保費":
+                            self.ui.qtExtraInsuranceFeeCheckBox.setChecked( row[ 1 ] == 'True' )
+                        elif row[0] == "顯示排序":
+                            if row[ 1 ] == 'True':
+                                self.ui.qtFromNewToOldRadioButton.setChecked( True )
+                            else:
+                                self.ui.qtFromOldToNewRadioButton.setChecked( True )
+                        elif row[0] == "顯示數量":
+                            if row[ 1 ] == 'True':
+                                self.ui.qtShowAllRadioButton.setChecked( True )
+                            else:
+                                self.ui.qtShow10RadioButton.setChecked( True )
 
     def refresh_stock_list_table( self ):
         self.stock_list_model.clear()
