@@ -314,6 +314,7 @@ class MainWindow( QMainWindow ):
         button_group_1.addButton( self.ui.qtFromNewToOldRadioButton )
         button_group_1.addButton( self.ui.qtFromOldToNewRadioButton )
         self.ui.qtFromNewToOldRadioButton.setChecked( True )
+        self.ui.qtFromNewToOldRadioButton.toggled.connect( self.on_new_to_old_radio_button_toggled )
 
         button_group_2 = QButtonGroup(self)
         button_group_2.addButton( self.ui.qtShowAllRadioButton )
@@ -341,6 +342,13 @@ class MainWindow( QMainWindow ):
             self.ui.qtDiscountRateDoubleSpinBox.setEnabled( True )
         else:
             self.ui.qtDiscountRateDoubleSpinBox.setEnabled( False )
+
+    def on_new_to_old_radio_button_toggled( self ):
+        if self.str_picked_stock_number is None:
+            return
+        str_stock_number = self.str_picked_stock_number
+        sorted_list = self.func_sort_single_trading_data( str_stock_number )
+        self.refresh_trading_data_table( sorted_list )
 
     def on_add_stock_push_button_clicked( self ):
         str_stock_input = self.ui.qtStockInputLineEdit.text()
@@ -643,7 +651,13 @@ class MainWindow( QMainWindow ):
         n_accumulated_total_cost = 0
 
         index = 0
-        for dict_per_trading_data in sorted_list:
+
+        if self.ui.qtFromNewToOldRadioButton.isChecked():
+            loop_list = sorted_list[::-1]
+        else:
+            loop_list = sorted_list
+
+        for dict_per_trading_data in loop_list:
 
             e_trading_type = dict_per_trading_data[ TradingData.TRADING_TYPE ]
             if e_trading_type == TradingType.TEMPLATE:
