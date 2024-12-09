@@ -1,0 +1,112 @@
+[
+    {
+        "stock_number": "2891",
+        "trading_date": "0001-01-01",
+        "trading_type": 0,
+        "trading_price": 0,
+        "trading_count": 0,
+        "trading_fee_discount": 1,
+        "stock_dividend": 0,
+        "cash_dividend": 0
+    },
+    {
+        "stock_number": "1210",
+        "trading_date": "0001-01-01",
+        "trading_type": 0,
+        "trading_price": 0,
+        "trading_count": 0,
+        "trading_fee_discount": 1,
+        "stock_dividend": 0,
+        "cash_dividend": 0
+    },
+    {
+        "stock_number": "2834",
+        "trading_date": "0001-01-01",
+        "trading_type": 0,
+        "trading_price": 0,
+        "trading_count": 0,
+        "trading_fee_discount": 1,
+        "stock_dividend": 0,
+        "cash_dividend": 0
+    },
+    {
+        "stock_number": "2834",
+        "trading_date": "2018-09-17",
+        "trading_type": 1,
+        "trading_price": 10.9,
+        "trading_count": 450000,
+        "trading_fee_discount": 0.45,
+        "stock_dividend": 0,
+        "cash_dividend": 0
+    },
+    {
+        "stock_number": "2834",
+        "trading_date": "2018-09-20",
+        "trading_type": 1,
+        "trading_price": 10.9,
+        "trading_count": 450000,
+        "trading_fee_discount": 0.45,
+        "stock_dividend": 0,
+        "cash_dividend": 0
+    },
+    {
+        "stock_number": "2834",
+        "trading_date": "2018-09-21",
+        "trading_type": 1,
+        "trading_price": 10.9,
+        "trading_count": 450000,
+        "trading_fee_discount": 0.45,
+        "stock_dividend": 0,
+        "cash_dividend": 0
+    },
+    {
+        "stock_number": "2834",
+        "trading_date": "2018-09-25",
+        "trading_type": 1,
+        "trading_price": 10.85,
+        "trading_count": 30000,
+        "trading_fee_discount": 0.45,
+        "stock_dividend": 0,
+        "cash_dividend": 0
+    },
+    {
+        "stock_number": "2834",
+        "trading_date": "2018-10-05",
+        "trading_type": 1,
+        "trading_price": 10.85,
+        "trading_count": 100000,
+        "trading_fee_discount": 0.45,
+        "stock_dividend": 0,
+        "cash_dividend": 0
+    },
+    {
+        "stock_number": "2834",
+        "trading_date": "2018-10-05",
+        "trading_type": 1,
+        "trading_price": 10.8,
+        "trading_count": 150000,
+        "trading_fee_discount": 0.45,
+        "stock_dividend": 0,
+        "cash_dividend": 0
+    },
+    {
+        "stock_number": "2834",
+        "trading_date": "2018-10-11",
+        "trading_type": 1,
+        "trading_price": 10.55,
+        "trading_count": 100000,
+        "trading_fee_discount": 0.45,
+        "stock_dividend": 0,
+        "cash_dividend": 0
+    },
+    {
+        "stock_number": "2834",
+        "trading_date": "2018-10-11",
+        "trading_type": 1,
+        "trading_price": 10.5,
+        "trading_count": 100000,
+        "trading_fee_discount": 0.45,
+        "stock_dividend": 0,
+        "cash_dividend": 0
+    }
+]

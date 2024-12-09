@@ -67,7 +67,16 @@ class TradingData( Enum ):
     TRADING_FEE_DISCOUNT = 5
     STOCK_DIVIDEND = 6
     CASH_DIVIDEND = 7
-    SORTED_INDEX = 8
+    SORTED_INDEX = 8 #不會記錄
+    TRADING_VALUE = 9 #不會記錄
+    TRADING_FEE = 10 #不會記錄
+    TRADING_TAX = 11 #不會記錄
+    TRADING_INSURANCE = 12 #不會記錄
+    TRADING_COST = 13 #不會記錄
+    ACCUMULATED_INVENTORY = 14 #不會記錄
+    ACCUMULATED_COST = 15 #不會記錄
+    AVERAGE_COST = 16 #不會記錄
+
 
 class TradingCost( Enum ):
     TRADING_VALUE = 0
@@ -339,6 +348,8 @@ class MainWindow( QMainWindow ):
         self.ui.qtAddDividendDataPushButton.clicked.connect( self.on_add_dividend_data_push_button_clicked )
         self.ui.qtAddCapitalReductionDataPushButton.clicked.connect( self.on_add_capital_reduction_data_push_button_clicked )
         self.ui.qtAddCapitalIncreaseDataPushButton.clicked.connect( self.on_add_capital_increase_data_push_button_clicked )
+        self.ui.qtExportAllStockTradingDataPushButton.clicked.connect( self.on_export_all_to_excell_button_clicked )
+        self.ui.qtExportSelectedStockTradingDataPushButton.clicked.connect( self.on_export_selected_to_excell_button_clicked )
 
         self.dict_all_company_number_and_name = self.download_all_company_stock_number()
 
@@ -536,10 +547,20 @@ class MainWindow( QMainWindow ):
                         self.func_save_trading_data()
 
     def on_export_selected_to_excell_button_clicked( self ):
-        workbook = Workbook()
-        worksheet = workbook.active
-        # worksheet.title = str_tab_title
-        
+        if self.str_picked_stock_number is None:
+            return
+        str_stock_number = self.str_picked_stock_number
+        str_stock_name = self.dict_all_company_number_and_name[ str_stock_number ]
+        file_path = self.open_save_file_dialog()
+        if file_path:
+            workbook = Workbook()
+            worksheet = workbook.active
+            worksheet.title = str_stock_name
+
+
+
+
+            workbook.save( file_path )
         pass
 
     def on_export_all_to_excell_button_clicked( self ):
@@ -578,8 +599,34 @@ class MainWindow( QMainWindow ):
     def func_sort_single_trading_data( self, str_stock_number ):
         list_trading_data = self.dict_all_stock_trading_data[ str_stock_number ]
         sorted_list = sorted( list_trading_data, key=lambda x: ( datetime.datetime.strptime( x[ TradingData.TRADING_DATE ], "%Y-%m-%d"), x[ TradingData.TRADING_TYPE ] ) )
+        n_accumulated_inventory = 0
+        n_accumulated_cost = 0
         for index, item in enumerate( sorted_list ):
-            sorted_list[ index ][ TradingData.SORTED_INDEX ] = index
+            item[ TradingData.SORTED_INDEX ] = index
+
+            e_trading_type = item[ TradingData.TRADING_TYPE ]
+            f_trading_price = item[ TradingData.TRADING_PRICE ]
+            n_trading_count = item[ TradingData.TRADING_COUNT ]
+            f_trading_fee_discount = item[ TradingData.TRADING_FEE_DISCOUNT ]
+            dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, True, False )
+            n_trading_value = item[ TradingData.TRADING_VALUE ] = dict_result[ TradingCost.TRADING_VALUE ]
+            n_trading_fee = item[ TradingData.TRADING_FEE ] = dict_result[ TradingCost.TRADING_FEE ]
+            n_trading_tax = item[ TradingData.TRADING_TAX ] = dict_result[ TradingCost.TRADING_TAX ]
+            n_trading_insurance = item[ TradingData.TRADING_INSURANCE ] = dict_result[ TradingCost.TRADING_INSURANCE ]  
+            n_per_trading_total_cost = item[ TradingData.TRADING_COST ] = dict_result[ TradingCost.TRADING_TOTAL_COST ]
+            if e_trading_type == TradingType.BUY:
+                n_accumulated_inventory += n_trading_count
+                n_accumulated_cost += n_per_trading_total_cost
+            elif e_trading_type == TradingType.SELL:
+                n_accumulated_inventory -= n_trading_count
+            elif e_trading_type == TradingType.DIVIDEND:
+                str_trading_type = "股利分配"
+            elif e_trading_type == TradingType.CAPITAL_REDUCTION:
+                str_trading_type = "減資"
+            item[ TradingData.ACCUMULATED_INVENTORY ] = n_accumulated_inventory
+            item[ TradingData.ACCUMULATED_COST ] = n_accumulated_cost
+            item[ TradingData.AVERAGE_COST ] = n_accumulated_cost / n_accumulated_inventory if n_accumulated_inventory != 0 else 0
+
         self.dict_all_stock_trading_data[ str_stock_number ] = sorted_list
         return sorted_list
 
@@ -674,8 +721,8 @@ class MainWindow( QMainWindow ):
         self.per_stock_trading_data_model.setVerticalHeaderLabels( g_list_trading_data_table_vertical_header )
         self.ui.qtTradingDataTableView.horizontalHeader().hide()
 
-        n_stock_inventory = 0
-        n_accumulated_total_cost = 0
+        n_accumulated_inventory = 0
+        n_accumulated_cost = 0
 
         index = 0
 
@@ -696,20 +743,18 @@ class MainWindow( QMainWindow ):
                 continue
             f_trading_price = dict_per_trading_data[ TradingData.TRADING_PRICE ]
             n_trading_count = dict_per_trading_data[ TradingData.TRADING_COUNT ]
-            f_trading_fee_discount = dict_per_trading_data[ TradingData.TRADING_FEE_DISCOUNT ]
-            dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, True, False )
-            n_trading_value = dict_result[ TradingCost.TRADING_VALUE ]
-            n_trading_fee = dict_result[ TradingCost.TRADING_FEE ]
-            n_trading_tax = dict_result[ TradingCost.TRADING_TAX ]
-            n_trading_insurance = dict_result[ TradingCost.TRADING_INSURANCE ]  
-            n_per_trading_total_cost = dict_result[ TradingCost.TRADING_TOTAL_COST ]
+            n_trading_value = dict_per_trading_data[ TradingData.TRADING_VALUE ]
+            n_trading_fee = dict_per_trading_data[ TradingData.TRADING_FEE ]
+            n_trading_tax = dict_per_trading_data[ TradingData.TRADING_TAX ]
+            n_trading_insurance = dict_per_trading_data[ TradingData.TRADING_INSURANCE ]
+            n_per_trading_total_cost = dict_per_trading_data[ TradingData.TRADING_COST ]
+            n_accumulated_cost = dict_per_trading_data[ TradingData.ACCUMULATED_COST ]
+            n_accumulated_inventory = dict_per_trading_data[ TradingData.ACCUMULATED_INVENTORY ]
+            f_average_cost = round( dict_per_trading_data[ TradingData.AVERAGE_COST ], 3 )
 
             if e_trading_type == TradingType.BUY:
-                n_stock_inventory += n_trading_count
                 str_trading_type = "買進"
-                n_accumulated_total_cost += n_per_trading_total_cost
             elif e_trading_type == TradingType.SELL:
-                n_stock_inventory -= n_trading_count
                 str_trading_type = "賣出"
             elif e_trading_type == TradingType.DIVIDEND:
                 str_trading_type = "股利分配"
@@ -725,9 +770,9 @@ class MainWindow( QMainWindow ):
                           format( n_trading_tax, "," ),                      #交易稅
                           format( n_trading_insurance, "," ),                #補充保費
                           format( n_per_trading_total_cost, "," ),           #單筆總成本
-                          format( n_accumulated_total_cost, "," ),           #累計總成本
-                          format( n_stock_inventory, "," ),                  #庫存股數
-                          'XXXX' ]                                           #均價
+                          format( n_accumulated_cost, "," ),                 #累計總成本
+                          format( n_accumulated_inventory, "," ),            #庫存股數
+                          format( f_average_cost) ]                          #均價
 
             for row, data in enumerate( list_data ):
                 standard_item = QStandardItem( data )
