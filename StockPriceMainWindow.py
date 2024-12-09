@@ -67,6 +67,7 @@ class TradingData( Enum ):
     TRADING_FEE_DISCOUNT = 5
     STOCK_DIVIDEND = 6
     CASH_DIVIDEND = 7
+    SORTED_INDEX = 8
 
 class TradingCost( Enum ):
     TRADING_VALUE = 0
@@ -133,6 +134,15 @@ class StockDividendEditDialog( QDialog ):
         self.ui.qtOkButtonBox.rejected.connect( self.cancel )
         self.dict_trading_data = {}
 
+    def setup_trading_date( self, str_date ):
+        self.ui.qtDateEdit.setDate( datetime.datetime.strptime( str_date, "%Y-%m-%d" ).date() )
+
+    def setup_stock_dividend( self, f_stock_dividend_per_share ):
+        self.ui.qtStockDividendDoubleSpinBox.setValue( f_stock_dividend_per_share )
+
+    def setup_cash_dividend( self, f_cash_dividend_per_share ):
+        self.ui.qtCashDividendDoubleSpinBox.setValue( f_cash_dividend_per_share )
+
     def accept_data( self ):
         f_stock_dividend_per_share = self.ui.qtStockDividendDoubleSpinBox.value()
         f_cash_dividend_per_share = self.ui.qtCashDividendDoubleSpinBox.value()
@@ -189,6 +199,36 @@ class StockTradingEditDialog( QDialog ):
             self.ui.qtDiscountRateDoubleSpinBox.setEnabled( False )
 
         self.compute_cost()
+
+    def setup_trading_date( self, str_date ):
+        self.ui.qtDateEdit.setDate( datetime.datetime.strptime( str_date, "%Y-%m-%d" ).date() )
+
+    def setup_trading_type( self, e_trading_type ):
+        if e_trading_type == TradingType.BUY:
+            self.ui.qtBuyRadioButton.setChecked( True )
+        else:
+            self.ui.qtSellRadioButton.setChecked( True )
+
+    def setup_trading_discount( self, f_discount_value ):
+        if f_discount_value != 1:
+            self.ui.qtDiscountCheckBox.setChecked( True )
+            self.ui.qtDiscountRateDoubleSpinBox.setValue( f_discount_value * 10 )
+        else:
+            self.ui.qtDiscountCheckBox.setChecked( False )
+            self.ui.qtDiscountRateDoubleSpinBox.setValue( 6 )
+
+    def setup_trading_price( self, f_price ):
+        self.ui.qtPriceDoubleSpinBox.setValue( f_price )
+
+    def setup_trading_count( self, f_count ):
+        if f_count % 1000 == 0:
+            self.ui.qtCommonTradeRadioButton.setChecked( True )
+            self.ui.qtCommonTradeCountSpinBox.setValue( f_count / 1000 )
+            self.ui.qtOddTradeCountSpinBox.setValue( 0 )
+        else:
+            self.ui.qtOddTradeRadioButton.setChecked( True )
+            self.ui.qtCommonTradeCountSpinBox.setValue( 0 )
+            self.ui.qtOddTradeCountSpinBox.setValue( f_count )
 
     def accept_data( self ):
 
@@ -422,11 +462,54 @@ class MainWindow( QMainWindow ):
             else:
                 n_index = len( list_trading_data ) - n_column - 1
 
-            if n_row == len( g_list_trading_data_table_vertical_header ) - 2: #編輯
-                pass
-            elif n_row == len( g_list_trading_data_table_vertical_header ) - 1: #刪除
-                result = self.func_show_message_box( "警告", f"確定要刪掉這筆交易資料嗎?" )
-                pass
+            if ( n_row == len( g_list_trading_data_table_vertical_header ) - 2 or #編輯
+                n_row == len( g_list_trading_data_table_vertical_header ) - 1 ): #刪除
+
+                if self.str_picked_stock_number is None:
+                    return
+                str_stock_number = self.str_picked_stock_number
+                str_stock_name = self.dict_all_company_number_and_name[ str_stock_number ]
+
+                hidden_data = table_model.data( index, Qt.UserRole )
+                n_findindex = -1
+                for index, dict_selected_data in enumerate( list_trading_data ):
+                    if dict_selected_data[ TradingData.SORTED_INDEX ] == hidden_data:
+                        n_findindex = index
+                        break
+                if n_findindex == -1:
+                    return
+                dict_selected_data = list_trading_data[ n_findindex ]
+
+                if n_row == len( g_list_trading_data_table_vertical_header ) - 2: #編輯
+                    if dict_selected_data[ TradingData.TRADING_TYPE ] == TradingType.TEMPLATE:
+                        return
+                    if dict_selected_data[ TradingData.TRADING_TYPE ] == TradingType.BUY or dict_selected_data[ TradingData.TRADING_TYPE ] == TradingType.SELL:
+                        dialog = StockTradingEditDialog( str_stock_number, str_stock_name, self.ui.qtDiscountCheckBox.isChecked(), self.ui.qtDiscountRateDoubleSpinBox.value(), self.ui.qtExtraInsuranceFeeCheckBox.isChecked(), self )
+                        dialog.setup_trading_date( dict_selected_data[ TradingData.TRADING_DATE ] )
+                        dialog.setup_trading_type( dict_selected_data[ TradingData.TRADING_TYPE ] )
+                        dialog.setup_trading_discount( dict_selected_data[ TradingData.TRADING_FEE_DISCOUNT ] )
+                        dialog.setup_trading_price( dict_selected_data[ TradingData.TRADING_PRICE ] )
+                        dialog.setup_trading_count( dict_selected_data[ TradingData.TRADING_COUNT ] )
+                    elif dict_selected_data[ TradingData.TRADING_TYPE ] == TradingType.DIVIDEND:
+                        dialog = StockDividendEditDialog( str_stock_number, str_stock_name, self )
+                        dialog.setup_trading_date( dict_selected_data[ TradingData.TRADING_DATE ] )
+                        dialog.setup_stock_dividend( dict_selected_data[ TradingData.STOCK_DIVIDEND ] )
+                        dialog.setup_cash_dividend( dict_selected_data[ TradingData.CASH_DIVIDEND ] )
+
+                    if dialog.exec():
+                        dict_trading_data = dialog.dict_trading_data
+                        self.dict_all_stock_trading_data[ str_stock_number ][ n_findindex ] = dict_trading_data
+                        sorted_list = self.func_sort_single_trading_data( str_stock_number )
+                        self.refresh_trading_data_table( sorted_list )
+                        self.func_save_trading_data()
+
+                elif n_row == len( g_list_trading_data_table_vertical_header ) - 1: #刪除
+                    result = self.func_show_message_box( "警告", f"確定要刪掉這筆交易資料嗎?" )
+                    if result:
+                        del self.dict_all_stock_trading_data[ str_stock_number ][ n_findindex ]
+                        sorted_list = self.func_sort_single_trading_data( str_stock_number )
+                        self.refresh_trading_data_table( sorted_list )
+                        self.func_save_trading_data()
 
     def on_export_selected_to_excell_button_clicked( self ):
         workbook = Workbook()
@@ -471,6 +554,8 @@ class MainWindow( QMainWindow ):
     def func_sort_single_trading_data( self, str_stock_number ):
         list_trading_data = self.dict_all_stock_trading_data[ str_stock_number ]
         sorted_list = sorted( list_trading_data, key=lambda x: ( datetime.datetime.strptime( x[ TradingData.TRADING_DATE ], "%Y-%m-%d"), x[ TradingData.TRADING_TYPE ] ) )
+        for index, item in enumerate( sorted_list ):
+            sorted_list[ index ][ TradingData.SORTED_INDEX ] = index
         self.dict_all_stock_trading_data[ str_stock_number ] = sorted_list
         return sorted_list
 
@@ -618,10 +703,11 @@ class MainWindow( QMainWindow ):
             edit_icon_item = QStandardItem("")
             edit_icon_item.setIcon( edit_icon )
             edit_icon_item.setFlags( edit_icon_item.flags() & ~Qt.ItemIsEditable )
+            edit_icon_item.setData( dict_per_trading_data[ TradingData.SORTED_INDEX ], Qt.UserRole )
             delete_icon_item = QStandardItem("")
             delete_icon_item.setIcon( delete_icon )
             delete_icon_item.setFlags( delete_icon_item.flags() & ~Qt.ItemIsEditable )
-            delete_icon_item.setTextAlignment( Qt.AlignHCenter | Qt.AlignVCenter )
+            delete_icon_item.setData( dict_per_trading_data[ TradingData.SORTED_INDEX ], Qt.UserRole )
 
             self.per_stock_trading_data_model.setItem( len( list_data ), index, edit_icon_item )
             self.per_stock_trading_data_model.setItem( len( list_data ) + 1, index, delete_icon_item )
