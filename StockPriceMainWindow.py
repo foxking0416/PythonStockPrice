@@ -9,7 +9,7 @@ from QtStockTradingEditDialog import Ui_Dialog as Ui_StockTradingDialog
 from QtStockDividendEditDialog import Ui_Dialog as Ui_StockDividendDialog
 from PySide6.QtWidgets import QApplication, QMainWindow, QDialog, QButtonGroup, QMessageBox, QStyledItemDelegate
 from PySide6.QtGui import QStandardItemModel, QStandardItem, QIcon
-from PySide6.QtCore import Qt, QModelIndex, QRect
+from PySide6.QtCore import Qt, QModelIndex, QRect, QSignalBlocker
 from openpyxl import Workbook
 from enum import Enum
 
@@ -310,6 +310,13 @@ class MainWindow( QMainWindow ):
         self.ui.qtTradingDataTableView.horizontalHeader().hide()
         self.ui.qtTradingDataTableView.clicked.connect( lambda index: self.on_trading_data_table_item_clicked( index, self.per_stock_trading_data_model ) )
 
+        self.ui.qtStockInputLineEdit.textChanged.connect( self.on_stock_input_text_changed ) 
+
+        self.ui.qtStockSelectComboBox.setVisible( False )
+        self.ui.qtStockSelectComboBox.activated.connect( self.on_stock_select_combo_box_current_index_changed )
+        self.ui.qtStockSelectComboBox.setStyleSheet( "QComboBox { combobox-popup: 0; }" )
+        self.ui.qtStockSelectComboBox.setMaxVisibleItems( 10 )
+
         button_group_1 = QButtonGroup(self)
         button_group_1.addButton( self.ui.qtFromNewToOldRadioButton )
         button_group_1.addButton( self.ui.qtFromOldToNewRadioButton )
@@ -344,6 +351,28 @@ class MainWindow( QMainWindow ):
             self.ui.qtDiscountRateDoubleSpinBox.setEnabled( True )
         else:
             self.ui.qtDiscountRateDoubleSpinBox.setEnabled( False )
+
+    def on_stock_input_text_changed( self ):
+        with QSignalBlocker( self.ui.qtStockSelectComboBox ), QSignalBlocker( self.ui.qtStockInputLineEdit ):
+            self.ui.qtStockSelectComboBox.clear()
+            str_stock_input = self.ui.qtStockInputLineEdit.text()
+            if len( str_stock_input ) == 0:
+                self.ui.qtStockSelectComboBox.setVisible( False )
+                return
+            self.ui.qtStockSelectComboBox.setVisible( True )
+
+            for stock_number, stock_name in self.dict_all_company_number_and_name.items():
+                if str_stock_input in stock_number or str_stock_input in stock_name:
+                    self.ui.qtStockSelectComboBox.addItem( f"{stock_number} {stock_name}" )
+            # self.ui.qtStockSelectComboBox.showPopup() #showPopup的話，focus會被搶走
+
+            self.ui.qtStockInputLineEdit.setFocus()
+
+    def on_stock_select_combo_box_current_index_changed( self, index ):
+        str_stock_input = self.ui.qtStockSelectComboBox.currentText()
+        self.ui.qtStockInputLineEdit.setText( str_stock_input )
+        self.ui.qtStockSelectComboBox.setVisible( False )
+        self.ui.qtStockInputLineEdit.setFocus()
 
     def on_new_to_old_radio_button_toggled( self ):
         if self.str_picked_stock_number != None:
