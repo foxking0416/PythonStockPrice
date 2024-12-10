@@ -374,6 +374,8 @@ class MainWindow( QMainWindow ):
         delegate = CenterIconDelegate()
         self.stock_list_model = QStandardItemModel( 0, 0 )
         self.stock_list_model.setHorizontalHeaderLabels( g_list_stock_list_table_vertical_header )
+        self.ui.qtStockListTableView.verticalHeader().setSectionsMovable( True )
+        self.ui.qtStockListTableView.verticalHeader().sectionMoved.connect( self.on_vertical_header_section_moved )
         self.ui.qtStockListTableView.setModel( self.stock_list_model )
         self.ui.qtStockListTableView.setItemDelegate( delegate )
         self.ui.qtStockListTableView.clicked.connect( lambda index: self.on_stock_list_table_item_clicked( index, self.stock_list_model ) )
@@ -543,6 +545,9 @@ class MainWindow( QMainWindow ):
             self.refresh_trading_data_table( sorted_list )
             self.func_save_trading_data()
 
+    def on_vertical_header_section_moved( self, n_logical_index, n_old_visual_index, n_new_visual_index ):
+        pass
+
     def on_stock_list_table_item_clicked( self, index: QModelIndex, table_model ):
         item = table_model.itemFromIndex( index )
         if item is not None:
@@ -631,7 +636,6 @@ class MainWindow( QMainWindow ):
 
     def export_trading_data_to_excel( self, worksheet, str_stock_number ):
         list_trading_data = self.dict_all_stock_trading_data[ str_stock_number ]
-
 
     def on_export_selected_to_excell_button_clicked( self ):
         if self.str_picked_stock_number is None:
