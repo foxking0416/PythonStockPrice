@@ -179,12 +179,6 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_3.addWidget(self.qtAddCapitalReductionDataPushButton)
 
-        self.qtAddCapitalIncreaseDataPushButton = QPushButton(self.centralwidget)
-        self.qtAddCapitalIncreaseDataPushButton.setObjectName(u"qtAddCapitalIncreaseDataPushButton")
-        self.qtAddCapitalIncreaseDataPushButton.setEnabled(False)
-
-        self.horizontalLayout_3.addWidget(self.qtAddCapitalIncreaseDataPushButton)
-
 
         self.verticalLayout.addLayout(self.horizontalLayout_3)
 
@@ -230,8 +224,7 @@ class Ui_MainWindow(object):
         self.qtShow10RadioButton.setText(QCoreApplication.translate("MainWindow", u"\u986f\u793a10\u7b46\u4ea4\u6613\u7d00\u9304", None))
         self.qtAddTradingDataPushButton.setText(QCoreApplication.translate("MainWindow", u"\u65b0\u589e\u4ea4\u6613\u7d00\u9304", None))
         self.qtAddDividendDataPushButton.setText(QCoreApplication.translate("MainWindow", u"\u65b0\u589e\u914d\u80a1\u914d\u606f\u7d00\u9304", None))
-        self.qtAddCapitalReductionDataPushButton.setText(QCoreApplication.translate("MainWindow", u"\u65b0\u589e\u6e1b\u8cc7\u7d00\u9304", None))
-        self.qtAddCapitalIncreaseDataPushButton.setText(QCoreApplication.translate("MainWindow", u"\u65b0\u589e\u589e\u8cc7\u7d00\u9304", None))
+        self.qtAddCapitalReductionDataPushButton.setText(QCoreApplication.translate("MainWindow", u"\u65b0\u589e\u73fe\u91d1\u6e1b\u8cc7\u7d00\u9304", None))
         self.qtExportAllStockTradingDataPushButton.setText(QCoreApplication.translate("MainWindow", u"\u8f38\u51fa\u6240\u6709\u80a1\u7968\u4ea4\u6613\u7d00\u9304", None))
         self.qtExportSelectedStockTradingDataPushButton.setText(QCoreApplication.translate("MainWindow", u"\u8f38\u51fa\u55ae\u652f\u80a1\u7968\u4ea4\u6613\u7d00\u9304", None))
     # retranslateUi

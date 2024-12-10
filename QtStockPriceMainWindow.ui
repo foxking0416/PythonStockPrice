@@ -269,17 +269,7 @@
          <bool>false</bool>
         </property>
         <property name="text">
-         <string>新增減資紀錄</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="qtAddCapitalIncreaseDataPushButton">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="text">
-         <string>新增增資紀錄</string>
+         <string>新增現金減資紀錄</string>
         </property>
        </widget>
       </item>
