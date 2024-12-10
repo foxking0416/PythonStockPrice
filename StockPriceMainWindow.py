@@ -73,9 +73,11 @@ class TradingData( Enum ):
     TRADING_TAX = 11 #不會記錄
     TRADING_INSURANCE = 12 #不會記錄
     TRADING_COST = 13 #不會記錄
-    ACCUMULATED_COST = 14 #不會記錄
-    ACCUMULATED_INVENTORY = 15 #不會記錄
-    AVERAGE_COST = 16 #不會記錄
+    STOCK_DIVIDEND_GAIN = 14 #不會記錄
+    CASH_DIVIDEND_GAIN = 15 #不會記錄
+    ACCUMULATED_COST = 16 #不會記錄
+    ACCUMULATED_INVENTORY = 17 #不會記錄
+    AVERAGE_COST = 18 #不會記錄
 
 class TradingCost( Enum ):
     TRADING_VALUE = 0
@@ -627,8 +629,8 @@ class MainWindow( QMainWindow ):
         n_accumulated_cost = 0
         for index, item in enumerate( sorted_list ):
             item[ TradingData.SORTED_INDEX ] = index
-
             e_trading_type = item[ TradingData.TRADING_TYPE ]
+            
             f_trading_price = item[ TradingData.TRADING_PRICE ]
             n_trading_count = item[ TradingData.TRADING_COUNT ]
             f_trading_fee_discount = item[ TradingData.TRADING_FEE_DISCOUNT ]
