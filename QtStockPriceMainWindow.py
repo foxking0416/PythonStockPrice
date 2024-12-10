@@ -192,7 +192,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
         self.qtExportAllStockTradingDataPushButton = QPushButton(self.centralwidget)
         self.qtExportAllStockTradingDataPushButton.setObjectName(u"qtExportAllStockTradingDataPushButton")
-        self.qtExportAllStockTradingDataPushButton.setEnabled(False)
+        self.qtExportAllStockTradingDataPushButton.setEnabled(True)
 
         self.horizontalLayout_5.addWidget(self.qtExportAllStockTradingDataPushButton)
 

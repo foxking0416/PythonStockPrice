@@ -290,7 +290,7 @@
       <item>
        <widget class="QPushButton" name="qtExportAllStockTradingDataPushButton">
         <property name="enabled">
-         <bool>false</bool>
+         <bool>true</bool>
         </property>
         <property name="text">
          <string>輸出所有股票交易紀錄</string>

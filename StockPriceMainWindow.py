@@ -625,11 +625,13 @@ class MainWindow( QMainWindow ):
             self.ui.qtAddDividendDataPushButton.setEnabled( False )
             self.ui.qtAddCapitalReductionDataPushButton.setEnabled( False )
             self.ui.qtAddCapitalIncreaseDataPushButton.setEnabled( False )
+            self.ui.qtExportSelectedStockTradingDataPushButton.setEnabled( False )
         else:
             self.ui.qtAddTradingDataPushButton.setEnabled( True )
             self.ui.qtAddDividendDataPushButton.setEnabled( True )
             self.ui.qtAddCapitalReductionDataPushButton.setEnabled( True )
-            self.ui.qtAddCapitalIncreaseDataPushButton.setEnabled( True)
+            self.ui.qtAddCapitalIncreaseDataPushButton.setEnabled( True )
+            self.ui.qtExportSelectedStockTradingDataPushButton.setEnabled( True )
         pass
 
     def func_sort_single_trading_data( self, str_stock_number ):
