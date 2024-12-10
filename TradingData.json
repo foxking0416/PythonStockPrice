@@ -161,6 +161,46 @@
     },
     {
         "stock_number": "2834",
+        "trading_date": "2020-09-01",
+        "trading_type": 2,
+        "trading_price": 10.1,
+        "trading_count": 20000,
+        "trading_fee_discount": 0.45,
+        "stock_dividend_per_share": 0,
+        "cash_dividend_per_share": 0
+    },
+    {
+        "stock_number": "2834",
+        "trading_date": "2020-09-02",
+        "trading_type": 2,
+        "trading_price": 10.05,
+        "trading_count": 40000,
+        "trading_fee_discount": 0.45,
+        "stock_dividend_per_share": 0,
+        "cash_dividend_per_share": 0
+    },
+    {
+        "stock_number": "2834",
+        "trading_date": "2021-09-08",
+        "trading_type": 3,
+        "trading_price": 0,
+        "trading_count": 0,
+        "trading_fee_discount": 1,
+        "stock_dividend_per_share": 0.34,
+        "cash_dividend_per_share": 0.1
+    },
+    {
+        "stock_number": "2834",
+        "trading_date": "2022-08-02",
+        "trading_type": 3,
+        "trading_price": 0,
+        "trading_count": 0,
+        "trading_fee_discount": 1,
+        "stock_dividend_per_share": 0.37,
+        "cash_dividend_per_share": 0.1
+    },
+    {
+        "stock_number": "2834",
         "trading_date": "2023-09-26",
         "trading_type": 1,
         "trading_price": 13.2,
