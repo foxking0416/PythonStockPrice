@@ -12,7 +12,7 @@ from PySide6.QtWidgets import QApplication, QMainWindow, QDialog, QButtonGroup, 
 from PySide6.QtGui import QStandardItemModel, QStandardItem, QIcon, QBrush
 from PySide6.QtCore import Qt, QModelIndex, QRect, QSignalBlocker
 from openpyxl import Workbook
-from enum import Enum
+from enum import Enum, IntEnum
 
 # 要把.ui檔變成.py
 # cd D:\_2.code\PythonStockPrice
@@ -54,17 +54,17 @@ class CenterIconDelegate( QStyledItemDelegate ):
             # 如果没有图标，使用默认绘制方法
             super().paint( painter, option, index )
 
-class TradingType( Enum ):
+class TradingType( IntEnum ):
     TEMPLATE = 0
-    BUY = 1
-    SELL = 2
+    SELL = 1
+    BUY = 2
     DIVIDEND = 3
     CAPITAL_REDUCTION = 4
 
 class TradingData( Enum ):
     STOCK_NUMBER = 0
     TRADING_DATE = 1
-    TRADING_TYPE = 2 # 0:買進, 1:賣出
+    TRADING_TYPE = 2 # 0:賣出, 1:買進, 2:股利, 3:減資
     TRADING_PRICE = 3
     TRADING_COUNT = 4
     TRADING_FEE_DISCOUNT = 5
@@ -684,7 +684,7 @@ class MainWindow( QMainWindow ):
 
     def func_sort_single_trading_data( self, str_stock_number ):
         list_trading_data = self.dict_all_stock_trading_data[ str_stock_number ]
-        sorted_list = sorted( list_trading_data, key=lambda x: ( datetime.datetime.strptime( x[ TradingData.TRADING_DATE ], "%Y-%m-%d"), x[ TradingData.TRADING_TYPE ] ) )
+        sorted_list = sorted( list_trading_data, key=lambda x: ( datetime.datetime.strptime( x[ TradingData.TRADING_DATE ], "%Y-%m-%d"), -x[ TradingData.TRADING_TYPE ] ) )
         n_accumulated_inventory = 0
         n_accumulated_cost = 0
         for index, item in enumerate( sorted_list ):
