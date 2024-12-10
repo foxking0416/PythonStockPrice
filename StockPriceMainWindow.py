@@ -20,7 +20,8 @@ from enum import Enum
 # pyside6-uic QtStockDividendEditDialog.ui -o QtStockDividendEditDialog.py
 
 g_list_trading_data_table_vertical_header = ['交易日', '交易種類', '交易價格', '交易股數', '交易金額', '手續費', 
-                                             '交易稅', '補充保費', '單筆總成本', '累計總成本', '庫存股數', '均價',
+                                             '交易稅', '補充保費', '單筆總成本', '股票股利', '現金股利',
+                                             '累計總成本', '庫存股數', '均價',
                                              '編輯', '刪除' ]
 g_list_stock_list_table_vertical_header = [ '總成本', '庫存股數', '平均成本', '今日股價', '刪除' ]
 g_current_dir = os.path.dirname(__file__)
@@ -631,24 +632,43 @@ class MainWindow( QMainWindow ):
             item[ TradingData.SORTED_INDEX ] = index
             e_trading_type = item[ TradingData.TRADING_TYPE ]
             
-            f_trading_price = item[ TradingData.TRADING_PRICE ]
-            n_trading_count = item[ TradingData.TRADING_COUNT ]
-            f_trading_fee_discount = item[ TradingData.TRADING_FEE_DISCOUNT ]
-            dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, True, False )
-            item[ TradingData.TRADING_VALUE ] = dict_result[ TradingCost.TRADING_VALUE ]
-            item[ TradingData.TRADING_FEE ] = dict_result[ TradingCost.TRADING_FEE ]
-            item[ TradingData.TRADING_TAX ] = dict_result[ TradingCost.TRADING_TAX ]
-            item[ TradingData.TRADING_INSURANCE ] = dict_result[ TradingCost.TRADING_INSURANCE ]  
-            n_per_trading_total_cost = item[ TradingData.TRADING_COST ] = dict_result[ TradingCost.TRADING_TOTAL_COST ]
-            if e_trading_type == TradingType.BUY:
+            if e_trading_type == TradingType.BUY or e_trading_type == TradingType.SELL:
+                f_trading_price = item[ TradingData.TRADING_PRICE ]
+                n_trading_count = item[ TradingData.TRADING_COUNT ]
+                f_trading_fee_discount = item[ TradingData.TRADING_FEE_DISCOUNT ]
+                dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, True, False )
+                item[ TradingData.TRADING_VALUE ] = dict_result[ TradingCost.TRADING_VALUE ]
+                item[ TradingData.TRADING_FEE ] = dict_result[ TradingCost.TRADING_FEE ]
+                item[ TradingData.TRADING_TAX ] = dict_result[ TradingCost.TRADING_TAX ]
+                item[ TradingData.TRADING_INSURANCE ] = dict_result[ TradingCost.TRADING_INSURANCE ]  
+                n_per_trading_total_cost = item[ TradingData.TRADING_COST ] = dict_result[ TradingCost.TRADING_TOTAL_COST ]
                 n_accumulated_inventory += n_trading_count
                 n_accumulated_cost += n_per_trading_total_cost
-            elif e_trading_type == TradingType.SELL:
-                n_accumulated_inventory -= n_trading_count
+
+                item[ TradingData.STOCK_DIVIDEND_GAIN ] = 0
+                item[ TradingData.CASH_DIVIDEND_GAIN ] = 0
             elif e_trading_type == TradingType.DIVIDEND:
-                str_trading_type = "股利分配"
-            elif e_trading_type == TradingType.CAPITAL_REDUCTION:
-                str_trading_type = "減資"
+                item[ TradingData.TRADING_VALUE ] = 0
+                item[ TradingData.TRADING_FEE ] = 0
+                item[ TradingData.TRADING_TAX ] = 0
+                item[ TradingData.TRADING_INSURANCE ] = 0 
+                n_per_trading_total_cost = item[ TradingData.TRADING_COST ] = 0
+
+                f_stock_dividend_gain = item[ TradingData.STOCK_DIVIDEND_PER_SHARE ] * n_accumulated_inventory / 10 #f_stock_dividend_gain單位為股 除以10是因為票面額10元
+                f_cash_dividend_gain = item[ TradingData.CASH_DIVIDEND_PER_SHARE ] * n_accumulated_inventory
+                item[ TradingData.STOCK_DIVIDEND_GAIN ] = f_stock_dividend_gain
+                item[ TradingData.CASH_DIVIDEND_GAIN ] = f_cash_dividend_gain
+                n_accumulated_inventory += f_stock_dividend_gain
+                n_accumulated_cost -= f_cash_dividend_gain
+            # if e_trading_type == TradingType.BUY:
+            #     n_accumulated_inventory += n_trading_count
+            #     n_accumulated_cost += n_per_trading_total_cost
+            # elif e_trading_type == TradingType.SELL:
+            #     n_accumulated_inventory -= n_trading_count
+            # elif e_trading_type == TradingType.DIVIDEND:
+            #     str_trading_type = "股利分配"
+            # elif e_trading_type == TradingType.CAPITAL_REDUCTION:
+            #     str_trading_type = "減資"
             item[ TradingData.ACCUMULATED_COST ] = n_accumulated_cost
             item[ TradingData.ACCUMULATED_INVENTORY ] = n_accumulated_inventory
             item[ TradingData.AVERAGE_COST ] = n_accumulated_cost / n_accumulated_inventory if n_accumulated_inventory != 0 else 0
@@ -836,6 +856,10 @@ class MainWindow( QMainWindow ):
             n_trading_tax = dict_per_trading_data[ TradingData.TRADING_TAX ]
             n_trading_insurance = dict_per_trading_data[ TradingData.TRADING_INSURANCE ]
             n_per_trading_total_cost = dict_per_trading_data[ TradingData.TRADING_COST ]
+            f_stock_dividend_per_share = dict_per_trading_data[ TradingData.STOCK_DIVIDEND_PER_SHARE ]
+            f_cash_dividend_per_share = dict_per_trading_data[ TradingData.CASH_DIVIDEND_PER_SHARE ]
+            n_stock_dividend_gain = dict_per_trading_data[ TradingData.STOCK_DIVIDEND_GAIN ]
+            n_cash_dividend_gain = dict_per_trading_data[ TradingData.CASH_DIVIDEND_GAIN ]
             n_accumulated_cost = dict_per_trading_data[ TradingData.ACCUMULATED_COST ]
             n_accumulated_inventory = dict_per_trading_data[ TradingData.ACCUMULATED_INVENTORY ]
             f_average_cost = round( dict_per_trading_data[ TradingData.AVERAGE_COST ], 3 )
@@ -858,6 +882,8 @@ class MainWindow( QMainWindow ):
                           format( n_trading_tax, "," ),                      #交易稅
                           format( n_trading_insurance, "," ),                #補充保費
                           format( n_per_trading_total_cost, "," ),           #單筆總成本
+                          format( n_stock_dividend_gain, "," ) + ' / ' + str( f_stock_dividend_per_share ), #總獲得股數 / 每股股票股利
+                          format( n_cash_dividend_gain, "," ) + ' / ' + str( f_cash_dividend_per_share ), #總獲得現金 / 每股現金股利
                           format( n_accumulated_cost, "," ),                 #累計總成本
                           format( n_accumulated_inventory, "," ),            #庫存股數
                           format( f_average_cost, "," ) ]                    #均價

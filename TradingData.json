@@ -151,6 +151,16 @@
     },
     {
         "stock_number": "2834",
+        "trading_date": "2020-07-22",
+        "trading_type": 3,
+        "trading_price": 0,
+        "trading_count": 0,
+        "trading_fee_discount": 1,
+        "stock_dividend_per_share": 0.5,
+        "cash_dividend_per_share": 0.2
+    },
+    {
+        "stock_number": "2834",
         "trading_date": "2023-09-26",
         "trading_type": 1,
         "trading_price": 13.2,
