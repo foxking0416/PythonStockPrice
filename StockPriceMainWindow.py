@@ -863,7 +863,7 @@ class MainWindow( QMainWindow ):
             pass
 
     def download_all_company_stock_number( self ): 
-        all_company_name_and_number = {}
+        dict_company_number_to_name = {}
         obj_current_date = datetime.datetime.today()
         str_date = obj_current_date.strftime('%Y%m%d')
 
@@ -879,7 +879,7 @@ class MainWindow( QMainWindow ):
                             break
                     else:
                         ele = row.strip().split( ',' )
-                        all_company_name_and_number[ ele[ 0 ] ] = ele[ 1 ]
+                        dict_company_number_to_name[ ele[ 0 ] ] = ele[ 1 ]
         else:
             b_need_to_download = True
 
@@ -944,9 +944,9 @@ class MainWindow( QMainWindow ):
                 f.write( str_date + '\n' )
                 for row in tds:
                     f.write( str( row[ 0 ] ) + ',' + str( row[ 1 ] ) + '\n' )
-                    all_company_name_and_number[ row[ 0 ] ] = row[ 1 ]
+                    dict_company_number_to_name[ row[ 0 ] ] = row[ 1 ]
 
-        return all_company_name_and_number
+        return dict_company_number_to_name
     
 if __name__ == "__main__":
     app = QApplication(sys.argv)  # 創建應用程式
