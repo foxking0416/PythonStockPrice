@@ -916,6 +916,23 @@ class MainWindow( QMainWindow ):
 
         for dict_per_trading_data in loop_list:
 
+            str_date = dict_per_trading_data[ TradingData.TRADING_DATE ]
+            obj_date = datetime.datetime.strptime( str_date, "%Y-%m-%d" )
+            n_weekday = obj_date.weekday()
+            if n_weekday == 0:
+                str_weekday = "(一)"
+            elif n_weekday == 1:
+                str_weekday = "(二)"
+            elif n_weekday == 2:
+                str_weekday = "(三)"
+            elif n_weekday == 3:
+                str_weekday = "(四)"
+            elif n_weekday == 4:
+                str_weekday = "(五)"
+            elif n_weekday == 5:
+                str_weekday = "(六)"
+            elif n_weekday == 6:
+                str_weekday = "(日)"
             e_trading_type = dict_per_trading_data[ TradingData.TRADING_TYPE ]
             if e_trading_type == TradingType.TEMPLATE:
                 continue
@@ -946,7 +963,7 @@ class MainWindow( QMainWindow ):
             elif e_trading_type == TradingType.CAPITAL_REDUCTION:
                 str_trading_type = "減資"
 
-            list_data = [ dict_per_trading_data[ TradingData.TRADING_DATE ], #交易日期
+            list_data = [ dict_per_trading_data[ TradingData.TRADING_DATE ] + str_weekday, #交易日期
                           str_trading_type,                                  #交易種類
                           format( f_trading_price, "," ),                    #交易價格
                           format( n_trading_count, "," ),                    #交易股數
