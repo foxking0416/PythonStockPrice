@@ -8,7 +8,7 @@ from QtStockPriceMainWindow import Ui_MainWindow  # 導入轉換後的 UI 類
 from QtStockTradingEditDialog import Ui_Dialog as Ui_StockTradingDialog
 from QtStockDividendEditDialog import Ui_Dialog as Ui_StockDividendDialog
 from PySide6.QtWidgets import QApplication, QMainWindow, QDialog, QButtonGroup, QMessageBox, QStyledItemDelegate
-from PySide6.QtGui import QStandardItemModel, QStandardItem, QIcon
+from PySide6.QtGui import QStandardItemModel, QStandardItem, QIcon, QBrush
 from PySide6.QtCore import Qt, QModelIndex, QRect, QSignalBlocker
 from openpyxl import Workbook
 from enum import Enum
@@ -855,6 +855,14 @@ class MainWindow( QMainWindow ):
 
             for row, data in enumerate( list_data ):
                 standard_item = QStandardItem( data )
+                if data == "買進":
+                    standard_item.setBackground( QBrush( '#550000' ) )
+                elif data == "賣出":
+                    standard_item.setBackground( QBrush( '#005555' ) )
+                elif data == "股利分配":
+                    standard_item.setBackground( QBrush( '#555500' ) )
+                elif data == "減資":
+                    standard_item.setBackground( QBrush( '#6EBD61' ) )
                 standard_item.setTextAlignment( Qt.AlignHCenter | Qt.AlignVCenter )
                 standard_item.setFlags( standard_item.flags() & ~Qt.ItemIsEditable )
                 self.per_stock_trading_data_model.setItem( row, index, standard_item ) 
