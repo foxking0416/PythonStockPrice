@@ -679,12 +679,12 @@ class MainWindow( QMainWindow ):
                 item[ TradingData.TRADING_INSURANCE ] = 0 
                 n_per_trading_total_cost = item[ TradingData.TRADING_COST ] = 0
 
-                f_stock_dividend_gain = item[ TradingData.STOCK_DIVIDEND_PER_SHARE ] * n_accumulated_inventory / 10 #f_stock_dividend_gain單位為股 除以10是因為票面額10元
-                f_cash_dividend_gain = item[ TradingData.CASH_DIVIDEND_PER_SHARE ] * n_accumulated_inventory
-                item[ TradingData.STOCK_DIVIDEND_GAIN ] = f_stock_dividend_gain
-                item[ TradingData.CASH_DIVIDEND_GAIN ] = f_cash_dividend_gain
-                n_accumulated_inventory += f_stock_dividend_gain
-                n_accumulated_cost -= f_cash_dividend_gain
+                n_stock_dividend_gain = int( item[ TradingData.STOCK_DIVIDEND_PER_SHARE ] * n_accumulated_inventory / 10 ) #f_stock_dividend_gain單位為股 除以10是因為票面額10元
+                n_cash_dividend_gain = int( item[ TradingData.CASH_DIVIDEND_PER_SHARE ] * n_accumulated_inventory )
+                item[ TradingData.STOCK_DIVIDEND_GAIN ] = n_stock_dividend_gain
+                item[ TradingData.CASH_DIVIDEND_GAIN ] = n_cash_dividend_gain
+                n_accumulated_inventory += n_stock_dividend_gain
+                n_accumulated_cost -= n_cash_dividend_gain
             elif e_trading_type == TradingType.CAPITAL_REDUCTION:
                 str_trading_type = "減資"
             item[ TradingData.ACCUMULATED_COST ] = n_accumulated_cost
