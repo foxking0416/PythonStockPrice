@@ -352,7 +352,10 @@ class MainWindow( QMainWindow ):
         self.ui.qtExportAllStockTradingDataPushButton.clicked.connect( self.on_export_all_to_excell_button_clicked )
         self.ui.qtExportSelectedStockTradingDataPushButton.clicked.connect( self.on_export_selected_to_excell_button_clicked )
 
-        self.dict_all_company_number_and_name = self.download_all_company_stock_number()
+        obj_current_date = datetime.datetime.today() - datetime.timedelta( days = 1 )
+        str_date = obj_current_date.strftime('%Y%m%d')
+        self.dict_all_company_number_and_name = self.download_all_company_stock_number( str_date )
+        self.dict_all_company_number_and_price_info = self.download_day_stock_price( str_date )
 
         self.str_picked_stock_number = None
         self.dict_all_stock_trading_data = {}
@@ -770,10 +773,18 @@ class MainWindow( QMainWindow ):
             n_accumulated_cost = dict_trading_data[ TradingData.ACCUMULATED_COST ]
             n_accumulated_inventory = dict_trading_data[ TradingData.ACCUMULATED_INVENTORY ]
             f_average_cost = round( dict_trading_data[ TradingData.AVERAGE_COST ], 3 )
+            
+            try:
+                f_stock_price = float( self.dict_all_company_number_and_price_info[ key_stock_number ] )
+                str_stock_price = format( f_stock_price, "," )
+            except ValueError:
+                str_stock_price = "N/A"
+            
 
             list_data = [ format( n_accumulated_cost, "," ),      #總成本
                           format( n_accumulated_inventory, "," ), #庫存股數
-                          format( f_average_cost, "," )  ]        #平均成本
+                          format( f_average_cost, "," ),          #平均成本
+                          str_stock_price  ]                      #當前股價
                                
             for column, data in enumerate( list_data ):
                 standard_item = QStandardItem( data )
@@ -862,10 +873,8 @@ class MainWindow( QMainWindow ):
             index += 1
             pass
 
-    def download_all_company_stock_number( self ): 
+    def download_all_company_stock_number( self, str_date ): 
         dict_company_number_to_name = {}
-        obj_current_date = datetime.datetime.today()
-        str_date = obj_current_date.strftime('%Y%m%d')
 
         file_path = os.path.join( os.path.dirname(__file__), 'StockNumber.txt' )
         b_need_to_download = False
@@ -947,6 +956,117 @@ class MainWindow( QMainWindow ):
                     dict_company_number_to_name[ row[ 0 ] ] = row[ 1 ]
 
         return dict_company_number_to_name
+    
+    def download_day_stock_price( self, str_date ):
+
+        dict_company_number_to_price_info = {}
+        file_path = os.path.join( os.path.dirname(__file__), 'StockPrice.txt' )
+        b_need_to_download = False
+        if os.path.exists( file_path ):
+            with open( file_path, 'r', encoding='utf-8' ) as f:
+                data = f.readlines()
+                for i, row in enumerate( data ):
+                    if i == 0:
+                        if row.strip() != str_date:
+                            b_need_to_download = True
+                            break
+                    else:
+                        ele = row.strip().split( ',' )
+                        dict_company_number_to_price_info[ ele[ 0 ] ] = ele[ 2 ]
+        else:
+            b_need_to_download = True
+
+        if b_need_to_download:
+            headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            }
+            # 上市公司股價從證交所取得
+            # https://www.twse.com.tw/rwd/zh/afterTrading/MI_INDEX?date=20240912&type=ALLBUT0999&response=json&_=1726121461234
+            url = 'https://www.twse.com.tw/rwd/zh/afterTrading/MI_INDEX?date=' + str_date + '&type=ALLBUT0999&response=json&_=1726121461234'
+            response = requests.get( url, headers=headers )
+            soup = BeautifulSoup( response.content, 'html.parser' )
+
+            all_stock_price = []
+            json_str = soup.get_text()
+            json_data = json.loads(json_str)
+            if 'tables' not in json_data:
+                return
+            for item in json_data['tables']:
+                if 'title' in item:
+                    if '每日收盤行情' in item['title']:
+                        for data in item['data']:
+                            #index 0 證券代號    "0050",
+                            #index 1 證券名稱    "元大台灣50",
+                            #index 2 成交股數    "16,337,565",
+                            #index 3 成交筆數    "15,442",
+                            #index 4 成交金額    "2,900,529,886",
+                            #index 5 開盤價      "176.10",
+                            #index 6 最高價      "178.65",
+                            #index 7 最低價      "176.10",
+                            #index 8 收盤價      "178.30",
+                            #index 9 漲跌(+/-)   "<p style= color:red>+<\u002fp>",
+                            #index 10 漲跌價差    "6.45",
+                            #index 11 最後揭示買價 "178.20",
+                            #index 12 最後揭示買量 "5",
+                            #index 13 最後揭示賣價 "178.30",
+                            #index 14 最後揭示賣量 "103",
+                            #index 15 本益比 
+                            list_stock_price = [ data[ 0 ], data[ 1 ], data[ 8 ] ] 
+                            all_stock_price.append( list_stock_price )
+
+            # 上櫃公司股價從櫃買中心取得
+            formatted_date = f"{str_date[:4]}%2F{str_date[4:6]}%2F{str_date[6:]}"
+            url = 'https://www.tpex.org.tw/www/zh-tw/afterTrading/dailyQuotes?date=' + formatted_date + '&id=&response=html'
+            # https://www.tpex.org.tw/www/zh-tw/afterTrading/dailyQuotes?date=2024%2F12%2F09&id=&response=html
+            res = requests.get( url )
+            
+            soup = BeautifulSoup( res.text, "lxml" )
+            tr = soup.findAll( 'tr' )
+            for raw in tr:
+                if not raw.find( 'th' ):
+                    td_elements = raw.findAll( "td" )
+                    if len( td_elements ) == 19:
+                        # index 0 證券代號	
+                        # index 1 證券名稱	
+                        # index 2 收盤	
+                        # index 3 漲跌	
+                        # index 4 開盤
+                        # index 5 最高	
+                        # index 6 最低
+                        # index 7 均價	
+                        # index 8 成交股數
+                        # index 9 成交金額(元)
+                        # index 10 成交筆數	
+                        # index 11 最後買價	
+                        # index 12 最後買量(千股)	2020/4/29 開始才有這筆資訊
+                        # index 13 最後賣價	
+                        # index 14 最後賣量(千股)   2020/4/29 開始才有這筆資訊
+                        # index 15 發行股數	次日
+                        # index 16 參考價	次日
+                        # index 17 漲停價	次日
+                        # index 18 跌停價
+                        str_stock_number = td_elements[ 0 ].get_text().strip()
+                        if len( str_stock_number ) > 4:
+                            continue
+                        str_stock_name = td_elements[ 1 ].get_text().strip()
+                        str_stock_price = td_elements[ 2 ].get_text().strip()
+                        list_stock_price = [ str_stock_number, str_stock_name, str_stock_price ] 
+                        all_stock_price.append( list_stock_price )
+        
+
+            if len( all_stock_price ) == 0:
+                print( "no data" )
+                return
+            
+            # 確保目錄存在，若不存在則遞歸創建
+            os.makedirs( os.path.dirname( file_path ), exist_ok = True )
+            with open( file_path, 'w', encoding='utf-8' ) as f:
+                f.write( str_date + '\n' )
+                for row in all_stock_price:
+                    f.write( str( row[ 0 ] ) + ',' + str( row[ 1 ] ) + ',' + str( row[ 2 ] ) + '\n' )
+                    dict_company_number_to_price_info[ row[ 0 ] ] = row[ 2 ]
+
+        return dict_company_number_to_price_info
     
 if __name__ == "__main__":
     app = QApplication(sys.argv)  # 創建應用程式
