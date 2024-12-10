@@ -447,7 +447,7 @@ class MainWindow( QMainWindow ):
                                                                0,                    #每股股票股利
                                                                0 )                   #每股現金股利
             self.dict_all_stock_trading_data[ str_first_four_chars ] = [ dict_trading_data ]
-
+            sorted_list = self.func_sort_single_trading_data( str_first_four_chars )
             self.refresh_stock_list_table()
             self.func_save_trading_data()
 
@@ -1075,7 +1075,8 @@ class MainWindow( QMainWindow ):
                             #index 13 最後揭示賣價 "178.30",
                             #index 14 最後揭示賣量 "103",
                             #index 15 本益比 
-                            list_stock_price = [ data[ 0 ], data[ 1 ], data[ 8 ] ] 
+
+                            list_stock_price = [ data[ 0 ], data[ 1 ], data[ 8 ].replace( ',', '' ) ] 
                             all_stock_price.append( list_stock_price )
 
             # 上櫃公司股價從櫃買中心取得
@@ -1114,7 +1115,7 @@ class MainWindow( QMainWindow ):
                             continue
                         str_stock_name = td_elements[ 1 ].get_text().strip()
                         str_stock_price = td_elements[ 2 ].get_text().strip()
-                        list_stock_price = [ str_stock_number, str_stock_name, str_stock_price ] 
+                        list_stock_price = [ str_stock_number, str_stock_name, str_stock_price.replace( ',', '' ) ] 
                         all_stock_price.append( list_stock_price )
         
 
@@ -1128,7 +1129,7 @@ class MainWindow( QMainWindow ):
                 f.write( str_date + '\n' )
                 for row in all_stock_price:
                     f.write( str( row[ 0 ] ) + ',' + str( row[ 1 ] ) + ',' + str( row[ 2 ] ) + '\n' )
-                    dict_company_number_to_price_info[ row[ 0 ] ] = row[ 2 ]
+                    dict_company_number_to_price_info[ row[ 0 ] ] = str( row[ 2 ] )
 
         return dict_company_number_to_price_info
     
