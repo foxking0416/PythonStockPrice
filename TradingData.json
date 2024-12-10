@@ -691,5 +691,27 @@
         "stock_dividend_per_share": 0,
         "cash_dividend_per_share": 0,
         "capital_reduction_per_share": 0
+    },
+    {
+        "stock_number": "2535",
+        "trading_date": "2023-10-30",
+        "trading_type": 4,
+        "trading_price": 0,
+        "trading_count": 0,
+        "trading_fee_discount": 1,
+        "stock_dividend_per_share": 0,
+        "cash_dividend_per_share": 0,
+        "capital_reduction_per_share": 2.0
+    },
+    {
+        "stock_number": "2535",
+        "trading_date": "2024-04-11",
+        "trading_type": 3,
+        "trading_price": 0,
+        "trading_count": 0,
+        "trading_fee_discount": 1,
+        "stock_dividend_per_share": 0.0,
+        "cash_dividend_per_share": 3.0,
+        "capital_reduction_per_share": 0
     }
 ]

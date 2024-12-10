@@ -536,8 +536,8 @@ class MainWindow( QMainWindow ):
         dialog = StockCapitalReductionEditDialog( str_stock_number, str_stock_name, self )
 
         if dialog.exec():
-            # dict_trading_data = dialog.dict_trading_data
-            # self.dict_all_stock_trading_data[ str_stock_number ].append( dict_trading_data )
+            dict_trading_data = dialog.dict_trading_data
+            self.dict_all_stock_trading_data[ str_stock_number ].append( dict_trading_data )
             sorted_list = self.func_sort_single_trading_data( str_stock_number )
             self.refresh_stock_list_table()
             self.refresh_trading_data_table( sorted_list )
@@ -736,7 +736,16 @@ class MainWindow( QMainWindow ):
                 n_accumulated_inventory += n_stock_dividend_gain
                 n_accumulated_cost -= n_cash_dividend_gain
             elif e_trading_type == TradingType.CAPITAL_REDUCTION:
-                str_trading_type = "減資"
+                item[ TradingData.TRADING_VALUE ] = 0
+                item[ TradingData.TRADING_FEE ] = 0
+                item[ TradingData.TRADING_TAX ] = 0
+                item[ TradingData.TRADING_INSURANCE ] = 0 
+                n_per_trading_total_cost = item[ TradingData.TRADING_COST ] = 0
+                item[ TradingData.STOCK_DIVIDEND_GAIN ] = 0
+                item[ TradingData.CASH_DIVIDEND_GAIN ] = 0
+                n_accumulated_cost = n_accumulated_cost - n_accumulated_inventory * item[ TradingData.CAPITAL_REDUCTION_PER_SHARE ]
+                n_accumulated_inventory = n_accumulated_inventory * ( 10 - item[ TradingData.CAPITAL_REDUCTION_PER_SHARE ] ) / 10
+
             item[ TradingData.ACCUMULATED_COST ] = n_accumulated_cost
             item[ TradingData.ACCUMULATED_INVENTORY ] = n_accumulated_inventory
             item[ TradingData.AVERAGE_COST ] = n_accumulated_cost / n_accumulated_inventory if n_accumulated_inventory != 0 else 0
