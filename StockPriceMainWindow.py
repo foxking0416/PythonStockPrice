@@ -307,10 +307,14 @@ class StockTradingEditDialog( QDialog ):
         
         dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, True, False )
 
-        self.ui.qtTradingValueLineEdit.setText( format( dict_result[ TradingCost.TRADING_VALUE ], ',' ) )
+        if e_trading_type == TradingType.BUY:
+            self.ui.qtTradingValueLineEdit.setText( format( dict_result[ TradingCost.TRADING_VALUE ], ',' ) )
+            self.ui.qtTotalCostLineEdit.setText( format( dict_result[ TradingCost.TRADING_TOTAL_COST ], ',' ) )
+        elif e_trading_type == TradingType.SELL:
+            self.ui.qtTradingValueLineEdit.setText( format( -dict_result[ TradingCost.TRADING_VALUE ], ',' ) )
+            self.ui.qtTotalCostLineEdit.setText( format( -dict_result[ TradingCost.TRADING_TOTAL_COST ], ',' ) )
         self.ui.qtFeeLineEdit.setText( format( dict_result[ TradingCost.TRADING_FEE ], ',' ) )
         self.ui.qtTaxLineEdit.setText( format( dict_result[ TradingCost.TRADING_TAX ], ',' ) )
-        self.ui.qtTotalCostLineEdit.setText( format( dict_result[ TradingCost.TRADING_TOTAL_COST ], ',' ) )
 
 class MainWindow( QMainWindow ):
     def __init__(self):
@@ -881,6 +885,9 @@ class MainWindow( QMainWindow ):
             if e_trading_type == TradingType.BUY:
                 str_trading_type = "買進"
             elif e_trading_type == TradingType.SELL:
+                n_trading_count = -n_trading_count
+                n_trading_value = -n_trading_value
+                n_per_trading_total_cost = -n_per_trading_total_cost
                 str_trading_type = "賣出"
             elif e_trading_type == TradingType.DIVIDEND:
                 str_trading_type = "股利分配"
