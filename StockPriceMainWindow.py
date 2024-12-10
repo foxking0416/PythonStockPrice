@@ -500,18 +500,20 @@ class MainWindow( QMainWindow ):
             n_row = index.row()  # 獲取行索引
             header_text = table_model.verticalHeaderItem( index.row() ).text()
             str_stock_number = header_text[:4]
-            self.str_picked_stock_number = str_stock_number
             
             if n_column == len( g_list_stock_list_table_vertical_header ) - 1:
                 result = self.func_show_message_box( "警告", f"確定要刪掉『{header_text}』的所有資料嗎?" )
                 if result:
                     del self.dict_all_stock_trading_data[ str_stock_number ]
+                    self.str_picked_stock_number = None
                     self.refresh_stock_list_table()
                     self.per_stock_trading_data_model.clear()
                     self.func_save_trading_data()
             elif str_stock_number in self.dict_all_stock_trading_data:
-                list_trading_data = self.dict_all_stock_trading_data[ str_stock_number ]
-                self.refresh_trading_data_table( list_trading_data )
+                if str_stock_number != self.str_picked_stock_number:
+                    self.str_picked_stock_number = str_stock_number
+                    list_trading_data = self.dict_all_stock_trading_data[ str_stock_number ]
+                    self.refresh_trading_data_table( list_trading_data )
 
         self.func_update_button_status()
 
