@@ -65,8 +65,8 @@ class TradingData( Enum ):
     TRADING_PRICE = 3
     TRADING_COUNT = 4
     TRADING_FEE_DISCOUNT = 5
-    STOCK_DIVIDEND = 6
-    CASH_DIVIDEND = 7
+    STOCK_DIVIDEND_PER_SHARE = 6
+    CASH_DIVIDEND_PER_SHARE = 7
     SORTED_INDEX = 8 #不會記錄
     TRADING_VALUE = 9 #不會記錄
     TRADING_FEE = 10 #不會記錄
@@ -87,24 +87,31 @@ class TradingCost( Enum ):
 class Utility():
     def compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, b_extra_insurance, b_daying_trading ):
 
-        n_trading_value = int( f_trading_price * n_trading_count )
-        n_trading_fee = int( n_trading_value * 0.001425 * f_trading_fee_discount )
-        if n_trading_fee < 20:
-            n_trading_fee = 20
-        if e_trading_type == TradingType.SELL:
-            if b_daying_trading:
-                n_trading_tax = int( n_trading_value * 0.0015 )
-            else:
-                n_trading_tax = int( n_trading_value * 0.003 )
-        else:
-            n_trading_tax = 0
-
         dict_result = {}
-        dict_result[ TradingCost.TRADING_VALUE ] = n_trading_value
-        dict_result[ TradingCost.TRADING_FEE ] = n_trading_fee
-        dict_result[ TradingCost.TRADING_TAX ] = n_trading_tax
-        dict_result[ TradingCost.TRADING_INSURANCE ] = 0
-        dict_result[ TradingCost.TRADING_TOTAL_COST ] = n_trading_value + n_trading_fee + n_trading_tax
+        if e_trading_type == TradingType.BUY or e_trading_type == TradingType.SELL:
+            n_trading_value = int( f_trading_price * n_trading_count )
+            n_trading_fee = int( n_trading_value * 0.001425 * f_trading_fee_discount )
+            if n_trading_fee < 20:
+                n_trading_fee = 20
+            if e_trading_type == TradingType.SELL:
+                if b_daying_trading:
+                    n_trading_tax = int( n_trading_value * 0.0015 )
+                else:
+                    n_trading_tax = int( n_trading_value * 0.003 )
+            else:
+                n_trading_tax = 0
+
+            dict_result[ TradingCost.TRADING_VALUE ] = n_trading_value
+            dict_result[ TradingCost.TRADING_FEE ] = n_trading_fee
+            dict_result[ TradingCost.TRADING_TAX ] = n_trading_tax
+            dict_result[ TradingCost.TRADING_INSURANCE ] = 0
+            dict_result[ TradingCost.TRADING_TOTAL_COST ] = n_trading_value + n_trading_fee + n_trading_tax
+        else:   
+            dict_result[ TradingCost.TRADING_VALUE ] = 0
+            dict_result[ TradingCost.TRADING_FEE ] = 0
+            dict_result[ TradingCost.TRADING_TAX ] = 0
+            dict_result[ TradingCost.TRADING_INSURANCE ] = 0
+            dict_result[ TradingCost.TRADING_TOTAL_COST ] = 0
         return dict_result
 
     def generate_trading_data( str_stock_number,            #股票代碼
@@ -122,8 +129,8 @@ class Utility():
         dict_trading_data[ TradingData.TRADING_PRICE ] = f_trading_price
         dict_trading_data[ TradingData.TRADING_COUNT ] = n_trading_count
         dict_trading_data[ TradingData.TRADING_FEE_DISCOUNT ] = f_trading_fee_discount
-        dict_trading_data[ TradingData.STOCK_DIVIDEND ] = f_stock_dividend_per_share
-        dict_trading_data[ TradingData.CASH_DIVIDEND ] = f_cash_dividend_per_share
+        dict_trading_data[ TradingData.STOCK_DIVIDEND_PER_SHARE ] = f_stock_dividend_per_share
+        dict_trading_data[ TradingData.CASH_DIVIDEND_PER_SHARE ] = f_cash_dividend_per_share
         return dict_trading_data
 
 class StockDividendEditDialog( QDialog ):
@@ -543,8 +550,8 @@ class MainWindow( QMainWindow ):
                     elif dict_selected_data[ TradingData.TRADING_TYPE ] == TradingType.DIVIDEND:
                         dialog = StockDividendEditDialog( str_stock_number, str_stock_name, self )
                         dialog.setup_trading_date( dict_selected_data[ TradingData.TRADING_DATE ] )
-                        dialog.setup_stock_dividend( dict_selected_data[ TradingData.STOCK_DIVIDEND ] )
-                        dialog.setup_cash_dividend( dict_selected_data[ TradingData.CASH_DIVIDEND ] )
+                        dialog.setup_stock_dividend( dict_selected_data[ TradingData.STOCK_DIVIDEND_PER_SHARE ] )
+                        dialog.setup_cash_dividend( dict_selected_data[ TradingData.CASH_DIVIDEND_PER_SHARE ] )
 
                     if dialog.exec():
                         dict_trading_data = dialog.dict_trading_data
@@ -626,10 +633,10 @@ class MainWindow( QMainWindow ):
             n_trading_count = item[ TradingData.TRADING_COUNT ]
             f_trading_fee_discount = item[ TradingData.TRADING_FEE_DISCOUNT ]
             dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, True, False )
-            n_trading_value = item[ TradingData.TRADING_VALUE ] = dict_result[ TradingCost.TRADING_VALUE ]
-            n_trading_fee = item[ TradingData.TRADING_FEE ] = dict_result[ TradingCost.TRADING_FEE ]
-            n_trading_tax = item[ TradingData.TRADING_TAX ] = dict_result[ TradingCost.TRADING_TAX ]
-            n_trading_insurance = item[ TradingData.TRADING_INSURANCE ] = dict_result[ TradingCost.TRADING_INSURANCE ]  
+            item[ TradingData.TRADING_VALUE ] = dict_result[ TradingCost.TRADING_VALUE ]
+            item[ TradingData.TRADING_FEE ] = dict_result[ TradingCost.TRADING_FEE ]
+            item[ TradingData.TRADING_TAX ] = dict_result[ TradingCost.TRADING_TAX ]
+            item[ TradingData.TRADING_INSURANCE ] = dict_result[ TradingCost.TRADING_INSURANCE ]  
             n_per_trading_total_cost = item[ TradingData.TRADING_COST ] = dict_result[ TradingCost.TRADING_TOTAL_COST ]
             if e_trading_type == TradingType.BUY:
                 n_accumulated_inventory += n_trading_count
@@ -663,8 +670,8 @@ class MainWindow( QMainWindow ):
                 dict_per_trading_data[ "trading_price" ] = item[ TradingData.TRADING_PRICE ]
                 dict_per_trading_data[ "trading_count" ] = item[ TradingData.TRADING_COUNT ]
                 dict_per_trading_data[ "trading_fee_discount" ] = item[ TradingData.TRADING_FEE_DISCOUNT ]
-                dict_per_trading_data[ "stock_dividend" ] = item[ TradingData.STOCK_DIVIDEND ]
-                dict_per_trading_data[ "cash_dividend" ] = item[ TradingData.CASH_DIVIDEND ]
+                dict_per_trading_data[ "stock_dividend_per_share" ] = item[ TradingData.STOCK_DIVIDEND_PER_SHARE ]
+                dict_per_trading_data[ "cash_dividend_per_share" ] = item[ TradingData.CASH_DIVIDEND_PER_SHARE ]
 
 
                 export_data.append( dict_per_trading_data )
@@ -687,8 +694,8 @@ class MainWindow( QMainWindow ):
                  "trading_price" in item and
                  "trading_count" in item and
                  "trading_fee_discount" in item and
-                 "stock_dividend" in item and
-                 "cash_dividend" in item ):
+                 "stock_dividend_per_share" in item and
+                 "cash_dividend_per_share" in item ):
 
                 dict_per_trading_data = Utility.generate_trading_data( item[ "stock_number" ],                #股票代碼
                                                                        item[ "trading_date" ],                #交易日期
@@ -696,8 +703,8 @@ class MainWindow( QMainWindow ):
                                                                        item[ "trading_price" ],               #交易價格
                                                                        item[ "trading_count" ],               #交易股數
                                                                        item[ "trading_fee_discount" ],        #手續費折扣
-                                                                       item[ "stock_dividend" ],              #每股股票股利
-                                                                       item[ "cash_dividend" ] )              #每股現金股利
+                                                                       item[ "stock_dividend_per_share" ],              #每股股票股利
+                                                                       item[ "cash_dividend_per_share" ] )              #每股現金股利
 
                 if item[ "stock_number" ] not in self.dict_all_stock_trading_data:
                     self.dict_all_stock_trading_data[ item[ "stock_number" ] ] = [ dict_per_trading_data ]
