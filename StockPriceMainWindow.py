@@ -163,7 +163,6 @@ class QtDuplicateOptionDialog( QDialog ):
     def cancel( self ):
         self.reject()
 
-
 class StockCapitalReductionEditDialog( QDialog ):
     def __init__( self, str_stock_number, str_stock_name, parent = None ):
         super().__init__( parent )
@@ -454,14 +453,6 @@ class MainWindow( QMainWindow ):
         self.func_load_filter_stock_UI_state()
         self.func_initial_load_existing_trading_data()
 
-    def on_discount_check_box_state_changed( self, state ):
-        if state == 2:
-            self.ui.qtDiscountRateDoubleSpinBox.setEnabled( True )
-        else:
-            self.ui.qtDiscountRateDoubleSpinBox.setEnabled( False )
-
-        self.save_filter_stock_UI_state()
-
     def on_stock_input_text_changed( self ):
         with QSignalBlocker( self.ui.qtStockSelectComboBox ), QSignalBlocker( self.ui.qtStockInputLineEdit ):
             self.ui.qtStockSelectComboBox.clear()
@@ -483,18 +474,6 @@ class MainWindow( QMainWindow ):
         self.ui.qtStockInputLineEdit.setText( str_stock_input )
         self.ui.qtStockSelectComboBox.setVisible( False )
         self.ui.qtStockInputLineEdit.setFocus()
-
-    def on_new_to_old_radio_button_toggled( self ):
-        if self.str_picked_stock_number != None:
-            self.refresh_trading_data_table( self.dict_all_stock_trading_data[ self.str_picked_stock_number ] )
-
-        self.save_filter_stock_UI_state()
-
-    def on_show_all_radio_button_toggled( self ):
-        if self.str_picked_stock_number != None:
-            self.refresh_trading_data_table( self.dict_all_stock_trading_data[ self.str_picked_stock_number ] )
-
-        self.save_filter_stock_UI_state()
 
     def on_add_stock_push_button_clicked( self ):
         str_stock_input = self.ui.qtStockInputLineEdit.text()
@@ -525,6 +504,26 @@ class MainWindow( QMainWindow ):
             sorted_list = self.func_sort_single_trading_data( str_first_four_chars )
             self.refresh_stock_list_table()
             self.func_auto_save_trading_data()
+
+    def on_discount_check_box_state_changed( self, state ):
+        if state == 2:
+            self.ui.qtDiscountRateDoubleSpinBox.setEnabled( True )
+        else:
+            self.ui.qtDiscountRateDoubleSpinBox.setEnabled( False )
+
+        self.save_filter_stock_UI_state()
+
+    def on_new_to_old_radio_button_toggled( self ):
+        if self.str_picked_stock_number != None:
+            self.refresh_trading_data_table( self.dict_all_stock_trading_data[ self.str_picked_stock_number ] )
+
+        self.save_filter_stock_UI_state()
+
+    def on_show_all_radio_button_toggled( self ):
+        if self.str_picked_stock_number != None:
+            self.refresh_trading_data_table( self.dict_all_stock_trading_data[ self.str_picked_stock_number ] )
+
+        self.save_filter_stock_UI_state()
 
     def on_add_trading_data_push_button_clicked( self ):
         if self.str_picked_stock_number is None:
