@@ -15,15 +15,15 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QAbstractButton, QApplication, QDialog, QDialogButtonBox,
-    QLabel, QRadioButton, QSizePolicy, QVBoxLayout,
+from PySide6.QtWidgets import (QApplication, QDialog, QHBoxLayout, QLabel,
+    QPushButton, QRadioButton, QSizePolicy, QVBoxLayout,
     QWidget)
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
         if not Dialog.objectName():
             Dialog.setObjectName(u"Dialog")
-        Dialog.resize(325, 174)
+        Dialog.resize(210, 135)
         self.verticalLayout = QVBoxLayout(Dialog)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.label = QLabel(Dialog)
@@ -42,25 +42,34 @@ class Ui_Dialog(object):
 
         self.verticalLayout.addWidget(self.radioButton_2)
 
-        self.qtOkButtonBox = QDialogButtonBox(Dialog)
-        self.qtOkButtonBox.setObjectName(u"qtOkButtonBox")
-        self.qtOkButtonBox.setOrientation(Qt.Horizontal)
-        self.qtOkButtonBox.setStandardButtons(QDialogButtonBox.Cancel|QDialogButtonBox.Ok)
+        self.horizontalLayout = QHBoxLayout()
+        self.horizontalLayout.setObjectName(u"horizontalLayout")
+        self.qtOkPushButton = QPushButton(Dialog)
+        self.qtOkPushButton.setObjectName(u"qtOkPushButton")
 
-        self.verticalLayout.addWidget(self.qtOkButtonBox)
+        self.horizontalLayout.addWidget(self.qtOkPushButton)
+
+        self.qtCancelPushButton = QPushButton(Dialog)
+        self.qtCancelPushButton.setObjectName(u"qtCancelPushButton")
+
+        self.horizontalLayout.addWidget(self.qtCancelPushButton)
+
+
+        self.verticalLayout.addLayout(self.horizontalLayout)
 
 
         self.retranslateUi(Dialog)
-        self.qtOkButtonBox.accepted.connect(Dialog.accept)
-        self.qtOkButtonBox.rejected.connect(Dialog.reject)
 
         QMetaObject.connectSlotsByName(Dialog)
     # setupUi
 
     def retranslateUi(self, Dialog):
-        Dialog.setWindowTitle(QCoreApplication.translate("Dialog", u"Dialog", None))
-        self.label.setText(QCoreApplication.translate("Dialog", u"\u6709\u76f8\u540c\u7684\u500b\u80a1\u8cc7\u6599\uff0c\u8acb\u9078\u64c7\u5c0d\u61c9\u65b9\u5f0f", None))
+        Dialog.setWindowTitle(QCoreApplication.translate("Dialog", u"\u91cd\u8907\u8cc7\u6599\u8655\u7406\u65b9\u5f0f", None))
+        self.label.setText(QCoreApplication.translate("Dialog", u"\u6709\u76f8\u540c\u7684\u500b\u80a1\u8cc7\u6599\uff0c\u8acb\u9078\u64c7\u8655\u7406\u65b9\u5f0f\n"
+"\u6216\u662f\u653e\u68c4\u532f\u5165", None))
         self.qtOverWriteRadioButton.setText(QCoreApplication.translate("Dialog", u"\u8986\u5beb", None))
         self.radioButton_2.setText(QCoreApplication.translate("Dialog", u"\u5408\u4f75", None))
+        self.qtOkPushButton.setText(QCoreApplication.translate("Dialog", u"\u78ba\u8a8d", None))
+        self.qtCancelPushButton.setText(QCoreApplication.translate("Dialog", u"\u653e\u68c4\u532f\u5165", None))
     # retranslateUi
 

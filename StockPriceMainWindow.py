@@ -154,6 +154,8 @@ class QtDuplicateOptionDialog( QDialog ):
 
         self.ui = Ui_DuplicateOptionDialog()
         self.ui.setupUi( self )
+        self.ui.qtOkPushButton.clicked.connect( self.accept_data )
+        self.ui.qtCancelPushButton.clicked.connect( self.cancel )
         self.b_overwrite = False
 
     def accept_data( self ):
