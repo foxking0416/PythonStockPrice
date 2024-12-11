@@ -585,7 +585,7 @@ class MainWindow( QMainWindow ):
                     self.per_stock_trading_data_model.clear()
                     self.func_auto_save_trading_data()
             elif n_column == len( g_list_stock_list_table_vertical_header ) - 2:#匯出
-                file_path = self.open_save_json_file_dialog()
+                file_path = self.func_open_save_json_file_dialog()
                 if file_path:
                     dict_stock_trading_data = { str_stock_number: self.dict_all_stock_trading_data[ str_stock_number ] }
                     self.func_manual_save_trading_data( dict_stock_trading_data, file_path )
@@ -672,7 +672,7 @@ class MainWindow( QMainWindow ):
             return
         str_stock_number = self.str_picked_stock_number
         str_stock_name = self.dict_all_company_number_and_name[ str_stock_number ]
-        file_path = self.open_save_excel_file_dialog()
+        file_path = self.func_open_save_excel_file_dialog()
         if file_path:
             workbook = Workbook()
             worksheet = workbook.active
@@ -687,7 +687,7 @@ class MainWindow( QMainWindow ):
     def on_export_all_to_excell_button_clicked( self ):
         pass
 
-    def open_load_json_file_dialog( self ):
+    def func_open_load_json_file_dialog( self ):
         # 彈出儲存檔案對話框
         file_path, _ = QFileDialog.getOpenFileName(
             self,
@@ -697,7 +697,7 @@ class MainWindow( QMainWindow ):
         )
         return file_path
 
-    def open_save_json_file_dialog( self ):
+    def func_open_save_json_file_dialog( self ):
         # 彈出儲存檔案對話框
         file_path, _ = QFileDialog.getSaveFileName(
             self,
@@ -707,7 +707,7 @@ class MainWindow( QMainWindow ):
         )
         return file_path
     
-    def open_save_excel_file_dialog( self ):
+    def func_open_save_excel_file_dialog( self ):
         # 彈出儲存檔案對話框
         file_path, _ = QFileDialog.getSaveFileName(
             self,
@@ -884,12 +884,12 @@ class MainWindow( QMainWindow ):
         self.refresh_stock_list_table()
 
     def func_export_trading_data( self ):
-        file_path = self.open_save_json_file_dialog()
+        file_path = self.func_open_save_json_file_dialog()
         if file_path:
             self.func_manual_save_trading_data( self.dict_all_stock_trading_data, file_path )
 
     def func_import_trading_data( self ):
-        file_path = self.open_load_json_file_dialog()
+        file_path = self.func_open_load_json_file_dialog()
         if file_path:
 
             dict_all_stock_trading_data_new = {}
