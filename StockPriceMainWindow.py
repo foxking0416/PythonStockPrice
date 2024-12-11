@@ -846,11 +846,10 @@ class MainWindow( QMainWindow ):
         with open( file_path, 'w', encoding='utf-8' ) as f:
             json.dump( export_data, f, ensure_ascii=False, indent=4 )
 
-    def func_initial_load_existing_trading_data( self ):
-
-        if not os.path.exists( g_trading_data_json_file_path ):
+    def func_load_trading_data( self, file_path, dict_trading_data ):
+        if not os.path.exists( file_path ):
             return
-        with open( g_trading_data_json_file_path,'r', encoding='utf-8' ) as f:
+        with open( file_path,'r', encoding='utf-8' ) as f:
             data = json.load( f )
 
         for item in data:
@@ -874,12 +873,13 @@ class MainWindow( QMainWindow ):
                                                                        item[ "cash_dividend_per_share" ],      #每股現金股利
                                                                        item[ "capital_reduction_per_share" ] ) #每股減資金額             
 
-                if item[ "stock_number" ] not in self.dict_all_stock_trading_data:
-                    self.dict_all_stock_trading_data[ item[ "stock_number" ] ] = [ dict_per_trading_data ]
+                if item[ "stock_number" ] not in dict_trading_data:
+                    dict_trading_data[ item[ "stock_number" ] ] = [ dict_per_trading_data ]
                 else:
-                    self.dict_all_stock_trading_data[ item[ "stock_number" ] ].append( dict_per_trading_data )
+                    dict_trading_data[ item[ "stock_number" ] ].append( dict_per_trading_data )
 
-                
+    def func_initial_load_existing_trading_data( self ):
+        self.func_load_trading_data( g_trading_data_json_file_path, self.dict_all_stock_trading_data )
         self.func_sort_all_trading_data()
         self.refresh_stock_list_table()
 
@@ -891,35 +891,9 @@ class MainWindow( QMainWindow ):
     def func_import_trading_data( self ):
         file_path = self.open_load_json_file_dialog()
         if file_path:
-            with open( file_path,'r', encoding='utf-8' ) as f:
-                data = json.load( f )
 
             dict_all_stock_trading_data_new = {}
-            for item in data:
-                if ( "stock_number" in item and
-                    "trading_date" in item and
-                    "trading_type" in item and
-                    "trading_price" in item and
-                    "trading_count" in item and
-                    "trading_fee_discount" in item and
-                    "stock_dividend_per_share" in item and
-                    "cash_dividend_per_share" in item and
-                    "capital_reduction_per_share" in item ):
-
-                    dict_per_trading_data = Utility.generate_trading_data( item[ "stock_number" ],                 #股票代碼
-                                                                           item[ "trading_date" ],                 #交易日期
-                                                                           TradingType( item[ "trading_type" ] ),  #交易種類
-                                                                           item[ "trading_price" ],                #交易價格
-                                                                           item[ "trading_count" ],                #交易股數
-                                                                           item[ "trading_fee_discount" ],         #手續費折扣
-                                                                           item[ "stock_dividend_per_share" ],     #每股股票股利
-                                                                           item[ "cash_dividend_per_share" ],      #每股現金股利
-                                                                           item[ "capital_reduction_per_share" ] ) #每股減資金額             
-
-                    if item[ "stock_number" ] not in dict_all_stock_trading_data_new:
-                        dict_all_stock_trading_data_new[ item[ "stock_number" ] ] = [ dict_per_trading_data ]
-                    else:
-                        dict_all_stock_trading_data_new[ item[ "stock_number" ] ].append( dict_per_trading_data )
+            self.func_load_trading_data( file_path, dict_all_stock_trading_data_new )
 
             for key_stock_number, value in dict_all_stock_trading_data_new.items():
                 if key_stock_number in self.dict_all_stock_trading_data:
