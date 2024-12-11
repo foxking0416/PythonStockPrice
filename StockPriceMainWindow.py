@@ -8,7 +8,7 @@ from QtStockPriceMainWindow import Ui_MainWindow  # 導入轉換後的 UI 類
 from QtStockTradingEditDialog import Ui_Dialog as Ui_StockTradingDialog
 from QtStockDividendEditDialog import Ui_Dialog as Ui_StockDividendDialog
 from QtStockCapitalReductionEditDialog import Ui_Dialog as Ui_StockCapitalReductionDialog
-from PySide6.QtWidgets import QApplication, QMainWindow, QDialog, QButtonGroup, QMessageBox, QStyledItemDelegate
+from PySide6.QtWidgets import QApplication, QMainWindow, QDialog, QButtonGroup, QMessageBox, QStyledItemDelegate, QFileDialog
 from PySide6.QtGui import QStandardItemModel, QStandardItem, QIcon, QBrush
 from PySide6.QtCore import Qt, QModelIndex, QRect, QSignalBlocker
 from openpyxl import Workbook
@@ -25,12 +25,14 @@ g_list_trading_data_table_vertical_header = ['交易日', '交易種類', '交�
                                              '交易稅', '補充保費', '單筆總成本', '股票股利', '現金股利',
                                              '累計總成本', '庫存股數', '均價',
                                              '編輯', '刪除' ]
-g_list_stock_list_table_vertical_header = [ '總成本', '庫存股數', '平均成本', '今日股價', '淨值', '損益', '刪除' ]
+g_list_stock_list_table_vertical_header = [ '總成本', '庫存股數', '平均成本', '今日股價', '淨值', '損益', '匯出', '刪除' ]
 g_current_dir = os.path.dirname(__file__)
 edit_icon_file_path = os.path.join( g_current_dir, 'icon\\Edit.svg' ) 
 edit_icon = QIcon( edit_icon_file_path ) 
 delete_icon_file_path = os.path.join( g_current_dir, 'icon\\Delete.svg' ) 
 delete_icon = QIcon( delete_icon_file_path ) 
+export_icon_file_path = os.path.join( g_current_dir, 'icon\\Export.svg' ) 
+export_icon = QIcon( export_icon_file_path ) 
 trading_data_json_file_path = os.path.join( g_current_dir, 'TradingData.json' )
 
 class CenterIconDelegate( QStyledItemDelegate ):
@@ -498,7 +500,7 @@ class MainWindow( QMainWindow ):
             self.dict_all_stock_trading_data[ str_first_four_chars ] = [ dict_trading_data ]
             sorted_list = self.func_sort_single_trading_data( str_first_four_chars )
             self.refresh_stock_list_table()
-            self.func_save_trading_data()
+            self.func_auto_save_trading_data()
 
     def on_add_trading_data_push_button_clicked( self ):
         if self.str_picked_stock_number is None:
@@ -513,7 +515,7 @@ class MainWindow( QMainWindow ):
             sorted_list = self.func_sort_single_trading_data( str_stock_number )
             self.refresh_stock_list_table()
             self.refresh_trading_data_table( sorted_list )
-            self.func_save_trading_data()
+            self.func_auto_save_trading_data()
 
     def on_add_dividend_data_push_button_clicked( self ):
         if self.str_picked_stock_number is None:
@@ -528,7 +530,7 @@ class MainWindow( QMainWindow ):
             sorted_list = self.func_sort_single_trading_data( str_stock_number )
             self.refresh_stock_list_table()
             self.refresh_trading_data_table( sorted_list )
-            self.func_save_trading_data()
+            self.func_auto_save_trading_data()
 
     def on_add_capital_reduction_data_push_button_clicked( self ):
         if self.str_picked_stock_number is None:
@@ -543,7 +545,7 @@ class MainWindow( QMainWindow ):
             sorted_list = self.func_sort_single_trading_data( str_stock_number )
             self.refresh_stock_list_table()
             self.refresh_trading_data_table( sorted_list )
-            self.func_save_trading_data()
+            self.func_auto_save_trading_data()
 
     def on_vertical_header_section_moved( self, n_logical_index, n_old_visual_index, n_new_visual_index ):
         list_stock_number = []
@@ -560,7 +562,7 @@ class MainWindow( QMainWindow ):
 
         self.dict_all_stock_trading_data = dict_all_stock_trading_data_new
         self.refresh_stock_list_table()
-        self.func_save_trading_data()
+        self.func_auto_save_trading_data()
 
     def on_stock_list_table_item_clicked( self, index: QModelIndex, table_model ):
         item = table_model.itemFromIndex( index )
@@ -570,14 +572,24 @@ class MainWindow( QMainWindow ):
             header_text = table_model.verticalHeaderItem( index.row() ).text()
             str_stock_number = header_text[:4]
             
-            if n_column == len( g_list_stock_list_table_vertical_header ) - 1:
+            if n_column == len( g_list_stock_list_table_vertical_header ) - 1:#刪除
                 result = self.func_show_message_box( "警告", f"確定要刪掉『{header_text}』的所有資料嗎?" )
                 if result:
                     del self.dict_all_stock_trading_data[ str_stock_number ]
                     self.str_picked_stock_number = None
                     self.refresh_stock_list_table()
                     self.per_stock_trading_data_model.clear()
-                    self.func_save_trading_data()
+                    self.func_auto_save_trading_data()
+            elif n_column == len( g_list_stock_list_table_vertical_header ) - 2:#匯出
+                file_path = self.open_save_json_file_dialog()
+                if file_path:
+                    dict_stock_trading_data = { str_stock_number: self.dict_all_stock_trading_data[ str_stock_number ] }
+                    self.func_manual_save_trading_data( dict_stock_trading_data, file_path )
+                
+                if str_stock_number != self.str_picked_stock_number:
+                    self.str_picked_stock_number = str_stock_number
+                    list_trading_data = self.dict_all_stock_trading_data[ str_stock_number ]
+                    self.refresh_trading_data_table( list_trading_data )
             elif str_stock_number in self.dict_all_stock_trading_data:
                 if str_stock_number != self.str_picked_stock_number:
                     self.str_picked_stock_number = str_stock_number
@@ -637,7 +649,7 @@ class MainWindow( QMainWindow ):
                         sorted_list = self.func_sort_single_trading_data( str_stock_number )
                         self.refresh_stock_list_table()
                         self.refresh_trading_data_table( sorted_list )
-                        self.func_save_trading_data()
+                        self.func_auto_save_trading_data()
 
                 elif n_row == len( g_list_trading_data_table_vertical_header ) - 1: #刪除
                     result = self.func_show_message_box( "警告", f"確定要刪掉這筆交易資料嗎?" )
@@ -646,7 +658,7 @@ class MainWindow( QMainWindow ):
                         sorted_list = self.func_sort_single_trading_data( str_stock_number )
                         self.refresh_stock_list_table()
                         self.refresh_trading_data_table( sorted_list )
-                        self.func_save_trading_data()
+                        self.func_auto_save_trading_data()
 
     def export_trading_data_to_excel( self, worksheet, str_stock_number ):
         list_trading_data = self.dict_all_stock_trading_data[ str_stock_number ]
@@ -656,7 +668,7 @@ class MainWindow( QMainWindow ):
             return
         str_stock_number = self.str_picked_stock_number
         str_stock_name = self.dict_all_company_number_and_name[ str_stock_number ]
-        file_path = self.open_save_file_dialog()
+        file_path = self.open_save_excel_file_dialog()
         if file_path:
             workbook = Workbook()
             worksheet = workbook.active
@@ -670,6 +682,26 @@ class MainWindow( QMainWindow ):
 
     def on_export_all_to_excell_button_clicked( self ):
         pass
+
+    def open_save_json_file_dialog( self ):
+        # 彈出儲存檔案對話框
+        file_path, _ = QFileDialog.getSaveFileName(
+            self,
+            "匯出交易資料",             # 對話框標題
+            "",                      # 預設路徑
+            "JSON (*.json);;"  # 檔案類型過濾
+        )
+        return file_path
+    
+    def open_save_excel_file_dialog( self ):
+        # 彈出儲存檔案對話框
+        file_path, _ = QFileDialog.getSaveFileName(
+            self,
+            "Save File",             # 對話框標題
+            "",                      # 預設路徑
+            "Excel 活頁簿 (*.xlsx);;All Files (*)"  # 檔案類型過濾
+        )
+        return file_path
 
     def func_show_message_box( self, str_title, str_message ):
         message_box = QMessageBox( self )
@@ -775,10 +807,12 @@ class MainWindow( QMainWindow ):
         for key_stock_number, value_list_trading_data in self.dict_all_stock_trading_data.items():
             self.func_sort_single_trading_data( key_stock_number )
 
-    def func_save_trading_data( self ):
+    def func_auto_save_trading_data( self ):
+        self.func_manual_save_trading_data( self.dict_all_stock_trading_data, trading_data_json_file_path )
 
+    def func_manual_save_trading_data( self, dict_stock_trading_data, file_path ):
         export_data = []
-        for key, value in self.dict_all_stock_trading_data.items():
+        for key, value in dict_stock_trading_data.items():
             for item in value:
                 dict_per_trading_data = {}
                 dict_per_trading_data[ "stock_number" ] = item[ TradingData.STOCK_NUMBER ]
@@ -795,7 +829,7 @@ class MainWindow( QMainWindow ):
                 export_data.append( dict_per_trading_data )
 
 
-        with open( trading_data_json_file_path, 'w', encoding='utf-8' ) as f:
+        with open( file_path, 'w', encoding='utf-8' ) as f:
             json.dump( export_data, f, ensure_ascii=False, indent=4 )
 
     def func_load_existing_trading_data( self ):
@@ -892,8 +926,12 @@ class MainWindow( QMainWindow ):
             delete_icon_item = QStandardItem("")
             delete_icon_item.setIcon( delete_icon )
             delete_icon_item.setFlags( delete_icon_item.flags() & ~Qt.ItemIsEditable )
+            export_icon_item = QStandardItem("")
+            export_icon_item.setIcon( export_icon )
+            export_icon_item.setFlags( export_icon_item.flags() & ~Qt.ItemIsEditable )
 
             self.stock_list_model.setItem( index_row, len( g_list_stock_list_table_vertical_header ) - 1, delete_icon_item )
+            self.stock_list_model.setItem( index_row, len( g_list_stock_list_table_vertical_header ) - 2, export_icon_item )
 
             dict_trading_data = value[ len( value ) - 1 ] #取最後一筆交易資料，因為最後一筆交易資料的庫存等內容才是所有累計的結果
             n_accumulated_cost = dict_trading_data[ TradingData.ACCUMULATED_COST ]
