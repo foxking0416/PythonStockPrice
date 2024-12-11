@@ -432,7 +432,7 @@ class MainWindow( QMainWindow ):
         self.dict_all_stock_trading_data = {}
         
         self.load_filter_stock_UI_state()
-        self.func_load_existing_trading_data()
+        self.func_initial_load_existing_trading_data()
 
     def on_discount_check_box_state_changed( self, state ):
         if state == 2:
@@ -687,6 +687,16 @@ class MainWindow( QMainWindow ):
     def on_export_all_to_excell_button_clicked( self ):
         pass
 
+    def open_load_json_file_dialog( self ):
+        # 彈出儲存檔案對話框
+        file_path, _ = QFileDialog.getOpenFileName(
+            self,
+            "匯入交易資料",             # 對話框標題
+            "",                      # 預設路徑
+            "JSON (*.json);;"  # 檔案類型過濾
+        )
+        return file_path
+
     def open_save_json_file_dialog( self ):
         # 彈出儲存檔案對話框
         file_path, _ = QFileDialog.getSaveFileName(
@@ -836,7 +846,7 @@ class MainWindow( QMainWindow ):
         with open( file_path, 'w', encoding='utf-8' ) as f:
             json.dump( export_data, f, ensure_ascii=False, indent=4 )
 
-    def func_load_existing_trading_data( self ):
+    def func_initial_load_existing_trading_data( self ):
 
         if not os.path.exists( g_trading_data_json_file_path ):
             return
@@ -879,7 +889,47 @@ class MainWindow( QMainWindow ):
             self.func_manual_save_trading_data( self.dict_all_stock_trading_data, file_path )
 
     def func_import_trading_data( self ):
-        pass
+        file_path = self.open_load_json_file_dialog()
+        if file_path:
+            with open( file_path,'r', encoding='utf-8' ) as f:
+                data = json.load( f )
+
+            dict_all_stock_trading_data_new = {}
+            for item in data:
+                if ( "stock_number" in item and
+                    "trading_date" in item and
+                    "trading_type" in item and
+                    "trading_price" in item and
+                    "trading_count" in item and
+                    "trading_fee_discount" in item and
+                    "stock_dividend_per_share" in item and
+                    "cash_dividend_per_share" in item and
+                    "capital_reduction_per_share" in item ):
+
+                    dict_per_trading_data = Utility.generate_trading_data( item[ "stock_number" ],                 #股票代碼
+                                                                           item[ "trading_date" ],                 #交易日期
+                                                                           TradingType( item[ "trading_type" ] ),  #交易種類
+                                                                           item[ "trading_price" ],                #交易價格
+                                                                           item[ "trading_count" ],                #交易股數
+                                                                           item[ "trading_fee_discount" ],         #手續費折扣
+                                                                           item[ "stock_dividend_per_share" ],     #每股股票股利
+                                                                           item[ "cash_dividend_per_share" ],      #每股現金股利
+                                                                           item[ "capital_reduction_per_share" ] ) #每股減資金額             
+
+                    if item[ "stock_number" ] not in dict_all_stock_trading_data_new:
+                        dict_all_stock_trading_data_new[ item[ "stock_number" ] ] = [ dict_per_trading_data ]
+                    else:
+                        dict_all_stock_trading_data_new[ item[ "stock_number" ] ].append( dict_per_trading_data )
+
+            for key_stock_number, value in dict_all_stock_trading_data_new.items():
+                if key_stock_number in self.dict_all_stock_trading_data:
+                    self.dict_all_stock_trading_data[ key_stock_number ] += value
+                else:
+                    self.dict_all_stock_trading_data[ key_stock_number ] = value
+
+            self.func_sort_all_trading_data()
+            self.refresh_stock_list_table()
+            self.func_auto_save_trading_data()
 
     def save_filter_stock_UI_state( self ):
         output_path = os.path.join( os.path.dirname(__file__), 'UISetting.config' )
