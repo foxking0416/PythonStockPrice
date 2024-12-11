@@ -333,8 +333,26 @@
      <height>21</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menu">
+    <property name="title">
+     <string>檔案</string>
+    </property>
+    <addaction name="qtActionImport"/>
+    <addaction name="qtActionExport"/>
+   </widget>
+   <addaction name="menu"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <action name="qtActionImport">
+   <property name="text">
+    <string>匯入</string>
+   </property>
+  </action>
+  <action name="qtActionExport">
+   <property name="text">
+    <string>匯出</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>

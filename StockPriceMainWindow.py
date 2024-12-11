@@ -419,6 +419,10 @@ class MainWindow( QMainWindow ):
         self.ui.qtExportAllStockTradingDataPushButton.clicked.connect( self.on_export_all_to_excell_button_clicked )
         self.ui.qtExportSelectedStockTradingDataPushButton.clicked.connect( self.on_export_selected_to_excell_button_clicked )
 
+        self.ui.qtActionExport.triggered.connect( self.func_export_trading_data )
+        self.ui.qtActionImport.triggered.connect( self.func_import_trading_data )
+        
+
         obj_current_date = datetime.datetime.today() - datetime.timedelta( days = 1 )
         str_date = obj_current_date.strftime('%Y%m%d')
         self.dict_all_company_number_and_name = self.download_all_company_stock_number( str_date )
@@ -868,6 +872,14 @@ class MainWindow( QMainWindow ):
                 
         self.func_sort_all_trading_data()
         self.refresh_stock_list_table()
+
+    def func_export_trading_data( self ):
+        file_path = self.open_save_json_file_dialog()
+        if file_path:
+            self.func_manual_save_trading_data( self.dict_all_stock_trading_data, file_path )
+
+    def func_import_trading_data( self ):
+        pass
 
     def save_filter_stock_UI_state( self ):
         output_path = os.path.join( os.path.dirname(__file__), 'UISetting.config' )
