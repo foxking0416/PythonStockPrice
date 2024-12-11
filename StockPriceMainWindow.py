@@ -154,10 +154,10 @@ class QtDuplicateOptionDialog( QDialog ):
 
         self.ui = Ui_DuplicateOptionDialog()
         self.ui.setupUi( self )
-        b_overwrite = False
+        self.b_overwrite = False
 
     def accept_data( self ):
-        b_overwrite = self.ui.qtOverWriteRadioButton.isChecked()
+        self.b_overwrite = self.ui.qtOverWriteRadioButton.isChecked()
         self.accept()
     
     def cancel( self ):
@@ -721,20 +721,41 @@ class MainWindow( QMainWindow ):
 
             dict_all_stock_trading_data_new = {}
             self.load_trading_data( file_path, dict_all_stock_trading_data_new )
-
-            # dialog = QtDuplicateOptionDialog( self )
-            # if dialog.exec():
-                # pass
             b_duplicate = False
             for key_stock_number, value in dict_all_stock_trading_data_new.items():
                 if key_stock_number in self.dict_all_stock_trading_data:
-                    self.dict_all_stock_trading_data[ key_stock_number ] += value
-                else:
-                    self.dict_all_stock_trading_data[ key_stock_number ] = value
+                    b_duplicate = True
+                    break
 
-            self.process_all_trading_data()
-            self.refresh_stock_list_table()
-            self.auto_save_trading_data()
+            if b_duplicate:
+                dialog = QtDuplicateOptionDialog( self )
+                if dialog.exec():
+                    if dialog.b_overwrite:
+                        self.dict_all_stock_trading_data.update( dict_all_stock_trading_data_new )
+                        self.process_all_trading_data()
+                        self.refresh_stock_list_table()
+                        self.auto_save_trading_data()
+                        if self.str_picked_stock_number != None:
+                            self.refresh_trading_data_table( self.dict_all_stock_trading_data[ self.str_picked_stock_number ] )
+                    else:
+                        for key_stock_number, value in dict_all_stock_trading_data_new.items():
+                            if key_stock_number in self.dict_all_stock_trading_data:
+                                self.dict_all_stock_trading_data[ key_stock_number ] += value
+                            else:
+                                self.dict_all_stock_trading_data[ key_stock_number ] = value
+                        self.process_all_trading_data()
+                        self.refresh_stock_list_table()
+                        self.auto_save_trading_data()
+                        if self.str_picked_stock_number != None:
+                            self.refresh_trading_data_table( self.dict_all_stock_trading_data[ self.str_picked_stock_number ] )
+
+            else:
+                self.dict_all_stock_trading_data.update( dict_all_stock_trading_data_new )
+                self.process_all_trading_data()
+                self.refresh_stock_list_table()
+                self.auto_save_trading_data()
+                if self.str_picked_stock_number != None:
+                    self.refresh_trading_data_table( self.dict_all_stock_trading_data[ self.str_picked_stock_number ] )
 
     def open_load_json_file_dialog( self ):
         # 彈出讀取檔案對話框
