@@ -8,6 +8,7 @@ from QtStockPriceMainWindow import Ui_MainWindow  # 導入轉換後的 UI 類
 from QtStockTradingEditDialog import Ui_Dialog as Ui_StockTradingDialog
 from QtStockDividendEditDialog import Ui_Dialog as Ui_StockDividendDialog
 from QtStockCapitalReductionEditDialog import Ui_Dialog as Ui_StockCapitalReductionDialog
+from QtDuplicateOptionDialog import Ui_Dialog as Ui_DuplicateOptionDialog
 from PySide6.QtWidgets import QApplication, QMainWindow, QDialog, QButtonGroup, QMessageBox, QStyledItemDelegate, QFileDialog
 from PySide6.QtGui import QStandardItemModel, QStandardItem, QIcon, QBrush
 from PySide6.QtCore import Qt, QModelIndex, QRect, QSignalBlocker
@@ -20,6 +21,7 @@ from enum import Enum, IntEnum
 # pyside6-uic QtStockTradingEditDialog.ui -o QtStockTradingEditDialog.py
 # pyside6-uic QtStockDividendEditDialog.ui -o QtStockDividendEditDialog.py
 # pyside6-uic QtStockCapitalReductionEditDialog.ui -o QtStockCapitalReductionEditDialog.py
+# pyside6-uic QtDuplicateOptionDialog.ui -o QtDuplicateOptionDialog.py
 
 g_list_trading_data_table_vertical_header = ['交易日', '交易種類', '交易價格', '交易股數', '交易金額', '手續費', 
                                              '交易稅', '補充保費', '單筆總成本', '股票股利', '現金股利',
@@ -145,6 +147,22 @@ class Utility():
         dict_trading_data[ TradingData.CASH_DIVIDEND_PER_SHARE ] = f_cash_dividend_per_share
         dict_trading_data[ TradingData.CAPITAL_REDUCTION_PER_SHARE ] = f_capital_reduction_per_share
         return dict_trading_data
+
+class QtDuplicateOptionDialog( QDialog ):
+    def __init__( self, parent = None ):
+        super().__init__( parent )
+
+        self.ui = Ui_DuplicateOptionDialog()
+        self.ui.setupUi( self )
+        b_overwrite = False
+
+    def accept_data( self ):
+        b_overwrite = self.ui.qtOverWriteRadioButton.isChecked()
+        self.accept()
+    
+    def cancel( self ):
+        self.reject()
+
 
 class StockCapitalReductionEditDialog( QDialog ):
     def __init__( self, str_stock_number, str_stock_name, parent = None ):
@@ -888,12 +906,17 @@ class MainWindow( QMainWindow ):
             self.func_manual_save_trading_data( self.dict_all_stock_trading_data, file_path )
 
     def func_import_trading_data( self ):
+        
         file_path = self.func_open_load_json_file_dialog()
         if file_path:
 
             dict_all_stock_trading_data_new = {}
             self.func_load_trading_data( file_path, dict_all_stock_trading_data_new )
 
+            # dialog = QtDuplicateOptionDialog( self )
+            # if dialog.exec():
+                # pass
+            b_duplicate = False
             for key_stock_number, value in dict_all_stock_trading_data_new.items():
                 if key_stock_number in self.dict_all_stock_trading_data:
                     self.dict_all_stock_trading_data[ key_stock_number ] += value
