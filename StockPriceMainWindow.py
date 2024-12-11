@@ -770,7 +770,6 @@ class MainWindow( QMainWindow ):
 
                 item[ TradingData.STOCK_DIVIDEND_GAIN ] = 0
                 item[ TradingData.CASH_DIVIDEND_GAIN ] = 0
-
             elif e_trading_type == TradingType.SELL:
                 f_trading_price = item[ TradingData.TRADING_PRICE ]
                 n_trading_count = item[ TradingData.TRADING_COUNT ]
@@ -781,8 +780,8 @@ class MainWindow( QMainWindow ):
                 item[ TradingData.TRADING_TAX ] = dict_result[ TradingCost.TRADING_TAX ]
                 item[ TradingData.TRADING_INSURANCE ] = dict_result[ TradingCost.TRADING_INSURANCE ]  
                 n_per_trading_total_cost = item[ TradingData.TRADING_COST ] = dict_result[ TradingCost.TRADING_TOTAL_COST ]
-                n_accumulated_inventory -= n_trading_count
                 n_accumulated_cost -= n_per_trading_total_cost
+                n_accumulated_inventory -= n_trading_count
 
                 item[ TradingData.STOCK_DIVIDEND_GAIN ] = 0
                 item[ TradingData.CASH_DIVIDEND_GAIN ] = 0
@@ -791,24 +790,24 @@ class MainWindow( QMainWindow ):
                 item[ TradingData.TRADING_FEE ] = 0
                 item[ TradingData.TRADING_TAX ] = 0
                 item[ TradingData.TRADING_INSURANCE ] = 0 
-                n_per_trading_total_cost = item[ TradingData.TRADING_COST ] = 0
+                item[ TradingData.TRADING_COST ] = 0
 
                 n_stock_dividend_gain = int( item[ TradingData.STOCK_DIVIDEND_PER_SHARE ] * n_accumulated_inventory / 10 ) #f_stock_dividend_gain單位為股 除以10是因為票面額10元
                 n_cash_dividend_gain = int( item[ TradingData.CASH_DIVIDEND_PER_SHARE ] * n_accumulated_inventory )
                 item[ TradingData.STOCK_DIVIDEND_GAIN ] = n_stock_dividend_gain
                 item[ TradingData.CASH_DIVIDEND_GAIN ] = n_cash_dividend_gain
-                n_accumulated_inventory += n_stock_dividend_gain
                 n_accumulated_cost -= n_cash_dividend_gain
+                n_accumulated_inventory += n_stock_dividend_gain
             elif e_trading_type == TradingType.CAPITAL_REDUCTION:
                 item[ TradingData.TRADING_VALUE ] = 0
                 item[ TradingData.TRADING_FEE ] = 0
                 item[ TradingData.TRADING_TAX ] = 0
                 item[ TradingData.TRADING_INSURANCE ] = 0 
-                n_per_trading_total_cost = item[ TradingData.TRADING_COST ] = 0
+                item[ TradingData.TRADING_COST ] = 0
                 item[ TradingData.STOCK_DIVIDEND_GAIN ] = 0
                 item[ TradingData.CASH_DIVIDEND_GAIN ] = 0
-                n_accumulated_cost = n_accumulated_cost - n_accumulated_inventory * item[ TradingData.CAPITAL_REDUCTION_PER_SHARE ]
-                n_accumulated_inventory = n_accumulated_inventory * ( 10 - item[ TradingData.CAPITAL_REDUCTION_PER_SHARE ] ) / 10
+                n_accumulated_cost = n_accumulated_cost - int( n_accumulated_inventory * item[ TradingData.CAPITAL_REDUCTION_PER_SHARE ] )
+                n_accumulated_inventory = int( n_accumulated_inventory * ( 10 - item[ TradingData.CAPITAL_REDUCTION_PER_SHARE ] ) / 10 )
 
             item[ TradingData.ACCUMULATED_COST ] = n_accumulated_cost
             item[ TradingData.ACCUMULATED_INVENTORY ] = n_accumulated_inventory
@@ -979,13 +978,13 @@ class MainWindow( QMainWindow ):
                 try:
                     f_stock_price = float( self.dict_all_company_number_and_price_info[ key_stock_number ] )
                     str_stock_price = format( f_stock_price, "," )
-                    f_net_value = n_accumulated_inventory * f_stock_price
-                    str_net_value = format( f_net_value, "," )
-                    f_profit = f_net_value - n_accumulated_cost
-                    str_profit = format( f_profit, "," )
-                    if f_profit > 0:
+                    n_net_value = int( n_accumulated_inventory * f_stock_price )
+                    str_net_value = format( n_net_value, "," )
+                    n_profit = n_net_value - n_accumulated_cost
+                    str_profit = format( n_profit, "," )
+                    if n_profit > 0:
                         str_color = QBrush( '#FF0000' )
-                    elif f_profit < 0:
+                    elif n_profit < 0:
                         str_color = QBrush( '#00AA00' )
                     else:
                         str_color = QBrush( '#FFFFFF' )
