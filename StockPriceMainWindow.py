@@ -886,10 +886,13 @@ class MainWindow( QMainWindow ):
             n_accumulated_inventory = dict_trading_data[ TradingData.ACCUMULATED_INVENTORY ]
             f_average_cost = round( dict_trading_data[ TradingData.AVERAGE_COST ], 3 )
             
-            try:
-                f_stock_price = float( self.dict_all_company_number_and_price_info[ key_stock_number ] )
-                str_stock_price = format( f_stock_price, "," )
-            except ValueError:
+            if key_stock_number in self.dict_all_company_number_and_price_info:
+                try:
+                    f_stock_price = float( self.dict_all_company_number_and_price_info[ key_stock_number ] )
+                    str_stock_price = format( f_stock_price, "," )
+                except ValueError:
+                    str_stock_price = "N/A"
+            else:
                 str_stock_price = "N/A"
             
 
@@ -1203,7 +1206,7 @@ class MainWindow( QMainWindow ):
 
             if len( all_stock_price ) == 0:
                 print( "no data" )
-                return
+                return dict_company_number_to_price_info
             
             # 確保目錄存在，若不存在則遞歸創建
             os.makedirs( os.path.dirname( file_path ), exist_ok = True )
