@@ -1104,9 +1104,10 @@ class MainWindow( QMainWindow ):
             if self.ui.qtShow10RadioButton.isChecked():
                 loop_list = loop_list[:11]
 
-
         for dict_per_trading_data in loop_list:
-
+            e_trading_type = dict_per_trading_data[ TradingData.TRADING_TYPE ]
+            if e_trading_type == TradingType.TEMPLATE:
+                continue
             str_date = dict_per_trading_data[ TradingData.TRADING_DATE ]
             obj_date = datetime.datetime.strptime( str_date, "%Y-%m-%d" )
             n_weekday = obj_date.weekday()
@@ -1124,9 +1125,6 @@ class MainWindow( QMainWindow ):
                 str_weekday = "(六)"
             elif n_weekday == 6:
                 str_weekday = "(日)"
-            e_trading_type = dict_per_trading_data[ TradingData.TRADING_TYPE ]
-            if e_trading_type == TradingType.TEMPLATE:
-                continue
             f_trading_price = dict_per_trading_data[ TradingData.TRADING_PRICE ]
             n_trading_count = dict_per_trading_data[ TradingData.TRADING_COUNT ]
             n_trading_value = dict_per_trading_data[ TradingData.TRADING_VALUE ]
