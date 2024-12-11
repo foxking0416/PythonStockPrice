@@ -1085,14 +1085,74 @@ class MainWindow( QMainWindow ):
 
             self.stock_list_model.setVerticalHeaderLabels( list_vertical_labels )
 
+    def get_per_trading_data_text_list( self, dict_per_trading_data ):
+        e_trading_type = dict_per_trading_data[ TradingData.TRADING_TYPE ]
+        if e_trading_type == TradingType.TEMPLATE:
+            return []
+        str_date = dict_per_trading_data[ TradingData.TRADING_DATE ]
+        obj_date = datetime.datetime.strptime( str_date, "%Y-%m-%d" )
+        n_weekday = obj_date.weekday()
+        if n_weekday == 0:
+            str_weekday = "(一)"
+        elif n_weekday == 1:
+            str_weekday = "(二)"
+        elif n_weekday == 2:
+            str_weekday = "(三)"
+        elif n_weekday == 3:
+            str_weekday = "(四)"
+        elif n_weekday == 4:
+            str_weekday = "(五)"
+        elif n_weekday == 5:
+            str_weekday = "(六)"
+        elif n_weekday == 6:
+            str_weekday = "(日)"
+        f_trading_price = dict_per_trading_data[ TradingData.TRADING_PRICE ]
+        n_trading_count = dict_per_trading_data[ TradingData.TRADING_COUNT ]
+        n_trading_value = dict_per_trading_data[ TradingData.TRADING_VALUE ]
+        n_trading_fee = dict_per_trading_data[ TradingData.TRADING_FEE ]
+        n_trading_tax = dict_per_trading_data[ TradingData.TRADING_TAX ]
+        n_trading_insurance = dict_per_trading_data[ TradingData.TRADING_INSURANCE ]
+        n_per_trading_total_cost = dict_per_trading_data[ TradingData.TRADING_COST ]
+        f_stock_dividend_per_share = dict_per_trading_data[ TradingData.STOCK_DIVIDEND_PER_SHARE ]
+        f_cash_dividend_per_share = dict_per_trading_data[ TradingData.CASH_DIVIDEND_PER_SHARE ]
+        n_stock_dividend_gain = dict_per_trading_data[ TradingData.STOCK_DIVIDEND_GAIN ]
+        n_cash_dividend_gain = dict_per_trading_data[ TradingData.CASH_DIVIDEND_GAIN ]
+        n_accumulated_cost = dict_per_trading_data[ TradingData.ACCUMULATED_COST ]
+        n_accumulated_inventory = dict_per_trading_data[ TradingData.ACCUMULATED_INVENTORY ]
+        f_average_cost = round( dict_per_trading_data[ TradingData.AVERAGE_COST ], 3 )
+
+        if e_trading_type == TradingType.BUY:
+            str_trading_type = "買進"
+        elif e_trading_type == TradingType.SELL:
+            n_trading_count = -n_trading_count
+            n_trading_value = -n_trading_value
+            n_per_trading_total_cost = -n_per_trading_total_cost
+            str_trading_type = "賣出"
+        elif e_trading_type == TradingType.DIVIDEND:
+            str_trading_type = "股利分配"
+        elif e_trading_type == TradingType.CAPITAL_REDUCTION:
+            str_trading_type = "減資"
+
+        list_data = [ dict_per_trading_data[ TradingData.TRADING_DATE ] + str_weekday, #交易日期
+                      str_trading_type,                                  #交易種類
+                      format( f_trading_price, "," ),                    #交易價格
+                      format( n_trading_count, "," ),                    #交易股數
+                      format( n_trading_value, "," ),                    #交易金額
+                      format( n_trading_fee, "," ),                      #手續費
+                      format( n_trading_tax, "," ),                      #交易稅
+                      format( n_trading_insurance, "," ),                #補充保費
+                      format( n_per_trading_total_cost, "," ),           #單筆總成本
+                      format( n_stock_dividend_gain, "," ) + ' / ' + str( f_stock_dividend_per_share ), #總獲得股數 / 每股股票股利
+                      format( n_cash_dividend_gain, "," ) + ' / ' + str( f_cash_dividend_per_share ), #總獲得現金 / 每股現金股利
+                      format( n_accumulated_cost, "," ),                 #累計總成本
+                      format( n_accumulated_inventory, "," ),            #庫存股數
+                      format( f_average_cost, "," ) ]                    #均價
+        return list_data
+
     def refresh_trading_data_table( self, sorted_list ):
         self.per_stock_trading_data_model.clear()
         self.per_stock_trading_data_model.setVerticalHeaderLabels( g_list_trading_data_table_vertical_header )
         self.ui.qtTradingDataTableView.horizontalHeader().hide()
-
-        n_accumulated_inventory = 0
-        n_accumulated_cost = 0
-
 
         if self.ui.qtFromNewToOldRadioButton.isChecked():
             loop_list = sorted_list[::-1]
@@ -1108,64 +1168,8 @@ class MainWindow( QMainWindow ):
             e_trading_type = dict_per_trading_data[ TradingData.TRADING_TYPE ]
             if e_trading_type == TradingType.TEMPLATE:
                 continue
-            str_date = dict_per_trading_data[ TradingData.TRADING_DATE ]
-            obj_date = datetime.datetime.strptime( str_date, "%Y-%m-%d" )
-            n_weekday = obj_date.weekday()
-            if n_weekday == 0:
-                str_weekday = "(一)"
-            elif n_weekday == 1:
-                str_weekday = "(二)"
-            elif n_weekday == 2:
-                str_weekday = "(三)"
-            elif n_weekday == 3:
-                str_weekday = "(四)"
-            elif n_weekday == 4:
-                str_weekday = "(五)"
-            elif n_weekday == 5:
-                str_weekday = "(六)"
-            elif n_weekday == 6:
-                str_weekday = "(日)"
-            f_trading_price = dict_per_trading_data[ TradingData.TRADING_PRICE ]
-            n_trading_count = dict_per_trading_data[ TradingData.TRADING_COUNT ]
-            n_trading_value = dict_per_trading_data[ TradingData.TRADING_VALUE ]
-            n_trading_fee = dict_per_trading_data[ TradingData.TRADING_FEE ]
-            n_trading_tax = dict_per_trading_data[ TradingData.TRADING_TAX ]
-            n_trading_insurance = dict_per_trading_data[ TradingData.TRADING_INSURANCE ]
-            n_per_trading_total_cost = dict_per_trading_data[ TradingData.TRADING_COST ]
-            f_stock_dividend_per_share = dict_per_trading_data[ TradingData.STOCK_DIVIDEND_PER_SHARE ]
-            f_cash_dividend_per_share = dict_per_trading_data[ TradingData.CASH_DIVIDEND_PER_SHARE ]
-            n_stock_dividend_gain = dict_per_trading_data[ TradingData.STOCK_DIVIDEND_GAIN ]
-            n_cash_dividend_gain = dict_per_trading_data[ TradingData.CASH_DIVIDEND_GAIN ]
-            n_accumulated_cost = dict_per_trading_data[ TradingData.ACCUMULATED_COST ]
-            n_accumulated_inventory = dict_per_trading_data[ TradingData.ACCUMULATED_INVENTORY ]
-            f_average_cost = round( dict_per_trading_data[ TradingData.AVERAGE_COST ], 3 )
 
-            if e_trading_type == TradingType.BUY:
-                str_trading_type = "買進"
-            elif e_trading_type == TradingType.SELL:
-                n_trading_count = -n_trading_count
-                n_trading_value = -n_trading_value
-                n_per_trading_total_cost = -n_per_trading_total_cost
-                str_trading_type = "賣出"
-            elif e_trading_type == TradingType.DIVIDEND:
-                str_trading_type = "股利分配"
-            elif e_trading_type == TradingType.CAPITAL_REDUCTION:
-                str_trading_type = "減資"
-
-            list_data = [ dict_per_trading_data[ TradingData.TRADING_DATE ] + str_weekday, #交易日期
-                          str_trading_type,                                  #交易種類
-                          format( f_trading_price, "," ),                    #交易價格
-                          format( n_trading_count, "," ),                    #交易股數
-                          format( n_trading_value, "," ),                    #交易金額
-                          format( n_trading_fee, "," ),                      #手續費
-                          format( n_trading_tax, "," ),                      #交易稅
-                          format( n_trading_insurance, "," ),                #補充保費
-                          format( n_per_trading_total_cost, "," ),           #單筆總成本
-                          format( n_stock_dividend_gain, "," ) + ' / ' + str( f_stock_dividend_per_share ), #總獲得股數 / 每股股票股利
-                          format( n_cash_dividend_gain, "," ) + ' / ' + str( f_cash_dividend_per_share ), #總獲得現金 / 每股現金股利
-                          format( n_accumulated_cost, "," ),                 #累計總成本
-                          format( n_accumulated_inventory, "," ),            #庫存股數
-                          format( f_average_cost, "," ) ]                    #均價
+            list_data = self.get_per_trading_data_text_list( dict_per_trading_data )
 
             for row, data in enumerate( list_data ):
                 standard_item = QStandardItem( data )
