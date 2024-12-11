@@ -394,8 +394,8 @@ class MainWindow( QMainWindow ):
         self.stock_list_model = QStandardItemModel( 0, 0 )
         self.stock_list_model.setHorizontalHeaderLabels( g_list_stock_list_table_vertical_header )
         self.ui.qtStockListTableView.verticalHeader().setSectionsMovable( True )
-        self.ui.qtStockListTableView.verticalHeader().sectionMoved.connect( self.on_vertical_header_section_moved )
-        self.ui.qtStockListTableView.horizontalHeader().sectionResized.connect( self.on_horizontal_section_resized )
+        self.ui.qtStockListTableView.verticalHeader().sectionMoved.connect( self.on_stock_list_table_vertical_header_section_moved )
+        self.ui.qtStockListTableView.horizontalHeader().sectionResized.connect( self.on_stock_list_table_horizontal_section_resized )
         self.ui.qtStockListTableView.setModel( self.stock_list_model )
         self.ui.qtStockListTableView.setItemDelegate( delegate )
         self.ui.qtStockListTableView.clicked.connect( lambda index: self.on_stock_list_table_item_clicked( index, self.stock_list_model ) )
@@ -437,8 +437,8 @@ class MainWindow( QMainWindow ):
         self.ui.qtExportAllStockTradingDataPushButton.clicked.connect( self.on_export_all_to_excell_button_clicked )
         self.ui.qtExportSelectedStockTradingDataPushButton.clicked.connect( self.on_export_selected_to_excell_button_clicked )
 
-        self.ui.qtActionExport.triggered.connect( self.func_export_trading_data )
-        self.ui.qtActionImport.triggered.connect( self.func_import_trading_data )
+        self.ui.qtActionExport.triggered.connect( self.export_trading_data )
+        self.ui.qtActionImport.triggered.connect( self.import_trading_data )
         
 
         obj_current_date = datetime.datetime.today() - datetime.timedelta( days = 1 )
@@ -450,8 +450,8 @@ class MainWindow( QMainWindow ):
         self.dict_all_stock_trading_data = {}
         self.list_stock_list_column_width = []
         
-        self.func_load_filter_stock_UI_state()
-        self.func_initial_load_existing_trading_data()
+        self.load_filter_stock_UI_state()
+        self.initial_load_existing_trading_data()
 
     def on_stock_input_text_changed( self ):
         with QSignalBlocker( self.ui.qtStockSelectComboBox ), QSignalBlocker( self.ui.qtStockInputLineEdit ):
@@ -501,9 +501,9 @@ class MainWindow( QMainWindow ):
                                                                0,                    #每股現金股利
                                                                0 )                   #每股減資金額
             self.dict_all_stock_trading_data[ str_first_four_chars ] = [ dict_trading_data ]
-            sorted_list = self.func_sort_single_trading_data( str_first_four_chars )
+            sorted_list = self.process_single_trading_data( str_first_four_chars )
             self.refresh_stock_list_table()
-            self.func_auto_save_trading_data()
+            self.auto_save_trading_data()
 
     def on_discount_check_box_state_changed( self, state ):
         if state == 2:
@@ -535,10 +535,10 @@ class MainWindow( QMainWindow ):
         if dialog.exec():
             dict_trading_data = dialog.dict_trading_data
             self.dict_all_stock_trading_data[ str_stock_number ].append( dict_trading_data )
-            sorted_list = self.func_sort_single_trading_data( str_stock_number )
+            sorted_list = self.process_single_trading_data( str_stock_number )
             self.refresh_stock_list_table()
             self.refresh_trading_data_table( sorted_list )
-            self.func_auto_save_trading_data()
+            self.auto_save_trading_data()
 
     def on_add_dividend_data_push_button_clicked( self ):
         if self.str_picked_stock_number is None:
@@ -550,10 +550,10 @@ class MainWindow( QMainWindow ):
         if dialog.exec():
             dict_trading_data = dialog.dict_trading_data
             self.dict_all_stock_trading_data[ str_stock_number ].append( dict_trading_data )
-            sorted_list = self.func_sort_single_trading_data( str_stock_number )
+            sorted_list = self.process_single_trading_data( str_stock_number )
             self.refresh_stock_list_table()
             self.refresh_trading_data_table( sorted_list )
-            self.func_auto_save_trading_data()
+            self.auto_save_trading_data()
 
     def on_add_capital_reduction_data_push_button_clicked( self ):
         if self.str_picked_stock_number is None:
@@ -565,12 +565,12 @@ class MainWindow( QMainWindow ):
         if dialog.exec():
             dict_trading_data = dialog.dict_trading_data
             self.dict_all_stock_trading_data[ str_stock_number ].append( dict_trading_data )
-            sorted_list = self.func_sort_single_trading_data( str_stock_number )
+            sorted_list = self.process_single_trading_data( str_stock_number )
             self.refresh_stock_list_table()
             self.refresh_trading_data_table( sorted_list )
-            self.func_auto_save_trading_data()
+            self.auto_save_trading_data()
 
-    def on_vertical_header_section_moved( self, n_logical_index, n_old_visual_index, n_new_visual_index ):
+    def on_stock_list_table_vertical_header_section_moved( self, n_logical_index, n_old_visual_index, n_new_visual_index ):
         list_stock_number = []
         for index_row,( key_stock_number, value ) in enumerate( self.dict_all_stock_trading_data.items() ):
             list_stock_number.append( key_stock_number )
@@ -585,9 +585,9 @@ class MainWindow( QMainWindow ):
 
         self.dict_all_stock_trading_data = dict_all_stock_trading_data_new
         self.refresh_stock_list_table()
-        self.func_auto_save_trading_data()
+        self.auto_save_trading_data()
 
-    def on_horizontal_section_resized( self, n_logical_index, n_old_size, n_new_size ):
+    def on_stock_list_table_horizontal_section_resized( self, n_logical_index, n_old_size, n_new_size ):
         self.list_stock_list_column_width[ n_logical_index ] = n_new_size
         self.save_filter_stock_UI_state()
 
@@ -600,18 +600,18 @@ class MainWindow( QMainWindow ):
             str_stock_number = header_text[:4]
             
             if n_column == len( g_list_stock_list_table_vertical_header ) - 1:#刪除
-                result = self.func_show_message_box( "警告", f"確定要刪掉『{header_text}』的所有資料嗎?" )
+                result = self.show_message_box( "警告", f"確定要刪掉『{header_text}』的所有資料嗎?" )
                 if result:
                     del self.dict_all_stock_trading_data[ str_stock_number ]
                     self.str_picked_stock_number = None
                     self.refresh_stock_list_table()
                     self.per_stock_trading_data_model.clear()
-                    self.func_auto_save_trading_data()
+                    self.auto_save_trading_data()
             elif n_column == len( g_list_stock_list_table_vertical_header ) - 2:#匯出
-                file_path = self.func_open_save_json_file_dialog()
+                file_path = self.open_save_json_file_dialog()
                 if file_path:
                     dict_stock_trading_data = { str_stock_number: self.dict_all_stock_trading_data[ str_stock_number ] }
-                    self.func_manual_save_trading_data( dict_stock_trading_data, file_path )
+                    self.manual_save_trading_data( dict_stock_trading_data, file_path )
                 
                 if str_stock_number != self.str_picked_stock_number:
                     self.str_picked_stock_number = str_stock_number
@@ -623,7 +623,7 @@ class MainWindow( QMainWindow ):
                     list_trading_data = self.dict_all_stock_trading_data[ str_stock_number ]
                     self.refresh_trading_data_table( list_trading_data )
 
-        self.func_update_button_status()
+        self.update_button_enable_disable_status()
 
     def on_trading_data_table_item_clicked( self, index: QModelIndex, table_model ):
         item = table_model.itemFromIndex( index )
@@ -673,19 +673,19 @@ class MainWindow( QMainWindow ):
                     if dialog.exec():
                         dict_trading_data = dialog.dict_trading_data
                         self.dict_all_stock_trading_data[ str_stock_number ][ n_findindex ] = dict_trading_data
-                        sorted_list = self.func_sort_single_trading_data( str_stock_number )
+                        sorted_list = self.process_single_trading_data( str_stock_number )
                         self.refresh_stock_list_table()
                         self.refresh_trading_data_table( sorted_list )
-                        self.func_auto_save_trading_data()
+                        self.auto_save_trading_data()
 
                 elif n_row == len( g_list_trading_data_table_vertical_header ) - 1: #刪除
-                    result = self.func_show_message_box( "警告", f"確定要刪掉這筆交易資料嗎?" )
+                    result = self.show_message_box( "警告", f"確定要刪掉這筆交易資料嗎?" )
                     if result:
                         del self.dict_all_stock_trading_data[ str_stock_number ][ n_findindex ]
-                        sorted_list = self.func_sort_single_trading_data( str_stock_number )
+                        sorted_list = self.process_single_trading_data( str_stock_number )
                         self.refresh_stock_list_table()
                         self.refresh_trading_data_table( sorted_list )
-                        self.func_auto_save_trading_data()
+                        self.auto_save_trading_data()
 
     def export_trading_data_to_excel( self, worksheet, str_stock_number ):
         list_trading_data = self.dict_all_stock_trading_data[ str_stock_number ]
@@ -695,7 +695,7 @@ class MainWindow( QMainWindow ):
             return
         str_stock_number = self.str_picked_stock_number
         str_stock_name = self.dict_all_company_number_and_name[ str_stock_number ]
-        file_path = self.func_open_save_excel_file_dialog()
+        file_path = self.open_save_excel_file_dialog()
         if file_path:
             workbook = Workbook()
             worksheet = workbook.active
@@ -710,27 +710,27 @@ class MainWindow( QMainWindow ):
     def on_export_all_to_excell_button_clicked( self ):
         pass
 
-    def func_open_load_json_file_dialog( self ):
-        # 彈出儲存檔案對話框
+    def open_load_json_file_dialog( self ):
+        # 彈出讀取檔案對話框
         file_path, _ = QFileDialog.getOpenFileName(
             self,
-            "匯入交易資料",             # 對話框標題
-            "",                      # 預設路徑
+            "匯入交易資料",     # 對話框標題
+            "",                # 預設路徑
             "JSON (*.json);;"  # 檔案類型過濾
         )
         return file_path
 
-    def func_open_save_json_file_dialog( self ):
+    def open_save_json_file_dialog( self ):
         # 彈出儲存檔案對話框
         file_path, _ = QFileDialog.getSaveFileName(
             self,
-            "匯出交易資料",             # 對話框標題
-            "",                      # 預設路徑
+            "匯出交易資料",     # 對話框標題
+            "",                # 預設路徑
             "JSON (*.json);;"  # 檔案類型過濾
         )
         return file_path
     
-    def func_open_save_excel_file_dialog( self ):
+    def open_save_excel_file_dialog( self ):
         # 彈出儲存檔案對話框
         file_path, _ = QFileDialog.getSaveFileName(
             self,
@@ -740,7 +740,7 @@ class MainWindow( QMainWindow ):
         )
         return file_path
 
-    def func_show_message_box( self, str_title, str_message ):
+    def show_message_box( self, str_title, str_message ):
         message_box = QMessageBox( self )
         message_box.setIcon( QMessageBox.Warning )  # 設置為警告圖示
         message_box.setWindowTitle( str_title )
@@ -757,7 +757,7 @@ class MainWindow( QMainWindow ):
         elif message_box.clickedButton() == button_cancel:
             return False
 
-    def func_update_button_status( self ):
+    def update_button_enable_disable_status( self ):
         if self.str_picked_stock_number is None:
             self.ui.qtAddTradingDataPushButton.setEnabled( False )
             self.ui.qtAddDividendDataPushButton.setEnabled( False )
@@ -769,7 +769,7 @@ class MainWindow( QMainWindow ):
             self.ui.qtAddCapitalReductionDataPushButton.setEnabled( True )
             self.ui.qtExportSelectedStockTradingDataPushButton.setEnabled( True )
 
-    def func_sort_single_trading_data( self, str_stock_number ):
+    def process_single_trading_data( self, str_stock_number ):
         list_trading_data = self.dict_all_stock_trading_data[ str_stock_number ]
         sorted_list = sorted( list_trading_data, key=lambda x: ( datetime.datetime.strptime( x[ TradingData.TRADING_DATE ], "%Y-%m-%d"), -x[ TradingData.TRADING_TYPE ] ) )
         n_accumulated_inventory = 0
@@ -839,14 +839,14 @@ class MainWindow( QMainWindow ):
         self.dict_all_stock_trading_data[ str_stock_number ] = sorted_list
         return sorted_list
 
-    def func_sort_all_trading_data( self ):
+    def process_all_trading_data( self ):
         for key_stock_number, value_list_trading_data in self.dict_all_stock_trading_data.items():
-            self.func_sort_single_trading_data( key_stock_number )
+            self.process_single_trading_data( key_stock_number )
 
-    def func_auto_save_trading_data( self ):
-        self.func_manual_save_trading_data( self.dict_all_stock_trading_data, g_trading_data_json_file_path )
+    def auto_save_trading_data( self ):
+        self.manual_save_trading_data( self.dict_all_stock_trading_data, g_trading_data_json_file_path )
 
-    def func_manual_save_trading_data( self, dict_stock_trading_data, file_path ):
+    def manual_save_trading_data( self, dict_stock_trading_data, file_path ):
         export_data = []
         for key, value in dict_stock_trading_data.items():
             for item in value:
@@ -868,7 +868,7 @@ class MainWindow( QMainWindow ):
         with open( file_path, 'w', encoding='utf-8' ) as f:
             json.dump( export_data, f, ensure_ascii=False, indent=4 )
 
-    def func_load_trading_data( self, file_path, dict_trading_data ):
+    def load_trading_data( self, file_path, dict_trading_data ):
         if not os.path.exists( file_path ):
             return
         with open( file_path,'r', encoding='utf-8' ) as f:
@@ -900,23 +900,23 @@ class MainWindow( QMainWindow ):
                 else:
                     dict_trading_data[ item[ "stock_number" ] ].append( dict_per_trading_data )
 
-    def func_initial_load_existing_trading_data( self ):
-        self.func_load_trading_data( g_trading_data_json_file_path, self.dict_all_stock_trading_data )
-        self.func_sort_all_trading_data()
+    def initial_load_existing_trading_data( self ):
+        self.load_trading_data( g_trading_data_json_file_path, self.dict_all_stock_trading_data )
+        self.process_all_trading_data()
         self.refresh_stock_list_table()
 
-    def func_export_trading_data( self ):
-        file_path = self.func_open_save_json_file_dialog()
+    def export_trading_data( self ):
+        file_path = self.open_save_json_file_dialog()
         if file_path:
-            self.func_manual_save_trading_data( self.dict_all_stock_trading_data, file_path )
+            self.manual_save_trading_data( self.dict_all_stock_trading_data, file_path )
 
-    def func_import_trading_data( self ):
+    def import_trading_data( self ):
         
-        file_path = self.func_open_load_json_file_dialog()
+        file_path = self.open_load_json_file_dialog()
         if file_path:
 
             dict_all_stock_trading_data_new = {}
-            self.func_load_trading_data( file_path, dict_all_stock_trading_data_new )
+            self.load_trading_data( file_path, dict_all_stock_trading_data_new )
 
             # dialog = QtDuplicateOptionDialog( self )
             # if dialog.exec():
@@ -928,9 +928,9 @@ class MainWindow( QMainWindow ):
                 else:
                     self.dict_all_stock_trading_data[ key_stock_number ] = value
 
-            self.func_sort_all_trading_data()
+            self.process_all_trading_data()
             self.refresh_stock_list_table()
-            self.func_auto_save_trading_data()
+            self.auto_save_trading_data()
 
     def save_filter_stock_UI_state( self ):
         output_path = os.path.join( os.path.dirname(__file__), 'UISetting.config' )
@@ -948,7 +948,7 @@ class MainWindow( QMainWindow ):
                 f.write( f",{ self.list_stock_list_column_width[ i ] }" )
             f.write( "\n" )
 
-    def func_load_filter_stock_UI_state( self ):
+    def load_filter_stock_UI_state( self ):
         with ( QSignalBlocker( self.ui.qtStockListTableView.horizontalHeader() ),
                QSignalBlocker( self.ui.qtDiscountCheckBox ),
                QSignalBlocker( self.ui.qtDiscountRateDoubleSpinBox ),
