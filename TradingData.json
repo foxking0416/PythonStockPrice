@@ -11,6 +11,28 @@
         "capital_reduction_per_share": 0
     },
     {
+        "stock_number": "2891",
+        "trading_date": "2024-12-11",
+        "trading_type": 2,
+        "trading_price": 10.0,
+        "trading_count": 10000,
+        "trading_fee_discount": 0.45,
+        "stock_dividend_per_share": 0,
+        "cash_dividend_per_share": 0,
+        "capital_reduction_per_share": 0
+    },
+    {
+        "stock_number": "2891",
+        "trading_date": "2024-12-11",
+        "trading_type": 1,
+        "trading_price": 11.0,
+        "trading_count": 10000,
+        "trading_fee_discount": 0.45,
+        "stock_dividend_per_share": 0,
+        "cash_dividend_per_share": 0,
+        "capital_reduction_per_share": 0
+    },
+    {
         "stock_number": "2834",
         "trading_date": "0001-01-01",
         "trading_type": 0,

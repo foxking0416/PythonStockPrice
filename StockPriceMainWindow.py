@@ -25,7 +25,7 @@ g_list_trading_data_table_vertical_header = ['交易日', '交易種類', '交�
                                              '交易稅', '補充保費', '單筆總成本', '股票股利', '現金股利',
                                              '累計總成本', '庫存股數', '均價',
                                              '編輯', '刪除' ]
-g_list_stock_list_table_vertical_header = [ '總成本', '庫存股數', '平均成本', '今日股價', '刪除' ]
+g_list_stock_list_table_vertical_header = [ '總成本', '庫存股數', '平均成本', '今日股價', '淨值', '損益', '刪除' ]
 g_current_dir = os.path.dirname(__file__)
 edit_icon_file_path = os.path.join( g_current_dir, 'icon\\Edit.svg' ) 
 edit_icon = QIcon( edit_icon_file_path ) 
@@ -881,30 +881,51 @@ class MainWindow( QMainWindow ):
 
             self.stock_list_model.setItem( index_row, len( g_list_stock_list_table_vertical_header ) - 1, delete_icon_item )
 
-            dict_trading_data = value[ len( value ) - 1 ]
+            dict_trading_data = value[ len( value ) - 1 ] #取最後一筆交易資料，因為最後一筆交易資料的庫存等內容才是所有累計的結果
             n_accumulated_cost = dict_trading_data[ TradingData.ACCUMULATED_COST ]
             n_accumulated_inventory = dict_trading_data[ TradingData.ACCUMULATED_INVENTORY ]
             f_average_cost = round( dict_trading_data[ TradingData.AVERAGE_COST ], 3 )
             
+
             if key_stock_number in self.dict_all_company_number_and_price_info:
                 try:
                     f_stock_price = float( self.dict_all_company_number_and_price_info[ key_stock_number ] )
                     str_stock_price = format( f_stock_price, "," )
+                    f_net_value = n_accumulated_inventory * f_stock_price
+                    str_net_value = format( f_net_value, "," )
+                    f_profit = f_net_value - n_accumulated_cost
+                    str_profit = format( f_profit, "," )
+                    if f_profit > 0:
+                        str_color = QBrush( '#FF0000' )
+                    elif f_profit < 0:
+                        str_color = QBrush( '#00AA00' )
+                    else:
+                        str_color = QBrush( '#FFFFFF' )
                 except ValueError:
                     str_stock_price = "N/A"
+                    str_net_value = "N/A"
+                    str_profit = "N/A"
+                    str_color = QBrush( '#FFFFFF' )
             else:
                 str_stock_price = "N/A"
+                str_net_value = "N/A"
+                str_profit = "N/A"
+                str_color = QBrush( '#FFFFFF' )
             
 
             list_data = [ format( n_accumulated_cost, "," ),      #總成本
                           format( n_accumulated_inventory, "," ), #庫存股數
                           format( f_average_cost, "," ),          #平均成本
-                          str_stock_price  ]                      #當前股價
+                          str_stock_price,                        #當前股價
+                          str_net_value,                          #淨值
+                          str_profit  ]                           #損益
                                
             for column, data in enumerate( list_data ):
                 standard_item = QStandardItem( data )
                 standard_item.setTextAlignment( Qt.AlignHCenter | Qt.AlignVCenter )
                 standard_item.setFlags( standard_item.flags() & ~Qt.ItemIsEditable )
+                if column == len( list_data ) - 1:
+                    standard_item.setForeground( QBrush( str_color ) )
                 self.stock_list_model.setItem( index_row, column, standard_item ) 
             
 
