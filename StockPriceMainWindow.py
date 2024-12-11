@@ -546,7 +546,21 @@ class MainWindow( QMainWindow ):
             self.func_save_trading_data()
 
     def on_vertical_header_section_moved( self, n_logical_index, n_old_visual_index, n_new_visual_index ):
-        pass
+        list_stock_number = []
+        for index_row,( key_stock_number, value ) in enumerate( self.dict_all_stock_trading_data.items() ):
+            list_stock_number.append( key_stock_number )
+
+        element = list_stock_number.pop( n_old_visual_index )
+        list_stock_number.insert( n_new_visual_index, element )
+
+        dict_all_stock_trading_data_new = {}
+        for index_row, str_stock_number in enumerate( list_stock_number ):
+            dict_all_stock_trading_data_new[ str_stock_number ] = self.dict_all_stock_trading_data[ str_stock_number ]
+
+
+        self.dict_all_stock_trading_data = dict_all_stock_trading_data_new
+        self.refresh_stock_list_table()
+        self.func_save_trading_data()
 
     def on_stock_list_table_item_clicked( self, index: QModelIndex, table_model ):
         item = table_model.itemFromIndex( index )
