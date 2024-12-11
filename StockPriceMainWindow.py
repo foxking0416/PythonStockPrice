@@ -1093,7 +1093,6 @@ class MainWindow( QMainWindow ):
         n_accumulated_inventory = 0
         n_accumulated_cost = 0
 
-        index = 0
 
         if self.ui.qtFromNewToOldRadioButton.isChecked():
             loop_list = sorted_list[::-1]
@@ -1104,6 +1103,7 @@ class MainWindow( QMainWindow ):
             if self.ui.qtShow10RadioButton.isChecked():
                 loop_list = loop_list[:11]
 
+        column = 0
         for dict_per_trading_data in loop_list:
             e_trading_type = dict_per_trading_data[ TradingData.TRADING_TYPE ]
             if e_trading_type == TradingType.TEMPLATE:
@@ -1179,7 +1179,7 @@ class MainWindow( QMainWindow ):
                     standard_item.setBackground( QBrush( '#6EBD61' ) )
                 standard_item.setTextAlignment( Qt.AlignHCenter | Qt.AlignVCenter )
                 standard_item.setFlags( standard_item.flags() & ~Qt.ItemIsEditable )
-                self.per_stock_trading_data_model.setItem( row, index, standard_item ) 
+                self.per_stock_trading_data_model.setItem( row, column, standard_item ) 
 
             edit_icon_item = QStandardItem("")
             edit_icon_item.setIcon( edit_icon )
@@ -1190,10 +1190,9 @@ class MainWindow( QMainWindow ):
             delete_icon_item.setFlags( delete_icon_item.flags() & ~Qt.ItemIsEditable )
             delete_icon_item.setData( dict_per_trading_data[ TradingData.SORTED_INDEX ], Qt.UserRole )
 
-            self.per_stock_trading_data_model.setItem( len( list_data ), index, edit_icon_item )
-            self.per_stock_trading_data_model.setItem( len( list_data ) + 1, index, delete_icon_item )
-            index += 1
-            pass
+            self.per_stock_trading_data_model.setItem( len( list_data ), column, edit_icon_item )
+            self.per_stock_trading_data_model.setItem( len( list_data ) + 1, column, delete_icon_item )
+            column += 1
 
     def download_all_company_stock_number( self, str_date ): 
         dict_company_number_to_name = {}
