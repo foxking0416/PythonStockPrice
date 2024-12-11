@@ -33,7 +33,7 @@ delete_icon_file_path = os.path.join( g_current_dir, 'icon\\Delete.svg' )
 delete_icon = QIcon( delete_icon_file_path ) 
 export_icon_file_path = os.path.join( g_current_dir, 'icon\\Export.svg' ) 
 export_icon = QIcon( export_icon_file_path ) 
-trading_data_json_file_path = os.path.join( g_current_dir, 'TradingData.json' )
+g_trading_data_json_file_path = os.path.join( g_current_dir, 'TradingData.json' )
 
 class CenterIconDelegate( QStyledItemDelegate ):
     def paint( self, painter, option, index ):
@@ -808,7 +808,7 @@ class MainWindow( QMainWindow ):
             self.func_sort_single_trading_data( key_stock_number )
 
     def func_auto_save_trading_data( self ):
-        self.func_manual_save_trading_data( self.dict_all_stock_trading_data, trading_data_json_file_path )
+        self.func_manual_save_trading_data( self.dict_all_stock_trading_data, g_trading_data_json_file_path )
 
     def func_manual_save_trading_data( self, dict_stock_trading_data, file_path ):
         export_data = []
@@ -834,9 +834,9 @@ class MainWindow( QMainWindow ):
 
     def func_load_existing_trading_data( self ):
 
-        if not os.path.exists( trading_data_json_file_path ):
+        if not os.path.exists( g_trading_data_json_file_path ):
             return
-        with open( trading_data_json_file_path,'r', encoding='utf-8' ) as f:
+        with open( g_trading_data_json_file_path,'r', encoding='utf-8' ) as f:
             data = json.load( f )
 
         for item in data:
