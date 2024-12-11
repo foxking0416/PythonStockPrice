@@ -396,6 +396,7 @@ class MainWindow( QMainWindow ):
         self.stock_list_model.setHorizontalHeaderLabels( g_list_stock_list_table_vertical_header )
         self.ui.qtStockListTableView.verticalHeader().setSectionsMovable( True )
         self.ui.qtStockListTableView.verticalHeader().sectionMoved.connect( self.on_vertical_header_section_moved )
+        self.ui.qtStockListTableView.horizontalHeader().sectionResized.connect( self.on_horizontal_section_resized )
         self.ui.qtStockListTableView.setModel( self.stock_list_model )
         self.ui.qtStockListTableView.setItemDelegate( delegate )
         self.ui.qtStockListTableView.clicked.connect( lambda index: self.on_stock_list_table_item_clicked( index, self.stock_list_model ) )
@@ -448,8 +449,9 @@ class MainWindow( QMainWindow ):
 
         self.str_picked_stock_number = None
         self.dict_all_stock_trading_data = {}
+        self.list_stock_list_column_width = []
         
-        self.load_filter_stock_UI_state()
+        self.func_load_filter_stock_UI_state()
         self.func_initial_load_existing_trading_data()
 
     def on_discount_check_box_state_changed( self, state ):
@@ -585,6 +587,10 @@ class MainWindow( QMainWindow ):
         self.dict_all_stock_trading_data = dict_all_stock_trading_data_new
         self.refresh_stock_list_table()
         self.func_auto_save_trading_data()
+
+    def on_horizontal_section_resized( self, n_logical_index, n_old_size, n_new_size ):
+        self.list_stock_list_column_width[ n_logical_index ] = n_new_size
+        self.save_filter_stock_UI_state()
 
     def on_stock_list_table_item_clicked( self, index: QModelIndex, table_model ):
         item = table_model.itemFromIndex( index )
@@ -938,9 +944,14 @@ class MainWindow( QMainWindow ):
             f.write( "補充保費," + str( self.ui.qtExtraInsuranceFeeCheckBox.isChecked() ) + '\n' )
             f.write( "顯示排序," + str( self.ui.qtFromNewToOldRadioButton.isChecked() ) + '\n' )
             f.write( "顯示數量," + str( self.ui.qtShowAllRadioButton.isChecked() ) + '\n' )
+            f.write( "欄寬" )
+            for i in range( len( self.list_stock_list_column_width ) ):
+                f.write( f",{ self.list_stock_list_column_width[ i ] }" )
+            f.write( "\n" )
 
-    def load_filter_stock_UI_state( self ):
-        with ( QSignalBlocker( self.ui.qtDiscountCheckBox ),
+    def func_load_filter_stock_UI_state( self ):
+        with ( QSignalBlocker( self.ui.qtStockListTableView.horizontalHeader() ),
+               QSignalBlocker( self.ui.qtDiscountCheckBox ),
                QSignalBlocker( self.ui.qtDiscountRateDoubleSpinBox ),
                QSignalBlocker( self.ui.qtExtraInsuranceFeeCheckBox ), 
                QSignalBlocker( self.ui.qtFromNewToOldRadioButton ),
@@ -971,75 +982,86 @@ class MainWindow( QMainWindow ):
                                 self.ui.qtShowAllRadioButton.setChecked( True )
                             else:
                                 self.ui.qtShow10RadioButton.setChecked( True )
+                        elif row[0] == '欄寬':
+                            self.list_stock_list_column_width = []
+                            for i in range( 1, len( row ) ):
+                                self.list_stock_list_column_width.append( int( row[ i ] ) )
 
     def refresh_stock_list_table( self ):
-        self.stock_list_model.clear()
-        self.stock_list_model.setHorizontalHeaderLabels( g_list_stock_list_table_vertical_header )
+        with QSignalBlocker( self.ui.qtStockListTableView.horizontalHeader() ):
+            self.stock_list_model.clear()
+            self.stock_list_model.setHorizontalHeaderLabels( g_list_stock_list_table_vertical_header )
 
-        list_vertical_labels = []
-        for index_row,( key_stock_number, value ) in enumerate( self.dict_all_stock_trading_data.items() ):
-            str_stock_name = self.dict_all_company_number_and_name[ key_stock_number ]
-            list_vertical_labels.append( f"{key_stock_number} {str_stock_name}" )
+            list_vertical_labels = []
+            for index_row,( key_stock_number, value ) in enumerate( self.dict_all_stock_trading_data.items() ):
+                str_stock_name = self.dict_all_company_number_and_name[ key_stock_number ]
+                list_vertical_labels.append( f"{key_stock_number} {str_stock_name}" )
 
-            delete_icon_item = QStandardItem("")
-            delete_icon_item.setIcon( delete_icon )
-            delete_icon_item.setFlags( delete_icon_item.flags() & ~Qt.ItemIsEditable )
-            export_icon_item = QStandardItem("")
-            export_icon_item.setIcon( export_icon )
-            export_icon_item.setFlags( export_icon_item.flags() & ~Qt.ItemIsEditable )
+                dict_trading_data = value[ len( value ) - 1 ] #取最後一筆交易資料，因為最後一筆交易資料的庫存等內容才是所有累計的結果
+                n_accumulated_cost = dict_trading_data[ TradingData.ACCUMULATED_COST ]
+                n_accumulated_inventory = dict_trading_data[ TradingData.ACCUMULATED_INVENTORY ]
+                f_average_cost = round( dict_trading_data[ TradingData.AVERAGE_COST ], 3 )
 
-            self.stock_list_model.setItem( index_row, len( g_list_stock_list_table_vertical_header ) - 1, delete_icon_item )
-            self.stock_list_model.setItem( index_row, len( g_list_stock_list_table_vertical_header ) - 2, export_icon_item )
-
-            dict_trading_data = value[ len( value ) - 1 ] #取最後一筆交易資料，因為最後一筆交易資料的庫存等內容才是所有累計的結果
-            n_accumulated_cost = dict_trading_data[ TradingData.ACCUMULATED_COST ]
-            n_accumulated_inventory = dict_trading_data[ TradingData.ACCUMULATED_INVENTORY ]
-            f_average_cost = round( dict_trading_data[ TradingData.AVERAGE_COST ], 3 )
-            
-
-            if key_stock_number in self.dict_all_company_number_and_price_info:
-                try:
-                    f_stock_price = float( self.dict_all_company_number_and_price_info[ key_stock_number ] )
-                    str_stock_price = format( f_stock_price, "," )
-                    n_net_value = int( n_accumulated_inventory * f_stock_price )
-                    str_net_value = format( n_net_value, "," )
-                    n_profit = n_net_value - n_accumulated_cost
-                    str_profit = format( n_profit, "," )
-                    if n_profit > 0:
-                        str_color = QBrush( '#FF0000' )
-                    elif n_profit < 0:
-                        str_color = QBrush( '#00AA00' )
-                    else:
+                if key_stock_number in self.dict_all_company_number_and_price_info:
+                    try:
+                        f_stock_price = float( self.dict_all_company_number_and_price_info[ key_stock_number ] )
+                        str_stock_price = format( f_stock_price, "," )
+                        n_net_value = int( n_accumulated_inventory * f_stock_price )
+                        str_net_value = format( n_net_value, "," )
+                        n_profit = n_net_value - n_accumulated_cost
+                        str_profit = format( n_profit, "," )
+                        if n_profit > 0:
+                            str_color = QBrush( '#FF0000' )
+                        elif n_profit < 0:
+                            str_color = QBrush( '#00AA00' )
+                        else:
+                            str_color = QBrush( '#FFFFFF' )
+                    except ValueError:
+                        str_stock_price = "N/A"
+                        str_net_value = "N/A"
+                        str_profit = "N/A"
                         str_color = QBrush( '#FFFFFF' )
-                except ValueError:
+                else:
                     str_stock_price = "N/A"
                     str_net_value = "N/A"
                     str_profit = "N/A"
                     str_color = QBrush( '#FFFFFF' )
-            else:
-                str_stock_price = "N/A"
-                str_net_value = "N/A"
-                str_profit = "N/A"
-                str_color = QBrush( '#FFFFFF' )
-            
+                
 
-            list_data = [ format( n_accumulated_cost, "," ),      #總成本
-                          format( n_accumulated_inventory, "," ), #庫存股數
-                          format( f_average_cost, "," ),          #平均成本
-                          str_stock_price,                        #當前股價
-                          str_net_value,                          #淨值
-                          str_profit  ]                           #損益
-                               
-            for column, data in enumerate( list_data ):
-                standard_item = QStandardItem( data )
-                standard_item.setTextAlignment( Qt.AlignHCenter | Qt.AlignVCenter )
-                standard_item.setFlags( standard_item.flags() & ~Qt.ItemIsEditable )
-                if column == len( list_data ) - 1:
-                    standard_item.setForeground( QBrush( str_color ) )
-                self.stock_list_model.setItem( index_row, column, standard_item ) 
-            
+                list_data = [ format( n_accumulated_cost, "," ),      #總成本
+                            format( n_accumulated_inventory, "," ), #庫存股數
+                            format( f_average_cost, "," ),          #平均成本
+                            str_stock_price,                        #當前股價
+                            str_net_value,                          #淨值
+                            str_profit  ]                           #損益
+                                
+                for column, data in enumerate( list_data ):
+                    standard_item = QStandardItem( data )
+                    standard_item.setTextAlignment( Qt.AlignHCenter | Qt.AlignVCenter )
+                    standard_item.setFlags( standard_item.flags() & ~Qt.ItemIsEditable )
+                    if column == len( list_data ) - 1:
+                        standard_item.setForeground( QBrush( str_color ) )
+                    self.stock_list_model.setItem( index_row, column, standard_item ) 
 
-        self.stock_list_model.setVerticalHeaderLabels( list_vertical_labels )
+                    
+                delete_icon_item = QStandardItem("")
+                delete_icon_item.setIcon( delete_icon )
+                delete_icon_item.setFlags( delete_icon_item.flags() & ~Qt.ItemIsEditable )
+                export_icon_item = QStandardItem("")
+                export_icon_item.setIcon( export_icon )
+                export_icon_item.setFlags( export_icon_item.flags() & ~Qt.ItemIsEditable )
+
+                self.stock_list_model.setItem( index_row, len( g_list_stock_list_table_vertical_header ) - 1, delete_icon_item )
+                self.stock_list_model.setItem( index_row, len( g_list_stock_list_table_vertical_header ) - 2, export_icon_item )
+
+            for column in range( len( g_list_stock_list_table_vertical_header ) ):
+                if column < len( self.list_stock_list_column_width ):
+                    self.ui.qtStockListTableView.setColumnWidth( column, self.list_stock_list_column_width[ column ] )
+                else:
+                    self.ui.qtStockListTableView.setColumnWidth( column, 100 )
+                    self.list_stock_list_column_width.append( 100 )
+
+            self.stock_list_model.setVerticalHeaderLabels( list_vertical_labels )
 
     def refresh_trading_data_table( self, sorted_list ):
         self.per_stock_trading_data_model.clear()
