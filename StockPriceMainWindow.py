@@ -1519,8 +1519,6 @@ class MainWindow( QMainWindow ):
                         # index 17 漲停價	次日
                         # index 18 跌停價
                         str_stock_number = td_elements[ 0 ].get_text().strip()
-                        if len( str_stock_number ) > 4:
-                            continue
                         str_stock_name = td_elements[ 1 ].get_text().strip()
                         str_stock_price = td_elements[ 2 ].get_text().strip()
                         list_stock_price = [ str_stock_number, str_stock_name, str_stock_price.replace( ',', '' ) ] 
