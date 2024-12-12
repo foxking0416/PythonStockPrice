@@ -70,25 +70,25 @@ class TradingData( Enum ):
     TRADING_FEE_DISCOUNT = 5
     STOCK_DIVIDEND_PER_SHARE = 6
     CASH_DIVIDEND_PER_SHARE = 7
-    CAPITAL_REDUCTION_PER_SHARE = 8
-    SORTED_INDEX = 9 #不會記錄
-    TRADING_VALUE = 10 #不會記錄
-    TRADING_FEE = 11 #不會記錄
-    TRADING_TAX = 12 #不會記錄
-    TRADING_INSURANCE = 13 #不會記錄
+    IS_REQUIRED_EXTRA_INSURANCE_FEE = 8
+    CAPITAL_REDUCTION_PER_SHARE = 9
+    SORTED_INDEX = 10 #不會記錄
+    TRADING_VALUE = 11 #不會記錄
+    TRADING_FEE = 12 #不會記錄
+    TRADING_TAX = 13 #不會記錄
     TRADING_COST = 14 #不會記錄
     STOCK_DIVIDEND_GAIN = 15 #不會記錄
     CASH_DIVIDEND_GAIN = 16 #不會記錄
-    ACCUMULATED_COST = 17 #不會記錄
-    ACCUMULATED_INVENTORY = 18 #不會記錄
-    AVERAGE_COST = 19 #不會記錄
+    EXTRA_INSURANCE_FEE = 17 #不會記錄
+    ACCUMULATED_COST = 18 #不會記錄
+    ACCUMULATED_INVENTORY = 19 #不會記錄
+    AVERAGE_COST = 20 #不會記錄
 
 class TradingCost( Enum ):
     TRADING_VALUE = 0
     TRADING_FEE = 1
     TRADING_TAX = 2
-    TRADING_INSURANCE = 3
-    TRADING_TOTAL_COST = 4
+    TRADING_TOTAL_COST = 3
 
 class Utility():
     def compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, b_extra_insurance, b_daying_trading ):
@@ -110,7 +110,6 @@ class Utility():
             dict_result[ TradingCost.TRADING_VALUE ] = n_trading_value
             dict_result[ TradingCost.TRADING_FEE ] = n_trading_fee
             dict_result[ TradingCost.TRADING_TAX ] = n_trading_tax
-            dict_result[ TradingCost.TRADING_INSURANCE ] = 0
             if e_trading_type == TradingType.BUY:
                 dict_result[ TradingCost.TRADING_TOTAL_COST ] = n_trading_value + n_trading_fee + n_trading_tax
             else:
@@ -119,7 +118,6 @@ class Utility():
             dict_result[ TradingCost.TRADING_VALUE ] = 0
             dict_result[ TradingCost.TRADING_FEE ] = 0
             dict_result[ TradingCost.TRADING_TAX ] = 0
-            dict_result[ TradingCost.TRADING_INSURANCE ] = 0
             dict_result[ TradingCost.TRADING_TOTAL_COST ] = 0
         return dict_result
 
@@ -131,6 +129,7 @@ class Utility():
                                f_trading_fee_discount,      #手續費折扣
                                f_stock_dividend_per_share,  #每股股票股利
                                f_cash_dividend_per_share,   #每股現金股利
+                               b_extra_insurance_fee,       #是否需扣除補充保費
                                f_capital_reduction_per_share ): #每股減資金額
         dict_trading_data = {}
         dict_trading_data[ TradingData.STOCK_NUMBER ] = str_stock_number
@@ -141,6 +140,7 @@ class Utility():
         dict_trading_data[ TradingData.TRADING_FEE_DISCOUNT ] = f_trading_fee_discount
         dict_trading_data[ TradingData.STOCK_DIVIDEND_PER_SHARE ] = f_stock_dividend_per_share
         dict_trading_data[ TradingData.CASH_DIVIDEND_PER_SHARE ] = f_cash_dividend_per_share
+        dict_trading_data[ TradingData.IS_REQUIRED_EXTRA_INSURANCE_FEE ] = b_extra_insurance_fee
         dict_trading_data[ TradingData.CAPITAL_REDUCTION_PER_SHARE ] = f_capital_reduction_per_share
         return dict_trading_data
 
@@ -235,6 +235,7 @@ class StockDividendEditDialog( QDialog ):
     def accept_data( self ):
         f_stock_dividend_per_share = self.ui.qtStockDividendDoubleSpinBox.value()
         f_cash_dividend_per_share = self.ui.qtCashDividendDoubleSpinBox.value()
+        b_extra_insurance_fee = self.ui.qtExtraInsuranceFeeCheckBox.isChecked()
         if f_stock_dividend_per_share != 0 or f_cash_dividend_per_share != 0:
 
             self.dict_trading_data = Utility.generate_trading_data( self.ui.qtStockNumberLabel.text(),                  #股票代碼
@@ -245,6 +246,7 @@ class StockDividendEditDialog( QDialog ):
                                                                     1,                                                  #手續費折扣                                   
                                                                     f_stock_dividend_per_share,                         #每股股票股利
                                                                     f_cash_dividend_per_share,                          #每股現金股利
+                                                                    b_extra_insurance_fee,                              #是否需扣除補充保費
                                                                     0 )                                                 #每股減資金額
             self.accept()
         else:
@@ -667,6 +669,7 @@ class MainWindow( QMainWindow ):
                         dialog.setup_trading_date( dict_selected_data[ TradingData.TRADING_DATE ] )
                         dialog.setup_stock_dividend( dict_selected_data[ TradingData.STOCK_DIVIDEND_PER_SHARE ] )
                         dialog.setup_cash_dividend( dict_selected_data[ TradingData.CASH_DIVIDEND_PER_SHARE ] )
+                        dialog.setup_extra_insurance_fee( dict_selected_data[ TradingData.IS_REQUIRED_EXTRA_INSURANCE_FEE ] )
                     elif dict_selected_data[ TradingData.TRADING_TYPE ] == TradingType.CAPITAL_REDUCTION:
                         dialog = StockCapitalReductionEditDialog( str_stock_number, str_stock_name, self )
                         dialog.setup_trading_date( dict_selected_data[ TradingData.TRADING_DATE ] )
@@ -919,7 +922,7 @@ class MainWindow( QMainWindow ):
                 item[ TradingData.TRADING_VALUE ] = dict_result[ TradingCost.TRADING_VALUE ]
                 item[ TradingData.TRADING_FEE ] = dict_result[ TradingCost.TRADING_FEE ]
                 item[ TradingData.TRADING_TAX ] = dict_result[ TradingCost.TRADING_TAX ]
-                item[ TradingData.TRADING_INSURANCE ] = dict_result[ TradingCost.TRADING_INSURANCE ]  
+                item[ TradingData.EXTRA_INSURANCE_FEE ] = 0 
                 n_per_trading_total_cost = item[ TradingData.TRADING_COST ] = dict_result[ TradingCost.TRADING_TOTAL_COST ]
                 n_accumulated_inventory += n_trading_count
                 n_accumulated_cost += n_per_trading_total_cost
@@ -934,7 +937,7 @@ class MainWindow( QMainWindow ):
                 item[ TradingData.TRADING_VALUE ] = dict_result[ TradingCost.TRADING_VALUE ]
                 item[ TradingData.TRADING_FEE ] = dict_result[ TradingCost.TRADING_FEE ]
                 item[ TradingData.TRADING_TAX ] = dict_result[ TradingCost.TRADING_TAX ]
-                item[ TradingData.TRADING_INSURANCE ] = dict_result[ TradingCost.TRADING_INSURANCE ]  
+                item[ TradingData.EXTRA_INSURANCE_FEE ] = 0
                 n_per_trading_total_cost = item[ TradingData.TRADING_COST ] = dict_result[ TradingCost.TRADING_TOTAL_COST ]
                 n_accumulated_cost -= n_per_trading_total_cost
                 n_accumulated_inventory -= n_trading_count
@@ -944,7 +947,6 @@ class MainWindow( QMainWindow ):
             elif e_trading_type == TradingType.DIVIDEND:
                 item[ TradingData.TRADING_VALUE ] = 0
                 item[ TradingData.TRADING_TAX ] = 0
-                item[ TradingData.TRADING_INSURANCE ] = 0 
                 item[ TradingData.TRADING_COST ] = 0
 
                 n_stock_dividend_gain = int( item[ TradingData.STOCK_DIVIDEND_PER_SHARE ] * n_accumulated_inventory / 10 ) #f_stock_dividend_gain單位為股 除以10是因為票面額10元
@@ -955,16 +957,22 @@ class MainWindow( QMainWindow ):
                 if n_cash_dividend_gain > 10:
                     item[ TradingData.CASH_DIVIDEND_GAIN ] = n_cash_dividend_gain
                     item[ TradingData.TRADING_FEE ] = 10
-                    n_accumulated_cost = n_accumulated_cost - n_cash_dividend_gain + 10
+                    if item[ TradingData.IS_REQUIRED_EXTRA_INSURANCE_FEE ] and n_cash_dividend_gain >= 20000:
+                        n_extra_insurance_fee = int( n_cash_dividend_gain * 0.0211 )
+                    else:
+                        n_extra_insurance_fee = 0
+                    item[ TradingData.EXTRA_INSURANCE_FEE ] = n_extra_insurance_fee
+                    n_accumulated_cost = n_accumulated_cost - n_cash_dividend_gain + 10 + n_extra_insurance_fee
                 else:
                     item[ TradingData.CASH_DIVIDEND_GAIN ] = 0
                     item[ TradingData.TRADING_FEE ] = 0
+                    item[ TradingData.EXTRA_INSURANCE_FEE ] = 0 
 
             elif e_trading_type == TradingType.CAPITAL_REDUCTION:
                 item[ TradingData.TRADING_VALUE ] = 0
                 item[ TradingData.TRADING_FEE ] = 0
                 item[ TradingData.TRADING_TAX ] = 0
-                item[ TradingData.TRADING_INSURANCE ] = 0 
+                item[ TradingData.EXTRA_INSURANCE_FEE ] = 0 
                 item[ TradingData.TRADING_COST ] = 0
                 item[ TradingData.STOCK_DIVIDEND_GAIN ] = 0
                 item[ TradingData.CASH_DIVIDEND_GAIN ] = 0
@@ -998,6 +1006,7 @@ class MainWindow( QMainWindow ):
                 dict_per_trading_data[ "trading_fee_discount" ] = item[ TradingData.TRADING_FEE_DISCOUNT ]
                 dict_per_trading_data[ "stock_dividend_per_share" ] = item[ TradingData.STOCK_DIVIDEND_PER_SHARE ]
                 dict_per_trading_data[ "cash_dividend_per_share" ] = item[ TradingData.CASH_DIVIDEND_PER_SHARE ]
+                dict_per_trading_data[ "extra_insurance_fee" ] = item[ TradingData.IS_REQUIRED_EXTRA_INSURANCE_FEE ]
                 dict_per_trading_data[ "capital_reduction_per_share" ] = item[ TradingData.CAPITAL_REDUCTION_PER_SHARE ]
 
 
@@ -1022,6 +1031,7 @@ class MainWindow( QMainWindow ):
                  "trading_fee_discount" in item and
                  "stock_dividend_per_share" in item and
                  "cash_dividend_per_share" in item and
+                 "extra_insurance_fee" in item and
                  "capital_reduction_per_share" in item ):
 
                 dict_per_trading_data = Utility.generate_trading_data( item[ "stock_number" ],                 #股票代碼
@@ -1032,6 +1042,7 @@ class MainWindow( QMainWindow ):
                                                                        item[ "trading_fee_discount" ],         #手續費折扣
                                                                        item[ "stock_dividend_per_share" ],     #每股股票股利
                                                                        item[ "cash_dividend_per_share" ],      #每股現金股利
+                                                                       item[ "extra_insurance_fee" ],          #是否須扣除補充保費
                                                                        item[ "capital_reduction_per_share" ] ) #每股減資金額             
 
                 if item[ "stock_number" ] not in dict_trading_data:
@@ -1155,7 +1166,7 @@ class MainWindow( QMainWindow ):
         n_trading_value = dict_per_trading_data[ TradingData.TRADING_VALUE ]
         n_trading_fee = dict_per_trading_data[ TradingData.TRADING_FEE ]
         n_trading_tax = dict_per_trading_data[ TradingData.TRADING_TAX ]
-        n_trading_insurance = dict_per_trading_data[ TradingData.TRADING_INSURANCE ]
+        n_extra_insurance_fee = dict_per_trading_data[ TradingData.EXTRA_INSURANCE_FEE ]
         n_per_trading_total_cost = dict_per_trading_data[ TradingData.TRADING_COST ]
         f_stock_dividend_per_share = dict_per_trading_data[ TradingData.STOCK_DIVIDEND_PER_SHARE ]
         f_cash_dividend_per_share = dict_per_trading_data[ TradingData.CASH_DIVIDEND_PER_SHARE ]
@@ -1190,7 +1201,7 @@ class MainWindow( QMainWindow ):
                       format( n_trading_value, "," ),                    #交易金額
                       format( n_trading_fee, "," ),                      #手續費
                       format( n_trading_tax, "," ),                      #交易稅
-                      format( n_trading_insurance, "," ),                #補充保費
+                      format( n_extra_insurance_fee, "," ),                #補充保費
                       format( n_per_trading_total_cost, "," ),           #單筆總成本
                       format( f_stock_dividend_gain, "," ) + ' / ' + str( f_stock_dividend_per_share ), #總獲得股數 / 每股股票股利
                       format( n_cash_dividend_gain, "," ) + ' / ' + str( f_cash_dividend_per_share ), #總獲得現金 / 每股現金股利
