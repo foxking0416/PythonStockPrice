@@ -15,28 +15,26 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QAbstractButton, QApplication, QDateEdit, QDialog,
-    QDialogButtonBox, QDoubleSpinBox, QHBoxLayout, QLabel,
-    QSizePolicy, QSpacerItem, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QAbstractButton, QApplication, QCheckBox, QDateEdit,
+    QDialog, QDialogButtonBox, QDoubleSpinBox, QHBoxLayout,
+    QLabel, QSizePolicy, QSpacerItem, QVBoxLayout,
+    QWidget)
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
         if not Dialog.objectName():
             Dialog.setObjectName(u"Dialog")
-        Dialog.resize(225, 153)
+        Dialog.resize(185, 185)
         sizePolicy = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(Dialog.sizePolicy().hasHeightForWidth())
         Dialog.setSizePolicy(sizePolicy)
+        Dialog.setMaximumSize(QSize(185, 185))
         self.verticalLayout = QVBoxLayout(Dialog)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName(u"horizontalLayout")
-        self.horizontalSpacer_5 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
-
-        self.horizontalLayout.addItem(self.horizontalSpacer_5)
-
         self.qtStockNumberLabel = QLabel(Dialog)
         self.qtStockNumberLabel.setObjectName(u"qtStockNumberLabel")
 
@@ -56,10 +54,6 @@ class Ui_Dialog(object):
 
         self.horizontalLayout_2 = QHBoxLayout()
         self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
-        self.horizontalSpacer_6 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
-
-        self.horizontalLayout_2.addItem(self.horizontalSpacer_6)
-
         self.label_3 = QLabel(Dialog)
         self.label_3.setObjectName(u"label_3")
 
@@ -79,10 +73,6 @@ class Ui_Dialog(object):
 
         self.horizontalLayout_3 = QHBoxLayout()
         self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
-        self.horizontalSpacer_7 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
-
-        self.horizontalLayout_3.addItem(self.horizontalSpacer_7)
-
         self.label_4 = QLabel(Dialog)
         self.label_4.setObjectName(u"label_4")
 
@@ -105,10 +95,6 @@ class Ui_Dialog(object):
 
         self.horizontalLayout_4 = QHBoxLayout()
         self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
-        self.horizontalSpacer_8 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
-
-        self.horizontalLayout_4.addItem(self.horizontalSpacer_8)
-
         self.label_5 = QLabel(Dialog)
         self.label_5.setObjectName(u"label_5")
 
@@ -128,6 +114,20 @@ class Ui_Dialog(object):
 
 
         self.verticalLayout.addLayout(self.horizontalLayout_4)
+
+        self.horizontalLayout_5 = QHBoxLayout()
+        self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
+        self.qtExtraInsuranceFeeCheckBox = QCheckBox(Dialog)
+        self.qtExtraInsuranceFeeCheckBox.setObjectName(u"qtExtraInsuranceFeeCheckBox")
+
+        self.horizontalLayout_5.addWidget(self.qtExtraInsuranceFeeCheckBox)
+
+        self.horizontalSpacer_10 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout_5.addItem(self.horizontalSpacer_10)
+
+
+        self.verticalLayout.addLayout(self.horizontalLayout_5)
 
         self.qtOkButtonBox = QDialogButtonBox(Dialog)
         self.qtOkButtonBox.setObjectName(u"qtOkButtonBox")
@@ -152,5 +152,6 @@ class Ui_Dialog(object):
         self.label_3.setText(QCoreApplication.translate("Dialog", u"\u65e5\u671f", None))
         self.label_4.setText(QCoreApplication.translate("Dialog", u"\u914d\u80a1", None))
         self.label_5.setText(QCoreApplication.translate("Dialog", u"\u914d\u606f", None))
+        self.qtExtraInsuranceFeeCheckBox.setText(QCoreApplication.translate("Dialog", u"\u662f\u5426\u9808\u6263\u88dc\u5145\u4fdd\u8cbb", None))
     # retranslateUi
 

@@ -204,7 +204,7 @@ class StockCapitalReductionEditDialog( QDialog ):
         self.reject()
 
 class StockDividendEditDialog( QDialog ):
-    def __init__( self, str_stock_number, str_stock_name, parent = None ):
+    def __init__( self, str_stock_number, str_stock_name, b_extra_insurance_fee, parent = None ):
         super().__init__( parent )
 
         self.ui = Ui_StockDividendDialog()
@@ -212,6 +212,7 @@ class StockDividendEditDialog( QDialog ):
 
         self.ui.qtStockNumberLabel.setText( str_stock_number )
         self.ui.qtStockNameLabel.setText( str_stock_name )
+        self.ui.qtExtraInsuranceFeeCheckBox.setChecked( b_extra_insurance_fee )
         obj_current_date = datetime.datetime.today()
         self.ui.qtDateEdit.setDate( obj_current_date.date() )
         self.ui.qtDateEdit.setCalendarPopup( True )
@@ -227,6 +228,9 @@ class StockDividendEditDialog( QDialog ):
 
     def setup_cash_dividend( self, f_cash_dividend_per_share ):
         self.ui.qtCashDividendDoubleSpinBox.setValue( f_cash_dividend_per_share )
+
+    def setup_extra_insurance_fee( self, b_extra_insurance_fee ):
+        self.ui.qtExtraInsuranceFeeCheckBox.setChecked( b_extra_insurance_fee )
 
     def accept_data( self ):
         f_stock_dividend_per_share = self.ui.qtStockDividendDoubleSpinBox.value()
@@ -250,7 +254,7 @@ class StockDividendEditDialog( QDialog ):
         self.reject()
 
 class StockTradingEditDialog( QDialog ):
-    def __init__( self, str_stock_number, str_stock_name, b_discount, f_discount_value, b_extra_insurance, parent = None ):
+    def __init__( self, str_stock_number, str_stock_name, b_discount, f_discount_value, parent = None ):
         super().__init__( parent )
 
         self.ui = Ui_StockTradingDialog()
@@ -528,7 +532,7 @@ class MainWindow( QMainWindow ):
             return
         str_stock_number = self.str_picked_stock_number
         str_stock_name = self.dict_all_company_number_and_name[ str_stock_number ]
-        dialog = StockTradingEditDialog( str_stock_number, str_stock_name, self.ui.qtDiscountCheckBox.isChecked(), self.ui.qtDiscountRateDoubleSpinBox.value(), self.ui.qtExtraInsuranceFeeCheckBox.isChecked(), self )
+        dialog = StockTradingEditDialog( str_stock_number, str_stock_name, self.ui.qtDiscountCheckBox.isChecked(), self.ui.qtDiscountRateDoubleSpinBox.value(), self )
 
         if dialog.exec():
             dict_trading_data = dialog.dict_trading_data
@@ -543,7 +547,7 @@ class MainWindow( QMainWindow ):
             return
         str_stock_number = self.str_picked_stock_number
         str_stock_name = self.dict_all_company_number_and_name[ str_stock_number ]
-        dialog = StockDividendEditDialog( str_stock_number, str_stock_name, self )
+        dialog = StockDividendEditDialog( str_stock_number, str_stock_name, self.ui.qtExtraInsuranceFeeCheckBox.isChecked(), self )
 
         if dialog.exec():
             dict_trading_data = dialog.dict_trading_data
@@ -652,14 +656,14 @@ class MainWindow( QMainWindow ):
                     if dict_selected_data[ TradingData.TRADING_TYPE ] == TradingType.TEMPLATE:
                         return
                     if dict_selected_data[ TradingData.TRADING_TYPE ] == TradingType.BUY or dict_selected_data[ TradingData.TRADING_TYPE ] == TradingType.SELL:
-                        dialog = StockTradingEditDialog( str_stock_number, str_stock_name, self.ui.qtDiscountCheckBox.isChecked(), self.ui.qtDiscountRateDoubleSpinBox.value(), self.ui.qtExtraInsuranceFeeCheckBox.isChecked(), self )
+                        dialog = StockTradingEditDialog( str_stock_number, str_stock_name, self.ui.qtDiscountCheckBox.isChecked(), self.ui.qtDiscountRateDoubleSpinBox.value(), self )
                         dialog.setup_trading_date( dict_selected_data[ TradingData.TRADING_DATE ] )
                         dialog.setup_trading_type( dict_selected_data[ TradingData.TRADING_TYPE ] )
                         dialog.setup_trading_discount( dict_selected_data[ TradingData.TRADING_FEE_DISCOUNT ] )
                         dialog.setup_trading_price( dict_selected_data[ TradingData.TRADING_PRICE ] )
                         dialog.setup_trading_count( dict_selected_data[ TradingData.TRADING_COUNT ] )
                     elif dict_selected_data[ TradingData.TRADING_TYPE ] == TradingType.DIVIDEND:
-                        dialog = StockDividendEditDialog( str_stock_number, str_stock_name, self )
+                        dialog = StockDividendEditDialog( str_stock_number, str_stock_name, self.ui.qtExtraInsuranceFeeCheckBox.isChecked(), self )
                         dialog.setup_trading_date( dict_selected_data[ TradingData.TRADING_DATE ] )
                         dialog.setup_stock_dividend( dict_selected_data[ TradingData.STOCK_DIVIDEND_PER_SHARE ] )
                         dialog.setup_cash_dividend( dict_selected_data[ TradingData.CASH_DIVIDEND_PER_SHARE ] )
