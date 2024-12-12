@@ -1184,7 +1184,7 @@ class MainWindow( QMainWindow ):
             return ['交易日', '交易種類', '交易價格', '交易股數', '交易金額', '手續費', '交易稅', '補充保費', '單筆總成本', '全部股票股利 /\n每股股票股利', '全部現金股利 /\n每股現金股利',
                     '累計總成本', '庫存股數', '均價', '編輯', '刪除' ]
         else:
-            return ['交易日', '交易種類', '交易價格', '交易股數', '交易金額', '手續費', '交易稅', '補充保費', '單筆總成本', '全部股票股利 /\n每股股票股利', '全部現金股利 /\n每股現金股利',
+            return ['交易日', '交易種類', '交易價格', '交易張數', '交易金額', '手續費', '交易稅', '補充保費', '單筆總成本', '全部股票股利 /\n每股股票股利', '全部現金股利 /\n每股現金股利',
                     '累計總成本', '庫存張數', '均價', '編輯', '刪除' ]
 
     def get_per_trading_data_text_list( self, dict_per_trading_data ):
@@ -1223,11 +1223,26 @@ class MainWindow( QMainWindow ):
         n_accumulated_inventory = dict_per_trading_data[ TradingData.ACCUMULATED_INVENTORY ]
         f_average_cost = round( dict_per_trading_data[ TradingData.AVERAGE_COST ], 3 )
         if self.ui.qtShow1StockRadioButton.isChecked():
-            f_accumulated_inventory = n_accumulated_inventory
-            f_stock_dividend_gain = n_stock_dividend_gain
+            str_trading_count = format( n_trading_count, "," )
+            str_stock_dividend_gain = format( n_stock_dividend_gain, "," )
+            str_accumulated_inventory = format( n_accumulated_inventory, "," )
         else:
-            f_accumulated_inventory = n_accumulated_inventory / 1000
+            f_trading_count = n_trading_count / 1000
             f_stock_dividend_gain = n_stock_dividend_gain / 1000
+            f_accumulated_inventory = n_accumulated_inventory / 1000
+            if f_trading_count.is_integer():
+                str_trading_count = format( int( f_trading_count ), "," )
+            else:
+                str_trading_count = format( f_trading_count, "," )
+            if f_stock_dividend_gain.is_integer():
+                str_stock_dividend_gain = format( int( f_stock_dividend_gain ), "," )
+            else:
+                str_stock_dividend_gain = format( f_stock_dividend_gain, "," )
+            if f_accumulated_inventory.is_integer():
+                str_accumulated_inventory = format( int( f_accumulated_inventory ), "," )
+            else:
+                str_accumulated_inventory = format( f_accumulated_inventory, "," )
+
 
         if e_trading_type == TradingType.BUY:
             str_trading_type = "買進"
@@ -1244,16 +1259,16 @@ class MainWindow( QMainWindow ):
         list_data = [ dict_per_trading_data[ TradingData.TRADING_DATE ] + str_weekday, #交易日期
                       str_trading_type,                                  #交易種類
                       format( f_trading_price, "," ),                    #交易價格
-                      format( n_trading_count, "," ),                    #交易股數
+                      str_trading_count,                                 #交易股數
                       format( n_trading_value, "," ),                    #交易金額
                       format( n_trading_fee, "," ),                      #手續費
                       format( n_trading_tax, "," ),                      #交易稅
                       format( n_extra_insurance_fee, "," ),                #補充保費
                       format( n_per_trading_total_cost, "," ),           #單筆總成本
-                      format( f_stock_dividend_gain, "," ) + ' / ' + str( f_stock_dividend_per_share ), #總獲得股數 / 每股股票股利
+                      str_stock_dividend_gain + ' / ' + str( f_stock_dividend_per_share ), #總獲得股數 / 每股股票股利
                       format( n_cash_dividend_gain, "," ) + ' / ' + str( f_cash_dividend_per_share ), #總獲得現金 / 每股現金股利
                       format( n_accumulated_cost, "," ),                 #累計總成本
-                      format( f_accumulated_inventory, "," ),            #庫存股數
+                      str_accumulated_inventory,                         #庫存股數
                       format( f_average_cost, "," ) ]                    #均價
         return list_data
 
