@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>938</width>
-    <height>794</height>
+    <height>867</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -209,7 +209,7 @@
         </property>
         <property name="sizeHint" stdset="0">
          <size>
-          <width>40</width>
+          <width>50</width>
           <height>20</height>
          </size>
         </property>
@@ -237,6 +237,43 @@
        </layout>
       </item>
       <item>
+       <spacer name="horizontalSpacer_7">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Minimum</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>50</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <widget class="QRadioButton" name="qtShow1StockRadioButton">
+          <property name="text">
+           <string>以一股為單位</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="qtShow1000StockRadioButton">
+          <property name="text">
+           <string>以一張為單位</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
        <spacer name="horizontalSpacer_3">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -256,7 +293,7 @@
       <property name="minimumSize">
        <size>
         <width>0</width>
-        <height>450</height>
+        <height>500</height>
        </size>
       </property>
       <attribute name="verticalHeaderMinimumSectionSize">

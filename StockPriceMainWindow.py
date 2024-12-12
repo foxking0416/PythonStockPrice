@@ -23,11 +23,7 @@ from enum import Enum, IntEnum
 # pyside6-uic QtStockCapitalReductionEditDialog.ui -o QtStockCapitalReductionEditDialog.py
 # pyside6-uic QtDuplicateOptionDialog.ui -o QtDuplicateOptionDialog.py
 
-g_list_trading_data_table_vertical_header = ['交易日', '交易種類', '交易價格', '交易股數', '交易金額', '手續費', 
-                                             '交易稅', '補充保費', '單筆總成本', '全部股票股利 /\n每股股票股利', '全部現金股利 /\n每股現金股利',
-                                             '累計總成本', '庫存股數', '均價',
-                                             '編輯', '刪除' ]
-g_list_stock_list_table_vertical_header = [ '總成本', '庫存股數', '平均成本', '今日股價', '淨值', '損益', '匯出', '刪除' ]
+g_list_stock_list_table_horizontal_header = [ '總成本', '庫存股數', '平均成本', '今日股價', '淨值', '損益', '匯出', '刪除' ]
 g_current_dir = os.path.dirname(__file__)
 edit_icon_file_path = os.path.join( g_current_dir, 'icon\\Edit.svg' ) 
 edit_icon = QIcon( edit_icon_file_path ) 
@@ -394,7 +390,7 @@ class MainWindow( QMainWindow ):
 
         delegate = CenterIconDelegate()
         self.stock_list_model = QStandardItemModel( 0, 0 )
-        self.stock_list_model.setHorizontalHeaderLabels( g_list_stock_list_table_vertical_header )
+        self.stock_list_model.setHorizontalHeaderLabels( g_list_stock_list_table_horizontal_header )
         self.ui.qtStockListTableView.verticalHeader().setSectionsMovable( True )
         self.ui.qtStockListTableView.verticalHeader().sectionMoved.connect( self.on_stock_list_table_vertical_header_section_moved )
         self.ui.qtStockListTableView.horizontalHeader().sectionResized.connect( self.on_stock_list_table_horizontal_section_resized )
@@ -403,7 +399,7 @@ class MainWindow( QMainWindow ):
         self.ui.qtStockListTableView.clicked.connect( lambda index: self.on_stock_list_table_item_clicked( index, self.stock_list_model ) )
 
         self.per_stock_trading_data_model = QStandardItemModel( 0, 0 ) 
-        self.per_stock_trading_data_model.setVerticalHeaderLabels( g_list_trading_data_table_vertical_header )
+        self.per_stock_trading_data_model.setVerticalHeaderLabels( self.get_trading_data_header() )
         self.ui.qtTradingDataTableView.setModel( self.per_stock_trading_data_model )
         self.ui.qtTradingDataTableView.setItemDelegate( delegate )
         self.ui.qtTradingDataTableView.horizontalHeader().hide()
@@ -420,13 +416,19 @@ class MainWindow( QMainWindow ):
         button_group_1.addButton( self.ui.qtFromNewToOldRadioButton )
         button_group_1.addButton( self.ui.qtFromOldToNewRadioButton )
         self.ui.qtFromNewToOldRadioButton.setChecked( True )
-        self.ui.qtFromNewToOldRadioButton.toggled.connect( self.on_new_to_old_radio_button_toggled )
+        self.ui.qtFromNewToOldRadioButton.toggled.connect( self.on_change_display_mode )
 
         button_group_2 = QButtonGroup(self)
         button_group_2.addButton( self.ui.qtShowAllRadioButton )
         button_group_2.addButton( self.ui.qtShow10RadioButton )
         self.ui.qtShowAllRadioButton.setChecked( True )
-        self.ui.qtShowAllRadioButton.toggled.connect( self.on_show_all_radio_button_toggled )
+        self.ui.qtShowAllRadioButton.toggled.connect( self.on_change_display_mode )
+
+        button_group_3 = QButtonGroup(self)
+        button_group_3.addButton( self.ui.qtShow1StockRadioButton )
+        button_group_3.addButton( self.ui.qtShow1000StockRadioButton )
+        self.ui.qtShow1StockRadioButton.setChecked( True )
+        self.ui.qtShow1StockRadioButton.toggled.connect( self.on_change_display_mode )
         
         self.ui.qtAddStockPushButton.clicked.connect( self.on_add_stock_push_button_clicked )
         self.ui.qtDiscountCheckBox.stateChanged.connect( self.on_discount_check_box_state_changed )
@@ -515,13 +517,7 @@ class MainWindow( QMainWindow ):
 
         self.save_UI_state()
 
-    def on_new_to_old_radio_button_toggled( self ):
-        if self.str_picked_stock_number != None:
-            self.refresh_trading_data_table( self.dict_all_stock_trading_data[ self.str_picked_stock_number ] )
-
-        self.save_UI_state()
-
-    def on_show_all_radio_button_toggled( self ):
+    def on_change_display_mode( self ):
         if self.str_picked_stock_number != None:
             self.refresh_trading_data_table( self.dict_all_stock_trading_data[ self.str_picked_stock_number ] )
 
@@ -601,7 +597,7 @@ class MainWindow( QMainWindow ):
             header_text = table_model.verticalHeaderItem( index.row() ).text()
             str_stock_number = header_text[:4]
             
-            if n_column == len( g_list_stock_list_table_vertical_header ) - 1:#刪除
+            if n_column == len( g_list_stock_list_table_horizontal_header ) - 1:#刪除
                 result = self.show_message_box( "警告", f"確定要刪掉『{header_text}』的所有資料嗎?" )
                 if result:
                     del self.dict_all_stock_trading_data[ str_stock_number ]
@@ -609,7 +605,7 @@ class MainWindow( QMainWindow ):
                     self.refresh_stock_list_table()
                     self.per_stock_trading_data_model.clear()
                     self.auto_save_trading_data()
-            elif n_column == len( g_list_stock_list_table_vertical_header ) - 2:#匯出
+            elif n_column == len( g_list_stock_list_table_horizontal_header ) - 2:#匯出
                 file_path = self.open_save_json_file_dialog()
                 if file_path:
                     dict_stock_trading_data = { str_stock_number: self.dict_all_stock_trading_data[ str_stock_number ] }
@@ -634,8 +630,8 @@ class MainWindow( QMainWindow ):
             n_row = index.row()  # 獲取行索引
             list_trading_data = self.dict_all_stock_trading_data[ self.str_picked_stock_number ]
 
-            if ( n_row == len( g_list_trading_data_table_vertical_header ) - 2 or #編輯
-                n_row == len( g_list_trading_data_table_vertical_header ) - 1 ): #刪除
+            if ( n_row == len( self.get_trading_data_header() ) - 2 or #編輯
+                n_row == len( self.get_trading_data_header() ) - 1 ): #刪除
 
                 if self.str_picked_stock_number is None:
                     return
@@ -652,7 +648,7 @@ class MainWindow( QMainWindow ):
                     return
                 dict_selected_data = list_trading_data[ n_findindex ]
 
-                if n_row == len( g_list_trading_data_table_vertical_header ) - 2: #編輯
+                if n_row == len( self.get_trading_data_header() ) - 2: #編輯
                     if dict_selected_data[ TradingData.TRADING_TYPE ] == TradingType.TEMPLATE:
                         return
                     if dict_selected_data[ TradingData.TRADING_TYPE ] == TradingType.BUY or dict_selected_data[ TradingData.TRADING_TYPE ] == TradingType.SELL:
@@ -680,7 +676,7 @@ class MainWindow( QMainWindow ):
                         self.refresh_trading_data_table( sorted_list )
                         self.auto_save_trading_data()
 
-                elif n_row == len( g_list_trading_data_table_vertical_header ) - 1: #刪除
+                elif n_row == len( self.get_trading_data_header() ) - 1: #刪除
                     result = self.show_message_box( "警告", f"確定要刪掉這筆交易資料嗎?" )
                     if result:
                         del self.dict_all_stock_trading_data[ str_stock_number ][ n_findindex ]
@@ -691,8 +687,8 @@ class MainWindow( QMainWindow ):
 
     def export_trading_data_to_excel( self, worksheet, str_stock_number ):
 
-        for index_row, str_header in enumerate( g_list_trading_data_table_vertical_header ):
-            if index_row == len( g_list_trading_data_table_vertical_header ) - 2:
+        for index_row, str_header in enumerate( self.get_trading_data_header() ):
+            if index_row == len( self.get_trading_data_header() ) - 2:
                 break
             worksheet.cell( row = index_row + 1, column = 1, value = str_header )
 
@@ -851,6 +847,7 @@ class MainWindow( QMainWindow ):
             f.write( "補充保費," + str( self.ui.qtExtraInsuranceFeeCheckBox.isChecked() ) + '\n' )
             f.write( "顯示排序," + str( self.ui.qtFromNewToOldRadioButton.isChecked() ) + '\n' )
             f.write( "顯示數量," + str( self.ui.qtShowAllRadioButton.isChecked() ) + '\n' )
+            f.write( "顯示單位," + str( self.ui.qtShow1StockRadioButton.isChecked() ) + '\n' )
             f.write( "欄寬" )
             for i in range( len( self.list_stock_list_column_width ) ):
                 f.write( f",{ self.list_stock_list_column_width[ i ] }" )
@@ -864,7 +861,9 @@ class MainWindow( QMainWindow ):
                QSignalBlocker( self.ui.qtFromNewToOldRadioButton ),
                QSignalBlocker( self.ui.qtFromOldToNewRadioButton ), 
                QSignalBlocker( self.ui.qtShowAllRadioButton ), 
-               QSignalBlocker( self.ui.qtShow10RadioButton ) ):
+               QSignalBlocker( self.ui.qtShow10RadioButton ),
+               QSignalBlocker( self.ui.qtShow1StockRadioButton ), 
+               QSignalBlocker( self.ui.qtShow1000StockRadioButton ) ):
 
             file_path = os.path.join( os.path.dirname(__file__), 'UISetting.config' )
             if os.path.exists( file_path ):
@@ -889,6 +888,11 @@ class MainWindow( QMainWindow ):
                                 self.ui.qtShowAllRadioButton.setChecked( True )
                             else:
                                 self.ui.qtShow10RadioButton.setChecked( True )
+                        elif row[0] == "顯示單位":
+                            if row[ 1 ] == 'True':
+                                self.ui.qtShow1StockRadioButton.setChecked( True )
+                            else:
+                                self.ui.qtShow1000StockRadioButton.setChecked( True )
                         elif row[0] == '欄寬':
                             self.list_stock_list_column_width = []
                             for i in range( 1, len( row ) ):
@@ -1040,7 +1044,7 @@ class MainWindow( QMainWindow ):
     def refresh_stock_list_table( self ):
         with QSignalBlocker( self.ui.qtStockListTableView.horizontalHeader() ):
             self.stock_list_model.clear()
-            self.stock_list_model.setHorizontalHeaderLabels( g_list_stock_list_table_vertical_header )
+            self.stock_list_model.setHorizontalHeaderLabels( g_list_stock_list_table_horizontal_header )
 
             list_vertical_labels = []
             for index_row,( key_stock_number, value ) in enumerate( self.dict_all_stock_trading_data.items() ):
@@ -1101,10 +1105,10 @@ class MainWindow( QMainWindow ):
                 export_icon_item.setIcon( export_icon )
                 export_icon_item.setFlags( export_icon_item.flags() & ~Qt.ItemIsEditable )
 
-                self.stock_list_model.setItem( index_row, len( g_list_stock_list_table_vertical_header ) - 1, delete_icon_item )
-                self.stock_list_model.setItem( index_row, len( g_list_stock_list_table_vertical_header ) - 2, export_icon_item )
+                self.stock_list_model.setItem( index_row, len( g_list_stock_list_table_horizontal_header ) - 1, delete_icon_item )
+                self.stock_list_model.setItem( index_row, len( g_list_stock_list_table_horizontal_header ) - 2, export_icon_item )
 
-            for column in range( len( g_list_stock_list_table_vertical_header ) ):
+            for column in range( len( g_list_stock_list_table_horizontal_header ) ):
                 if column < len( self.list_stock_list_column_width ):
                     self.ui.qtStockListTableView.setColumnWidth( column, self.list_stock_list_column_width[ column ] )
                 else:
@@ -1112,6 +1116,14 @@ class MainWindow( QMainWindow ):
                     self.list_stock_list_column_width.append( 100 )
 
             self.stock_list_model.setVerticalHeaderLabels( list_vertical_labels )
+
+    def get_trading_data_header( self ):
+        if self.ui.qtShow1StockRadioButton.isChecked():
+            return ['交易日', '交易種類', '交易價格', '交易股數', '交易金額', '手續費', '交易稅', '補充保費', '單筆總成本', '全部股票股利 /\n每股股票股利', '全部現金股利 /\n每股現金股利',
+                    '累計總成本', '庫存股數', '均價', '編輯', '刪除' ]
+        else:
+            return ['交易日', '交易種類', '交易價格', '交易股數', '交易金額', '手續費', '交易稅', '補充保費', '單筆總成本', '全部股票股利 /\n每股股票股利', '全部現金股利 /\n每股現金股利',
+                    '累計總成本', '庫存張數', '均價', '編輯', '刪除' ]
 
     def get_per_trading_data_text_list( self, dict_per_trading_data ):
         e_trading_type = dict_per_trading_data[ TradingData.TRADING_TYPE ]
@@ -1148,6 +1160,12 @@ class MainWindow( QMainWindow ):
         n_accumulated_cost = dict_per_trading_data[ TradingData.ACCUMULATED_COST ]
         n_accumulated_inventory = dict_per_trading_data[ TradingData.ACCUMULATED_INVENTORY ]
         f_average_cost = round( dict_per_trading_data[ TradingData.AVERAGE_COST ], 3 )
+        if self.ui.qtShow1StockRadioButton.isChecked():
+            f_accumulated_inventory = n_accumulated_inventory
+            f_stock_dividend_gain = n_stock_dividend_gain
+        else:
+            f_accumulated_inventory = n_accumulated_inventory / 1000
+            f_stock_dividend_gain = n_stock_dividend_gain / 1000
 
         if e_trading_type == TradingType.BUY:
             str_trading_type = "買進"
@@ -1170,16 +1188,16 @@ class MainWindow( QMainWindow ):
                       format( n_trading_tax, "," ),                      #交易稅
                       format( n_trading_insurance, "," ),                #補充保費
                       format( n_per_trading_total_cost, "," ),           #單筆總成本
-                      format( n_stock_dividend_gain, "," ) + ' / ' + str( f_stock_dividend_per_share ), #總獲得股數 / 每股股票股利
+                      format( f_stock_dividend_gain, "," ) + ' / ' + str( f_stock_dividend_per_share ), #總獲得股數 / 每股股票股利
                       format( n_cash_dividend_gain, "," ) + ' / ' + str( f_cash_dividend_per_share ), #總獲得現金 / 每股現金股利
                       format( n_accumulated_cost, "," ),                 #累計總成本
-                      format( n_accumulated_inventory, "," ),            #庫存股數
+                      format( f_accumulated_inventory, "," ),            #庫存股數
                       format( f_average_cost, "," ) ]                    #均價
         return list_data
 
     def refresh_trading_data_table( self, sorted_list ):
         self.per_stock_trading_data_model.clear()
-        self.per_stock_trading_data_model.setVerticalHeaderLabels( g_list_trading_data_table_vertical_header )
+        self.per_stock_trading_data_model.setVerticalHeaderLabels( self.get_trading_data_header() )
         self.ui.qtTradingDataTableView.horizontalHeader().hide()
 
         if self.ui.qtFromNewToOldRadioButton.isChecked():
