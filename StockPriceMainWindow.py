@@ -490,7 +490,7 @@ class MainWindow( QMainWindow ):
     def on_add_stock_push_button_clicked( self ):
         str_stock_input = self.ui.qtStockInputLineEdit.text()
         self.ui.qtStockInputLineEdit.clear()
-        str_first_four_chars = str_stock_input[:4]
+        str_first_four_chars = str_stock_input.split(" ")[0]
         if str_first_four_chars not in self.dict_all_company_number_and_name:
             b_find = False
             for stock_number, stock_name in self.dict_all_company_number_and_name.items():
@@ -604,7 +604,7 @@ class MainWindow( QMainWindow ):
             n_column = index.column()  # 獲取列索引
             n_row = index.row()  # 獲取行索引
             header_text = table_model.verticalHeaderItem( index.row() ).text()
-            str_stock_number = header_text[:4]
+            str_stock_number = header_text.split(" ")[0]
             
             if n_column == len( g_list_stock_list_table_horizontal_header ) - 1:#刪除
                 result = self.show_message_box( "警告", f"確定要刪掉『{header_text}』的所有資料嗎?" )
@@ -1336,7 +1336,12 @@ class MainWindow( QMainWindow ):
             tds = []
             for raw in tr:
                 data = [ td.get_text() for td in raw.findAll("td" )]
-                if len( data ) == 7 and data[ 5 ] == 'ESVUFR': 
+                if len( data ) == 7 and ( data[ 5 ] == 'ESVUFR' or 
+                                          data[ 5 ] == 'CEOGEU' or 
+                                          data[ 5 ] == 'CEOJBU' or 
+                                          data[ 5 ] == 'CEOGBU' or
+                                          data[ 5 ] == 'CEOIBU' or
+                                          data[ 5 ] == 'CEOGDU' ): 
                     total_company_count += 1
                     if '\u3000' in data[ 0 ]:
                         modified_data = data[ 0 ].split("\u3000")
@@ -1352,7 +1357,11 @@ class MainWindow( QMainWindow ):
             tr = soup.findAll( 'tr' )
             for raw in tr:
                 data = [ td.get_text() for td in raw.findAll("td") ]
-                if len( data ) == 7 and data[ 5 ] == 'ESVUFR': 
+                if len( data ) == 7 and ( data[ 5 ] == 'ESVUFR' or 
+                                          data[ 5 ] == 'CEOGEU' or 
+                                          data[ 5 ] == 'CEOJBU' or 
+                                          data[ 5 ] == 'CEOGBU' or
+                                          data[ 5 ] == 'CEOIBU' ): 
                     total_company_count += 1
                     if '\u3000' in data[ 0 ]:
                         modified_data = data[ 0 ].split("\u3000")

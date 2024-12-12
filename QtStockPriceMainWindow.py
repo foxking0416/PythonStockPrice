@@ -45,7 +45,8 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.qtStockInputLineEdit.sizePolicy().hasHeightForWidth())
         self.qtStockInputLineEdit.setSizePolicy(sizePolicy)
-        self.qtStockInputLineEdit.setMaximumSize(QSize(100, 16777215))
+        self.qtStockInputLineEdit.setMinimumSize(QSize(200, 0))
+        self.qtStockInputLineEdit.setMaximumSize(QSize(200, 16777215))
 
         self.horizontalLayout.addWidget(self.qtStockInputLineEdit)
 
@@ -96,7 +97,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_6.setObjectName(u"horizontalLayout_6")
         self.qtStockSelectComboBox = QComboBox(self.centralwidget)
         self.qtStockSelectComboBox.setObjectName(u"qtStockSelectComboBox")
-        self.qtStockSelectComboBox.setMinimumSize(QSize(100, 0))
+        self.qtStockSelectComboBox.setMinimumSize(QSize(200, 0))
 
         self.horizontalLayout_6.addWidget(self.qtStockSelectComboBox)
 
