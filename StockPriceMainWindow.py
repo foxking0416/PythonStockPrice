@@ -1182,10 +1182,10 @@ class MainWindow( QMainWindow ):
     def get_trading_data_header( self ):
         if self.ui.qtShow1StockRadioButton.isChecked():
             return ['交易日', '交易種類', '交易價格', '交易股數', '交易金額', '手續費', '交易稅', '補充保費', '單筆總成本', '全部股票股利 /\n每股股票股利', '全部現金股利 /\n每股現金股利',
-                    '累計總成本', '庫存股數', '均價', '編輯', '刪除' ]
+                    '累計總成本', '庫存股數', '平均成本', '編輯', '刪除' ]
         else:
             return ['交易日', '交易種類', '交易價格', '交易張數', '交易金額', '手續費', '交易稅', '補充保費', '單筆總成本', '全部股票股利 /\n每股股票股利', '全部現金股利 /\n每股現金股利',
-                    '累計總成本', '庫存張數', '均價', '編輯', '刪除' ]
+                    '累計總成本', '庫存張數', '平均成本', '編輯', '刪除' ]
 
     def get_per_trading_data_text_list( self, dict_per_trading_data ):
         e_trading_type = dict_per_trading_data[ TradingData.TRADING_TYPE ]
