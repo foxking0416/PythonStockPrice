@@ -91,7 +91,7 @@ class TradingCost( Enum ):
     TRADING_TOTAL_COST = 3
 
 class Utility():
-    def compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, b_extra_insurance, b_daying_trading ):
+    def compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, b_daying_trading ):
 
         dict_result = {}
         if e_trading_type == TradingType.BUY or e_trading_type == TradingType.SELL:
@@ -195,6 +195,7 @@ class StockCapitalReductionEditDialog( QDialog ):
                                                                     1,                                                  #手續費折扣                                   
                                                                     0,                                                  #每股股票股利
                                                                     0,                                                  #每股現金股利
+                                                                    False,                                              #是否需扣除補充保費
                                                                     f_stock_capital_reduction_per_share )               #每股減資金額           
             self.accept()
         else:
@@ -335,6 +336,7 @@ class StockTradingEditDialog( QDialog ):
                                                                     self.get_trading_fee_discount(),                    #手續費折扣
                                                                     0,                                                  #每股股票股利
                                                                     0,                                                  #每股現金股利
+                                                                    False,                                              #是否需扣除補充保費
                                                                     0 )                                                 #每股減資金額
             self.accept()
         else:
@@ -377,7 +379,7 @@ class StockTradingEditDialog( QDialog ):
         n_trading_count = self.get_trading_count()
         f_trading_fee_discount = self.get_trading_fee_discount() 
         
-        dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, True, False )
+        dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, False )
 
         if e_trading_type == TradingType.BUY:
             self.ui.qtTradingValueLineEdit.setText( format( dict_result[ TradingCost.TRADING_VALUE ], ',' ) )
@@ -509,6 +511,7 @@ class MainWindow( QMainWindow ):
                                                                1,                    #手續費折扣
                                                                0,                    #每股股票股利
                                                                0,                    #每股現金股利
+                                                               False,                #是否需扣除補充保費
                                                                0 )                   #每股減資金額
             self.dict_all_stock_trading_data[ str_first_four_chars ] = [ dict_trading_data ]
             sorted_list = self.process_single_trading_data( str_first_four_chars )
@@ -910,6 +913,8 @@ class MainWindow( QMainWindow ):
         sorted_list = sorted( list_trading_data, key=lambda x: ( datetime.datetime.strptime( x[ TradingData.TRADING_DATE ], "%Y-%m-%d"), -x[ TradingData.TRADING_TYPE ] ) )
         n_accumulated_inventory = 0
         n_accumulated_cost = 0
+        str_last_buying_date = ''
+        n_last_buying_count = 0
         for index, item in enumerate( sorted_list ):
             item[ TradingData.SORTED_INDEX ] = index
             e_trading_type = item[ TradingData.TRADING_TYPE ]
@@ -918,7 +923,7 @@ class MainWindow( QMainWindow ):
                 f_trading_price = item[ TradingData.TRADING_PRICE ]
                 n_trading_count = item[ TradingData.TRADING_COUNT ]
                 f_trading_fee_discount = item[ TradingData.TRADING_FEE_DISCOUNT ]
-                dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, True, False )
+                dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, False )
                 item[ TradingData.TRADING_VALUE ] = dict_result[ TradingCost.TRADING_VALUE ]
                 item[ TradingData.TRADING_FEE ] = dict_result[ TradingCost.TRADING_FEE ]
                 item[ TradingData.TRADING_TAX ] = dict_result[ TradingCost.TRADING_TAX ]
@@ -929,19 +934,61 @@ class MainWindow( QMainWindow ):
 
                 item[ TradingData.STOCK_DIVIDEND_GAIN ] = 0
                 item[ TradingData.CASH_DIVIDEND_GAIN ] = 0
+                str_buying_date = item[ TradingData.TRADING_DATE ]
+                if str_last_buying_date == str_buying_date:
+                    n_last_buying_count += n_trading_count
+                else:
+                    str_last_buying_date = str_buying_date
+                    n_last_buying_count = n_trading_count
             elif e_trading_type == TradingType.SELL:
+                str_selling_date = item[ TradingData.TRADING_DATE ]
                 f_trading_price = item[ TradingData.TRADING_PRICE ]
-                n_trading_count = item[ TradingData.TRADING_COUNT ]
                 f_trading_fee_discount = item[ TradingData.TRADING_FEE_DISCOUNT ]
-                dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, True, False )
-                item[ TradingData.TRADING_VALUE ] = dict_result[ TradingCost.TRADING_VALUE ]
-                item[ TradingData.TRADING_FEE ] = dict_result[ TradingCost.TRADING_FEE ]
-                item[ TradingData.TRADING_TAX ] = dict_result[ TradingCost.TRADING_TAX ]
-                item[ TradingData.EXTRA_INSURANCE_FEE ] = 0
-                n_per_trading_total_cost = item[ TradingData.TRADING_COST ] = dict_result[ TradingCost.TRADING_TOTAL_COST ]
-                n_accumulated_cost -= n_per_trading_total_cost
-                n_accumulated_inventory -= n_trading_count
+                n_trading_count = item[ TradingData.TRADING_COUNT ]
 
+                if str_selling_date == str_last_buying_date: #賣出與買入同一天屬於當沖
+                    if n_trading_count <= n_last_buying_count: #賣出數量小於或等於買入數量，表示全部賣出數量都可視為當沖
+                        dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, True )
+                        item[ TradingData.TRADING_VALUE ] = dict_result[ TradingCost.TRADING_VALUE ]
+                        item[ TradingData.TRADING_FEE ] = dict_result[ TradingCost.TRADING_FEE ]
+                        item[ TradingData.TRADING_TAX ] = dict_result[ TradingCost.TRADING_TAX ]
+                        n_per_trading_total_cost = item[ TradingData.TRADING_COST ] = dict_result[ TradingCost.TRADING_TOTAL_COST ]
+                        n_accumulated_cost -= n_per_trading_total_cost
+                        n_accumulated_inventory -= n_trading_count
+                        n_last_buying_count -= n_trading_count
+                    else: #賣出數量大於買入數量，表示只有部分數量都可視為當沖
+                        n_trading_count_1 = n_last_buying_count
+                        dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count_1, f_trading_fee_discount, True )#這部分是當沖
+                        n_trading_value_1 = dict_result[ TradingCost.TRADING_VALUE ]
+                        n_trading_fee_1 = dict_result[ TradingCost.TRADING_FEE ]
+                        n_trading_tax_1 = dict_result[ TradingCost.TRADING_TAX ]
+                        n_trading_total_cost_1 = dict_result[ TradingCost.TRADING_TOTAL_COST ]
+
+                        n_trading_count_2 = n_trading_count - n_last_buying_count
+                        dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count_2, f_trading_fee_discount, False )#這部分不是當沖
+                        n_trading_value_2 = dict_result[ TradingCost.TRADING_VALUE ]
+                        n_trading_fee_2 = dict_result[ TradingCost.TRADING_FEE ]
+                        n_trading_tax_2 = dict_result[ TradingCost.TRADING_TAX ]
+                        n_trading_total_cost_2 = dict_result[ TradingCost.TRADING_TOTAL_COST ]
+
+                        item[ TradingData.TRADING_VALUE ] = n_trading_value_1 + n_trading_value_2
+                        item[ TradingData.TRADING_FEE ] = n_trading_fee_1 + n_trading_fee_2
+                        item[ TradingData.TRADING_TAX ] = n_trading_tax_1 + n_trading_tax_2
+                        n_per_trading_total_cost = item[ TradingData.TRADING_COST ] = n_trading_total_cost_1 + n_trading_total_cost_2
+                        n_accumulated_cost -= n_per_trading_total_cost
+                        n_accumulated_inventory -= n_trading_count
+
+                        n_last_buying_count = 0
+                else:
+                    dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, False )
+                    item[ TradingData.TRADING_VALUE ] = dict_result[ TradingCost.TRADING_VALUE ]
+                    item[ TradingData.TRADING_FEE ] = dict_result[ TradingCost.TRADING_FEE ]
+                    item[ TradingData.TRADING_TAX ] = dict_result[ TradingCost.TRADING_TAX ]
+                    n_per_trading_total_cost = item[ TradingData.TRADING_COST ] = dict_result[ TradingCost.TRADING_TOTAL_COST ]
+                    n_accumulated_cost -= n_per_trading_total_cost
+                    n_accumulated_inventory -= n_trading_count
+
+                item[ TradingData.EXTRA_INSURANCE_FEE ] = 0
                 item[ TradingData.STOCK_DIVIDEND_GAIN ] = 0
                 item[ TradingData.CASH_DIVIDEND_GAIN ] = 0
             elif e_trading_type == TradingType.DIVIDEND:
