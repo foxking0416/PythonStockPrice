@@ -24,7 +24,7 @@ from enum import Enum, IntEnum
 # pyside6-uic QtDuplicateOptionDialog.ui -o QtDuplicateOptionDialog.py
 
 g_list_trading_data_table_vertical_header = ['交易日', '交易種類', '交易價格', '交易股數', '交易金額', '手續費', 
-                                             '交易稅', '補充保費', '單筆總成本', '股票股利', '現金股利',
+                                             '交易稅', '補充保費', '單筆總成本', '全部股票股利 /\n每股股票股利', '全部現金股利 /\n每股現金股利',
                                              '累計總成本', '庫存股數', '均價',
                                              '編輯', '刪除' ]
 g_list_stock_list_table_vertical_header = [ '總成本', '庫存股數', '平均成本', '今日股價', '淨值', '損益', '匯出', '刪除' ]
@@ -690,6 +690,12 @@ class MainWindow( QMainWindow ):
                         self.auto_save_trading_data()
 
     def export_trading_data_to_excel( self, worksheet, str_stock_number ):
+
+        for index_row, str_header in enumerate( g_list_trading_data_table_vertical_header ):
+            if index_row == len( g_list_trading_data_table_vertical_header ) - 2:
+                break
+            worksheet.cell( row = index_row + 1, column = 1, value = str_header )
+
         list_trading_data = self.dict_all_stock_trading_data[ str_stock_number ]
         for index_column, dict_per_trading_data in enumerate( list_trading_data ):
             e_trading_type = dict_per_trading_data[ TradingData.TRADING_TYPE ]
