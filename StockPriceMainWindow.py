@@ -1321,6 +1321,19 @@ class MainWindow( QMainWindow ):
             self.per_stock_trading_data_model.setItem( len( list_data ) + 1, column, delete_icon_item )
             column += 1
 
+    def check_internet_via_http( self, url="https://www.google.com", timeout=3):
+        """
+        檢測是否有網路連線（透過 HTTP 請求）
+        :param url: 用於測試的 URL
+        :param timeout: 超時時間（秒）
+        :return: True（有網路連線）或 False（無網路連線）
+        """
+        try:
+            response = requests.get(url, timeout=timeout)
+            return response.status_code == 200
+        except requests.RequestException:
+            return False
+
     def download_all_company_stock_number( self, str_date ): 
         dict_company_number_to_name = {}
 
@@ -1332,8 +1345,9 @@ class MainWindow( QMainWindow ):
                 for i, row in enumerate( data ):
                     if i == 0:
                         if row.strip() != str_date:
-                            b_need_to_download = True
-                            break
+                            if self.check_internet_via_http(): #日期不一樣，且又有網路時才重新下載，不然就用舊的
+                                b_need_to_download = True
+                                break
                     else:
                         ele = row.strip().split( ',' )
                         dict_company_number_to_name[ ele[ 0 ] ] = ele[ 1 ]
@@ -1425,8 +1439,9 @@ class MainWindow( QMainWindow ):
                 for i, row in enumerate( data ):
                     if i == 0:
                         if row.strip() != str_date:
-                            b_need_to_download = True
-                            break
+                            if self.check_internet_via_http(): #日期不一樣，且又有網路時才重新下載，不然就用舊的
+                                b_need_to_download = True
+                                break
                     else:
                         ele = row.strip().split( ',' )
                         dict_company_number_to_price_info[ ele[ 0 ] ] = ele[ 2 ]
