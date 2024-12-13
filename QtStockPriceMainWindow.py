@@ -26,7 +26,7 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(938, 867)
+        MainWindow.resize(938, 893)
         self.qtActionImport = QAction(MainWindow)
         self.qtActionImport.setObjectName(u"qtActionImport")
         self.qtActionExport = QAction(MainWindow)
@@ -186,7 +186,7 @@ class Ui_MainWindow(object):
 
         self.qtTradingDataTableView = QTableView(self.centralwidget)
         self.qtTradingDataTableView.setObjectName(u"qtTradingDataTableView")
-        self.qtTradingDataTableView.setMinimumSize(QSize(0, 500))
+        self.qtTradingDataTableView.setMinimumSize(QSize(0, 520))
         self.qtTradingDataTableView.verticalHeader().setMinimumSectionSize(15)
 
         self.verticalLayout.addWidget(self.qtTradingDataTableView)

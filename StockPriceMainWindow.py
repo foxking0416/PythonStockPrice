@@ -14,7 +14,7 @@ from PySide6.QtGui import QStandardItemModel, QStandardItem, QIcon, QBrush
 from PySide6.QtCore import Qt, QModelIndex, QRect, QSignalBlocker
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
-from openpyxl.styles import Alignment
+from openpyxl.styles import Alignment, PatternFill
 from enum import Enum, IntEnum
 
 # 要把.ui檔變成.py
@@ -725,21 +725,38 @@ class MainWindow( QMainWindow ):
                 str_data = str_data.replace( ',', '' )
                 n_cell_row = n_row_start + index_row + 1
                 n_cell_column = index_column + 2
+                cell = worksheet.cell( row = n_cell_row, column = n_cell_column )
+                if str_data == "買進":
+                    color_fill = PatternFill( start_color = "DA9694", end_color = "DA9694", fill_type="solid")
+                    cell.fill = color_fill
+                elif str_data == "賣出":
+                    color_fill = PatternFill( start_color = "76933C", end_color = "76933C", fill_type="solid")
+                    cell.fill = color_fill
+                elif str_data == "股利分配":
+                    color_fill = PatternFill( start_color = "8DB4E2", end_color = "8DB4E2", fill_type="solid")
+                    cell.fill = color_fill
+                elif str_data == "減資":
+                    color_fill = PatternFill( start_color = "B1A0C7", end_color = "B1A0C7", fill_type="solid")
+                    cell.fill = color_fill
+
                 str_cell = get_column_letter( n_cell_column ) + str( n_cell_row )
-                try:
-                    f_data= float( str_data )
-                    if f_data.is_integer():
-                        f_data = int( f_data )
-                        worksheet[ str_cell ].number_format = "#,##0"  #顯示千位逗號
-                    elif ( f_data * 10 ).is_integer():
-                        worksheet[ str_cell ].number_format = "#,##0.0"
-                    elif ( f_data * 100 ).is_integer():
-                        worksheet[ str_cell ].number_format = "#,##0.00"
-                    elif ( f_data * 1000 ).is_integer():
-                        worksheet[ str_cell ].number_format = "#,##0.000"
-                    worksheet.cell( row = n_cell_row, column = n_cell_column, value = f_data )
-                except ValueError:
+                if index_row == 0:
                     worksheet.cell( row = n_cell_row, column = n_cell_column, value = str_data )
+                else:
+                    try:
+                        f_data= float( str_data )
+                        if f_data.is_integer():
+                            f_data = int( f_data )
+                            worksheet[ str_cell ].number_format = "#,##0"  #顯示千位逗號
+                        elif ( f_data * 10 ).is_integer():
+                            worksheet[ str_cell ].number_format = "#,##0.0"
+                        elif ( f_data * 100 ).is_integer():
+                            worksheet[ str_cell ].number_format = "#,##0.00"
+                        elif ( f_data * 1000 ).is_integer():
+                            worksheet[ str_cell ].number_format = "#,##0.000"
+                        worksheet.cell( row = n_cell_row, column = n_cell_column, value = f_data )
+                    except ValueError:
+                        worksheet.cell( row = n_cell_row, column = n_cell_column, value = str_data )
 
                 worksheet[ str_cell ].alignment = Alignment( horizontal = "center", vertical = "center" )
             data_index += 1
@@ -1214,10 +1231,10 @@ class MainWindow( QMainWindow ):
 
     def get_trading_data_header( self ):
         if self.ui.qtShow1StockRadioButton.isChecked():
-            return ['交易日', '交易種類', '交易價格', '交易股數', '交易金額', '手續費', '交易稅', '補充保費', '單筆總成本', '全部股票股利 /\n每股股票股利', '全部現金股利 /\n每股現金股利',
+            return ['年度', '日期', '交易種類', '交易價格', '交易股數', '交易金額', '手續費', '交易稅', '補充保費', '單筆總成本', '全部股票股利 /\n每股股票股利', '全部現金股利 /\n每股現金股利',
                     '累計總成本', '庫存股數', '平均成本', '編輯', '刪除' ]
         else:
-            return ['交易日', '交易種類', '交易價格', '交易張數', '交易金額', '手續費', '交易稅', '補充保費', '單筆總成本', '全部股票股利 /\n每股股票股利', '全部現金股利 /\n每股現金股利',
+            return ['年度', '日期', '交易種類', '交易價格', '交易張數', '交易金額', '手續費', '交易稅', '補充保費', '單筆總成本', '全部股票股利 /\n每股股票股利', '全部現金股利 /\n每股現金股利',
                     '累計總成本', '庫存張數', '平均成本', '編輯', '刪除' ]
 
     def get_per_trading_data_text_list( self, dict_per_trading_data ):
@@ -1225,6 +1242,8 @@ class MainWindow( QMainWindow ):
         if e_trading_type == TradingType.TEMPLATE:
             return []
         str_date = dict_per_trading_data[ TradingData.TRADING_DATE ]
+        str_year = str_date.split( '-' )[ 0 ]
+        str_month_date = str_date[ 5: ].replace( '-', '/' )
         obj_date = datetime.datetime.strptime( str_date, "%Y-%m-%d" )
         n_weekday = obj_date.weekday()
         if n_weekday == 0:
@@ -1289,7 +1308,8 @@ class MainWindow( QMainWindow ):
         elif e_trading_type == TradingType.CAPITAL_REDUCTION:
             str_trading_type = "減資"
 
-        list_data = [ dict_per_trading_data[ TradingData.TRADING_DATE ] + str_weekday, #交易日期
+        list_data = [ str_year,                                          #交易年度
+                      str_month_date + str_weekday,                      #交易日期
                       str_trading_type,                                  #交易種類
                       format( f_trading_price, "," ),                    #交易價格
                       str_trading_count,                                 #交易股數
