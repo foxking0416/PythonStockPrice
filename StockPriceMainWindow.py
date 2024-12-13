@@ -13,6 +13,8 @@ from PySide6.QtWidgets import QApplication, QMainWindow, QDialog, QButtonGroup, 
 from PySide6.QtGui import QStandardItemModel, QStandardItem, QIcon, QBrush
 from PySide6.QtCore import Qt, QModelIndex, QRect, QSignalBlocker
 from openpyxl import Workbook
+from openpyxl.utils import get_column_letter
+from openpyxl.styles import Alignment
 from enum import Enum, IntEnum
 
 # 要把.ui檔變成.py
@@ -697,20 +699,43 @@ class MainWindow( QMainWindow ):
 
     def export_trading_data_to_excel( self, worksheet, str_stock_number ):
 
-        for index_row, str_header in enumerate( self.get_trading_data_header() ):
-            if index_row == len( self.get_trading_data_header() ) - 2:
-                break
-            worksheet.cell( row = index_row + 1, column = 1, value = str_header )
-
+        worksheet.column_dimensions['A'].width = 30
         list_trading_data = self.dict_all_stock_trading_data[ str_stock_number ]
-        for index_column, dict_per_trading_data in enumerate( list_trading_data ):
+
+        data_index = 0
+        n_row_start = 0
+        for dict_per_trading_data in list_trading_data:
+            
             e_trading_type = dict_per_trading_data[ TradingData.TRADING_TYPE ]
             if e_trading_type == TradingType.TEMPLATE:
                 continue
 
+            if data_index % 10 == 0:
+                n_row_start = int( ( len( self.get_trading_data_header() ) -2 + 1 ) * int( data_index / 10 ) )
+                for index_row, str_header in enumerate( self.get_trading_data_header() ):
+                    if index_row == len( self.get_trading_data_header() ) - 2:
+                        break
+                    worksheet.cell( row = n_row_start + index_row + 1, column = 1, value = str_header )
+                index_column = 0
+
+            worksheet.column_dimensions[ get_column_letter( index_column + 2 ) ].width = 15
+
             list_data = self.get_per_trading_data_text_list( dict_per_trading_data )
             for index_row, str_data in enumerate( list_data ):
-                worksheet.cell( row = index_row + 1, column = index_column + 1, value = str_data )
+                str_data = str_data.replace( ',', '' )
+                n_cell_row = n_row_start + index_row + 1
+                n_cell_column = index_column + 2
+                try:
+                    f_data= float( str_data )
+                    if f_data.is_integer():
+                        f_data = int( f_data )
+                    worksheet.cell( row = n_cell_row, column = n_cell_column, value = f_data )
+                except ValueError:
+                    worksheet.cell( row = n_cell_row, column = n_cell_column, value = str_data )
+
+                worksheet[ get_column_letter( n_cell_column ) + str( n_cell_row ) ].alignment = Alignment( horizontal = "center", vertical = "center" )
+            data_index += 1
+            index_column += 1
 
     def on_export_selected_to_excell_button_clicked( self ):
         if self.str_picked_stock_number is None:
