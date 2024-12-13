@@ -14,7 +14,7 @@ from PySide6.QtGui import QStandardItemModel, QStandardItem, QIcon, QBrush
 from PySide6.QtCore import Qt, QModelIndex, QRect, QSignalBlocker
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
-from openpyxl.styles import Alignment, PatternFill
+from openpyxl.styles import Alignment, PatternFill, Font
 from enum import Enum, IntEnum
 
 # 要把.ui檔變成.py
@@ -697,8 +697,8 @@ class MainWindow( QMainWindow ):
                         self.refresh_trading_data_table( sorted_list )
                         self.auto_save_trading_data()
 
-    def export_trading_data_to_excel( self, worksheet, str_stock_number ):
-
+    def export_trading_data_to_excel( self, worksheet, str_stock_number, str_stock_name ):
+        str_title = str_stock_number + " " + str_stock_name
         worksheet.column_dimensions['A'].width = 30
         list_trading_data = self.dict_all_stock_trading_data[ str_stock_number ]
 
@@ -711,16 +711,22 @@ class MainWindow( QMainWindow ):
                 continue
 
             if data_index % 10 == 0:
-                n_row_start = int( ( len( self.get_trading_data_header() ) -2 + 1 ) * int( data_index / 10 ) )
-                for index_row, str_header in enumerate( self.get_trading_data_header() ):
-                    if index_row == len( self.get_trading_data_header() ) - 2:
+                list_data_header = self.get_trading_data_header()
+                list_data_header.insert( 0, str_title )
+
+                n_row_start = int( ( len( list_data_header ) -2 + 1 ) * int( data_index / 10 ) )
+                for index_row, str_header in enumerate( list_data_header ):
+                    if index_row == len( list_data_header ) - 2:
                         break
                     worksheet.cell( row = n_row_start + index_row + 1, column = 1, value = str_header )
+                    if index_row == 0:
+                        worksheet.cell( row = n_row_start + index_row + 1, column = 1 ).font = Font( bold = True )
                 index_column = 0
 
             worksheet.column_dimensions[ get_column_letter( index_column + 2 ) ].width = 15
 
             list_data = self.get_per_trading_data_text_list( dict_per_trading_data )
+            list_data.insert( 0, "" )
             for index_row, str_data in enumerate( list_data ):
                 str_data = str_data.replace( ',', '' )
                 n_cell_row = n_row_start + index_row + 1
@@ -740,7 +746,7 @@ class MainWindow( QMainWindow ):
                     cell.fill = color_fill
 
                 str_cell = get_column_letter( n_cell_column ) + str( n_cell_row )
-                if index_row == 0:
+                if index_row == 1:
                     worksheet.cell( row = n_cell_row, column = n_cell_column, value = str_data )
                 else:
                     try:
@@ -771,8 +777,8 @@ class MainWindow( QMainWindow ):
         if file_path:
             workbook = Workbook()
             worksheet = workbook.active
-            worksheet.title = str_stock_number + " " +str_stock_name
-            self.export_trading_data_to_excel( worksheet, str_stock_number )
+            worksheet.title = str_stock_number + " " + str_stock_name
+            self.export_trading_data_to_excel( worksheet, str_stock_number, str_stock_name )
             workbook.save( file_path )
 
     def on_export_all_to_excell_button_clicked( self ):
@@ -781,13 +787,13 @@ class MainWindow( QMainWindow ):
             workbook = Workbook()
             for index, ( key_stock_number, value ) in enumerate( self.dict_all_stock_trading_data.items() ):
                 str_stock_name = self.dict_all_company_number_and_name[ key_stock_number ]
-                str_tab_title = key_stock_number + " " +str_stock_name
+                str_tab_title = key_stock_number + " " + str_stock_name
                 if index == 0:
                     worksheet = workbook.active
                     worksheet.title = str_tab_title
                 else:
                     worksheet = workbook.create_sheet( str_tab_title, index )
-                self.export_trading_data_to_excel( worksheet, key_stock_number )
+                self.export_trading_data_to_excel( worksheet, key_stock_number, str_stock_name )
             workbook.save( file_path )
 
     def on_export_trading_data_action_triggered( self ):
