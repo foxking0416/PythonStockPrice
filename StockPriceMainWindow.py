@@ -1072,7 +1072,9 @@ class MainWindow( QMainWindow ):
                     item[ TradingData.EXTRA_INSURANCE_FEE ] = 0 
 
             elif e_trading_type == TradingType.CAPITAL_REDUCTION:
-                item[ TradingData.TRADING_VALUE ] = 0
+                item[ TradingData.TRADING_PRICE ] = -item[ TradingData.CAPITAL_REDUCTION_PER_SHARE ]
+                item[ TradingData.TRADING_COUNT ] = n_accumulated_inventory
+                item[ TradingData.TRADING_VALUE ] = -int( n_accumulated_inventory * item[ TradingData.CAPITAL_REDUCTION_PER_SHARE ] )
                 item[ TradingData.TRADING_FEE ] = 0
                 item[ TradingData.TRADING_TAX ] = 0
                 item[ TradingData.EXTRA_INSURANCE_FEE ] = 0 
