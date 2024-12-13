@@ -4,6 +4,7 @@ import json
 import os
 import sys
 import datetime
+import time
 from QtStockPriceMainWindow import Ui_MainWindow  # 導入轉換後的 UI 類
 from QtStockTradingEditDialog import Ui_Dialog as Ui_StockTradingDialog
 from QtStockDividendEditDialog import Ui_Dialog as Ui_StockDividendDialog
@@ -1395,6 +1396,27 @@ class MainWindow( QMainWindow ):
         except requests.RequestException:
             return False
 
+    def send_get_request( self, url ):
+        retries = 0
+        while retries < 3:
+            try:
+                headers = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36' }
+                res = requests.get( url )
+                if res.status_code == 200:
+                    return res
+                else:
+                    print("\033[1;31mRequest failed\033[0m")
+                    print(f"Status code {res.status_code}. Retrying...")
+            except requests.exceptions.Timeout:
+                print("\033[1;31mTimeout\033[0m")
+            except requests.exceptions.TooManyRedirects:
+                print("\033[1;31mTooManyRedirects\033[0m")
+            
+            retries += 1
+            time.sleep(2)  # 等待2秒後重試
+    
+        raise Exception("Max retries exceeded. Failed to get a successful response.")
+
     def download_all_company_stock_number( self, str_date ): 
         dict_company_number_to_name = {}
 
@@ -1416,65 +1438,74 @@ class MainWindow( QMainWindow ):
             b_need_to_download = True
 
         if b_need_to_download:
+            tds = []
             # 上市公司股票代碼
             companyNymUrl = "https://isin.twse.com.tw/isin/C_public.jsp?strMode=2"
-            res = requests.get( companyNymUrl )
-            soup = BeautifulSoup( res.text, "lxml" )
-            tr = soup.findAll( 'tr' )
+            try:
+                res = self.send_get_request( companyNymUrl )
+                soup = BeautifulSoup( res.text, "lxml" )
+                tr = soup.findAll( 'tr' )
 
-            total_company_count = 0
-            tds = []
-            for raw in tr:
-                data = [ td.get_text() for td in raw.findAll("td" )]
-                if len( data ) == 7 and ( data[ 5 ] == 'ESVUFR' or 
-                                          data[ 5 ] == 'CEOGEU' or 
-                                          data[ 5 ] == 'CEOJBU' or 
-                                          data[ 5 ] == 'CEOGBU' or
-                                          data[ 5 ] == 'CEOIBU' or
-                                          data[ 5 ] == 'CEOGDU' ): 
-                    total_company_count += 1
-                    if '\u3000' in data[ 0 ]:
-                        modified_data = data[ 0 ].split("\u3000")
-                        if '-創' in modified_data[ 1 ]:
-                            continue
-                        modified_data_after_strip = [ modified_data[ 0 ].strip(), modified_data[ 1 ].strip() ]
-                        tds.append( modified_data_after_strip )
+                total_company_count = 0
+                for raw in tr:
+                    data = [ td.get_text() for td in raw.findAll("td" )]
+                    if len( data ) == 7 and ( data[ 5 ] == 'ESVUFR' or 
+                                            data[ 5 ] == 'CEOGEU' or 
+                                            data[ 5 ] == 'CEOJBU' or 
+                                            data[ 5 ] == 'CEOGBU' or
+                                            data[ 5 ] == 'CEOIBU' or
+                                            data[ 5 ] == 'CEOGDU' ): 
+                        total_company_count += 1
+                        if '\u3000' in data[ 0 ]:
+                            modified_data = data[ 0 ].split("\u3000")
+                            if '-創' in modified_data[ 1 ]:
+                                continue
+                            modified_data_after_strip = [ modified_data[ 0 ].strip(), modified_data[ 1 ].strip() ]
+                            tds.append( modified_data_after_strip )
+            except Exception as e:
+                pass                
 
             # 上櫃公司股票代碼
             companyNymUrl = "https://isin.twse.com.tw/isin/C_public.jsp?strMode=4"
-            res = requests.get( companyNymUrl )
-            soup = BeautifulSoup( res.text, "lxml" )
-            tr = soup.findAll( 'tr' )
-            for raw in tr:
-                data = [ td.get_text() for td in raw.findAll("td") ]
-                if len( data ) == 7 and ( data[ 5 ] == 'ESVUFR' or 
-                                          data[ 5 ] == 'CEOGEU' or 
-                                          data[ 5 ] == 'CEOJBU' or 
-                                          data[ 5 ] == 'CEOGBU' or
-                                          data[ 5 ] == 'CEOIBU' ): 
-                    total_company_count += 1
-                    if '\u3000' in data[ 0 ]:
-                        modified_data = data[ 0 ].split("\u3000")
-                        if '-創' in modified_data[ 1 ]:
-                            continue
-                        modified_data_after_strip = [ modified_data[ 0 ].strip(), modified_data[ 1 ].strip() ]
-                        tds.append( modified_data_after_strip )
+            try:
+                res = self.send_get_request( companyNymUrl )
+                soup = BeautifulSoup( res.text, "lxml" )
+                tr = soup.findAll( 'tr' )
+                for raw in tr:
+                    data = [ td.get_text() for td in raw.findAll("td") ]
+                    if len( data ) == 7 and ( data[ 5 ] == 'ESVUFR' or 
+                                            data[ 5 ] == 'CEOGEU' or 
+                                            data[ 5 ] == 'CEOJBU' or 
+                                            data[ 5 ] == 'CEOGBU' or
+                                            data[ 5 ] == 'CEOIBU' ): 
+                        total_company_count += 1
+                        if '\u3000' in data[ 0 ]:
+                            modified_data = data[ 0 ].split("\u3000")
+                            if '-創' in modified_data[ 1 ]:
+                                continue
+                            modified_data_after_strip = [ modified_data[ 0 ].strip(), modified_data[ 1 ].strip() ]
+                            tds.append( modified_data_after_strip )
+            except Exception as e:
+                pass
 
             # 興櫃公司股票代碼
             companyNymUrl = "https://isin.twse.com.tw/isin/C_public.jsp?strMode=5"
-            res = requests.get( companyNymUrl )
-            soup = BeautifulSoup( res.text, "lxml" )
-            tr = soup.findAll( 'tr' )
-            for raw in tr:
-                data = [ td.get_text() for td in raw.findAll("td") ]
-                if len( data ) == 7 and data[ 5 ] == 'ESVUFR': 
-                    total_company_count += 1
-                    if '\u3000' in data[ 0 ]:
-                        modified_data = data[ 0 ].split("\u3000")
-                        if '-創' in modified_data[ 1 ]:
-                            continue
-                        modified_data_after_strip = [ modified_data[ 0 ].strip(), modified_data[ 1 ].strip() ]
-                        tds.append( modified_data_after_strip )
+            try:
+                res = self.send_get_request( companyNymUrl )
+                soup = BeautifulSoup( res.text, "lxml" )
+                tr = soup.findAll( 'tr' )
+                for raw in tr:
+                    data = [ td.get_text() for td in raw.findAll("td") ]
+                    if len( data ) == 7 and data[ 5 ] == 'ESVUFR': 
+                        total_company_count += 1
+                        if '\u3000' in data[ 0 ]:
+                            modified_data = data[ 0 ].split("\u3000")
+                            if '-創' in modified_data[ 1 ]:
+                                continue
+                            modified_data_after_strip = [ modified_data[ 0 ].strip(), modified_data[ 1 ].strip() ]
+                            tds.append( modified_data_after_strip )
+            except Exception as e:
+                pass
 
             if len( tds ) == 0:
                 return
@@ -1510,81 +1541,83 @@ class MainWindow( QMainWindow ):
             b_need_to_download = True
 
         if b_need_to_download:
-            headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-            }
             # 上市公司股價從證交所取得
             # https://www.twse.com.tw/rwd/zh/afterTrading/MI_INDEX?date=20240912&type=ALLBUT0999&response=json&_=1726121461234
             url = 'https://www.twse.com.tw/rwd/zh/afterTrading/MI_INDEX?date=' + str_date + '&type=ALLBUT0999&response=json&_=1726121461234'
-            response = requests.get( url, headers=headers )
-            soup = BeautifulSoup( response.content, 'html.parser' )
+            try:
+                res = self.send_get_request( url )
+                soup = BeautifulSoup( res.content, 'html.parser' )
 
-            all_stock_price = []
-            json_str = soup.get_text()
-            json_data = json.loads(json_str)
-            if 'tables' not in json_data:
-                return
-            for item in json_data['tables']:
-                if 'title' in item:
-                    if '每日收盤行情' in item['title']:
-                        for data in item['data']:
-                            #index 0 證券代號    "0050",
-                            #index 1 證券名稱    "元大台灣50",
-                            #index 2 成交股數    "16,337,565",
-                            #index 3 成交筆數    "15,442",
-                            #index 4 成交金額    "2,900,529,886",
-                            #index 5 開盤價      "176.10",
-                            #index 6 最高價      "178.65",
-                            #index 7 最低價      "176.10",
-                            #index 8 收盤價      "178.30",
-                            #index 9 漲跌(+/-)   "<p style= color:red>+<\u002fp>",
-                            #index 10 漲跌價差    "6.45",
-                            #index 11 最後揭示買價 "178.20",
-                            #index 12 最後揭示買量 "5",
-                            #index 13 最後揭示賣價 "178.30",
-                            #index 14 最後揭示賣量 "103",
-                            #index 15 本益比 
+                all_stock_price = []
+                json_str = soup.get_text()
+                json_data = json.loads(json_str)
+                if 'tables' not in json_data:
+                    return
+                for item in json_data['tables']:
+                    if 'title' in item:
+                        if '每日收盤行情' in item['title']:
+                            for data in item['data']:
+                                #index 0 證券代號    "0050",
+                                #index 1 證券名稱    "元大台灣50",
+                                #index 2 成交股數    "16,337,565",
+                                #index 3 成交筆數    "15,442",
+                                #index 4 成交金額    "2,900,529,886",
+                                #index 5 開盤價      "176.10",
+                                #index 6 最高價      "178.65",
+                                #index 7 最低價      "176.10",
+                                #index 8 收盤價      "178.30",
+                                #index 9 漲跌(+/-)   "<p style= color:red>+<\u002fp>",
+                                #index 10 漲跌價差    "6.45",
+                                #index 11 最後揭示買價 "178.20",
+                                #index 12 最後揭示買量 "5",
+                                #index 13 最後揭示賣價 "178.30",
+                                #index 14 最後揭示賣量 "103",
+                                #index 15 本益比 
 
-                            list_stock_price = [ data[ 0 ], data[ 1 ], data[ 8 ].replace( ',', '' ) ] 
-                            all_stock_price.append( list_stock_price )
+                                list_stock_price = [ data[ 0 ], data[ 1 ], data[ 8 ].replace( ',', '' ) ] 
+                                all_stock_price.append( list_stock_price )
+            except Exception as e:
+                pass
 
             # 上櫃公司股價從櫃買中心取得
+            # https://www.tpex.org.tw/www/zh-tw/afterTrading/dailyQuotes?date=2024%2F12%2F09&id=&response=html
             formatted_date = f"{str_date[:4]}%2F{str_date[4:6]}%2F{str_date[6:]}"
             url = 'https://www.tpex.org.tw/www/zh-tw/afterTrading/dailyQuotes?date=' + formatted_date + '&id=&response=html'
-            # https://www.tpex.org.tw/www/zh-tw/afterTrading/dailyQuotes?date=2024%2F12%2F09&id=&response=html
-            res = requests.get( url )
-            
-            soup = BeautifulSoup( res.text, "lxml" )
-            tr = soup.findAll( 'tr' )
-            for raw in tr:
-                if not raw.find( 'th' ):
-                    td_elements = raw.findAll( "td" )
-                    if len( td_elements ) == 19:
-                        # index 0 證券代號	
-                        # index 1 證券名稱	
-                        # index 2 收盤	
-                        # index 3 漲跌	
-                        # index 4 開盤
-                        # index 5 最高	
-                        # index 6 最低
-                        # index 7 均價	
-                        # index 8 成交股數
-                        # index 9 成交金額(元)
-                        # index 10 成交筆數	
-                        # index 11 最後買價	
-                        # index 12 最後買量(千股)	2020/4/29 開始才有這筆資訊
-                        # index 13 最後賣價	
-                        # index 14 最後賣量(千股)   2020/4/29 開始才有這筆資訊
-                        # index 15 發行股數	次日
-                        # index 16 參考價	次日
-                        # index 17 漲停價	次日
-                        # index 18 跌停價
-                        str_stock_number = td_elements[ 0 ].get_text().strip()
-                        str_stock_name = td_elements[ 1 ].get_text().strip()
-                        str_stock_price = td_elements[ 2 ].get_text().strip()
-                        list_stock_price = [ str_stock_number, str_stock_name, str_stock_price.replace( ',', '' ) ] 
-                        all_stock_price.append( list_stock_price )
-        
+            try:
+                res = self.send_get_request( url )
+                
+                soup = BeautifulSoup( res.text, "lxml" )
+                tr = soup.findAll( 'tr' )
+                for raw in tr:
+                    if not raw.find( 'th' ):
+                        td_elements = raw.findAll( "td" )
+                        if len( td_elements ) == 19:
+                            # index 0 證券代號	
+                            # index 1 證券名稱	
+                            # index 2 收盤	
+                            # index 3 漲跌	
+                            # index 4 開盤
+                            # index 5 最高	
+                            # index 6 最低
+                            # index 7 均價	
+                            # index 8 成交股數
+                            # index 9 成交金額(元)
+                            # index 10 成交筆數	
+                            # index 11 最後買價	
+                            # index 12 最後買量(千股)	2020/4/29 開始才有這筆資訊
+                            # index 13 最後賣價	
+                            # index 14 最後賣量(千股)   2020/4/29 開始才有這筆資訊
+                            # index 15 發行股數	次日
+                            # index 16 參考價	次日
+                            # index 17 漲停價	次日
+                            # index 18 跌停價
+                            str_stock_number = td_elements[ 0 ].get_text().strip()
+                            str_stock_name = td_elements[ 1 ].get_text().strip()
+                            str_stock_price = td_elements[ 2 ].get_text().strip()
+                            list_stock_price = [ str_stock_number, str_stock_name, str_stock_price.replace( ',', '' ) ] 
+                            all_stock_price.append( list_stock_price )
+            except Exception as e:
+                pass    
 
             if len( all_stock_price ) == 0:
                 print( "no data" )
