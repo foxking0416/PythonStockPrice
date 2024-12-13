@@ -725,15 +725,23 @@ class MainWindow( QMainWindow ):
                 str_data = str_data.replace( ',', '' )
                 n_cell_row = n_row_start + index_row + 1
                 n_cell_column = index_column + 2
+                str_cell = get_column_letter( n_cell_column ) + str( n_cell_row )
                 try:
                     f_data= float( str_data )
                     if f_data.is_integer():
                         f_data = int( f_data )
+                        worksheet[ str_cell ].number_format = "#,##0"  #顯示千位逗號
+                    elif ( f_data * 10 ).is_integer():
+                        worksheet[ str_cell ].number_format = "#,##0.0"
+                    elif ( f_data * 100 ).is_integer():
+                        worksheet[ str_cell ].number_format = "#,##0.00"
+                    elif ( f_data * 1000 ).is_integer():
+                        worksheet[ str_cell ].number_format = "#,##0.000"
                     worksheet.cell( row = n_cell_row, column = n_cell_column, value = f_data )
                 except ValueError:
                     worksheet.cell( row = n_cell_row, column = n_cell_column, value = str_data )
 
-                worksheet[ get_column_letter( n_cell_column ) + str( n_cell_row ) ].alignment = Alignment( horizontal = "center", vertical = "center" )
+                worksheet[ str_cell ].alignment = Alignment( horizontal = "center", vertical = "center" )
             data_index += 1
             index_column += 1
 
