@@ -18,6 +18,12 @@ from openpyxl.utils import get_column_letter
 from openpyxl.styles import Alignment, PatternFill, Font
 from enum import Enum, IntEnum
 
+#打包指令
+# cd D:\_2.code\PythonStockPrice   
+# pyinstaller --hidden-import "babel.numbers" --add-data "icon;./icon" --onefile --noconsole StockPriceMainWindow.py
+# pyinstaller --hidden-import "babel.numbers" --add-data "icon;./icon" --onefile --console StockPriceMainWindow.py
+# pyinstaller --hidden-import "babel.numbers" --add-data "icon;./icon" --console StockPriceMainWindow.py
+
 # 要把.ui檔變成.py
 # cd D:\_2.code\PythonStockPrice
 # pyside6-uic QtStockPriceMainWindow.ui -o QtStockPriceMainWindow.py
@@ -26,16 +32,38 @@ from enum import Enum, IntEnum
 # pyside6-uic QtStockCapitalReductionEditDialog.ui -o QtStockCapitalReductionEditDialog.py
 # pyside6-uic QtDuplicateOptionDialog.ui -o QtDuplicateOptionDialog.py
 
+g_user_dir = os.path.expanduser("~")  #開發模式跟打包模式下都是C:\Users\foxki
+g_exe_dir = os.path.dirname(__file__) #開發模式下是D:\_2.code\PythonStockPrice #打包模式後是C:\Users\foxki\AppData\Local\Temp\_MEI60962 最後那個資料夾是暫時性的隨機名稱
+g_exe2_dir = os.path.dirname( sys.executable ) #開發模式下是C:\Users\foxki\AppData\Local\Programs\Python\Python312 #打包模式後是:D:\_2.code\PythonStockPrice\dist
+g_abs_dir = os.path.dirname( os.path.abspath(__file__) ) #開發模式下是D:\_2.code\PythonStockPrice #打包模式後是C:\Users\foxki\AppData\Local\Temp\_MEI60962 最後那個資料夾是暫時性的隨機名稱
+print( "g_user_dir :" + g_user_dir ) #開發模式下是C:\Users\foxki
+print( "g_exe_dir :" + g_exe_dir ) #開發模式下是D:\_2.code\PythonStockPrice #打包模式後是C:\Users\foxki\AppData\Local\Temp\_MEI60962 最後那個資料夾是暫時性的隨機名稱
+print( "g_exe2_dir :" + g_exe2_dir ) #開發模式下是C:\Users\foxki\AppData\Local\Programs\Python\Python312 #打包模式後是:D:\_2.code\PythonStockPrice\dist
+print( "g_abs_dir :" + g_abs_dir ) #開發模式下是D:\_2.code\PythonStockPrice #打包模式後是C:\Users\foxki\AppData\Local\Temp\_MEI60962 最後那個資料夾是暫時性的隨機名稱
+
+
+
 g_list_stock_list_table_horizontal_header = [ '總成本', '庫存股數', '平均成本', '今日股價', '淨值', '損益', '匯出', '刪除' ]
-g_current_dir = os.path.dirname(__file__)
-window_icon_file_path = os.path.join( g_current_dir, 'icon\\FoxInfo.png' ) 
-edit_icon_file_path = os.path.join( g_current_dir, 'icon\\Edit.svg' ) 
+if getattr( sys, 'frozen', False ):
+    # PyInstaller 打包後執行時
+    g_exe_root_dir = os.path.dirname(__file__) #C:\Users\foxki\AppData\Local\Temp\_MEI60962
+    g_data_dir = os.path.join( g_user_dir, "AppData", "Local", "FoxInfo" ) #C:\Users\foxki\AppData\Local\FoxInfo
+else:
+    # 正常執行 Python 腳本時
+    g_exe_root_dir = os.path.dirname( os.path.abspath(__file__) )
+    g_data_dir = g_exe_root_dir
+
+window_icon_file_path = os.path.join( g_exe_root_dir, 'icon\\FoxInfo.png' ) 
+edit_icon_file_path = os.path.join( g_exe_root_dir, 'icon\\Edit.svg' ) 
 edit_icon = QIcon( edit_icon_file_path ) 
-delete_icon_file_path = os.path.join( g_current_dir, 'icon\\Delete.svg' ) 
+delete_icon_file_path = os.path.join( g_exe_root_dir, 'icon\\Delete.svg' ) 
 delete_icon = QIcon( delete_icon_file_path ) 
-export_icon_file_path = os.path.join( g_current_dir, 'icon\\Export.svg' ) 
+export_icon_file_path = os.path.join( g_exe_root_dir, 'icon\\Export.svg' ) 
 export_icon = QIcon( export_icon_file_path ) 
-g_trading_data_json_file_path = os.path.join( g_current_dir, 'TradingData.json' )
+g_trading_data_json_file_path = os.path.join( g_data_dir, 'TradingData.json' )
+g_UISetting_file_path = os.path.join( g_data_dir, 'UISetting.config' )
+g_stock_number_file_path = os.path.join( g_data_dir, 'StockNumber.txt' )
+g_stock_price_file_path = os.path.join( g_data_dir, 'StockPrice.txt' )
 
 class CenterIconDelegate( QStyledItemDelegate ):
     def paint( self, painter, option, index ):
@@ -915,11 +943,10 @@ class MainWindow( QMainWindow ):
             self.ui.qtExportSelectedStockTradingDataPushButton.setEnabled( True )
 
     def save_UI_state( self ):
-        output_path = os.path.join( os.path.dirname(__file__), 'UISetting.config' )
         # 確保目錄存在，若不存在則遞歸創建
-        os.makedirs( os.path.dirname( output_path ), exist_ok = True )
+        os.makedirs( os.path.dirname( g_UISetting_file_path ), exist_ok = True )
 
-        with open( output_path, 'w', encoding='utf-8' ) as f:
+        with open( g_UISetting_file_path, 'w', encoding='utf-8' ) as f:
             f.write( "手續費折扣," + str( self.ui.qtDiscountCheckBox.isChecked() ) + '\n' )
             f.write( "手續費折數," + str( self.ui.qtDiscountRateDoubleSpinBox.value() ) + '\n' )
             f.write( "補充保費," + str( self.ui.qtExtraInsuranceFeeCheckBox.isChecked() ) + '\n' )
@@ -943,9 +970,8 @@ class MainWindow( QMainWindow ):
                QSignalBlocker( self.ui.qtShow1StockRadioButton ), 
                QSignalBlocker( self.ui.qtShow1000StockRadioButton ) ):
 
-            file_path = os.path.join( os.path.dirname(__file__), 'UISetting.config' )
-            if os.path.exists( file_path ):
-                with open( file_path, 'r', encoding='utf-8' ) as f:
+            if os.path.exists( g_UISetting_file_path ):
+                with open( g_UISetting_file_path, 'r', encoding='utf-8' ) as f:
                     data = f.readlines()
                     for i, row in enumerate( data ):
                         row = row.strip().split( ',' )
@@ -1431,10 +1457,9 @@ class MainWindow( QMainWindow ):
     def download_all_company_stock_number( self, str_date ): 
         dict_company_number_to_name = {}
 
-        file_path = os.path.join( os.path.dirname(__file__), 'StockNumber.txt' )
         b_need_to_download = False
-        if os.path.exists( file_path ):
-            with open( file_path, 'r', encoding='utf-8' ) as f:
+        if os.path.exists( g_stock_number_file_path ):
+            with open( g_stock_number_file_path, 'r', encoding='utf-8' ) as f:
                 data = f.readlines()
                 for i, row in enumerate( data ):
                     if i == 0:
@@ -1522,8 +1547,8 @@ class MainWindow( QMainWindow ):
                 return
             
             # 確保目錄存在，若不存在則遞歸創建
-            os.makedirs( os.path.dirname( file_path ), exist_ok = True )
-            with open( file_path, 'w', encoding='utf-8' ) as f:
+            os.makedirs( os.path.dirname( g_stock_number_file_path ), exist_ok = True )
+            with open( g_stock_number_file_path, 'w', encoding='utf-8' ) as f:
                 f.write( str_date + '\n' )
                 for row in tds:
                     f.write( str( row[ 0 ] ) + ',' + str( row[ 1 ] ) + '\n' )
@@ -1534,10 +1559,9 @@ class MainWindow( QMainWindow ):
     def download_day_stock_price( self, str_date ):
 
         dict_company_number_to_price_info = {}
-        file_path = os.path.join( os.path.dirname(__file__), 'StockPrice.txt' )
         b_need_to_download = False
-        if os.path.exists( file_path ):
-            with open( file_path, 'r', encoding='utf-8' ) as f:
+        if os.path.exists( g_stock_price_file_path ):
+            with open( g_stock_price_file_path, 'r', encoding='utf-8' ) as f:
                 data = f.readlines()
                 for i, row in enumerate( data ):
                     if i == 0:
@@ -1633,8 +1657,8 @@ class MainWindow( QMainWindow ):
                 return dict_company_number_to_price_info
             
             # 確保目錄存在，若不存在則遞歸創建
-            os.makedirs( os.path.dirname( file_path ), exist_ok = True )
-            with open( file_path, 'w', encoding='utf-8' ) as f:
+            os.makedirs( os.path.dirname( g_stock_price_file_path ), exist_ok = True )
+            with open( g_stock_price_file_path, 'w', encoding='utf-8' ) as f:
                 f.write( str_date + '\n' )
                 for row in all_stock_price:
                     f.write( str( row[ 0 ] ) + ',' + str( row[ 1 ] ) + ',' + str( row[ 2 ] ) + '\n' )
