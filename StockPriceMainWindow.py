@@ -499,6 +499,17 @@ class MainWindow( QMainWindow ):
         str_date = obj_current_date.strftime('%Y%m%d')
         self.dict_all_company_number_and_name = self.download_all_company_stock_number( str_date )
         self.dict_all_company_number_and_price_info = self.download_day_stock_price( str_date )
+        n_retry = 0
+        while len( self.dict_all_company_number_and_price_info ) == 0:
+            obj_current_date = obj_current_date - datetime.timedelta( days = 1 )
+            n_weekday = obj_current_date.weekday()
+            if n_weekday == 5 or n_weekday == 6:
+                continue
+            str_date = obj_current_date.strftime('%Y%m%d')
+            self.dict_all_company_number_and_price_info = self.download_day_stock_price( str_date )
+            n_retry += 1
+            if n_retry > 30:
+                break
 
         self.str_picked_stock_number = None
         self.dict_all_stock_trading_data = {}
