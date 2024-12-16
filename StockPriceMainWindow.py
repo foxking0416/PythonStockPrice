@@ -1533,7 +1533,6 @@ class MainWindow( QMainWindow ):
                         if row.strip() != str_date:
                             if self.check_internet_via_http(): #日期不一樣，且又有網路時才重新下載，不然就用舊的
                                 b_need_to_download = True
-                                break
                     else:
                         ele = row.strip().split( ',' )
                         dict_company_number_to_price_info[ ele[ 0 ] ] = ele[ 2 ]
@@ -1551,31 +1550,30 @@ class MainWindow( QMainWindow ):
                 all_stock_price = []
                 json_str = soup.get_text()
                 json_data = json.loads(json_str)
-                if 'tables' not in json_data:
-                    return
-                for item in json_data['tables']:
-                    if 'title' in item:
-                        if '每日收盤行情' in item['title']:
-                            for data in item['data']:
-                                #index 0 證券代號    "0050",
-                                #index 1 證券名稱    "元大台灣50",
-                                #index 2 成交股數    "16,337,565",
-                                #index 3 成交筆數    "15,442",
-                                #index 4 成交金額    "2,900,529,886",
-                                #index 5 開盤價      "176.10",
-                                #index 6 最高價      "178.65",
-                                #index 7 最低價      "176.10",
-                                #index 8 收盤價      "178.30",
-                                #index 9 漲跌(+/-)   "<p style= color:red>+<\u002fp>",
-                                #index 10 漲跌價差    "6.45",
-                                #index 11 最後揭示買價 "178.20",
-                                #index 12 最後揭示買量 "5",
-                                #index 13 最後揭示賣價 "178.30",
-                                #index 14 最後揭示賣量 "103",
-                                #index 15 本益比 
+                if 'tables' in json_data:
+                    for item in json_data['tables']:
+                        if 'title' in item:
+                            if '每日收盤行情' in item['title']:
+                                for data in item['data']:
+                                    #index 0 證券代號    "0050",
+                                    #index 1 證券名稱    "元大台灣50",
+                                    #index 2 成交股數    "16,337,565",
+                                    #index 3 成交筆數    "15,442",
+                                    #index 4 成交金額    "2,900,529,886",
+                                    #index 5 開盤價      "176.10",
+                                    #index 6 最高價      "178.65",
+                                    #index 7 最低價      "176.10",
+                                    #index 8 收盤價      "178.30",
+                                    #index 9 漲跌(+/-)   "<p style= color:red>+<\u002fp>",
+                                    #index 10 漲跌價差    "6.45",
+                                    #index 11 最後揭示買價 "178.20",
+                                    #index 12 最後揭示買量 "5",
+                                    #index 13 最後揭示賣價 "178.30",
+                                    #index 14 最後揭示賣量 "103",
+                                    #index 15 本益比 
 
-                                list_stock_price = [ data[ 0 ], data[ 1 ], data[ 8 ].replace( ',', '' ) ] 
-                                all_stock_price.append( list_stock_price )
+                                    list_stock_price = [ data[ 0 ], data[ 1 ], data[ 8 ].replace( ',', '' ) ] 
+                                    all_stock_price.append( list_stock_price )
             except Exception as e:
                 pass
 
