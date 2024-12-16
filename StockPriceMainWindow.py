@@ -1103,9 +1103,9 @@ class MainWindow( QMainWindow ):
 
                 n_stock_dividend_gain = int( item[ TradingData.STOCK_DIVIDEND_PER_SHARE ] * n_accumulated_inventory / 10 ) #f_stock_dividend_gain單位為股 除以10是因為票面額10元
                 item[ TradingData.STOCK_DIVIDEND_GAIN ] = n_stock_dividend_gain
+                n_cash_dividend_gain = int( Decimal( str(item[ TradingData.CASH_DIVIDEND_PER_SHARE ] ) ) * Decimal( str( n_accumulated_inventory ) ) )
                 n_accumulated_inventory += n_stock_dividend_gain
                 
-                n_cash_dividend_gain = int( item[ TradingData.CASH_DIVIDEND_PER_SHARE ] * n_accumulated_inventory )
                 if n_cash_dividend_gain > 10:
                     item[ TradingData.CASH_DIVIDEND_GAIN ] = n_cash_dividend_gain
                     item[ TradingData.TRADING_FEE ] = 10
