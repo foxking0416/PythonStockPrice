@@ -28,6 +28,7 @@ from enum import Enum, IntEnum
 
 g_list_stock_list_table_horizontal_header = [ '總成本', '庫存股數', '平均成本', '今日股價', '淨值', '損益', '匯出', '刪除' ]
 g_current_dir = os.path.dirname(__file__)
+window_icon_file_path = os.path.join( g_current_dir, 'icon\\FoxInfo.png' ) 
 edit_icon_file_path = os.path.join( g_current_dir, 'icon\\Edit.svg' ) 
 edit_icon = QIcon( edit_icon_file_path ) 
 delete_icon_file_path = os.path.join( g_current_dir, 'icon\\Delete.svg' ) 
@@ -153,6 +154,8 @@ class QtDuplicateOptionDialog( QDialog ):
 
         self.ui = Ui_DuplicateOptionDialog()
         self.ui.setupUi( self )
+        window_icon = QIcon( window_icon_file_path ) 
+        self.setWindowIcon( window_icon )
         self.ui.qtOkPushButton.clicked.connect( self.accept_data )
         self.ui.qtCancelPushButton.clicked.connect( self.cancel )
         self.b_overwrite = False
@@ -170,6 +173,8 @@ class StockCapitalReductionEditDialog( QDialog ):
 
         self.ui = Ui_StockCapitalReductionDialog()
         self.ui.setupUi( self )
+        window_icon = QIcon( window_icon_file_path ) 
+        self.setWindowIcon( window_icon )
 
         self.ui.qtStockNumberLabel.setText( str_stock_number )
         self.ui.qtStockNameLabel.setText( str_stock_name )
@@ -213,6 +218,8 @@ class StockDividendEditDialog( QDialog ):
 
         self.ui = Ui_StockDividendDialog()
         self.ui.setupUi( self )
+        window_icon = QIcon( window_icon_file_path ) 
+        self.setWindowIcon( window_icon )
 
         self.ui.qtStockNumberLabel.setText( str_stock_number )
         self.ui.qtStockNameLabel.setText( str_stock_name )
@@ -265,6 +272,8 @@ class StockTradingEditDialog( QDialog ):
 
         self.ui = Ui_StockTradingDialog()
         self.ui.setupUi( self )
+        window_icon = QIcon( window_icon_file_path ) 
+        self.setWindowIcon( window_icon )
 
         self.ui.qtStockNumberLabel.setText( str_stock_number )
         self.ui.qtStockNameLabel.setText( str_stock_name )
@@ -398,6 +407,8 @@ class MainWindow( QMainWindow ):
         super( MainWindow, self ).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi( self )  # 設置 UI
+        window_icon = QIcon( window_icon_file_path ) 
+        self.setWindowIcon( window_icon )
 
         delegate = CenterIconDelegate()
         self.stock_list_model = QStandardItemModel( 0, 0 )
