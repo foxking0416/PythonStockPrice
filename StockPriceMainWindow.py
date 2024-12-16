@@ -1158,8 +1158,12 @@ class MainWindow( QMainWindow ):
                 dict_per_trading_data[ "stock_number" ] = item[ TradingData.STOCK_NUMBER ]
                 dict_per_trading_data[ "trading_date" ] = item[ TradingData.TRADING_DATE ]
                 dict_per_trading_data[ "trading_type" ] = int( item[ TradingData.TRADING_TYPE ].value )
-                dict_per_trading_data[ "trading_price" ] = item[ TradingData.TRADING_PRICE ]
-                dict_per_trading_data[ "trading_count" ] = item[ TradingData.TRADING_COUNT ]
+                if item[ TradingData.TRADING_TYPE ] == TradingType.CAPITAL_REDUCTION: #CAPITAL_REDUCTION 為了顯示，所以需要寫一些數值進去，但實際上不用存
+                    dict_per_trading_data[ "trading_price" ] = 0
+                    dict_per_trading_data[ "trading_count" ] = 0
+                else:
+                    dict_per_trading_data[ "trading_price" ] = item[ TradingData.TRADING_PRICE ]
+                    dict_per_trading_data[ "trading_count" ] = item[ TradingData.TRADING_COUNT ]
                 dict_per_trading_data[ "trading_fee_discount" ] = item[ TradingData.TRADING_FEE_DISCOUNT ]
                 dict_per_trading_data[ "stock_dividend_per_share" ] = item[ TradingData.STOCK_DIVIDEND_PER_SHARE ]
                 dict_per_trading_data[ "cash_dividend_per_share" ] = item[ TradingData.CASH_DIVIDEND_PER_SHARE ]
