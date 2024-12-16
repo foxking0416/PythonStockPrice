@@ -17,6 +17,7 @@ from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import Alignment, PatternFill, Font
 from enum import Enum, IntEnum
+from decimal import Decimal
 
 #打包指令
 # cd D:\_2.code\PythonStockPrice   
@@ -124,18 +125,20 @@ class TradingCost( Enum ):
 
 class Utility():
     def compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, b_daying_trading ):
-
+        f_trading_price = Decimal( str( f_trading_price ) )#原本10.45 * 100000 = 1044999.999999999 然後取 int 就變成1044999，所以改用Decimal
+        n_trading_count = Decimal( str( n_trading_count ) )
+        f_trading_fee_discount = Decimal( str( f_trading_fee_discount ) )
         dict_result = {}
         if e_trading_type == TradingType.BUY or e_trading_type == TradingType.SELL:
             n_trading_value = int( f_trading_price * n_trading_count )
-            n_trading_fee = int( n_trading_value * 0.001425 * f_trading_fee_discount )
+            n_trading_fee = int( n_trading_value * Decimal( '0.001425' ) * f_trading_fee_discount )
             if n_trading_fee < 20 and n_trading_fee != 0:
                 n_trading_fee = 20
             if e_trading_type == TradingType.SELL:
                 if b_daying_trading:
-                    n_trading_tax = int( n_trading_value * 0.0015 )
+                    n_trading_tax = int( n_trading_value * Decimal( '0.0015' ) )
                 else:
-                    n_trading_tax = int( n_trading_value * 0.003 )
+                    n_trading_tax = int( n_trading_value * Decimal( '0.003' ) )
             else:
                 n_trading_tax = 0
 
@@ -1101,7 +1104,7 @@ class MainWindow( QMainWindow ):
                 item[ TradingData.TRADING_TAX ] = 0
                 item[ TradingData.TRADING_COST ] = 0
 
-                n_stock_dividend_gain = int( item[ TradingData.STOCK_DIVIDEND_PER_SHARE ] * n_accumulated_inventory / 10 ) #f_stock_dividend_gain單位為股 除以10是因為票面額10元
+                n_stock_dividend_gain = int( Decimal( str( item[ TradingData.STOCK_DIVIDEND_PER_SHARE ] ) ) * Decimal( str( n_accumulated_inventory ) ) / Decimal( '10' ) ) #f_stock_dividend_gain單位為股 除以10是因為票面額10元
                 item[ TradingData.STOCK_DIVIDEND_GAIN ] = n_stock_dividend_gain
                 n_cash_dividend_gain = int( Decimal( str(item[ TradingData.CASH_DIVIDEND_PER_SHARE ] ) ) * Decimal( str( n_accumulated_inventory ) ) )
                 n_accumulated_inventory += n_stock_dividend_gain
@@ -1110,7 +1113,7 @@ class MainWindow( QMainWindow ):
                     item[ TradingData.CASH_DIVIDEND_GAIN ] = n_cash_dividend_gain
                     item[ TradingData.TRADING_FEE ] = 10
                     if item[ TradingData.IS_REQUIRED_EXTRA_INSURANCE_FEE ] and n_cash_dividend_gain >= 20000:
-                        n_extra_insurance_fee = int( n_cash_dividend_gain * 0.0211 )
+                        n_extra_insurance_fee = int( Decimal( str( n_cash_dividend_gain ) ) * Decimal( str( '0.0211' ) ) )
                     else:
                         n_extra_insurance_fee = 0
                     item[ TradingData.EXTRA_INSURANCE_FEE ] = n_extra_insurance_fee
@@ -1130,8 +1133,8 @@ class MainWindow( QMainWindow ):
                 item[ TradingData.TRADING_COST ] = 0
                 item[ TradingData.STOCK_DIVIDEND_GAIN ] = 0
                 item[ TradingData.CASH_DIVIDEND_GAIN ] = 0
-                n_accumulated_cost = n_accumulated_cost - int( n_accumulated_inventory * item[ TradingData.CAPITAL_REDUCTION_PER_SHARE ] )
-                n_accumulated_inventory = int( n_accumulated_inventory * ( 10 - item[ TradingData.CAPITAL_REDUCTION_PER_SHARE ] ) / 10 )
+                n_accumulated_cost = n_accumulated_cost - int( Decimal( str( n_accumulated_inventory ) ) * Decimal( str( item[ TradingData.CAPITAL_REDUCTION_PER_SHARE ] ) ) )
+                n_accumulated_inventory = int( Decimal( str( n_accumulated_inventory ) ) * ( Decimal( str( '10' ) ) - Decimal( str( item[ TradingData.CAPITAL_REDUCTION_PER_SHARE ] ) ) ) / Decimal( str( '10' ) ) )
 
             item[ TradingData.ACCUMULATED_COST ] = n_accumulated_cost
             item[ TradingData.ACCUMULATED_INVENTORY ] = n_accumulated_inventory
