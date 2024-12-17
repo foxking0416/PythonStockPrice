@@ -124,7 +124,7 @@ class TradingCost( Enum ):
     TRADING_TOTAL_COST = 3
 
 class Utility():
-    def compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, b_daying_trading ):
+    def compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, b_etf, b_daying_trading ):
         f_trading_price = Decimal( str( f_trading_price ) )#原本10.45 * 100000 = 1044999.999999999 然後取 int 就變成1044999，所以改用Decimal
         n_trading_count = Decimal( str( n_trading_count ) )
         f_trading_fee_discount = Decimal( str( f_trading_fee_discount ) )
@@ -135,7 +135,9 @@ class Utility():
             if n_trading_fee < 20 and n_trading_fee != 0:
                 n_trading_fee = 20
             if e_trading_type == TradingType.SELL:
-                if b_daying_trading:
+                if b_etf:
+                    n_trading_tax = int( n_trading_value * Decimal( '0.001' ) )
+                elif b_daying_trading:
                     n_trading_tax = int( n_trading_value * Decimal( '0.0015' ) )
                 else:
                     n_trading_tax = int( n_trading_value * Decimal( '0.003' ) )
@@ -298,7 +300,7 @@ class StockDividendEditDialog( QDialog ):
         self.reject()
 
 class StockTradingEditDialog( QDialog ):
-    def __init__( self, str_stock_number, str_stock_name, b_discount, f_discount_value, parent = None ):
+    def __init__( self, str_stock_number, str_stock_name, b_etf, b_discount, f_discount_value, parent = None ):
         super().__init__( parent )
 
         self.ui = Ui_StockTradingDialog()
@@ -325,7 +327,7 @@ class StockTradingEditDialog( QDialog ):
         self.ui.qtOddTradeCountSpinBox.valueChanged.connect( self.compute_cost )
         self.ui.qtOkButtonBox.accepted.connect( self.accept_data )
         self.ui.qtOkButtonBox.rejected.connect( self.cancel )
-
+        self.b_etf = b_etf
 
         self.dict_trading_data = {}
 
@@ -366,6 +368,9 @@ class StockTradingEditDialog( QDialog ):
             self.ui.qtOddTradeRadioButton.setChecked( True )
             self.ui.qtCommonTradeCountSpinBox.setValue( 0 )
             self.ui.qtOddTradeCountSpinBox.setValue( f_count )
+
+    def setup_stock_type( self, b_etf ):
+        self.b_etf = b_etf
 
     def accept_data( self ):
 
@@ -422,7 +427,7 @@ class StockTradingEditDialog( QDialog ):
         n_trading_count = self.get_trading_count()
         f_trading_fee_discount = self.get_trading_fee_discount() 
         
-        dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, False )
+        dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, self.b_etf, False )
 
         if e_trading_type == TradingType.BUY:
             self.ui.qtTradingValueLineEdit.setText( format( dict_result[ TradingCost.TRADING_VALUE ], ',' ) )
@@ -500,16 +505,16 @@ class MainWindow( QMainWindow ):
 
         obj_current_date = datetime.datetime.today() - datetime.timedelta( days = 1 )
         str_date = obj_current_date.strftime('%Y%m%d')
-        self.dict_all_company_number_and_name = self.download_all_company_stock_number( str_date )
-        self.dict_all_company_number_and_price_info = self.download_day_stock_price( str_date )
+        self.dict_all_company_number_to_name_and_type = self.download_all_company_stock_number( str_date )
+        self.dict_all_company_number_to_price_info = self.download_day_stock_price( str_date )
         n_retry = 0
-        while len( self.dict_all_company_number_and_price_info ) == 0:
+        while len( self.dict_all_company_number_to_price_info ) == 0:
             obj_current_date = obj_current_date - datetime.timedelta( days = 1 )
             n_weekday = obj_current_date.weekday()
             if n_weekday == 5 or n_weekday == 6:
                 continue
             str_date = obj_current_date.strftime('%Y%m%d')
-            self.dict_all_company_number_and_price_info = self.download_day_stock_price( str_date )
+            self.dict_all_company_number_to_price_info = self.download_day_stock_price( str_date )
             n_retry += 1
             if n_retry > 30:
                 break
@@ -530,9 +535,10 @@ class MainWindow( QMainWindow ):
                 return
             self.ui.qtStockSelectComboBox.setVisible( True )
 
-            for stock_number, stock_name in self.dict_all_company_number_and_name.items():
-                if str_stock_input in stock_number or str_stock_input in stock_name:
-                    self.ui.qtStockSelectComboBox.addItem( f"{stock_number} {stock_name}" )
+            for stock_number, list_stock_name_and_type in self.dict_all_company_number_to_name_and_type.items():
+                str_stock_name = list_stock_name_and_type[ 0 ]
+                if str_stock_input in stock_number or str_stock_input in str_stock_name:
+                    self.ui.qtStockSelectComboBox.addItem( f"{stock_number} {str_stock_name}" )
             # self.ui.qtStockSelectComboBox.showPopup() #showPopup的話，focus會被搶走
 
             self.ui.qtStockInputLineEdit.setFocus()
@@ -547,10 +553,11 @@ class MainWindow( QMainWindow ):
         str_stock_input = self.ui.qtStockInputLineEdit.text()
         self.ui.qtStockInputLineEdit.clear()
         str_first_four_chars = str_stock_input.split(" ")[0]
-        if str_first_four_chars not in self.dict_all_company_number_and_name:
+        if str_first_four_chars not in self.dict_all_company_number_to_name_and_type:
             b_find = False
-            for stock_number, stock_name in self.dict_all_company_number_and_name.items():
-                if str_first_four_chars == stock_name:
+            for stock_number, list_stock_name_and_type in self.dict_all_company_number_to_name_and_type.items():
+                str_stock_name = list_stock_name_and_type[ 0 ]
+                if str_first_four_chars == str_stock_name:
                     str_first_four_chars = stock_number
                     b_find = True
                     break
@@ -592,7 +599,8 @@ class MainWindow( QMainWindow ):
         if self.str_picked_stock_number is None:
             return
         str_stock_number = self.str_picked_stock_number
-        str_stock_name = self.dict_all_company_number_and_name[ str_stock_number ]
+        list_stock_name_and_type = self.dict_all_company_number_to_name_and_type[ str_stock_number ]
+        str_stock_name = list_stock_name_and_type[ 0 ]
         dialog = StockTradingEditDialog( str_stock_number, str_stock_name, self.ui.qtDiscountCheckBox.isChecked(), self.ui.qtDiscountRateDoubleSpinBox.value(), self )
 
         if dialog.exec():
@@ -607,7 +615,8 @@ class MainWindow( QMainWindow ):
         if self.str_picked_stock_number is None:
             return
         str_stock_number = self.str_picked_stock_number
-        str_stock_name = self.dict_all_company_number_and_name[ str_stock_number ]
+        list_stock_name_and_type = self.dict_all_company_number_to_name_and_type[ str_stock_number ]
+        str_stock_name = list_stock_name_and_type[ 0 ]
         dialog = StockDividendEditDialog( str_stock_number, str_stock_name, self.ui.qtExtraInsuranceFeeCheckBox.isChecked(), self )
 
         if dialog.exec():
@@ -622,7 +631,8 @@ class MainWindow( QMainWindow ):
         if self.str_picked_stock_number is None:
             return
         str_stock_number = self.str_picked_stock_number
-        str_stock_name = self.dict_all_company_number_and_name[ str_stock_number ]
+        list_stock_name_and_type = self.dict_all_company_number_to_name_and_type[ str_stock_number ]
+        str_stock_name = list_stock_name_and_type[ 0 ]
         dialog = StockCapitalReductionEditDialog( str_stock_number, str_stock_name, self )
 
         if dialog.exec():
@@ -701,7 +711,8 @@ class MainWindow( QMainWindow ):
                 if self.str_picked_stock_number is None:
                     return
                 str_stock_number = self.str_picked_stock_number
-                str_stock_name = self.dict_all_company_number_and_name[ str_stock_number ]
+                list_stock_name_and_type = self.dict_all_company_number_to_name_and_type[ str_stock_number ]
+                str_stock_name = list_stock_name_and_type[ 0 ]
 
                 hidden_data = table_model.data( index, Qt.UserRole )
                 n_findindex = -1
@@ -826,7 +837,8 @@ class MainWindow( QMainWindow ):
         if self.str_picked_stock_number is None:
             return
         str_stock_number = self.str_picked_stock_number
-        str_stock_name = self.dict_all_company_number_and_name[ str_stock_number ]
+        list_stock_name_and_type = self.dict_all_company_number_to_name_and_type[ str_stock_number ]
+        str_stock_name = list_stock_name_and_type[ 0 ]
         file_path = self.open_save_excel_file_dialog()
         if file_path:
             workbook = Workbook()
@@ -840,7 +852,8 @@ class MainWindow( QMainWindow ):
         if file_path:
             workbook = Workbook()
             for index, ( key_stock_number, value ) in enumerate( self.dict_all_stock_trading_data.items() ):
-                str_stock_name = self.dict_all_company_number_and_name[ key_stock_number ]
+                list_stock_name_and_type = self.dict_all_company_number_to_name_and_type[ key_stock_number ]
+                str_stock_name = list_stock_name_and_type[ 0 ]
                 str_tab_title = key_stock_number + " " + str_stock_name
                 if index == 0:
                     worksheet = workbook.active
@@ -1018,6 +1031,7 @@ class MainWindow( QMainWindow ):
 
     def process_single_trading_data( self, str_stock_number ):
         list_trading_data = self.dict_all_stock_trading_data[ str_stock_number ]
+        b_etf = self.dict_all_company_number_to_name_and_type[ str_stock_number ][ 1 ]
         sorted_list = sorted( list_trading_data, key=lambda x: ( datetime.datetime.strptime( x[ TradingData.TRADING_DATE ], "%Y-%m-%d"), -x[ TradingData.TRADING_TYPE ] ) )
         n_accumulated_inventory = 0
         n_accumulated_cost = 0
@@ -1031,7 +1045,7 @@ class MainWindow( QMainWindow ):
                 f_trading_price = item[ TradingData.TRADING_PRICE ]
                 n_trading_count = item[ TradingData.TRADING_COUNT ]
                 f_trading_fee_discount = item[ TradingData.TRADING_FEE_DISCOUNT ]
-                dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, False )
+                dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, b_etf, False )
                 item[ TradingData.TRADING_VALUE ] = dict_result[ TradingCost.TRADING_VALUE ]
                 item[ TradingData.TRADING_FEE ] = dict_result[ TradingCost.TRADING_FEE ]
                 item[ TradingData.TRADING_TAX ] = dict_result[ TradingCost.TRADING_TAX ]
@@ -1056,7 +1070,7 @@ class MainWindow( QMainWindow ):
 
                 if str_selling_date == str_last_buying_date: #賣出與買入同一天屬於當沖
                     if n_trading_count <= n_last_buying_count: #賣出數量小於或等於買入數量，表示全部賣出數量都可視為當沖
-                        dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, True )
+                        dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, b_etf, True )
                         item[ TradingData.TRADING_VALUE ] = dict_result[ TradingCost.TRADING_VALUE ]
                         item[ TradingData.TRADING_FEE ] = dict_result[ TradingCost.TRADING_FEE ]
                         item[ TradingData.TRADING_TAX ] = dict_result[ TradingCost.TRADING_TAX ]
@@ -1066,14 +1080,14 @@ class MainWindow( QMainWindow ):
                         n_last_buying_count -= n_trading_count
                     else: #賣出數量大於買入數量，表示只有部分數量都可視為當沖
                         n_trading_count_1 = n_last_buying_count
-                        dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count_1, f_trading_fee_discount, True )#這部分是當沖
+                        dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count_1, f_trading_fee_discount, b_etf, True )#這部分是當沖
                         n_trading_value_1 = dict_result[ TradingCost.TRADING_VALUE ]
                         n_trading_fee_1 = dict_result[ TradingCost.TRADING_FEE ]
                         n_trading_tax_1 = dict_result[ TradingCost.TRADING_TAX ]
                         n_trading_total_cost_1 = dict_result[ TradingCost.TRADING_TOTAL_COST ]
 
                         n_trading_count_2 = n_trading_count - n_last_buying_count
-                        dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count_2, f_trading_fee_discount, False )#這部分不是當沖
+                        dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count_2, f_trading_fee_discount, b_etf, False )#這部分不是當沖
                         n_trading_value_2 = dict_result[ TradingCost.TRADING_VALUE ]
                         n_trading_fee_2 = dict_result[ TradingCost.TRADING_FEE ]
                         n_trading_tax_2 = dict_result[ TradingCost.TRADING_TAX ]
@@ -1088,7 +1102,7 @@ class MainWindow( QMainWindow ):
 
                         n_last_buying_count = 0
                 else:
-                    dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, False )
+                    dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, b_etf, False )
                     item[ TradingData.TRADING_VALUE ] = dict_result[ TradingCost.TRADING_VALUE ]
                     item[ TradingData.TRADING_FEE ] = dict_result[ TradingCost.TRADING_FEE ]
                     item[ TradingData.TRADING_TAX ] = dict_result[ TradingCost.TRADING_TAX ]
@@ -1224,7 +1238,8 @@ class MainWindow( QMainWindow ):
 
             list_vertical_labels = []
             for index_row,( key_stock_number, value ) in enumerate( self.dict_all_stock_trading_data.items() ):
-                str_stock_name = self.dict_all_company_number_and_name[ key_stock_number ]
+                list_stock_name_and_type = self.dict_all_company_number_to_name_and_type[ key_stock_number ]
+                str_stock_name = list_stock_name_and_type[ 0 ]
                 list_vertical_labels.append( f"{key_stock_number} {str_stock_name}" )
 
                 dict_trading_data = value[ len( value ) - 1 ] #取最後一筆交易資料，因為最後一筆交易資料的庫存等內容才是所有累計的結果
@@ -1232,9 +1247,9 @@ class MainWindow( QMainWindow ):
                 n_accumulated_inventory = dict_trading_data[ TradingData.ACCUMULATED_INVENTORY ]
                 f_average_cost = round( dict_trading_data[ TradingData.AVERAGE_COST ], 3 )
 
-                if key_stock_number in self.dict_all_company_number_and_price_info:
+                if key_stock_number in self.dict_all_company_number_to_price_info:
                     try:
-                        f_stock_price = float( self.dict_all_company_number_and_price_info[ key_stock_number ] )
+                        f_stock_price = float( self.dict_all_company_number_to_price_info[ key_stock_number ] )
                         str_stock_price = format( f_stock_price, "," )
                         n_net_value = int( n_accumulated_inventory * f_stock_price )
                         str_net_value = format( n_net_value, "," )
@@ -1487,7 +1502,7 @@ class MainWindow( QMainWindow ):
                                 break
                     else:
                         ele = row.strip().split( ',' )
-                        dict_company_number_to_name[ ele[ 0 ] ] = ele[ 1 ]
+                        dict_company_number_to_name[ ele[ 0 ] ] = [ ele[ 1 ], ele[ 2 ] ]
         else:
             b_need_to_download = True
 
@@ -1504,17 +1519,23 @@ class MainWindow( QMainWindow ):
                 for raw in tr:
                     data = [ td.get_text() for td in raw.findAll("td" )]
                     if len( data ) == 7 and ( data[ 5 ] == 'ESVUFR' or 
-                                            data[ 5 ] == 'CEOGEU' or 
-                                            data[ 5 ] == 'CEOJBU' or 
-                                            data[ 5 ] == 'CEOGBU' or
-                                            data[ 5 ] == 'CEOIBU' or
-                                            data[ 5 ] == 'CEOGDU' ): 
+                                              data[ 5 ] == 'CEOGBU' or
+                                              data[ 5 ] == 'CEOGCU' or
+                                              data[ 5 ] == 'CEOGDU' or 
+                                              data[ 5 ] == 'CEOGEU' or 
+                                              data[ 5 ] == 'CEOGMU' or
+                                              data[ 5 ] == 'CEOJBU' or 
+                                              data[ 5 ] == 'CEOJEU' or
+                                              data[ 5 ] == 'CEOIBU' or
+                                              data[ 5 ] == 'CEOIEU' or
+                                              data[ 5 ] == 'CEOIRU' ): 
+                        b_ETF = False if data[ 5 ] == 'ESVUFR' else True
                         total_company_count += 1
                         if '\u3000' in data[ 0 ]:
                             modified_data = data[ 0 ].split("\u3000")
                             if '-創' in modified_data[ 1 ]:
                                 continue
-                            modified_data_after_strip = [ modified_data[ 0 ].strip(), modified_data[ 1 ].strip() ]
+                            modified_data_after_strip = [ modified_data[ 0 ].strip(), modified_data[ 1 ].strip(), b_ETF ]
                             tds.append( modified_data_after_strip )
             except Exception as e:
                 pass                
@@ -1528,16 +1549,17 @@ class MainWindow( QMainWindow ):
                 for raw in tr:
                     data = [ td.get_text() for td in raw.findAll("td") ]
                     if len( data ) == 7 and ( data[ 5 ] == 'ESVUFR' or 
-                                            data[ 5 ] == 'CEOGEU' or 
-                                            data[ 5 ] == 'CEOJBU' or 
-                                            data[ 5 ] == 'CEOGBU' or
-                                            data[ 5 ] == 'CEOIBU' ): 
+                                              data[ 5 ] == 'CEOGBU' or
+                                              data[ 5 ] == 'CEOGEU' or 
+                                              data[ 5 ] == 'CEOJBU' or 
+                                              data[ 5 ] == 'CEOIBU' ): 
+                        b_ETF = False if data[ 5 ] == 'ESVUFR' else True
                         total_company_count += 1
                         if '\u3000' in data[ 0 ]:
                             modified_data = data[ 0 ].split("\u3000")
                             if '-創' in modified_data[ 1 ]:
                                 continue
-                            modified_data_after_strip = [ modified_data[ 0 ].strip(), modified_data[ 1 ].strip() ]
+                            modified_data_after_strip = [ modified_data[ 0 ].strip(), modified_data[ 1 ].strip(), b_ETF ]
                             tds.append( modified_data_after_strip )
             except Exception as e:
                 pass
@@ -1556,7 +1578,7 @@ class MainWindow( QMainWindow ):
                             modified_data = data[ 0 ].split("\u3000")
                             if '-創' in modified_data[ 1 ]:
                                 continue
-                            modified_data_after_strip = [ modified_data[ 0 ].strip(), modified_data[ 1 ].strip() ]
+                            modified_data_after_strip = [ modified_data[ 0 ].strip(), modified_data[ 1 ].strip(), False ]
                             tds.append( modified_data_after_strip )
             except Exception as e:
                 pass
@@ -1569,8 +1591,8 @@ class MainWindow( QMainWindow ):
             with open( g_stock_number_file_path, 'w', encoding='utf-8' ) as f:
                 f.write( str_date + '\n' )
                 for row in tds:
-                    f.write( str( row[ 0 ] ) + ',' + str( row[ 1 ] ) + '\n' )
-                    dict_company_number_to_name[ row[ 0 ] ] = row[ 1 ]
+                    f.write( str( row[ 0 ] ) + ',' + str( row[ 1 ] ) + ',' + str( row[ 2 ] ) + '\n' )
+                    dict_company_number_to_name[ row[ 0 ] ] = [ row[ 1 ], row[ 2 ] ]
 
         return dict_company_number_to_name
     
