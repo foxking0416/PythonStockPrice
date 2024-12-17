@@ -1901,10 +1901,15 @@ class MainWindow( QMainWindow ):
 
         return list_all_company_dividend
 
+    def get_value_from_string( self, str_value ):
+        if str_value == '' or str_value == '--':
+            return 0
+        return Decimal( str_value )
+
     def load_all_yearly_dividend_data( self, n_dividend_data_start_year ):
         current_date = datetime.datetime.today()
         n_current_year = current_date.year
-        dict_date_yearly_dividend = {}
+        dict_stock_yearly_dividned = {}
         for n_year in range( n_dividend_data_start_year, n_current_year + 1 ):
             # 假如是西元，轉成民國
             if n_current_year > 1990:
@@ -1913,15 +1918,64 @@ class MainWindow( QMainWindow ):
                 n_year -= 1911
             list_yearly_dividend = self.read_yearly_dividend_raw_data( n_year )
             if list_yearly_dividend != None:
-                dict_stock_yearly_dividned = {}
                 for index, item in enumerate( list_yearly_dividend ):
-                    if item[0] in dict_stock_yearly_dividned:
-                        dict_stock_yearly_dividned[ item[0] ].append( item[1:] )
-                    else:
-                        dict_stock_yearly_dividned[ item[0] ] = [ item[1:] ]
+                    f_stock_dividend_per_share = self.get_value_from_string( item[4] ) + self.get_value_from_string( item[5] )
+                    str_stock_dividend_date = item[6]
+                    f_cash_dividend_per_share = self.get_value_from_string( item[7] ) + self.get_value_from_string( item[8] )
+                    str_cash_dividend_date = item[10]
+                    str_cash_dividend_distribute_date = item[11]
+                    str_year_month_date = ''
 
-                dict_date_yearly_dividend[ str( n_year ) ] = dict_stock_yearly_dividned
-        return dict_date_yearly_dividend
+                    if ( f_stock_dividend_per_share != 0 and str_stock_dividend_date != '' ) and \
+                       ( f_cash_dividend_per_share != 0 and str_cash_dividend_date != '' ):
+                        #同時有現金股利和股票股利
+                        
+                        if str_stock_dividend_date == str_cash_dividend_date:
+                            list_year_month_date = str_stock_dividend_date.split( '/' )
+                            str_year = str( int( list_year_month_date[0] ) + 1911 )
+                            str_year_month_date = str_year + '-' + list_year_month_date[1] + '-' + list_year_month_date[2]
+                        else:
+                            #股票股利和現金股利日期不同，理論上不應該出現
+                            print("ERRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR")
+                            print("ERRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR")
+                            print("ERRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR")
+                            print("ERRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR")
+                            print("ERRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR")
+                            pass
+                    elif ( f_stock_dividend_per_share != 0  and str_stock_dividend_date != '' ):
+                        #只有股票股利
+                        list_year_month_date = str_stock_dividend_date.split( '/' )
+                        str_year = str( int( list_year_month_date[0] ) + 1911 )
+                        str_year_month_date = str_year + '-' + list_year_month_date[1] + '-' + list_year_month_date[2]
+                        pass
+                    elif ( f_cash_dividend_per_share != 0 and str_cash_dividend_date != '' ):
+                        #只有現金股利
+                        list_year_month_date = str_cash_dividend_date.split( '/' )
+                        str_year = str( int( list_year_month_date[0] ) + 1911 )
+                        str_year_month_date = str_year + '-' + list_year_month_date[1] + '-' + list_year_month_date[2]
+                        pass
+                    
+                    if str_year_month_date != '':
+                        dict_dividend_data = Utility.generate_trading_data( item[0],                    #股票代碼
+                                                                            str_year_month_date,        #交易日期
+                                                                            TradingType.DIVIDEND,       #交易種類
+                                                                            0,                          #交易價格                         
+                                                                            0,                          #交易股數
+                                                                            1,                          #手續費折扣                                   
+                                                                            f_stock_dividend_per_share, #每股股票股利
+                                                                            f_cash_dividend_per_share,  #每股現金股利
+                                                                            False,                      #是否需扣除補充保費
+                                                                            0 )                         #每股減資金額
+
+
+                    
+                    if item[0] in dict_stock_yearly_dividned:
+
+                        dict_stock_yearly_dividned[ item[0] ].append( dict_dividend_data )
+                    else:
+                        dict_stock_yearly_dividned[ item[0] ] = [ dict_dividend_data ]
+
+        return dict_stock_yearly_dividned
 
 
 if __name__ == "__main__":
