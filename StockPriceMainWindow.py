@@ -10,7 +10,7 @@ from QtStockTradingEditDialog import Ui_Dialog as Ui_StockTradingDialog
 from QtStockDividendEditDialog import Ui_Dialog as Ui_StockDividendDialog
 from QtStockCapitalReductionEditDialog import Ui_Dialog as Ui_StockCapitalReductionDialog
 from QtDuplicateOptionDialog import Ui_Dialog as Ui_DuplicateOptionDialog
-from PySide6.QtWidgets import QApplication, QMainWindow, QDialog, QButtonGroup, QMessageBox, QStyledItemDelegate, QFileDialog
+from PySide6.QtWidgets import QApplication, QMainWindow, QDialog, QButtonGroup, QMessageBox, QStyledItemDelegate, QFileDialog, QHeaderView
 from PySide6.QtGui import QStandardItemModel, QStandardItem, QIcon, QBrush
 from PySide6.QtCore import Qt, QModelIndex, QRect, QSignalBlocker
 from openpyxl import Workbook
@@ -452,6 +452,7 @@ class MainWindow( QMainWindow ):
         self.ui.qtStockListTableView.verticalHeader().setSectionsMovable( True )
         self.ui.qtStockListTableView.verticalHeader().sectionMoved.connect( self.on_stock_list_table_vertical_header_section_moved )
         self.ui.qtStockListTableView.verticalHeader().sectionClicked.connect( self.on_stock_list_table_vertical_section_clicked )
+        self.ui.qtStockListTableView.verticalHeader().setSectionResizeMode( QHeaderView.Fixed )
         self.ui.qtStockListTableView.horizontalHeader().sectionResized.connect( self.on_stock_list_table_horizontal_section_resized )
         self.ui.qtStockListTableView.setModel( self.stock_list_model )
         self.ui.qtStockListTableView.setItemDelegate( delegate )
@@ -462,6 +463,7 @@ class MainWindow( QMainWindow ):
         self.ui.qtTradingDataTableView.setModel( self.per_stock_trading_data_model )
         self.ui.qtTradingDataTableView.setItemDelegate( delegate )
         self.ui.qtTradingDataTableView.horizontalHeader().hide()
+        self.ui.qtTradingDataTableView.verticalHeader().setSectionResizeMode( QHeaderView.Fixed )
         self.ui.qtTradingDataTableView.clicked.connect( lambda index: self.on_trading_data_table_item_clicked( index, self.per_stock_trading_data_model ) )
 
         self.ui.qtStockInputLineEdit.textChanged.connect( self.on_stock_input_text_changed ) 
