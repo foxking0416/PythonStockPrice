@@ -451,6 +451,7 @@ class MainWindow( QMainWindow ):
         self.stock_list_model.setHorizontalHeaderLabels( g_list_stock_list_table_horizontal_header )
         self.ui.qtStockListTableView.verticalHeader().setSectionsMovable( True )
         self.ui.qtStockListTableView.verticalHeader().sectionMoved.connect( self.on_stock_list_table_vertical_header_section_moved )
+        self.ui.qtStockListTableView.verticalHeader().sectionClicked.connect( self.on_stock_list_table_vertical_section_clicked )
         self.ui.qtStockListTableView.horizontalHeader().sectionResized.connect( self.on_stock_list_table_horizontal_section_resized )
         self.ui.qtStockListTableView.setModel( self.stock_list_model )
         self.ui.qtStockListTableView.setItemDelegate( delegate )
@@ -659,6 +660,17 @@ class MainWindow( QMainWindow ):
         self.dict_all_stock_trading_data = dict_all_stock_trading_data_new
         self.refresh_stock_list_table()
         self.auto_save_trading_data()
+
+    def on_stock_list_table_vertical_section_clicked( self, n_logical_index ):
+        header_text = self.stock_list_model.verticalHeaderItem( n_logical_index ).text()
+        str_stock_number = header_text.split(" ")[0]
+
+        if str_stock_number in self.dict_all_stock_trading_data:
+            if str_stock_number != self.str_picked_stock_number:
+                self.str_picked_stock_number = str_stock_number
+                list_trading_data = self.dict_all_stock_trading_data[ str_stock_number ]
+                self.refresh_trading_data_table( list_trading_data )
+        self.update_button_enable_disable_status()
 
     def on_stock_list_table_horizontal_section_resized( self, n_logical_index, n_old_size, n_new_size ):
         self.list_stock_list_column_width[ n_logical_index ] = n_new_size
