@@ -369,9 +369,6 @@ class StockTradingEditDialog( QDialog ):
             self.ui.qtCommonTradeCountSpinBox.setValue( 0 )
             self.ui.qtOddTradeCountSpinBox.setValue( f_count )
 
-    def setup_stock_type( self, b_etf ):
-        self.b_etf = b_etf
-
     def accept_data( self ):
 
         if float( self.ui.qtTotalCostLineEdit.text().replace( ',', '' ) ) != 0:
@@ -607,7 +604,8 @@ class MainWindow( QMainWindow ):
         str_stock_number = self.str_picked_stock_number
         list_stock_name_and_type = self.dict_all_company_number_to_name_and_type[ str_stock_number ]
         str_stock_name = list_stock_name_and_type[ 0 ]
-        dialog = StockTradingEditDialog( str_stock_number, str_stock_name, self.ui.qtDiscountCheckBox.isChecked(), self.ui.qtDiscountRateDoubleSpinBox.value(), self )
+        b_etf = self.dict_all_company_number_to_name_and_type[ str_stock_number ][ 1 ]
+        dialog = StockTradingEditDialog( str_stock_number, str_stock_name, b_etf, self.ui.qtDiscountCheckBox.isChecked(), self.ui.qtDiscountRateDoubleSpinBox.value(), self )
 
         if dialog.exec():
             dict_trading_data = dialog.dict_trading_data
@@ -745,7 +743,8 @@ class MainWindow( QMainWindow ):
                     if dict_selected_data[ TradingData.TRADING_TYPE ] == TradingType.TEMPLATE:
                         return
                     if dict_selected_data[ TradingData.TRADING_TYPE ] == TradingType.BUY or dict_selected_data[ TradingData.TRADING_TYPE ] == TradingType.SELL:
-                        dialog = StockTradingEditDialog( str_stock_number, str_stock_name, self.ui.qtDiscountCheckBox.isChecked(), self.ui.qtDiscountRateDoubleSpinBox.value(), self )
+                        b_etf = self.dict_all_company_number_to_name_and_type[ str_stock_number ][ 1 ]
+                        dialog = StockTradingEditDialog( str_stock_number, str_stock_name, b_etf, self.ui.qtDiscountCheckBox.isChecked(), self.ui.qtDiscountRateDoubleSpinBox.value(), self )
                         dialog.setup_trading_date( dict_selected_data[ TradingData.TRADING_DATE ] )
                         dialog.setup_trading_type( dict_selected_data[ TradingData.TRADING_TYPE ] )
                         dialog.setup_trading_discount( dict_selected_data[ TradingData.TRADING_FEE_DISCOUNT ] )
