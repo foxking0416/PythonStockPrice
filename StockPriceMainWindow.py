@@ -181,7 +181,7 @@ class Utility():
         dict_trading_data[ TradingData.CAPITAL_REDUCTION_PER_SHARE ] = f_capital_reduction_per_share
         return dict_trading_data
 
-class QtDuplicateOptionDialog( QDialog ):
+class ImportDataDuplicateOptionDialog( QDialog ):
     def __init__( self, parent = None ):
         super().__init__( parent )
 
@@ -893,7 +893,7 @@ class MainWindow( QMainWindow ):
                     break
 
             if b_duplicate:
-                dialog = QtDuplicateOptionDialog( self )
+                dialog = ImportDataDuplicateOptionDialog( self )
                 if dialog.exec():
                     if dialog.b_overwrite:
                         self.dict_all_stock_trading_data.update( dict_all_stock_trading_data_new )
