@@ -61,10 +61,10 @@ delete_icon_file_path = os.path.join( g_exe_root_dir, 'icon\\Delete.svg' )
 delete_icon = QIcon( delete_icon_file_path ) 
 export_icon_file_path = os.path.join( g_exe_root_dir, 'icon\\Export.svg' ) 
 export_icon = QIcon( export_icon_file_path ) 
-g_trading_data_json_file_path = os.path.join( g_data_dir, 'TradingData.json' )
-g_UISetting_file_path = os.path.join( g_data_dir, 'UISetting.config' )
-g_stock_number_file_path = os.path.join( g_data_dir, 'StockNumber.txt' )
-g_stock_price_file_path = os.path.join( g_data_dir, 'StockPrice.txt' )
+g_trading_data_json_file_path = os.path.join( g_data_dir, 'StockInventory', 'TradingData.json' )
+g_UISetting_file_path = os.path.join( g_data_dir, 'StockInventory', 'UISetting.config' )
+g_stock_number_file_path = os.path.join( g_data_dir, 'StockInventory', 'StockNumber.txt' )
+g_stock_price_file_path = os.path.join( g_data_dir, 'StockInventory', 'StockPrice.txt' )
 
 class CenterIconDelegate( QStyledItemDelegate ):
     def paint( self, painter, option, index ):
@@ -508,6 +508,8 @@ class MainWindow( QMainWindow ):
         str_date = obj_current_date.strftime('%Y%m%d')
         self.dict_all_company_number_to_name_and_type = self.download_all_company_stock_number( str_date )
         self.dict_all_company_number_to_price_info = self.download_day_stock_price( str_date )
+        self.download_all_yearly_dividend_data( 2019, str_date )
+        self.dict_date_yearly_dividend = self.load_all_yearly_dividend_data( 2019 )
         n_retry = 0
         while len( self.dict_all_company_number_to_price_info ) == 0:
             obj_current_date = obj_current_date - datetime.timedelta( days = 1 )
@@ -523,6 +525,7 @@ class MainWindow( QMainWindow ):
         self.str_picked_stock_number = None
         self.dict_all_stock_trading_data = {}
         self.list_stock_list_column_width = []
+
         
         
         self.initialize()
@@ -1499,6 +1502,29 @@ class MainWindow( QMainWindow ):
     
         raise Exception("Max retries exceeded. Failed to get a successful response.")
 
+    def send_post_request( self, url, payload, max_retries = 3, timeout = 10 ):
+        retries = 0
+        while retries < max_retries:
+
+            try:
+                # 發送 POST 請求
+                res = requests.post( url, data = payload, timeout=timeout )
+                # 檢查回應的狀態碼，確保是成功的 2xx 系列
+                if res.status_code == 200:
+                    return res
+                else:
+                    print("\033[1;31mRequest failed\033[0m")
+                    print(f"Status code {res.status_code}. Retrying...")
+            except requests.exceptions.Timeout:
+                print("\033[1;31mTimeout\033[0m")
+            except requests.exceptions.TooManyRedirects:
+                print("\033[1;31mTooManyRedirects\033[0m")
+
+            retries += 1
+            time.sleep(2)  # 等待2秒後重試
+        
+        raise Exception("Max retries exceeded. Failed to get a successful response.")
+
     def download_all_company_stock_number( self, str_date ): 
         dict_company_number_to_name = {}
 
@@ -1613,7 +1639,6 @@ class MainWindow( QMainWindow ):
         return dict_company_number_to_name
     
     def download_day_stock_price( self, str_date ):
-
         dict_company_number_to_price_info = {}
         b_need_to_download = False
         if os.path.exists( g_stock_price_file_path ):
@@ -1722,6 +1747,183 @@ class MainWindow( QMainWindow ):
 
         return dict_company_number_to_price_info
     
+    def process_output_file_path( self, str_output_path, list_file_exist, str_folder_name, str_file_name, n_year, n_season, b_overwrite ):
+        str_season = ''
+        if n_season == 1 or n_season == 2 or n_season == 3 or n_season == 4:
+            str_season = '_Q' + str( n_season )
+        if str_output_path == None:
+            str_output_path = os.path.join( g_data_dir, 'StockInventory', str_folder_name, str_file_name + str( n_year ) + str_season + '.txt' )
+        # 確保目錄存在，若不存在則遞歸創建
+        os.makedirs( os.path.dirname( str_output_path ), exist_ok = True )
+        if b_overwrite or not os.path.exists( str_output_path ):
+            list_file_exist[0] = False
+        
+        return str_output_path
+
+    def download_yearly_dividend_data( self, n_year, str_date, str_output_path, b_overwrite ):
+        # 假如是西元，轉成民國
+        if n_year > 1990:
+            n_year -= 1911
+
+        file_exist = [ True ]
+        str_output_path = self.process_output_file_path( str_output_path, file_exist, 'Dividend', 'Dividend_', n_year, 0, b_overwrite )
+        if file_exist[0]:
+            print("dividend file exists")
+            return
+
+        b_need_to_download = False
+        if os.path.exists( str_output_path ):
+            with open( str_output_path, 'r', encoding='utf-8' ) as f:
+                data = f.readlines()
+                for i, row in enumerate( data ):
+                    if i == 0:
+                        if row.strip() != str_date:
+                            if self.check_internet_via_http(): #日期不一樣，且又有網路時才重新下載，不然就用舊的
+                                b_need_to_download = True
+        else:
+            b_need_to_download = True
+
+        if b_need_to_download:
+            # 請求的 URL
+            url = 'https://mops.twse.com.tw/mops/web/ajax_t108sb27'
+
+            # POST 請求的數據
+            payload = {
+                # 'TYPEK': 'sii' if e_company_type2 == CompanyType2.LISTED else 'otc',
+                'encodeURIComponent': '1',
+                'firstin': '1',
+                'off': '1',
+                'step': '1',
+                'year': str(n_year)
+            }
+
+            all_company_dividend = []
+            try:
+                for n_type in range( 2 ):
+                    if n_type == 0:
+                        payload[ 'TYPEK' ] = 'sii'
+                    else:
+                        payload[ 'TYPEK' ] = 'otc'
+
+                    res = self.send_post_request( url, payload )
+
+                    soup = BeautifulSoup( res.text, "lxml" )
+                    tr = soup.findAll( 'tr' )
+                    for raw in tr:
+                        if not raw.find( 'th' ):
+                            data = []
+                            td_elements = raw.findAll( "td" )
+                            if len( td_elements ) == 19:
+                                for index, td in enumerate( td_elements ):
+                                    text = td.get_text().strip()
+                                    if index == 4 or index == 5 or index == 7 or index == 8 or index == 9 or index == 13 or index == 14:
+                                        if text == '\xa0' or text == ''  or text == '-' or text == '--':
+                                            data.append( 0 )
+                                        else:
+                                            number = float( text.replace( ',', '' ) ) 
+                                            data.append( number )
+                                    elif index == 12 or index == 15:
+                                        if text == '\xa0' or text == ''  or text == '-' or text == '--':
+                                            data.append( 0 )
+                                        else:
+                                            number = int( text.replace( ',', '' ) ) 
+                                            data.append( number )
+                                    else:
+                                        if text == '\xa0' or text == ''  or text == '-' or text == '--':
+                                            data.append( '--' )
+                                        else:
+                                            data.append( text )
+
+                                all_company_dividend.append( data )
+            except Exception as e:
+                print(f"Final error: {e}")
+
+
+            if len( all_company_dividend ) == 0:
+                print( "no data" )
+                return
+            with open( str_output_path, 'w', encoding = 'utf-8' ) as f:
+                f.write( str_date + '\n' )
+                f.write( str( n_year ) + '\n' )
+                f.write( '[0]公司代號,[1]公司名稱,[2]股利所屬期間,[3]權利分派基準日,[4]股票股利_盈餘轉增資配股(元/股),[5]股票股利_法定盈餘公積、資本公積轉增資配股(元/股),\
+                        [6]股票股利_除權交易日,[7]現金股利_盈餘分配之股東現金股利(元/股),[8]現金股利_法定盈餘公積、資本公積發放之現金(元/股),[9]現金股利_特別股配發現金股利(元/股),\
+                        [10]現金股利_除息交易日,[11]現金股利_現金股利發放日,[12]現金增資總股數(股),[13]現金增資認股比率(%),[14]現金增資認購價(元/股),\
+                        [15]參加分派總股數,[16]公告日期,[17]公告時間,[18]普通股每股面額\n' )
+                for row in all_company_dividend:
+                    b_first = True
+                    for ele in row:
+                        if b_first:
+                            f.write( str( ele ) )
+                            b_first = False
+                        else:
+                            f.write( ',' + str( ele ) )
+                    f.write( '\n')  # 用逗號分隔每個元素，並換行
+
+    def download_all_yearly_dividend_data( self, n_dividend_data_start_year, str_date ):
+        print( "\033[32m>>>>>>>>>>>>>>> Start to download all yearly dividend data.\033[0m" )
+        current_date = datetime.datetime.today()
+        n_current_year = current_date.year
+
+        for n_year in range( n_dividend_data_start_year, n_current_year + 1 ):
+            # 假如是西元，轉成民國
+            if n_current_year > 1990:
+                n_current_year -= 1911
+            if n_year > 1990:
+                n_year -= 1911
+
+            b_overwrite = False
+            file_exist = [ True ]
+            str_output_path = self.process_output_file_path( None, file_exist, 'Dividend', 'Dividend_', n_year, 0, b_overwrite )
+            if not file_exist[0] or n_year == n_current_year:
+                self.download_yearly_dividend_data( n_year, str_date, str_output_path, True )
+                print(f"Finish {n_year} yearly dividend " )
+
+        print( "\033[32m<<<<<<<<<<<<<<< Finish downloading all yearly dividend data.\033[0m" )
+
+    def read_yearly_dividend_raw_data( self, n_year ):
+        if n_year > 1990:
+            n_year -= 1911
+        file_exist = [ True ]
+        file_path = self.process_output_file_path( None, file_exist, 'Dividend', 'Dividend_', n_year, 0, False )
+        if not os.path.exists( file_path ):
+            return None
+        
+        list_all_company_dividend = []
+        with open( file_path, 'r', encoding = 'utf-8' ) as f:
+            data = f.readlines()
+            for i, row in enumerate( data ):
+                if i == 0 or i == 1 or i == 2:#i=0 檔案下載日期, i=1 資料年度, i=2 欄位名稱
+                    continue
+                else:
+                    row = row.strip().split( ',' )
+                    list_all_company_dividend.append( row )
+            print( "Read " + 'StockDividend_Y' + str( n_year ) )
+
+        return list_all_company_dividend
+
+    def load_all_yearly_dividend_data( self, n_dividend_data_start_year ):
+        current_date = datetime.datetime.today()
+        n_current_year = current_date.year
+        dict_date_yearly_dividend = {}
+        for n_year in range( n_dividend_data_start_year, n_current_year + 1 ):
+            # 假如是西元，轉成民國
+            if n_current_year > 1990:
+                n_current_year -= 1911
+            if n_year > 1990:
+                n_year -= 1911
+            list_yearly_dividend = self.read_yearly_dividend_raw_data( n_year )
+            if list_yearly_dividend != None:
+                dict_stock_yearly_dividned = {}
+                for index, item in enumerate( list_yearly_dividend ):
+                    if item[0] in dict_stock_yearly_dividned:
+                        dict_stock_yearly_dividned[ item[0] ].append( item[1:] )
+                    else:
+                        dict_stock_yearly_dividned[ item[0] ] = [ item[1:] ]
+
+                dict_date_yearly_dividend[ str( n_year ) ] = dict_stock_yearly_dividned
+        return dict_date_yearly_dividend
+
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)  # 創建應用程式
     app.setStyle('Fusion')
