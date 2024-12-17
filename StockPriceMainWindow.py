@@ -1514,7 +1514,11 @@ class MainWindow( QMainWindow ):
                                 break
                     else:
                         ele = row.strip().split( ',' )
-                        dict_company_number_to_name[ ele[ 0 ] ] = [ ele[ 1 ], ele[ 2 ] ]
+                        if len( ele ) == 2:
+                            b_need_to_download = True
+                            break
+                        else:
+                            dict_company_number_to_name[ ele[ 0 ] ] = [ ele[ 1 ], ele[ 2 ] ]
         else:
             b_need_to_download = True
 
