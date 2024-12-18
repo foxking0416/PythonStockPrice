@@ -472,7 +472,7 @@ class MainWindow( QMainWindow ):
             if row == 10 or row == 11:
                 self.ui.qtTradingDataTableView.setRowHeight( row, 40 )
             else:
-                self.ui.qtTradingDataTableView.setRowHeight( row, 20 )
+                self.ui.qtTradingDataTableView.setRowHeight( row, 25 )
 
         self.ui.qtStockInputLineEdit.textChanged.connect( self.on_stock_input_text_changed ) 
 
@@ -1413,6 +1413,8 @@ class MainWindow( QMainWindow ):
                     self.ui.qtStockListTableView.setColumnWidth( column, 100 )
                     self.list_stock_list_column_width.append( 100 )
 
+            for index_row in range( len( self.dict_all_stock_trading_data ) ):
+                self.ui.qtStockListTableView.setRowHeight( index_row, 25 )
             self.stock_list_model.setVerticalHeaderLabels( list_vertical_labels )
 
     def get_trading_data_header( self ):
@@ -1607,7 +1609,7 @@ class MainWindow( QMainWindow ):
             if row == 10 or row == 11:
                 self.ui.qtTradingDataTableView.setRowHeight( row, 40 )
             else:
-                self.ui.qtTradingDataTableView.setRowHeight( row, 20 )
+                self.ui.qtTradingDataTableView.setRowHeight( row, 25 )
 
     def check_internet_via_http( self, url="https://www.google.com", timeout=3):
         """

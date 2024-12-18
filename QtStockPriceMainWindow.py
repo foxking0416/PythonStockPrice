@@ -206,7 +206,7 @@ class Ui_MainWindow(object):
 
         self.qtTradingDataTableView = QTableView(self.centralwidget)
         self.qtTradingDataTableView.setObjectName(u"qtTradingDataTableView")
-        self.qtTradingDataTableView.setMinimumSize(QSize(0, 520))
+        self.qtTradingDataTableView.setMinimumSize(QSize(0, 470))
         self.qtTradingDataTableView.verticalHeader().setMinimumSectionSize(15)
 
         self.verticalLayout.addWidget(self.qtTradingDataTableView)
