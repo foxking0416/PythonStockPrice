@@ -44,7 +44,7 @@ print( "g_abs_dir :" + g_abs_dir ) #開發模式下是D:\_2.code\PythonStockPric
 
 
 
-g_list_stock_list_table_horizontal_header = [ '總成本', '庫存股數', '平均成本', '今日股價', '淨值', '損益', '匯出', '刪除' ]
+g_list_stock_list_table_horizontal_header = [ '自動帶入\n股利', '總成本', '庫存股數', '平均成本', '今日股價', '淨值', '損益', '匯出', '刪除' ]
 if getattr( sys, 'frozen', False ):
     # PyInstaller 打包後執行時
     g_exe_root_dir = os.path.dirname(__file__) #C:\Users\foxki\AppData\Local\Temp\_MEI60962
@@ -60,7 +60,11 @@ edit_icon = QIcon( edit_icon_file_path )
 delete_icon_file_path = os.path.join( g_exe_root_dir, 'icon\\Delete.svg' ) 
 delete_icon = QIcon( delete_icon_file_path ) 
 export_icon_file_path = os.path.join( g_exe_root_dir, 'icon\\Export.svg' ) 
-export_icon = QIcon( export_icon_file_path ) 
+export_icon = QIcon( export_icon_file_path )
+check_icon_file_path = os.path.join( g_exe_root_dir, 'icon\\CheckOn.svg' ) 
+check_icon = QIcon( check_icon_file_path )
+uncheck_icon_file_path = os.path.join( g_exe_root_dir, 'icon\\CheckOff.svg' ) 
+uncheck_icon = QIcon( uncheck_icon_file_path )
 g_trading_data_json_file_path = os.path.join( g_data_dir, 'StockInventory', 'TradingData.json' )
 g_UISetting_file_path = os.path.join( g_data_dir, 'StockInventory', 'UISetting.config' )
 g_stock_number_file_path = os.path.join( g_data_dir, 'StockInventory', 'StockNumber.txt' )
@@ -105,18 +109,19 @@ class TradingData( Enum ):
     CASH_DIVIDEND_PER_SHARE = 7
     IS_REQUIRED_EXTRA_INSURANCE_FEE = 8
     CAPITAL_REDUCTION_PER_SHARE = 9
-    SORTED_INDEX = 10 #不會記錄
-    TRADING_VALUE = 11 #不會記錄
-    TRADING_FEE = 12 #不會記錄
-    TRADING_TAX = 13 #不會記錄
-    TRADING_COST = 14 #不會記錄
-    STOCK_DIVIDEND_GAIN = 15 #不會記錄
-    CASH_DIVIDEND_GAIN = 16 #不會記錄
-    EXTRA_INSURANCE_FEE = 17 #不會記錄
-    ACCUMULATED_COST = 18 #不會記錄
-    ACCUMULATED_INVENTORY = 19 #不會記錄
-    AVERAGE_COST = 20 #不會記錄
-    AUTO_DIVIDEND = 21 #不會記錄
+    USE_AUTO_DIVIDEND_DATA = 10
+    SORTED_INDEX_NON_SAVE = 11 #不會記錄
+    TRADING_VALUE_NON_SAVE = 12 #不會記錄
+    TRADING_FEE_NON_SAVE = 13 #不會記錄
+    TRADING_TAX_NON_SAVE = 14 #不會記錄
+    TRADING_COST_NON_SAVE = 15 #不會記錄
+    STOCK_DIVIDEND_GAIN_NON_SAVE = 16 #不會記錄
+    CASH_DIVIDEND_GAIN_NON_SAVE = 17 #不會記錄
+    EXTRA_INSURANCE_FEE_NON_SAVE = 18 #不會記錄
+    ACCUMULATED_COST_NON_SAVE = 19 #不會記錄
+    ACCUMULATED_INVENTORY_NON_SAVE = 20 #不會記錄
+    AVERAGE_COST_NON_SAVE = 21 #不會記錄
+    IS_AUTO_DIVIDEND_DATA_NON_SAVE = 22 #不會記錄
 
 class TradingCost( Enum ):
     TRADING_VALUE = 0
@@ -591,6 +596,7 @@ class MainWindow( QMainWindow ):
                                                                0,                    #每股現金股利
                                                                False,                #是否需扣除補充保費
                                                                0 )                   #每股減資金額
+            dict_trading_data[ TradingData.USE_AUTO_DIVIDEND_DATA ] = True
             self.dict_all_stock_trading_data[ str_first_four_chars ] = [ dict_trading_data ]
             sorted_list = self.process_single_trading_data( str_first_four_chars )
             self.refresh_stock_list_table()
@@ -699,7 +705,15 @@ class MainWindow( QMainWindow ):
             header_text = table_model.verticalHeaderItem( index.row() ).text()
             str_stock_number = header_text.split(" ")[0]
             
-            if n_column == len( g_list_stock_list_table_horizontal_header ) - 1:#刪除
+            if n_column == 0:#自動帶入股利按鈕
+                list_trading_data = self.dict_all_stock_trading_data[ str_stock_number ]
+                list_trading_data[ 0 ][ TradingData.USE_AUTO_DIVIDEND_DATA ] = not list_trading_data[ 0 ][ TradingData.USE_AUTO_DIVIDEND_DATA ]
+                self.str_picked_stock_number = str_stock_number
+                sorted_list = self.process_single_trading_data( str_stock_number )
+                self.refresh_stock_list_table()
+                self.refresh_trading_data_table( sorted_list )
+                self.auto_save_trading_data()
+            elif n_column == len( g_list_stock_list_table_horizontal_header ) - 1:#刪除按鈕
                 result = self.show_message_box( "警告", f"確定要刪掉『{header_text}』的所有資料嗎?" )
                 if result:
                     del self.dict_all_stock_trading_data[ str_stock_number ]
@@ -707,7 +721,7 @@ class MainWindow( QMainWindow ):
                     self.refresh_stock_list_table()
                     self.per_stock_trading_data_model.clear()
                     self.auto_save_trading_data()
-            elif n_column == len( g_list_stock_list_table_horizontal_header ) - 2:#匯出
+            elif n_column == len( g_list_stock_list_table_horizontal_header ) - 2:#匯出按鈕
                 file_path = self.open_save_json_file_dialog()
                 if file_path:
                     dict_stock_trading_data = { str_stock_number: self.dict_all_stock_trading_data[ str_stock_number ] }
@@ -744,7 +758,7 @@ class MainWindow( QMainWindow ):
                 hidden_data = table_model.data( index, Qt.UserRole )
                 n_findindex = -1
                 for index, dict_selected_data in enumerate( list_trading_data ):
-                    if dict_selected_data[ TradingData.SORTED_INDEX ] == hidden_data:
+                    if dict_selected_data[ TradingData.SORTED_INDEX_NON_SAVE ] == hidden_data:
                         n_findindex = index
                         break
                 if n_findindex == -1:
@@ -1067,22 +1081,26 @@ class MainWindow( QMainWindow ):
 
     def process_single_trading_data( self, str_stock_number ):
         list_trading_data = self.dict_all_stock_trading_data[ str_stock_number ]
+        #先拔掉所有的AUTO_DIVIDEND_DATA，下面有需要再重新插入，避免重複插入
+        list_trading_data = [item for item in list_trading_data if TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE not in item or not item[TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE]]
+
         b_etf = self.dict_all_company_number_to_name_and_type[ str_stock_number ][ 1 ]
         sorted_list = sorted( list_trading_data, key=lambda x: ( datetime.datetime.strptime( x[ TradingData.TRADING_DATE ], "%Y-%m-%d"), -x[ TradingData.TRADING_TYPE ] ) )
 
         str_current_date = datetime.datetime.today().strftime("%Y-%m-%d")
-
-        if str_stock_number in self.dict_auto_stock_yearly_dividned:
-            auto_list_dividend = self.dict_auto_stock_yearly_dividned[ str_stock_number ]
-            auto_list_dividend = sorted( auto_list_dividend, key=lambda x: ( datetime.datetime.strptime( x[ TradingData.TRADING_DATE ], "%Y-%m-%d") ) )
-            if len( sorted_list ) > 1:
-                first_data = sorted_list[ 1 ]
-                for index, auto_dividend_data in enumerate( auto_list_dividend ):
-                    if auto_dividend_data[ TradingData.TRADING_DATE ] > first_data[ TradingData.TRADING_DATE ]:
-                        if auto_dividend_data[ TradingData.TRADING_DATE ] > str_current_date:
-                            break
-                        # sorted_list.append( auto_dividend_data )
-        sorted_list = sorted( sorted_list, key=lambda x: ( datetime.datetime.strptime( x[ TradingData.TRADING_DATE ], "%Y-%m-%d"), -x[ TradingData.TRADING_TYPE ] ) )
+        b_use_auto_dividend = sorted_list[ 0 ][ TradingData.USE_AUTO_DIVIDEND_DATA ]
+        if b_use_auto_dividend:
+            if str_stock_number in self.dict_auto_stock_yearly_dividned:
+                auto_list_dividend = self.dict_auto_stock_yearly_dividned[ str_stock_number ]
+                auto_list_dividend = sorted( auto_list_dividend, key=lambda x: ( datetime.datetime.strptime( x[ TradingData.TRADING_DATE ], "%Y-%m-%d") ) )
+                if len( sorted_list ) > 1:
+                    first_data = sorted_list[ 1 ]
+                    for index, auto_dividend_data in enumerate( auto_list_dividend ):
+                        if auto_dividend_data[ TradingData.TRADING_DATE ] > first_data[ TradingData.TRADING_DATE ]:
+                            if auto_dividend_data[ TradingData.TRADING_DATE ] > str_current_date:
+                                break
+                            sorted_list.append( auto_dividend_data )
+                    sorted_list = sorted( sorted_list, key=lambda x: ( datetime.datetime.strptime( x[ TradingData.TRADING_DATE ], "%Y-%m-%d"), -x[ TradingData.TRADING_TYPE ] ) )
 
         n_accumulated_inventory = 0
         n_accumulated_cost = 0
@@ -1090,24 +1108,26 @@ class MainWindow( QMainWindow ):
         n_last_buying_count = 0
         list_calibration_data = [] #因為若是已經沒有庫存股票，那麼股利分配或是減資的資料就不會被計算
         for index, item in enumerate( sorted_list ):
-            item[ TradingData.SORTED_INDEX ] = index
+            item[ TradingData.SORTED_INDEX_NON_SAVE ] = index
             e_trading_type = item[ TradingData.TRADING_TYPE ]
             
-            if e_trading_type == TradingType.BUY:
+            if e_trading_type == TradingType.TEMPLATE:
+                list_calibration_data.append( item )
+            elif e_trading_type == TradingType.BUY:
                 f_trading_price = item[ TradingData.TRADING_PRICE ]
                 n_trading_count = item[ TradingData.TRADING_COUNT ]
                 f_trading_fee_discount = item[ TradingData.TRADING_FEE_DISCOUNT ]
                 dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, b_etf, False )
-                item[ TradingData.TRADING_VALUE ] = dict_result[ TradingCost.TRADING_VALUE ]
-                item[ TradingData.TRADING_FEE ] = dict_result[ TradingCost.TRADING_FEE ]
-                item[ TradingData.TRADING_TAX ] = dict_result[ TradingCost.TRADING_TAX ]
-                item[ TradingData.EXTRA_INSURANCE_FEE ] = 0 
-                n_per_trading_total_cost = item[ TradingData.TRADING_COST ] = dict_result[ TradingCost.TRADING_TOTAL_COST ]
+                item[ TradingData.TRADING_VALUE_NON_SAVE ] = dict_result[ TradingCost.TRADING_VALUE ]
+                item[ TradingData.TRADING_FEE_NON_SAVE ] = dict_result[ TradingCost.TRADING_FEE ]
+                item[ TradingData.TRADING_TAX_NON_SAVE ] = dict_result[ TradingCost.TRADING_TAX ]
+                item[ TradingData.EXTRA_INSURANCE_FEE_NON_SAVE ] = 0 
+                n_per_trading_total_cost = item[ TradingData.TRADING_COST_NON_SAVE ] = dict_result[ TradingCost.TRADING_TOTAL_COST ]
                 n_accumulated_inventory += n_trading_count
                 n_accumulated_cost += n_per_trading_total_cost
 
-                item[ TradingData.STOCK_DIVIDEND_GAIN ] = 0
-                item[ TradingData.CASH_DIVIDEND_GAIN ] = 0
+                item[ TradingData.STOCK_DIVIDEND_GAIN_NON_SAVE ] = 0
+                item[ TradingData.CASH_DIVIDEND_GAIN_NON_SAVE ] = 0
                 str_buying_date = item[ TradingData.TRADING_DATE ]
                 if str_last_buying_date == str_buying_date:
                     n_last_buying_count += n_trading_count
@@ -1124,10 +1144,10 @@ class MainWindow( QMainWindow ):
                 if str_selling_date == str_last_buying_date: #賣出與買入同一天屬於當沖
                     if n_trading_count <= n_last_buying_count: #賣出數量小於或等於買入數量，表示全部賣出數量都可視為當沖
                         dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, b_etf, True )
-                        item[ TradingData.TRADING_VALUE ] = dict_result[ TradingCost.TRADING_VALUE ]
-                        item[ TradingData.TRADING_FEE ] = dict_result[ TradingCost.TRADING_FEE ]
-                        item[ TradingData.TRADING_TAX ] = dict_result[ TradingCost.TRADING_TAX ]
-                        n_per_trading_total_cost = item[ TradingData.TRADING_COST ] = dict_result[ TradingCost.TRADING_TOTAL_COST ]
+                        item[ TradingData.TRADING_VALUE_NON_SAVE ] = dict_result[ TradingCost.TRADING_VALUE ]
+                        item[ TradingData.TRADING_FEE_NON_SAVE ] = dict_result[ TradingCost.TRADING_FEE ]
+                        item[ TradingData.TRADING_TAX_NON_SAVE ] = dict_result[ TradingCost.TRADING_TAX ]
+                        n_per_trading_total_cost = item[ TradingData.TRADING_COST_NON_SAVE ] = dict_result[ TradingCost.TRADING_TOTAL_COST ]
                         n_accumulated_cost -= n_per_trading_total_cost
                         n_accumulated_inventory -= n_trading_count
                         n_last_buying_count -= n_trading_count
@@ -1146,69 +1166,80 @@ class MainWindow( QMainWindow ):
                         n_trading_tax_2 = dict_result[ TradingCost.TRADING_TAX ]
                         n_trading_total_cost_2 = dict_result[ TradingCost.TRADING_TOTAL_COST ]
 
-                        item[ TradingData.TRADING_VALUE ] = n_trading_value_1 + n_trading_value_2
-                        item[ TradingData.TRADING_FEE ] = n_trading_fee_1 + n_trading_fee_2
-                        item[ TradingData.TRADING_TAX ] = n_trading_tax_1 + n_trading_tax_2
-                        n_per_trading_total_cost = item[ TradingData.TRADING_COST ] = n_trading_total_cost_1 + n_trading_total_cost_2
+                        item[ TradingData.TRADING_VALUE_NON_SAVE ] = n_trading_value_1 + n_trading_value_2
+                        item[ TradingData.TRADING_FEE_NON_SAVE ] = n_trading_fee_1 + n_trading_fee_2
+                        item[ TradingData.TRADING_TAX_NON_SAVE ] = n_trading_tax_1 + n_trading_tax_2
+                        n_per_trading_total_cost = item[ TradingData.TRADING_COST_NON_SAVE ] = n_trading_total_cost_1 + n_trading_total_cost_2
                         n_accumulated_cost -= n_per_trading_total_cost
                         n_accumulated_inventory -= n_trading_count
 
                         n_last_buying_count = 0
                 else:
                     dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, b_etf, False )
-                    item[ TradingData.TRADING_VALUE ] = dict_result[ TradingCost.TRADING_VALUE ]
-                    item[ TradingData.TRADING_FEE ] = dict_result[ TradingCost.TRADING_FEE ]
-                    item[ TradingData.TRADING_TAX ] = dict_result[ TradingCost.TRADING_TAX ]
-                    n_per_trading_total_cost = item[ TradingData.TRADING_COST ] = dict_result[ TradingCost.TRADING_TOTAL_COST ]
+                    item[ TradingData.TRADING_VALUE_NON_SAVE ] = dict_result[ TradingCost.TRADING_VALUE ]
+                    item[ TradingData.TRADING_FEE_NON_SAVE ] = dict_result[ TradingCost.TRADING_FEE ]
+                    item[ TradingData.TRADING_TAX_NON_SAVE ] = dict_result[ TradingCost.TRADING_TAX ]
+                    n_per_trading_total_cost = item[ TradingData.TRADING_COST_NON_SAVE ] = dict_result[ TradingCost.TRADING_TOTAL_COST ]
                     n_accumulated_cost -= n_per_trading_total_cost
                     n_accumulated_inventory -= n_trading_count
 
-                item[ TradingData.EXTRA_INSURANCE_FEE ] = 0
-                item[ TradingData.STOCK_DIVIDEND_GAIN ] = 0
-                item[ TradingData.CASH_DIVIDEND_GAIN ] = 0
+                item[ TradingData.EXTRA_INSURANCE_FEE_NON_SAVE ] = 0
+                item[ TradingData.STOCK_DIVIDEND_GAIN_NON_SAVE ] = 0
+                item[ TradingData.CASH_DIVIDEND_GAIN_NON_SAVE ] = 0
                 list_calibration_data.append( item )
             elif e_trading_type == TradingType.DIVIDEND:
                 if n_accumulated_inventory > 0: #沒有庫存就不用算股利了
-                    item[ TradingData.TRADING_VALUE ] = 0
-                    item[ TradingData.TRADING_TAX ] = 0
-                    item[ TradingData.TRADING_COST ] = 0
 
                     n_stock_dividend_gain = int( Decimal( str( item[ TradingData.STOCK_DIVIDEND_PER_SHARE ] ) ) * Decimal( str( n_accumulated_inventory ) ) / Decimal( '10' ) ) #f_stock_dividend_gain單位為股 除以10是因為票面額10元
-                    item[ TradingData.STOCK_DIVIDEND_GAIN ] = n_stock_dividend_gain
                     n_cash_dividend_gain = int( Decimal( str(item[ TradingData.CASH_DIVIDEND_PER_SHARE ] ) ) * Decimal( str( n_accumulated_inventory ) ) )
+
+                    if b_use_auto_dividend:
+                        if TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE not in item or not item[TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE]:
+                            n_stock_dividend_gain = 0
+                            n_cash_dividend_gain = 0
+                    else:
+                        if TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE in item and item[TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE]:
+                            n_stock_dividend_gain = 0
+                            n_cash_dividend_gain = 0
+
+                    item[ TradingData.TRADING_VALUE_NON_SAVE ] = 0
+                    item[ TradingData.TRADING_TAX_NON_SAVE ] = 0
+                    item[ TradingData.TRADING_COST_NON_SAVE ] = 0
+
+                    item[ TradingData.STOCK_DIVIDEND_GAIN_NON_SAVE ] = n_stock_dividend_gain
                     n_accumulated_inventory += n_stock_dividend_gain
                     
                     if n_cash_dividend_gain > 10:
-                        item[ TradingData.CASH_DIVIDEND_GAIN ] = n_cash_dividend_gain
-                        item[ TradingData.TRADING_FEE ] = 10
+                        item[ TradingData.CASH_DIVIDEND_GAIN_NON_SAVE ] = n_cash_dividend_gain
+                        item[ TradingData.TRADING_FEE_NON_SAVE ] = 10
                         if item[ TradingData.IS_REQUIRED_EXTRA_INSURANCE_FEE ] and n_cash_dividend_gain >= 20000:
                             n_extra_insurance_fee = int( Decimal( str( n_cash_dividend_gain ) ) * Decimal( str( '0.0211' ) ) )
                         else:
                             n_extra_insurance_fee = 0
-                        item[ TradingData.EXTRA_INSURANCE_FEE ] = n_extra_insurance_fee
+                        item[ TradingData.EXTRA_INSURANCE_FEE_NON_SAVE ] = n_extra_insurance_fee
                         n_accumulated_cost = n_accumulated_cost - n_cash_dividend_gain + 10 + n_extra_insurance_fee
                     else:
-                        item[ TradingData.CASH_DIVIDEND_GAIN ] = 0
-                        item[ TradingData.TRADING_FEE ] = 0
-                        item[ TradingData.EXTRA_INSURANCE_FEE ] = 0 
+                        item[ TradingData.CASH_DIVIDEND_GAIN_NON_SAVE ] = 0
+                        item[ TradingData.TRADING_FEE_NON_SAVE ] = 0
+                        item[ TradingData.EXTRA_INSURANCE_FEE_NON_SAVE ] = 0 
                     list_calibration_data.append( item )
             elif e_trading_type == TradingType.CAPITAL_REDUCTION:
                 if n_accumulated_inventory > 0: #沒有庫存就不用算減資了
                     item[ TradingData.TRADING_PRICE ] = -item[ TradingData.CAPITAL_REDUCTION_PER_SHARE ]
                     item[ TradingData.TRADING_COUNT ] = n_accumulated_inventory
-                    item[ TradingData.TRADING_VALUE ] = -int( n_accumulated_inventory * item[ TradingData.CAPITAL_REDUCTION_PER_SHARE ] )
-                    item[ TradingData.TRADING_FEE ] = 0
-                    item[ TradingData.TRADING_TAX ] = 0
-                    item[ TradingData.EXTRA_INSURANCE_FEE ] = 0 
-                    item[ TradingData.TRADING_COST ] = 0
-                    item[ TradingData.STOCK_DIVIDEND_GAIN ] = 0
-                    item[ TradingData.CASH_DIVIDEND_GAIN ] = 0
+                    item[ TradingData.TRADING_VALUE_NON_SAVE ] = -int( n_accumulated_inventory * item[ TradingData.CAPITAL_REDUCTION_PER_SHARE ] )
+                    item[ TradingData.TRADING_FEE_NON_SAVE ] = 0
+                    item[ TradingData.TRADING_TAX_NON_SAVE ] = 0
+                    item[ TradingData.EXTRA_INSURANCE_FEE_NON_SAVE ] = 0 
+                    item[ TradingData.TRADING_COST_NON_SAVE ] = 0
+                    item[ TradingData.STOCK_DIVIDEND_GAIN_NON_SAVE ] = 0
+                    item[ TradingData.CASH_DIVIDEND_GAIN_NON_SAVE ] = 0
                     n_accumulated_cost = n_accumulated_cost - int( Decimal( str( n_accumulated_inventory ) ) * Decimal( str( item[ TradingData.CAPITAL_REDUCTION_PER_SHARE ] ) ) )
                     n_accumulated_inventory = int( Decimal( str( n_accumulated_inventory ) ) * ( Decimal( str( '10' ) ) - Decimal( str( item[ TradingData.CAPITAL_REDUCTION_PER_SHARE ] ) ) ) / Decimal( str( '10' ) ) )
                     list_calibration_data.append( item )
-            item[ TradingData.ACCUMULATED_COST ] = n_accumulated_cost
-            item[ TradingData.ACCUMULATED_INVENTORY ] = n_accumulated_inventory
-            item[ TradingData.AVERAGE_COST ] = n_accumulated_cost / n_accumulated_inventory if n_accumulated_inventory != 0 else 0
+            item[ TradingData.ACCUMULATED_COST_NON_SAVE ] = n_accumulated_cost
+            item[ TradingData.ACCUMULATED_INVENTORY_NON_SAVE ] = n_accumulated_inventory
+            item[ TradingData.AVERAGE_COST_NON_SAVE ] = n_accumulated_cost / n_accumulated_inventory if n_accumulated_inventory != 0 else 0
 
         self.dict_all_stock_trading_data[ str_stock_number ] = list_calibration_data
         return list_calibration_data
@@ -1226,7 +1257,7 @@ class MainWindow( QMainWindow ):
         export_data = []
         for key, value in dict_stock_trading_data.items():
             for item in value:
-                if item[ TradingData.AUTO_DIVIDEND ] == True:
+                if TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE in item and item[ TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE ] == True:
                     continue
                 dict_per_trading_data = {}
                 dict_per_trading_data[ "stock_number" ] = item[ TradingData.STOCK_NUMBER ]
@@ -1243,6 +1274,8 @@ class MainWindow( QMainWindow ):
                 dict_per_trading_data[ "cash_dividend_per_share" ] = item[ TradingData.CASH_DIVIDEND_PER_SHARE ]
                 dict_per_trading_data[ "extra_insurance_fee" ] = item[ TradingData.IS_REQUIRED_EXTRA_INSURANCE_FEE ]
                 dict_per_trading_data[ "capital_reduction_per_share" ] = item[ TradingData.CAPITAL_REDUCTION_PER_SHARE ]
+                if dict_per_trading_data[ "trading_date" ] == '0001-01-01':
+                    dict_per_trading_data[ "use_auto_dividend_data" ] = item[ TradingData.USE_AUTO_DIVIDEND_DATA ]
 
 
                 export_data.append( dict_per_trading_data )
@@ -1264,15 +1297,15 @@ class MainWindow( QMainWindow ):
                 "trading_data" in item_company:
                 for item_trading_data in item_company[ "trading_data" ]:
                     if ( "stock_number" in item_trading_data and
-                        "trading_date" in item_trading_data and
-                        "trading_type" in item_trading_data and
-                        "trading_price" in item_trading_data and
-                        "trading_count" in item_trading_data and
-                        "trading_fee_discount" in item_trading_data and
-                        "stock_dividend_per_share" in item_trading_data and
-                        "cash_dividend_per_share" in item_trading_data and
-                        "extra_insurance_fee" in item_trading_data and
-                        "capital_reduction_per_share" in item_trading_data ):
+                         "trading_date" in item_trading_data and
+                         "trading_type" in item_trading_data and
+                         "trading_price" in item_trading_data and
+                         "trading_count" in item_trading_data and
+                         "trading_fee_discount" in item_trading_data and
+                         "stock_dividend_per_share" in item_trading_data and
+                         "cash_dividend_per_share" in item_trading_data and
+                         "extra_insurance_fee" in item_trading_data and
+                         "capital_reduction_per_share" in item_trading_data ):
 
                         dict_per_trading_data = Utility.generate_trading_data( item_trading_data[ "stock_number" ],                 #股票代碼
                                                                                item_trading_data[ "trading_date" ],                 #交易日期
@@ -1283,7 +1316,9 @@ class MainWindow( QMainWindow ):
                                                                                item_trading_data[ "stock_dividend_per_share" ],     #每股股票股利
                                                                                item_trading_data[ "cash_dividend_per_share" ],      #每股現金股利
                                                                                item_trading_data[ "extra_insurance_fee" ],          #是否須扣除補充保費
-                                                                               item_trading_data[ "capital_reduction_per_share" ] ) #每股減資金額             
+                                                                               item_trading_data[ "capital_reduction_per_share" ] ) #每股減資金額     
+                        if item_trading_data[ "trading_date" ] == '0001-01-01':
+                            dict_per_trading_data[ TradingData.USE_AUTO_DIVIDEND_DATA ] = item_trading_data[ "use_auto_dividend_data" ]       
 
                         if item_trading_data[ "stock_number" ] not in dict_trading_data:
                             dict_trading_data[ item_trading_data[ "stock_number" ] ] = [ dict_per_trading_data ]
@@ -1307,10 +1342,11 @@ class MainWindow( QMainWindow ):
                 str_stock_name = list_stock_name_and_type[ 0 ]
                 list_vertical_labels.append( f"{key_stock_number} {str_stock_name}" )
 
-                dict_trading_data = value[ len( value ) - 1 ] #取最後一筆交易資料，因為最後一筆交易資料的庫存等內容才是所有累計的結果
-                n_accumulated_cost = dict_trading_data[ TradingData.ACCUMULATED_COST ]
-                n_accumulated_inventory = dict_trading_data[ TradingData.ACCUMULATED_INVENTORY ]
-                f_average_cost = round( dict_trading_data[ TradingData.AVERAGE_COST ], 3 )
+                dict_trading_data_first = value[ 0 ] #取第一筆交易資料，因為第一筆交易資料有存是否使用自動帶入股利
+                dict_trading_data_last = value[ len( value ) - 1 ] #取最後一筆交易資料，因為最後一筆交易資料的庫存等內容才是所有累計的結果
+                n_accumulated_cost = dict_trading_data_last[ TradingData.ACCUMULATED_COST_NON_SAVE ]
+                n_accumulated_inventory = dict_trading_data_last[ TradingData.ACCUMULATED_INVENTORY_NON_SAVE ]
+                f_average_cost = round( dict_trading_data_last[ TradingData.AVERAGE_COST_NON_SAVE ], 3 )
 
                 if key_stock_number in self.dict_all_company_number_to_price_info:
                     try:
@@ -1337,13 +1373,20 @@ class MainWindow( QMainWindow ):
                     str_profit = "N/A"
                     str_color = QBrush( '#FFFFFF' )
                 
+                use_auto_dividend_item = QStandardItem()
+                if dict_trading_data_first[ TradingData.USE_AUTO_DIVIDEND_DATA ]:
+                    use_auto_dividend_item.setIcon( check_icon )
+                else:
+                    use_auto_dividend_item.setIcon( uncheck_icon )
+                use_auto_dividend_item.setFlags( use_auto_dividend_item.flags() & ~Qt.ItemIsEditable )
+                self.stock_list_model.setItem( index_row, 0, use_auto_dividend_item)
 
                 list_data = [ format( n_accumulated_cost, "," ),      #總成本
-                            format( n_accumulated_inventory, "," ), #庫存股數
-                            format( f_average_cost, "," ),          #平均成本
-                            str_stock_price,                        #當前股價
-                            str_net_value,                          #淨值
-                            str_profit  ]                           #損益
+                              format( n_accumulated_inventory, "," ), #庫存股數
+                              format( f_average_cost, "," ),          #平均成本
+                              str_stock_price,                        #當前股價
+                              str_net_value,                          #淨值
+                              str_profit  ]                           #損益
                                 
                 for column, data in enumerate( list_data ):
                     standard_item = QStandardItem( data )
@@ -1351,17 +1394,16 @@ class MainWindow( QMainWindow ):
                     standard_item.setFlags( standard_item.flags() & ~Qt.ItemIsEditable )
                     if column == len( list_data ) - 1:
                         standard_item.setForeground( QBrush( str_color ) )
-                    self.stock_list_model.setItem( index_row, column, standard_item ) 
+                    self.stock_list_model.setItem( index_row, column + 1, standard_item ) 
 
                     
                 export_icon_item = QStandardItem("")
                 export_icon_item.setIcon( export_icon )
                 export_icon_item.setFlags( export_icon_item.flags() & ~Qt.ItemIsEditable )
+                self.stock_list_model.setItem( index_row, len( g_list_stock_list_table_horizontal_header ) - 2, export_icon_item )
                 delete_icon_item = QStandardItem("")
                 delete_icon_item.setIcon( delete_icon )
                 delete_icon_item.setFlags( delete_icon_item.flags() & ~Qt.ItemIsEditable )
-
-                self.stock_list_model.setItem( index_row, len( g_list_stock_list_table_horizontal_header ) - 2, export_icon_item )
                 self.stock_list_model.setItem( index_row, len( g_list_stock_list_table_horizontal_header ) - 1, delete_icon_item )
 
             for column in range( len( g_list_stock_list_table_horizontal_header ) ):
@@ -1409,18 +1451,18 @@ class MainWindow( QMainWindow ):
             str_weekday = "(日)"
         f_trading_price = dict_per_trading_data[ TradingData.TRADING_PRICE ]
         n_trading_count = dict_per_trading_data[ TradingData.TRADING_COUNT ]
-        n_trading_value = dict_per_trading_data[ TradingData.TRADING_VALUE ]
-        n_trading_fee = dict_per_trading_data[ TradingData.TRADING_FEE ]
-        n_trading_tax = dict_per_trading_data[ TradingData.TRADING_TAX ]
-        n_extra_insurance_fee = dict_per_trading_data[ TradingData.EXTRA_INSURANCE_FEE ]
-        n_per_trading_total_cost = dict_per_trading_data[ TradingData.TRADING_COST ]
+        n_trading_value = dict_per_trading_data[ TradingData.TRADING_VALUE_NON_SAVE ]
+        n_trading_fee = dict_per_trading_data[ TradingData.TRADING_FEE_NON_SAVE ]
+        n_trading_tax = dict_per_trading_data[ TradingData.TRADING_TAX_NON_SAVE ]
+        n_extra_insurance_fee = dict_per_trading_data[ TradingData.EXTRA_INSURANCE_FEE_NON_SAVE ]
+        n_per_trading_total_cost = dict_per_trading_data[ TradingData.TRADING_COST_NON_SAVE ]
         f_stock_dividend_per_share = dict_per_trading_data[ TradingData.STOCK_DIVIDEND_PER_SHARE ]
         f_cash_dividend_per_share = dict_per_trading_data[ TradingData.CASH_DIVIDEND_PER_SHARE ]
-        n_stock_dividend_gain = dict_per_trading_data[ TradingData.STOCK_DIVIDEND_GAIN ]
-        n_cash_dividend_gain = dict_per_trading_data[ TradingData.CASH_DIVIDEND_GAIN ]
-        n_accumulated_cost = dict_per_trading_data[ TradingData.ACCUMULATED_COST ]
-        n_accumulated_inventory = dict_per_trading_data[ TradingData.ACCUMULATED_INVENTORY ]
-        f_average_cost = round( dict_per_trading_data[ TradingData.AVERAGE_COST ], 3 )
+        n_stock_dividend_gain = dict_per_trading_data[ TradingData.STOCK_DIVIDEND_GAIN_NON_SAVE ]
+        n_cash_dividend_gain = dict_per_trading_data[ TradingData.CASH_DIVIDEND_GAIN_NON_SAVE ]
+        n_accumulated_cost = dict_per_trading_data[ TradingData.ACCUMULATED_COST_NON_SAVE ]
+        n_accumulated_inventory = dict_per_trading_data[ TradingData.ACCUMULATED_INVENTORY_NON_SAVE ]
+        f_average_cost = round( dict_per_trading_data[ TradingData.AVERAGE_COST_NON_SAVE ], 3 )
         if self.ui.qtShow1StockRadioButton.isChecked():
             str_trading_count = format( n_trading_count, "," )
             str_stock_dividend_gain = format( n_stock_dividend_gain, "," )
@@ -1486,11 +1528,20 @@ class MainWindow( QMainWindow ):
             if self.ui.qtShow10RadioButton.isChecked():
                 loop_list = loop_list[:11]
 
+        b_use_auto_dividend = sorted_list[ 0 ][ TradingData.USE_AUTO_DIVIDEND_DATA ]
         column = 0
         for dict_per_trading_data in loop_list:
             e_trading_type = dict_per_trading_data[ TradingData.TRADING_TYPE ]
             if e_trading_type == TradingType.TEMPLATE:
                 continue
+
+            if e_trading_type == TradingType.DIVIDEND:
+                if b_use_auto_dividend:#使用自動帶入股利資料，但是這筆資料不是自動股利資料，就跳過，反之亦然
+                    if TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE not in dict_per_trading_data or not dict_per_trading_data[TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE]:
+                        continue
+                else:
+                    if TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE in dict_per_trading_data and dict_per_trading_data[TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE]:
+                        continue
 
             list_data = self.get_per_trading_data_text_list( dict_per_trading_data )
 
@@ -1508,17 +1559,18 @@ class MainWindow( QMainWindow ):
                 standard_item.setFlags( standard_item.flags() & ~Qt.ItemIsEditable )
                 self.per_stock_trading_data_model.setItem( row, column, standard_item ) 
 
-            edit_icon_item = QStandardItem("")
-            edit_icon_item.setIcon( edit_icon )
-            edit_icon_item.setFlags( edit_icon_item.flags() & ~Qt.ItemIsEditable )
-            edit_icon_item.setData( dict_per_trading_data[ TradingData.SORTED_INDEX ], Qt.UserRole )
-            delete_icon_item = QStandardItem("")
-            delete_icon_item.setIcon( delete_icon )
-            delete_icon_item.setFlags( delete_icon_item.flags() & ~Qt.ItemIsEditable )
-            delete_icon_item.setData( dict_per_trading_data[ TradingData.SORTED_INDEX ], Qt.UserRole )
+            if e_trading_type != TradingType.DIVIDEND or not b_use_auto_dividend:
+                edit_icon_item = QStandardItem("")
+                edit_icon_item.setIcon( edit_icon )
+                edit_icon_item.setFlags( edit_icon_item.flags() & ~Qt.ItemIsEditable )
+                edit_icon_item.setData( dict_per_trading_data[ TradingData.SORTED_INDEX_NON_SAVE ], Qt.UserRole )
+                delete_icon_item = QStandardItem("")
+                delete_icon_item.setIcon( delete_icon )
+                delete_icon_item.setFlags( delete_icon_item.flags() & ~Qt.ItemIsEditable )
+                delete_icon_item.setData( dict_per_trading_data[ TradingData.SORTED_INDEX_NON_SAVE ], Qt.UserRole )
 
-            self.per_stock_trading_data_model.setItem( len( list_data ), column, edit_icon_item )
-            self.per_stock_trading_data_model.setItem( len( list_data ) + 1, column, delete_icon_item )
+                self.per_stock_trading_data_model.setItem( len( list_data ), column, edit_icon_item )
+                self.per_stock_trading_data_model.setItem( len( list_data ) + 1, column, delete_icon_item )
             column += 1
 
         for row in range( len( self.get_trading_data_header() ) ):
@@ -2025,7 +2077,7 @@ class MainWindow( QMainWindow ):
                                                                             f_cash_dividend_per_share,  #每股現金股利
                                                                             False,                      #是否需扣除補充保費
                                                                             0 )                         #每股減資金額
-                        dict_dividend_data[ TradingData.AUTO_DIVIDEND ] = True
+                        dict_dividend_data[ TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE ] = True
 
                     
                     if item[0] in dict_stock_yearly_dividned:
