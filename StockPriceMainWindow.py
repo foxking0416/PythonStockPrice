@@ -498,7 +498,7 @@ class MainWindow( QMainWindow ):
         button_group_4.addButton( self.ui.qtADYearRadioButton )
         button_group_4.addButton( self.ui.qtROCYearRadioButton )
         self.ui.qtADYearRadioButton.setChecked( True )
-        self.ui.qtROCYearRadioButton.toggled.connect( self.on_change_display_mode )
+        self.ui.qtADYearRadioButton.toggled.connect( self.on_change_display_mode )
         
         self.ui.qtAddStockPushButton.clicked.connect( self.on_add_stock_push_button_clicked )
         self.ui.qtDiscountCheckBox.stateChanged.connect( self.on_discount_check_box_state_changed )
@@ -1008,6 +1008,7 @@ class MainWindow( QMainWindow ):
             f.write( "顯示排序," + str( self.ui.qtFromNewToOldRadioButton.isChecked() ) + '\n' )
             f.write( "顯示數量," + str( self.ui.qtShowAllRadioButton.isChecked() ) + '\n' )
             f.write( "顯示單位," + str( self.ui.qtShow1StockRadioButton.isChecked() ) + '\n' )
+            f.write( "年度顯示," + str( self.ui.qtADYearRadioButton.isChecked() ) + '\n' )
             f.write( "欄寬" )
             for i in range( len( self.list_stock_list_column_width ) ):
                 f.write( f",{ self.list_stock_list_column_width[ i ] }" )
@@ -1023,7 +1024,9 @@ class MainWindow( QMainWindow ):
                QSignalBlocker( self.ui.qtShowAllRadioButton ), 
                QSignalBlocker( self.ui.qtShow10RadioButton ),
                QSignalBlocker( self.ui.qtShow1StockRadioButton ), 
-               QSignalBlocker( self.ui.qtShow1000StockRadioButton ) ):
+               QSignalBlocker( self.ui.qtShow1000StockRadioButton ),
+               QSignalBlocker( self.ui.qtADYearRadioButton ), 
+               QSignalBlocker( self.ui.qtROCYearRadioButton ) ):
 
             if os.path.exists( g_UISetting_file_path ):
                 with open( g_UISetting_file_path, 'r', encoding='utf-8' ) as f:
@@ -1052,6 +1055,11 @@ class MainWindow( QMainWindow ):
                                 self.ui.qtShow1StockRadioButton.setChecked( True )
                             else:
                                 self.ui.qtShow1000StockRadioButton.setChecked( True )
+                        elif row[0] == "年度顯示":
+                            if row[ 1 ] == 'True':
+                                self.ui.qtADYearRadioButton.setChecked( True )
+                            else:
+                                self.ui.qtROCYearRadioButton.setChecked( True )
                         elif row[0] == '欄寬':
                             self.list_stock_list_column_width = []
                             for i in range( 1, len( row ) ):
