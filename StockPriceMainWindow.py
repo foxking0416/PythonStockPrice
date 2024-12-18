@@ -1180,6 +1180,8 @@ class MainWindow( QMainWindow ):
         self.manual_save_trading_data( self.dict_all_stock_trading_data, g_trading_data_json_file_path )
 
     def manual_save_trading_data( self, dict_stock_trading_data, file_path ):
+        list_all_company_trading_data = []
+        dict_all_trading_data = {}
         export_data = []
         for key, value in dict_stock_trading_data.items():
             for item in value:
@@ -1201,10 +1203,12 @@ class MainWindow( QMainWindow ):
 
 
                 export_data.append( dict_per_trading_data )
-
+        dict_all_trading_data[ "account_name" ] = '華春'
+        dict_all_trading_data[ "trading_data" ] = export_data
+        list_all_company_trading_data.append( dict_all_trading_data )
 
         with open( file_path, 'w', encoding='utf-8' ) as f:
-            json.dump( export_data, f, ensure_ascii=False, indent=4 )
+            json.dump( list_all_company_trading_data, f, ensure_ascii=False, indent=4 )
 
     def load_trading_data( self, file_path, dict_trading_data ):
         if not os.path.exists( file_path ):
@@ -1212,33 +1216,36 @@ class MainWindow( QMainWindow ):
         with open( file_path,'r', encoding='utf-8' ) as f:
             data = json.load( f )
 
-        for item in data:
-            if ( "stock_number" in item and
-                 "trading_date" in item and
-                 "trading_type" in item and
-                 "trading_price" in item and
-                 "trading_count" in item and
-                 "trading_fee_discount" in item and
-                 "stock_dividend_per_share" in item and
-                 "cash_dividend_per_share" in item and
-                 "extra_insurance_fee" in item and
-                 "capital_reduction_per_share" in item ):
+        for item_company in data:
+            if "account_name" in item_company and \
+                "trading_data" in item_company:
+                for item_trading_data in item_company[ "trading_data" ]:
+                    if ( "stock_number" in item_trading_data and
+                        "trading_date" in item_trading_data and
+                        "trading_type" in item_trading_data and
+                        "trading_price" in item_trading_data and
+                        "trading_count" in item_trading_data and
+                        "trading_fee_discount" in item_trading_data and
+                        "stock_dividend_per_share" in item_trading_data and
+                        "cash_dividend_per_share" in item_trading_data and
+                        "extra_insurance_fee" in item_trading_data and
+                        "capital_reduction_per_share" in item_trading_data ):
 
-                dict_per_trading_data = Utility.generate_trading_data( item[ "stock_number" ],                 #股票代碼
-                                                                       item[ "trading_date" ],                 #交易日期
-                                                                       TradingType( item[ "trading_type" ] ),  #交易種類
-                                                                       item[ "trading_price" ],                #交易價格
-                                                                       item[ "trading_count" ],                #交易股數
-                                                                       item[ "trading_fee_discount" ],         #手續費折扣
-                                                                       item[ "stock_dividend_per_share" ],     #每股股票股利
-                                                                       item[ "cash_dividend_per_share" ],      #每股現金股利
-                                                                       item[ "extra_insurance_fee" ],          #是否須扣除補充保費
-                                                                       item[ "capital_reduction_per_share" ] ) #每股減資金額             
+                        dict_per_trading_data = Utility.generate_trading_data( item_trading_data[ "stock_number" ],                 #股票代碼
+                                                                               item_trading_data[ "trading_date" ],                 #交易日期
+                                                                               TradingType( item_trading_data[ "trading_type" ] ),  #交易種類
+                                                                               item_trading_data[ "trading_price" ],                #交易價格
+                                                                               item_trading_data[ "trading_count" ],                #交易股數
+                                                                               item_trading_data[ "trading_fee_discount" ],         #手續費折扣
+                                                                               item_trading_data[ "stock_dividend_per_share" ],     #每股股票股利
+                                                                               item_trading_data[ "cash_dividend_per_share" ],      #每股現金股利
+                                                                               item_trading_data[ "extra_insurance_fee" ],          #是否須扣除補充保費
+                                                                               item_trading_data[ "capital_reduction_per_share" ] ) #每股減資金額             
 
-                if item[ "stock_number" ] not in dict_trading_data:
-                    dict_trading_data[ item[ "stock_number" ] ] = [ dict_per_trading_data ]
-                else:
-                    dict_trading_data[ item[ "stock_number" ] ].append( dict_per_trading_data )
+                        if item_trading_data[ "stock_number" ] not in dict_trading_data:
+                            dict_trading_data[ item_trading_data[ "stock_number" ] ] = [ dict_per_trading_data ]
+                        else:
+                            dict_trading_data[ item_trading_data[ "stock_number" ] ].append( dict_per_trading_data )
 
     def initialize( self ):
         self.load_UI_state()
