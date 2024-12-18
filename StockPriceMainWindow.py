@@ -1485,33 +1485,63 @@ class MainWindow( QMainWindow ):
                 str_accumulated_inventory = format( f_accumulated_inventory, "," )
 
 
+        str_trading_price = format( f_trading_price, "," )
+        str_trading_value = format( n_trading_value, "," )
+        str_trading_fee = format( n_trading_fee, "," )
+        str_trading_tax = format( n_trading_tax, "," )
+        str_extra_insurance_fee = format( n_extra_insurance_fee, "," )
+        str_per_trading_total_cost = format( n_per_trading_total_cost, "," )
+        str_stock_dividend = str_stock_dividend_gain + ' / ' + str( f_stock_dividend_per_share )
+        str_cash_dividend = format( n_cash_dividend_gain, "," ) + ' / ' + str( f_cash_dividend_per_share )
+        str_accumulated_cost = format( n_accumulated_cost, "," )
+        str_average_cost = format( f_average_cost, "," )
+
         if e_trading_type == TradingType.BUY:
             str_trading_type = "買進"
+            str_trading_tax = "N/A"
+            str_extra_insurance_fee = "N/A"
+            str_stock_dividend = "N/A"
+            str_cash_dividend = "N/A"
         elif e_trading_type == TradingType.SELL:
-            n_trading_count = -n_trading_count
             n_trading_value = -n_trading_value
+            str_trading_value = format( n_trading_value, "," )
+            str_per_trading_total_cost = format( n_per_trading_total_cost, "," )
             n_per_trading_total_cost = -n_per_trading_total_cost
             str_trading_type = "賣出"
+            str_extra_insurance_fee = "N/A"
+            str_stock_dividend = "N/A"
+            str_cash_dividend = "N/A"
         elif e_trading_type == TradingType.DIVIDEND:
             str_trading_type = "股利分配"
+            str_trading_price = "N/A"
+            str_trading_count = "N/A"
+            str_trading_value = "N/A"
+            str_trading_tax = "N/A"
+            str_per_trading_total_cost = "N/A"
         elif e_trading_type == TradingType.CAPITAL_REDUCTION:
             str_trading_type = "減資"
+            str_trading_fee = "N/A"
+            str_trading_tax = "N/A"
+            str_extra_insurance_fee = "N/A"
+            str_per_trading_total_cost = "N/A"
+            str_stock_dividend = "N/A"
+            str_cash_dividend = "N/A"
 
-        list_data = [ str_year,                                          #交易年度
-                      str_month_date + str_weekday,                      #交易日期
-                      str_trading_type,                                  #交易種類
-                      format( f_trading_price, "," ),                    #交易價格
-                      str_trading_count,                                 #交易股數
-                      format( n_trading_value, "," ),                    #交易金額
-                      format( n_trading_fee, "," ),                      #手續費
-                      format( n_trading_tax, "," ),                      #交易稅
-                      format( n_extra_insurance_fee, "," ),                #補充保費
-                      format( n_per_trading_total_cost, "," ),           #單筆總成本
-                      str_stock_dividend_gain + ' / ' + str( f_stock_dividend_per_share ), #總獲得股數 / 每股股票股利
-                      format( n_cash_dividend_gain, "," ) + ' / ' + str( f_cash_dividend_per_share ), #總獲得現金 / 每股現金股利
-                      format( n_accumulated_cost, "," ),                 #累計總成本
-                      str_accumulated_inventory,                         #庫存股數
-                      format( f_average_cost, "," ) ]                    #均價
+        list_data = [ str_year,                     #交易年度
+                      str_month_date + str_weekday, #交易日期
+                      str_trading_type,             #交易種類
+                      str_trading_price,            #交易價格
+                      str_trading_count,            #交易股數
+                      str_trading_value,            #交易金額
+                      str_trading_fee,              #手續費
+                      str_trading_tax,              #交易稅
+                      str_extra_insurance_fee,      #補充保費
+                      str_per_trading_total_cost,   #單筆總成本
+                      str_stock_dividend,           #總獲得股數 / 每股股票股利
+                      str_cash_dividend,            #總獲得現金 / 每股現金股利
+                      str_accumulated_cost,         #累計總成本
+                      str_accumulated_inventory,    #庫存股數
+                      str_average_cost ]            #均價
         return list_data
 
     def refresh_trading_data_table( self, sorted_list ):
