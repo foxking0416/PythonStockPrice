@@ -487,6 +487,12 @@ class MainWindow( QMainWindow ):
         button_group_3.addButton( self.ui.qtShow1000StockRadioButton )
         self.ui.qtShow1StockRadioButton.setChecked( True )
         self.ui.qtShow1StockRadioButton.toggled.connect( self.on_change_display_mode )
+
+        button_group_4 = QButtonGroup(self)
+        button_group_4.addButton( self.ui.qtADYearRadioButton )
+        button_group_4.addButton( self.ui.qtROCYearRadioButton )
+        self.ui.qtADYearRadioButton.setChecked( True )
+        self.ui.qtROCYearRadioButton.toggled.connect( self.on_change_display_mode )
         
         self.ui.qtAddStockPushButton.clicked.connect( self.on_add_stock_push_button_clicked )
         self.ui.qtDiscountCheckBox.stateChanged.connect( self.on_discount_check_box_state_changed )
@@ -1344,6 +1350,9 @@ class MainWindow( QMainWindow ):
             return []
         str_date = dict_per_trading_data[ TradingData.TRADING_DATE ]
         str_year = str_date.split( '-' )[ 0 ]
+        if self.ui.qtROCYearRadioButton.isChecked():
+            str_year = str( int( str_year ) - 1911 )
+
         str_month_date = str_date[ 5: ].replace( '-', '/' )
         obj_date = datetime.datetime.strptime( str_date, "%Y-%m-%d" )
         n_weekday = obj_date.weekday()
