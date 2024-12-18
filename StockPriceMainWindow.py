@@ -508,7 +508,7 @@ class MainWindow( QMainWindow ):
         self.dict_all_company_number_to_name_and_type = self.download_all_company_stock_number( str_date )
         self.dict_all_company_number_to_price_info = self.download_day_stock_price( str_date )
         self.download_all_yearly_dividend_data( 2019, str_date )
-        self.dict_date_yearly_dividend = self.load_all_yearly_dividend_data( 2019 )
+        self.dict_stock_yearly_dividned = self.load_all_yearly_dividend_data( 2019 )
         n_retry = 0
         while len( self.dict_all_company_number_to_price_info ) == 0:
             obj_current_date = obj_current_date - datetime.timedelta( days = 1 )
@@ -1152,7 +1152,6 @@ class MainWindow( QMainWindow ):
                     item[ TradingData.CASH_DIVIDEND_GAIN ] = 0
                     item[ TradingData.TRADING_FEE ] = 0
                     item[ TradingData.EXTRA_INSURANCE_FEE ] = 0 
-
             elif e_trading_type == TradingType.CAPITAL_REDUCTION:
                 item[ TradingData.TRADING_PRICE ] = -item[ TradingData.CAPITAL_REDUCTION_PER_SHARE ]
                 item[ TradingData.TRADING_COUNT ] = n_accumulated_inventory
