@@ -12,7 +12,8 @@
                 "stock_dividend_per_share": 0,
                 "cash_dividend_per_share": 0,
                 "extra_insurance_fee": false,
-                "capital_reduction_per_share": 0
+                "capital_reduction_per_share": 0,
+                "use_auto_dividend_data": true
             },
             {
                 "stock_number": "1216",
@@ -60,7 +61,8 @@
                 "stock_dividend_per_share": 0,
                 "cash_dividend_per_share": 0,
                 "extra_insurance_fee": false,
-                "capital_reduction_per_share": 0
+                "capital_reduction_per_share": 0,
+                "use_auto_dividend_data": true
             },
             {
                 "stock_number": "6505",
@@ -96,7 +98,8 @@
                 "stock_dividend_per_share": 0,
                 "cash_dividend_per_share": 0,
                 "extra_insurance_fee": false,
-                "capital_reduction_per_share": 0
+                "capital_reduction_per_share": 0,
+                "use_auto_dividend_data": true
             },
             {
                 "stock_number": "2535",
@@ -492,7 +495,8 @@
                 "stock_dividend_per_share": 0,
                 "cash_dividend_per_share": 0,
                 "extra_insurance_fee": false,
-                "capital_reduction_per_share": 0
+                "capital_reduction_per_share": 0,
+                "use_auto_dividend_data": true
             },
             {
                 "stock_number": "2834",
@@ -1044,7 +1048,8 @@
                 "stock_dividend_per_share": 0,
                 "cash_dividend_per_share": 0,
                 "extra_insurance_fee": false,
-                "capital_reduction_per_share": 0
+                "capital_reduction_per_share": 0,
+                "use_auto_dividend_data": true
             },
             {
                 "stock_number": "00679B",
@@ -1296,7 +1301,8 @@
                 "stock_dividend_per_share": 0,
                 "cash_dividend_per_share": 0,
                 "extra_insurance_fee": false,
-                "capital_reduction_per_share": 0
+                "capital_reduction_per_share": 0,
+                "use_auto_dividend_data": true
             },
             {
                 "stock_number": "5706",
@@ -1596,7 +1602,8 @@
                 "stock_dividend_per_share": 0,
                 "cash_dividend_per_share": 0,
                 "extra_insurance_fee": false,
-                "capital_reduction_per_share": 0
+                "capital_reduction_per_share": 0,
+                "use_auto_dividend_data": true
             },
             {
                 "stock_number": "0050",
@@ -1848,7 +1855,8 @@
                 "stock_dividend_per_share": 0,
                 "cash_dividend_per_share": 0,
                 "extra_insurance_fee": false,
-                "capital_reduction_per_share": 0
+                "capital_reduction_per_share": 0,
+                "use_auto_dividend_data": true
             },
             {
                 "stock_number": "00893",
@@ -2304,7 +2312,8 @@
                 "stock_dividend_per_share": 0,
                 "cash_dividend_per_share": 0,
                 "extra_insurance_fee": false,
-                "capital_reduction_per_share": 0
+                "capital_reduction_per_share": 0,
+                "use_auto_dividend_data": true
             },
             {
                 "stock_number": "00916",
@@ -2628,7 +2637,8 @@
                 "stock_dividend_per_share": 0,
                 "cash_dividend_per_share": 0,
                 "extra_insurance_fee": false,
-                "capital_reduction_per_share": 0
+                "capital_reduction_per_share": 0,
+                "use_auto_dividend_data": true
             },
             {
                 "stock_number": "9933",
