@@ -463,6 +463,11 @@ class MainWindow( QMainWindow ):
         self.ui.qtTradingDataTableView.horizontalHeader().hide()
         self.ui.qtTradingDataTableView.verticalHeader().setSectionResizeMode( QHeaderView.Fixed )
         self.ui.qtTradingDataTableView.clicked.connect( lambda index: self.on_trading_data_table_item_clicked( index, self.per_stock_trading_data_model ) )
+        for row in range( len( self.get_trading_data_header() ) ):
+            if row == 10 or row == 11:
+                self.ui.qtTradingDataTableView.setRowHeight( row, 40 )
+            else:
+                self.ui.qtTradingDataTableView.setRowHeight( row, 20 )
 
         self.ui.qtStockInputLineEdit.textChanged.connect( self.on_stock_input_text_changed ) 
 
@@ -1341,15 +1346,15 @@ class MainWindow( QMainWindow ):
                     self.stock_list_model.setItem( index_row, column, standard_item ) 
 
                     
-                delete_icon_item = QStandardItem("")
-                delete_icon_item.setIcon( delete_icon )
-                delete_icon_item.setFlags( delete_icon_item.flags() & ~Qt.ItemIsEditable )
                 export_icon_item = QStandardItem("")
                 export_icon_item.setIcon( export_icon )
                 export_icon_item.setFlags( export_icon_item.flags() & ~Qt.ItemIsEditable )
+                delete_icon_item = QStandardItem("")
+                delete_icon_item.setIcon( delete_icon )
+                delete_icon_item.setFlags( delete_icon_item.flags() & ~Qt.ItemIsEditable )
 
-                self.stock_list_model.setItem( index_row, len( g_list_stock_list_table_horizontal_header ) - 1, delete_icon_item )
                 self.stock_list_model.setItem( index_row, len( g_list_stock_list_table_horizontal_header ) - 2, export_icon_item )
+                self.stock_list_model.setItem( index_row, len( g_list_stock_list_table_horizontal_header ) - 1, delete_icon_item )
 
             for column in range( len( g_list_stock_list_table_horizontal_header ) ):
                 if column < len( self.list_stock_list_column_width ):
@@ -1507,6 +1512,12 @@ class MainWindow( QMainWindow ):
             self.per_stock_trading_data_model.setItem( len( list_data ), column, edit_icon_item )
             self.per_stock_trading_data_model.setItem( len( list_data ) + 1, column, delete_icon_item )
             column += 1
+
+        for row in range( len( self.get_trading_data_header() ) ):
+            if row == 10 or row == 11:
+                self.ui.qtTradingDataTableView.setRowHeight( row, 40 )
+            else:
+                self.ui.qtTradingDataTableView.setRowHeight( row, 20 )
 
     def check_internet_via_http( self, url="https://www.google.com", timeout=3):
         """
