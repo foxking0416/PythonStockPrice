@@ -10,9 +10,10 @@ from QtStockTradingEditDialog import Ui_Dialog as Ui_StockTradingDialog
 from QtStockDividendEditDialog import Ui_Dialog as Ui_StockDividendDialog
 from QtStockCapitalReductionEditDialog import Ui_Dialog as Ui_StockCapitalReductionDialog
 from QtDuplicateOptionDialog import Ui_Dialog as Ui_DuplicateOptionDialog
-from PySide6.QtWidgets import QApplication, QMainWindow, QDialog, QButtonGroup, QMessageBox, QStyledItemDelegate, QFileDialog, QHeaderView
+from PySide6.QtWidgets import QApplication, QMainWindow, QDialog, QButtonGroup, QMessageBox, QStyledItemDelegate, QFileDialog, QHeaderView, QVBoxLayout, QHBoxLayout, \
+                              QLabel, QLineEdit, QDialogButtonBox, QTabBar, QWidget, QTableView, QComboBox, QPushButton, QSizePolicy, QSpacerItem, QCheckBox, QDoubleSpinBox
 from PySide6.QtGui import QStandardItemModel, QStandardItem, QIcon, QBrush
-from PySide6.QtCore import Qt, QModelIndex, QRect, QSignalBlocker
+from PySide6.QtCore import Qt, QModelIndex, QRect, QSignalBlocker, QSize
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import Alignment, PatternFill, Font
@@ -186,6 +187,32 @@ class Utility():
         dict_trading_data[ TradingData.IS_REQUIRED_EXTRA_INSURANCE_FEE ] = b_extra_insurance_fee
         dict_trading_data[ TradingData.CAPITAL_REDUCTION_PER_SHARE ] = f_capital_reduction_per_share
         return dict_trading_data
+
+class EditTabTitleDialog( QDialog ):
+    """一個小對話框用於編輯 Tab 標題"""
+    def __init__( self, current_title, parent = None ):
+        super().__init__( parent )
+        self.setWindowTitle( "修改名稱" )
+        self.resize( 300, 100 )
+
+        self.layout = QVBoxLayout( self )
+
+        self.label = QLabel("輸入名稱:")
+        self.layout.addWidget( self.label )
+
+        self.line_edit = QLineEdit( self )
+        self.line_edit.setText( current_title )
+        self.line_edit.selectAll()
+        self.layout.addWidget( self.line_edit )
+
+        self.buttons = QDialogButtonBox( QDialogButtonBox.Ok | QDialogButtonBox.Cancel )
+        self.buttons.accepted.connect( self.accept )
+        self.buttons.rejected.connect( self.reject )
+        self.layout.addWidget( self.buttons )
+
+    def get_new_title(self):
+        """返回用戶輸入的標題"""
+        return self.line_edit.text()
 
 class ImportDataDuplicateOptionDialog( QDialog ):
     def __init__( self, parent = None ):
@@ -449,6 +476,12 @@ class MainWindow( QMainWindow ):
         window_icon = QIcon( window_icon_file_path ) 
         self.setWindowIcon( window_icon )
 
+        self.ui.qtTabWidget.currentChanged.connect( self.on_tab_current_changed )
+        self.ui.qtTabWidget.tabBarDoubleClicked.connect( self.on_tab_widget_double_clicked )
+        self.ui.qtTabWidget.tabCloseRequested.connect( self.on_tab_widget_close )
+        self.ui.qtTabWidget.tabBar().tabMoved.connect( self.on_tab_moved )
+        self.ui.qtTabWidget.tabBar().setTabButton( 0, QTabBar.RightSide, None )  # 隱藏最後一個 tab 的 close 按鈕
+
         delegate = CenterIconDelegate()
         self.stock_list_model = QStandardItemModel( 0, 0 )
         self.stock_list_model.setHorizontalHeaderLabels( g_list_stock_list_table_horizontal_header )
@@ -541,10 +574,107 @@ class MainWindow( QMainWindow ):
         self.str_picked_stock_number = None
         self.dict_all_stock_trading_data = {}
         self.list_stock_list_column_width = []
-
-        
-        
+        self.n_tab_index = 0
         self.initialize()
+
+    def add_new_tab_and_table( self, str_tab_title = None ):
+        str_tab_name = f"TabIndex{ self.n_tab_index }"
+
+        increased_tab = QWidget()
+        increased_tab.setObjectName( str_tab_name )
+               
+        uiqt_vertical_layout_main = QVBoxLayout( increased_tab )
+        uiqt_horizontal_layout_1 = QHBoxLayout()
+        uiqt_stock_input_line_edit = QLineEdit( increased_tab)
+        sizePolicy = QSizePolicy( QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Fixed )
+        sizePolicy.setHorizontalStretch( 0 )
+        sizePolicy.setVerticalStretch( 0 )
+        sizePolicy.setHeightForWidth( uiqt_stock_input_line_edit.sizePolicy().hasHeightForWidth() )
+
+        uiqt_stock_input_line_edit.setSizePolicy( sizePolicy )
+        uiqt_stock_input_line_edit.setMinimumSize( QSize( 200, 0 ) )
+        uiqt_stock_input_line_edit.setMaximumSize( QSize( 200, 16777215 ) )
+        uiqt_horizontal_layout_1.addWidget( uiqt_stock_input_line_edit )
+
+        uiqt_add_stock_push_button = QPushButton(increased_tab)
+        uiqt_add_stock_push_button.setMaximumSize( QSize( 100, 16777215 ) )
+        uiqt_add_stock_push_button.setText( "新增股票" )
+        uiqt_horizontal_layout_1.addWidget( uiqt_add_stock_push_button )
+
+        uiqt_horizontal_spacer_1_1 = QSpacerItem( 40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum )
+        uiqt_horizontal_layout_1.addItem( uiqt_horizontal_spacer_1_1 )
+
+        uiqt_discount_check_box = QCheckBox(increased_tab)
+        uiqt_discount_check_box.setChecked( True )
+        uiqt_discount_check_box.setText( "手續費折扣" )
+        uiqt_horizontal_layout_1.addWidget( uiqt_discount_check_box )
+
+        uiqt_discount_rate_double_spin_box = QDoubleSpinBox( increased_tab )
+        uiqt_discount_rate_double_spin_box.setEnabled( True )
+        uiqt_discount_rate_double_spin_box.setDecimals( 1 )
+        uiqt_discount_rate_double_spin_box.setMaximum( 10.000000000000000 )
+        uiqt_discount_rate_double_spin_box.setSingleStep( 0.500000000000000 )
+        uiqt_discount_rate_double_spin_box.setValue( 6.000000000000000 )
+        uiqt_horizontal_layout_1.addWidget( uiqt_discount_rate_double_spin_box )
+
+        uiqt_horizontal_spacer_1_2 = QSpacerItem( 40, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum )
+        uiqt_horizontal_layout_1.addItem( uiqt_horizontal_spacer_1_2)
+
+        uiqt_extra_insurance_fee_check_box = QCheckBox( increased_tab )
+        uiqt_extra_insurance_fee_check_box.setText( "補充保費" )
+        uiqt_horizontal_layout_1.addWidget( uiqt_extra_insurance_fee_check_box )
+
+        uiqt_horizontal_spacer_1_3 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+        uiqt_horizontal_layout_1.addItem( uiqt_horizontal_spacer_1_3 )
+
+        uiqt_vertical_layout_main.addLayout( uiqt_horizontal_layout_1 )
+
+        uiqt_horizontal_layout_2 = QHBoxLayout()
+        uiqt_horizontal_layout_2.setSpacing( 0 )
+
+        uiqt_stock_select_combo_box = QComboBox( increased_tab )
+        uiqt_stock_select_combo_box.setMinimumSize( QSize( 200, 0 ) )
+        uiqt_horizontal_layout_2.addWidget( uiqt_stock_select_combo_box )
+
+        uiqt_horizontal_spacer_2_1 = QSpacerItem( 40, 0, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum )
+        uiqt_horizontal_layout_2.addItem( uiqt_horizontal_spacer_2_1 )
+
+        uiqt_vertical_layout_main.addLayout( uiqt_horizontal_layout_2 )
+
+        uiqt_horizontal_layout_3 = QHBoxLayout()
+
+        self.qtStockListTableView = QTableView( increased_tab )
+        self.qtStockListTableView.setMinimumSize( QSize( 0, 100 ) )
+        uiqt_horizontal_layout_3.addWidget(self.qtStockListTableView)
+
+        uiqt_vertical_layout_main.addLayout( uiqt_horizontal_layout_3 )
+
+        if not str_tab_title:
+            str_tab_title = "新群組"
+        self.ui.qtTabWidget.insertTab( self.n_tab_index, increased_tab, str_tab_title )
+        self.ui.qtTabWidget.setCurrentIndex( self.n_tab_index )
+        self.n_tab_index += 1
+
+    def on_tab_current_changed( self, index ):
+        pass
+
+    def on_tab_widget_double_clicked( self, index ):
+        n_tab_count = self.ui.qtTabWidget.count()
+        if index == n_tab_count - 1:
+            self.add_new_tab_and_table()
+        else:
+            current_title = self.ui.qtTabWidget.tabText( index )
+            dialog = EditTabTitleDialog( current_title, self )
+            if dialog.exec() == QDialog.Accepted:
+                new_title = dialog.get_new_title()
+                self.ui.qtTabWidget.setTabText( index, new_title )
+                # self.save_custom_compare_state()
+
+    def on_tab_widget_close( self, index ):
+        pass
+
+    def on_tab_moved( self, from_index, to_index ):
+        pass
 
     def on_stock_input_text_changed( self ):
         with QSignalBlocker( self.ui.qtStockSelectComboBox ), QSignalBlocker( self.ui.qtStockInputLineEdit ):

@@ -19,8 +19,8 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
 from PySide6.QtWidgets import (QApplication, QCheckBox, QComboBox, QDoubleSpinBox,
     QHBoxLayout, QHeaderView, QLineEdit, QMainWindow,
     QMenu, QMenuBar, QPushButton, QRadioButton,
-    QSizePolicy, QSpacerItem, QStatusBar, QTableView,
-    QVBoxLayout, QWidget)
+    QSizePolicy, QSpacerItem, QStatusBar, QTabWidget,
+    QTableView, QVBoxLayout, QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -36,9 +36,15 @@ class Ui_MainWindow(object):
         self.verticalLayout = QVBoxLayout(self.centralwidget)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.verticalLayout.setContentsMargins(-1, 0, -1, 0)
+        self.qtTabWidget = QTabWidget(self.centralwidget)
+        self.qtTabWidget.setObjectName(u"qtTabWidget")
+        self.tab = QWidget()
+        self.tab.setObjectName(u"tab")
+        self.verticalLayout_6 = QVBoxLayout(self.tab)
+        self.verticalLayout_6.setObjectName(u"verticalLayout_6")
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName(u"horizontalLayout")
-        self.qtStockInputLineEdit = QLineEdit(self.centralwidget)
+        self.qtStockInputLineEdit = QLineEdit(self.tab)
         self.qtStockInputLineEdit.setObjectName(u"qtStockInputLineEdit")
         sizePolicy = QSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -50,7 +56,7 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout.addWidget(self.qtStockInputLineEdit)
 
-        self.qtAddStockPushButton = QPushButton(self.centralwidget)
+        self.qtAddStockPushButton = QPushButton(self.tab)
         self.qtAddStockPushButton.setObjectName(u"qtAddStockPushButton")
         self.qtAddStockPushButton.setMaximumSize(QSize(100, 16777215))
 
@@ -60,13 +66,13 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout.addItem(self.horizontalSpacer_6)
 
-        self.qtDiscountCheckBox = QCheckBox(self.centralwidget)
+        self.qtDiscountCheckBox = QCheckBox(self.tab)
         self.qtDiscountCheckBox.setObjectName(u"qtDiscountCheckBox")
         self.qtDiscountCheckBox.setChecked(True)
 
         self.horizontalLayout.addWidget(self.qtDiscountCheckBox)
 
-        self.qtDiscountRateDoubleSpinBox = QDoubleSpinBox(self.centralwidget)
+        self.qtDiscountRateDoubleSpinBox = QDoubleSpinBox(self.tab)
         self.qtDiscountRateDoubleSpinBox.setObjectName(u"qtDiscountRateDoubleSpinBox")
         self.qtDiscountRateDoubleSpinBox.setEnabled(True)
         self.qtDiscountRateDoubleSpinBox.setDecimals(1)
@@ -80,7 +86,7 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout.addItem(self.horizontalSpacer)
 
-        self.qtExtraInsuranceFeeCheckBox = QCheckBox(self.centralwidget)
+        self.qtExtraInsuranceFeeCheckBox = QCheckBox(self.tab)
         self.qtExtraInsuranceFeeCheckBox.setObjectName(u"qtExtraInsuranceFeeCheckBox")
 
         self.horizontalLayout.addWidget(self.qtExtraInsuranceFeeCheckBox)
@@ -90,12 +96,12 @@ class Ui_MainWindow(object):
         self.horizontalLayout.addItem(self.horizontalSpacer_2)
 
 
-        self.verticalLayout.addLayout(self.horizontalLayout)
+        self.verticalLayout_6.addLayout(self.horizontalLayout)
 
         self.horizontalLayout_6 = QHBoxLayout()
         self.horizontalLayout_6.setSpacing(0)
         self.horizontalLayout_6.setObjectName(u"horizontalLayout_6")
-        self.qtStockSelectComboBox = QComboBox(self.centralwidget)
+        self.qtStockSelectComboBox = QComboBox(self.tab)
         self.qtStockSelectComboBox.setObjectName(u"qtStockSelectComboBox")
         self.qtStockSelectComboBox.setMinimumSize(QSize(200, 0))
 
@@ -106,18 +112,25 @@ class Ui_MainWindow(object):
         self.horizontalLayout_6.addItem(self.horizontalSpacer_5)
 
 
-        self.verticalLayout.addLayout(self.horizontalLayout_6)
+        self.verticalLayout_6.addLayout(self.horizontalLayout_6)
 
         self.horizontalLayout_2 = QHBoxLayout()
         self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
-        self.qtStockListTableView = QTableView(self.centralwidget)
+        self.qtStockListTableView = QTableView(self.tab)
         self.qtStockListTableView.setObjectName(u"qtStockListTableView")
         self.qtStockListTableView.setMinimumSize(QSize(0, 100))
 
         self.horizontalLayout_2.addWidget(self.qtStockListTableView)
 
 
-        self.verticalLayout.addLayout(self.horizontalLayout_2)
+        self.verticalLayout_6.addLayout(self.horizontalLayout_2)
+
+        self.qtTabWidget.addTab(self.tab, "")
+        self.tab_2 = QWidget()
+        self.tab_2.setObjectName(u"tab_2")
+        self.qtTabWidget.addTab(self.tab_2, "")
+
+        self.verticalLayout.addWidget(self.qtTabWidget)
 
         self.horizontalLayout_4 = QHBoxLayout()
         self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
@@ -278,6 +291,8 @@ class Ui_MainWindow(object):
         self.qtAddStockPushButton.setText(QCoreApplication.translate("MainWindow", u"\u65b0\u589e\u80a1\u7968", None))
         self.qtDiscountCheckBox.setText(QCoreApplication.translate("MainWindow", u"\u624b\u7e8c\u8cbb\u6298\u6263", None))
         self.qtExtraInsuranceFeeCheckBox.setText(QCoreApplication.translate("MainWindow", u"\u88dc\u5145\u4fdd\u8cbb", None))
+        self.qtTabWidget.setTabText(self.qtTabWidget.indexOf(self.tab), QCoreApplication.translate("MainWindow", u"Tab 1", None))
+        self.qtTabWidget.setTabText(self.qtTabWidget.indexOf(self.tab_2), QCoreApplication.translate("MainWindow", u"Tab 2", None))
         self.qtFromNewToOldRadioButton.setText(QCoreApplication.translate("MainWindow", u"\u7531\u65b0\u5230\u820a", None))
         self.qtFromOldToNewRadioButton.setText(QCoreApplication.translate("MainWindow", u"\u7531\u820a\u5230\u65b0", None))
         self.qtShowAllRadioButton.setText(QCoreApplication.translate("MainWindow", u"\u986f\u793a\u5168\u90e8\u4ea4\u6613\u7d00\u9304", None))

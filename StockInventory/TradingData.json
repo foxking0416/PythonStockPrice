@@ -1049,7 +1049,7 @@
                 "cash_dividend_per_share": 0,
                 "extra_insurance_fee": false,
                 "capital_reduction_per_share": 0,
-                "use_auto_dividend_data": true
+                "use_auto_dividend_data": false
             },
             {
                 "stock_number": "00679B",
