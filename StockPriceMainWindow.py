@@ -1217,9 +1217,18 @@ class MainWindow( QMainWindow ):
             self.ui.qtExportSelectedStockTradingDataPushButton.setEnabled( False )
         else:
             self.ui.qtAddTradingDataPushButton.setEnabled( True )
-            self.ui.qtAddDividendDataPushButton.setEnabled( True )
+            
             self.ui.qtAddCapitalReductionDataPushButton.setEnabled( True )
             self.ui.qtExportSelectedStockTradingDataPushButton.setEnabled( True )
+            str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
+            dict_per_account_all_stock_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ]
+            if self.str_picked_stock_number in dict_per_account_all_stock_trading_data:
+                list_trading_data = dict_per_account_all_stock_trading_data[ self.str_picked_stock_number ]
+                b_use_auto_dividend = list_trading_data[ 0 ][ TradingData.USE_AUTO_DIVIDEND_DATA ]
+                self.ui.qtAddDividendDataPushButton.setEnabled( not b_use_auto_dividend )
+            else:
+                self.ui.qtAddDividendDataPushButton.setEnabled( False )
+
 
     def save_share_UI_state( self ): #done
         # 確保目錄存在，若不存在則遞歸創建
