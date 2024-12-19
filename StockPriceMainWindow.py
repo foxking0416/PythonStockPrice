@@ -787,7 +787,7 @@ class MainWindow( QMainWindow ):
         if self.str_picked_stock_number is None:
             return
         qt_double_spin_box = self.ui.qtTabWidget.currentWidget().findChild( QDoubleSpinBox )
-        qt_discount_check_box = self.ui.qtTabWidget.currentWidget().findChildren( QCheckBox, name="discount")
+        list_qt_discount_check_box = self.ui.qtTabWidget.currentWidget().findChildren( QCheckBox, name="discount")
 
         str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
         dict_per_account_all_stock_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ]
@@ -796,7 +796,7 @@ class MainWindow( QMainWindow ):
         list_stock_name_and_type = self.dict_all_company_number_to_name_and_type[ str_stock_number ]
         str_stock_name = list_stock_name_and_type[ 0 ]
         b_etf = self.dict_all_company_number_to_name_and_type[ str_stock_number ][ 1 ]
-        dialog = StockTradingEditDialog( str_stock_number, str_stock_name, b_etf, qt_discount_check_box[ 0 ].isChecked(), qt_double_spin_box.value(), self )
+        dialog = StockTradingEditDialog( str_stock_number, str_stock_name, b_etf, list_qt_discount_check_box[ 0 ].isChecked(), qt_double_spin_box.value(), self )
 
         if dialog.exec():
             dict_trading_data = dialog.dict_trading_data
@@ -809,7 +809,7 @@ class MainWindow( QMainWindow ):
     def on_add_dividend_data_push_button_clicked( self ): #done
         if self.str_picked_stock_number is None:
             return
-        qt_insurance_check_box = self.ui.qtTabWidget.currentWidget().findChildren( QCheckBox, name="insurance")
+        list_qt_insurance_check_box = self.ui.qtTabWidget.currentWidget().findChildren( QCheckBox, name="insurance")
 
         str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
         dict_per_account_all_stock_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ]
@@ -817,7 +817,7 @@ class MainWindow( QMainWindow ):
         str_stock_number = self.str_picked_stock_number
         list_stock_name_and_type = self.dict_all_company_number_to_name_and_type[ str_stock_number ]
         str_stock_name = list_stock_name_and_type[ 0 ]
-        dialog = StockDividendEditDialog( str_stock_number, str_stock_name, qt_insurance_check_box[ 0 ].isChecked(), self )
+        dialog = StockDividendEditDialog( str_stock_number, str_stock_name, list_qt_insurance_check_box[ 0 ].isChecked(), self )
 
         if dialog.exec():
             dict_trading_data = dialog.dict_trading_data
@@ -934,8 +934,8 @@ class MainWindow( QMainWindow ):
         item = table_model.itemFromIndex( index )
         if item is not None:
             qt_double_spin_box = self.ui.qtTabWidget.currentWidget().findChild( QDoubleSpinBox )
-            qt_discount_check_box = self.ui.qtTabWidget.currentWidget().findChildren( QCheckBox, name="discount")
-            qt_insurance_check_box = self.ui.qtTabWidget.currentWidget().findChildren( QCheckBox, name="insurance")
+            list_qt_discount_check_box = self.ui.qtTabWidget.currentWidget().findChildren( QCheckBox, name="discount")
+            list_qt_insurance_check_box = self.ui.qtTabWidget.currentWidget().findChildren( QCheckBox, name="insurance")
 
             n_column = index.column()  # 獲取列索引
             n_row = index.row()  # 獲取行索引
@@ -967,14 +967,14 @@ class MainWindow( QMainWindow ):
                         return
                     if dict_selected_data[ TradingData.TRADING_TYPE ] == TradingType.BUY or dict_selected_data[ TradingData.TRADING_TYPE ] == TradingType.SELL:
                         b_etf = self.dict_all_company_number_to_name_and_type[ str_stock_number ][ 1 ]
-                        dialog = StockTradingEditDialog( str_stock_number, str_stock_name, b_etf, qt_discount_check_box[ 0 ].isChecked(), qt_double_spin_box.value(), self )
+                        dialog = StockTradingEditDialog( str_stock_number, str_stock_name, b_etf, list_qt_discount_check_box[ 0 ].isChecked(), qt_double_spin_box.value(), self )
                         dialog.setup_trading_date( dict_selected_data[ TradingData.TRADING_DATE ] )
                         dialog.setup_trading_type( dict_selected_data[ TradingData.TRADING_TYPE ] )
                         dialog.setup_trading_discount( dict_selected_data[ TradingData.TRADING_FEE_DISCOUNT ] )
                         dialog.setup_trading_price( dict_selected_data[ TradingData.TRADING_PRICE ] )
                         dialog.setup_trading_count( dict_selected_data[ TradingData.TRADING_COUNT ] )
                     elif dict_selected_data[ TradingData.TRADING_TYPE ] == TradingType.DIVIDEND:
-                        dialog = StockDividendEditDialog( str_stock_number, str_stock_name, qt_insurance_check_box[ 0 ].isChecked(), self )
+                        dialog = StockDividendEditDialog( str_stock_number, str_stock_name, list_qt_insurance_check_box[ 0 ].isChecked(), self )
                         dialog.setup_trading_date( dict_selected_data[ TradingData.TRADING_DATE ] )
                         dialog.setup_stock_dividend( dict_selected_data[ TradingData.STOCK_DIVIDEND_PER_SHARE ] )
                         dialog.setup_cash_dividend( dict_selected_data[ TradingData.CASH_DIVIDEND_PER_SHARE ] )
@@ -1221,7 +1221,7 @@ class MainWindow( QMainWindow ):
             self.ui.qtAddCapitalReductionDataPushButton.setEnabled( True )
             self.ui.qtExportSelectedStockTradingDataPushButton.setEnabled( True )
 
-    def save_share_UI_state( self ):
+    def save_share_UI_state( self ): #done
         # 確保目錄存在，若不存在則遞歸創建
         os.makedirs( os.path.dirname( g_UISetting_file_path ), exist_ok = True )
 
@@ -1235,12 +1235,26 @@ class MainWindow( QMainWindow ):
                 f.write( f",{ self.list_stock_list_column_width[ i ] }" )
             f.write( "\n" )
 
-    def load_share_UI_state( self ):
-        with ( # QSignalBlocker( self.ui.qtStockListTableView.horizontalHeader() ),
-               # QSignalBlocker( self.ui.qtDiscountCheckBox ),
-               # QSignalBlocker( self.ui.qtDiscountRateDoubleSpinBox ),
-               # QSignalBlocker( self.ui.qtExtraInsuranceFeeCheckBox ), 
-               QSignalBlocker( self.ui.qtFromNewToOldRadioButton ),
+    def load_share_UI_state( self, dict_all_account_ui_state ): #done
+        for index in range( self.ui.qtTabWidget.count() - 1 ):
+            tab_widget = self.ui.qtTabWidget.widget( index )
+            str_tab_name = tab_widget.objectName()
+
+            list_qt_discount_check_box = tab_widget.findChildren( QCheckBox, name="discount")
+            qt_double_spin_box = tab_widget.findChild( QDoubleSpinBox )
+            list_qt_insurance_check_box = tab_widget.findChildren( QCheckBox, name="insurance")
+            with ( QSignalBlocker( list_qt_discount_check_box[ 0 ] ),
+                   QSignalBlocker( qt_double_spin_box ),
+                   QSignalBlocker( list_qt_insurance_check_box[ 0 ] ) ):
+                b_discount = dict_all_account_ui_state[ str_tab_name ][ "discount_checkbox"]
+                f_discount_value = dict_all_account_ui_state[ str_tab_name ][ "discount_value"]
+                b_insurance = dict_all_account_ui_state[ str_tab_name ][ "insurance_checkbox"]
+                list_qt_discount_check_box[ 0 ].setChecked( b_discount )
+                qt_double_spin_box.setValue( f_discount_value )
+                qt_double_spin_box.setEnabled( b_discount )
+                list_qt_insurance_check_box[ 0 ].setChecked( b_insurance )
+
+        with ( QSignalBlocker( self.ui.qtFromNewToOldRadioButton ),
                QSignalBlocker( self.ui.qtFromOldToNewRadioButton ), 
                QSignalBlocker( self.ui.qtShowAllRadioButton ), 
                QSignalBlocker( self.ui.qtShow10RadioButton ),
@@ -1254,17 +1268,7 @@ class MainWindow( QMainWindow ):
                     data = f.readlines()
                     for i, row in enumerate( data ):
                         row = row.strip().split( ',' )
-                        if row[0] == "手續費折扣":
-                            # self.ui.qtDiscountCheckBox.setChecked( row[ 1 ] == 'True' )
-                            # self.ui.qtDiscountRateDoubleSpinBox.setEnabled( row[ 1 ] == 'True' )
-                            pass
-                        elif row[0] == "手續費折數":
-                            # self.ui.qtDiscountRateDoubleSpinBox.setValue( float(row[ 1 ]) )
-                            pass
-                        elif row[0] == "補充保費":
-                            # self.ui.qtExtraInsuranceFeeCheckBox.setChecked( row[ 1 ] == 'True' )
-                            pass
-                        elif row[0] == "顯示排序":
+                        if row[0] == "顯示排序":
                             if row[ 1 ] == 'True':
                                 self.ui.qtFromNewToOldRadioButton.setChecked( True )
                             else:
@@ -1468,9 +1472,9 @@ class MainWindow( QMainWindow ):
         for index in range( self.ui.qtTabWidget.count() - 1 ):
             tab_widget = self.ui.qtTabWidget.widget( index )
 
-            qt_discount_check_box = tab_widget.findChildren( QCheckBox, name="discount")
+            list_qt_discount_check_box = tab_widget.findChildren( QCheckBox, name="discount")
             qt_double_spin_box = tab_widget.findChild( QDoubleSpinBox )
-            qt_insurance_check_box = tab_widget.findChildren( QCheckBox, name="insurance")
+            list_qt_insurance_check_box = tab_widget.findChildren( QCheckBox, name="insurance")
 
             str_tab_title = self.ui.qtTabWidget.tabText( index )
             str_tab_name = tab_widget.objectName()
@@ -1503,9 +1507,9 @@ class MainWindow( QMainWindow ):
                 export_dict_per_account_all_stock_trading_data[ key_stock ] = export_data
             export_dict_per_account_all_info[ "account_name" ] = str_tab_title
             export_dict_per_account_all_info[ "trading_data" ] = export_dict_per_account_all_stock_trading_data
-            export_dict_per_account_all_info[ "discount_checkbox" ] = qt_discount_check_box[ 0 ].isChecked()
+            export_dict_per_account_all_info[ "discount_checkbox" ] = list_qt_discount_check_box[ 0 ].isChecked()
             export_dict_per_account_all_info[ "discount_value" ] = qt_double_spin_box.value()
-            export_dict_per_account_all_info[ "insurance_checkbox" ] = qt_insurance_check_box[ 0 ].isChecked()
+            export_dict_per_account_all_info[ "insurance_checkbox" ] = list_qt_insurance_check_box[ 0 ].isChecked()
 
             export_list_all_account_all_stock_trading_data.append( export_dict_per_account_all_info )
 
@@ -1564,9 +1568,9 @@ class MainWindow( QMainWindow ):
 
     def initialize( self ): #done
         with QSignalBlocker( self.ui.qtTabWidget ):
-            self.load_share_UI_state()
             dict_all_account_ui_state = {}
             self.load_trading_data_and_create_tab( g_trading_data_json_file_path, self.dict_all_account_all_stock_trading_data, dict_all_account_ui_state )
+            self.load_share_UI_state( dict_all_account_ui_state )
             if len( self.dict_all_account_all_stock_trading_data ) == 0:
                 str_tab_name = self.add_new_tab_and_table()
                 self.dict_all_account_all_stock_trading_data[ str_tab_name ] = {}
