@@ -1001,11 +1001,11 @@ class MainWindow( QMainWindow ):
                         self.refresh_trading_data_table( sorted_list )
                         self.auto_save_trading_data()
 
-    def export_trading_data_to_excel( self, worksheet, str_stock_number, str_stock_name ):
+    def export_trading_data_to_excel( self, worksheet, str_stock_number, str_stock_name, list_trading_data ): #done
         str_title = str_stock_number + " " + str_stock_name
         worksheet.column_dimensions['A'].width = 30
-        list_trading_data = self.dict_all_account_all_stock_trading_data[ str_stock_number ]
 
+        b_use_auto_dividend = list_trading_data[ 0 ][ TradingData.USE_AUTO_DIVIDEND_DATA ]
         data_index = 0
         n_row_start = 0
         for dict_per_trading_data in list_trading_data:
@@ -1014,6 +1014,13 @@ class MainWindow( QMainWindow ):
             if e_trading_type == TradingType.TEMPLATE:
                 continue
 
+            if e_trading_type == TradingType.DIVIDEND:
+                if b_use_auto_dividend:#使用自動帶入股利資料，但是這筆資料不是自動股利資料，就跳過，反之亦然
+                    if TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE not in dict_per_trading_data or not dict_per_trading_data[TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE]:
+                        continue
+                else:
+                    if TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE in dict_per_trading_data and dict_per_trading_data[TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE]:
+                        continue
             if data_index % 10 == 0:
                 list_data_header = self.get_trading_data_header()
                 list_data_header.insert( 0, str_title )
@@ -1072,25 +1079,31 @@ class MainWindow( QMainWindow ):
             data_index += 1
             index_column += 1
 
-    def on_export_selected_to_excell_button_clicked( self ):
+    def on_export_selected_to_excell_button_clicked( self ): #done
         if self.str_picked_stock_number is None:
             return
+        str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
         str_stock_number = self.str_picked_stock_number
         list_stock_name_and_type = self.dict_all_company_number_to_name_and_type[ str_stock_number ]
         str_stock_name = list_stock_name_and_type[ 0 ]
+        dict_per_account_all_stock_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ]
+        list_trading_data = dict_per_account_all_stock_trading_data[ str_stock_number ]
         file_path = self.open_save_excel_file_dialog()
         if file_path:
             workbook = Workbook()
             worksheet = workbook.active
             worksheet.title = str_stock_number + " " + str_stock_name
-            self.export_trading_data_to_excel( worksheet, str_stock_number, str_stock_name )
+            self.export_trading_data_to_excel( worksheet, str_stock_number, str_stock_name, list_trading_data )
             workbook.save( file_path )
 
-    def on_export_all_to_excell_button_clicked( self ):
+    def on_export_all_to_excell_button_clicked( self ): #done
         file_path = self.open_save_excel_file_dialog()
         if file_path:
             workbook = Workbook()
-            for index, ( key_stock_number, value ) in enumerate( self.dict_all_account_all_stock_trading_data.items() ):
+            str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
+            dict_per_account_all_stock_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ]
+
+            for index, ( key_stock_number, value_list_trading_data ) in enumerate( dict_per_account_all_stock_trading_data.items() ):
                 list_stock_name_and_type = self.dict_all_company_number_to_name_and_type[ key_stock_number ]
                 str_stock_name = list_stock_name_and_type[ 0 ]
                 str_tab_title = key_stock_number + " " + str_stock_name
@@ -1099,10 +1112,10 @@ class MainWindow( QMainWindow ):
                     worksheet.title = str_tab_title
                 else:
                     worksheet = workbook.create_sheet( str_tab_title, index )
-                self.export_trading_data_to_excel( worksheet, key_stock_number, str_stock_name )
+                self.export_trading_data_to_excel( worksheet, key_stock_number, str_stock_name, value_list_trading_data )
             workbook.save( file_path )
 
-    def on_export_trading_data_action_triggered( self ):
+    def on_export_trading_data_action_triggered( self ): #done
         file_path = self.open_save_json_file_dialog()
         if file_path:
             self.manual_save_trading_data( self.dict_all_account_all_stock_trading_data, file_path )
