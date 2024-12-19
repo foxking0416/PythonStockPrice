@@ -38,6 +38,7 @@ class Ui_MainWindow(object):
         self.verticalLayout.setContentsMargins(-1, 0, -1, 0)
         self.qtTabWidget = QTabWidget(self.centralwidget)
         self.qtTabWidget.setObjectName(u"qtTabWidget")
+        self.qtTabWidget.setIconSize(QSize(10, 10))
         self.tab = QWidget()
         self.tab.setObjectName(u"tab")
         self.verticalLayout_6 = QVBoxLayout(self.tab)
