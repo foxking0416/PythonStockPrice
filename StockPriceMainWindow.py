@@ -655,8 +655,8 @@ class MainWindow( QMainWindow ):
 
         uiqt_add_stock_push_button.clicked.connect( self.on_add_stock_push_button_clicked )
         uiqt_discount_check_box.stateChanged.connect( self.on_discount_check_box_state_changed )
-        uiqt_discount_rate_double_spin_box.valueChanged.connect( self.save_UI_state )
-        uiqt_extra_insurance_fee_check_box.stateChanged.connect( self.save_UI_state )
+        uiqt_discount_rate_double_spin_box.valueChanged.connect( self.save_share_UI_state )
+        uiqt_extra_insurance_fee_check_box.stateChanged.connect( self.save_share_UI_state )
 
 
         if not str_tab_title:
@@ -773,7 +773,7 @@ class MainWindow( QMainWindow ):
         else:
             qt_double_spin_box.setEnabled( False )
 
-        self.save_UI_state()
+        self.save_share_UI_state()
 
     def on_change_display_mode( self ): #done
         if self.str_picked_stock_number != None:
@@ -781,7 +781,7 @@ class MainWindow( QMainWindow ):
             dict_per_account_all_stock_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ]
             self.refresh_trading_data_table( dict_per_account_all_stock_trading_data[ self.str_picked_stock_number ] )
 
-        self.save_UI_state()
+        self.save_share_UI_state()
 
     def on_add_trading_data_push_button_clicked( self ): #done
         if self.str_picked_stock_number is None:
@@ -884,7 +884,7 @@ class MainWindow( QMainWindow ):
 
     def on_stock_list_table_horizontal_section_resized( self, n_logical_index, n_old_size, n_new_size ): #done
         self.list_stock_list_column_width[ n_logical_index ] = n_new_size
-        self.save_UI_state()
+        self.save_share_UI_state()
 
     def on_stock_list_table_item_clicked( self, index: QModelIndex, table_model ):
         str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
@@ -1221,14 +1221,11 @@ class MainWindow( QMainWindow ):
             self.ui.qtAddCapitalReductionDataPushButton.setEnabled( True )
             self.ui.qtExportSelectedStockTradingDataPushButton.setEnabled( True )
 
-    def save_UI_state( self ):
+    def save_share_UI_state( self ):
         # 確保目錄存在，若不存在則遞歸創建
         os.makedirs( os.path.dirname( g_UISetting_file_path ), exist_ok = True )
 
         with open( g_UISetting_file_path, 'w', encoding='utf-8' ) as f:
-            # f.write( "手續費折扣," + str( self.ui.qtDiscountCheckBox.isChecked() ) + '\n' )
-            # f.write( "手續費折數," + str( self.ui.qtDiscountRateDoubleSpinBox.value() ) + '\n' )
-            # f.write( "補充保費," + str( self.ui.qtExtraInsuranceFeeCheckBox.isChecked() ) + '\n' )
             f.write( "顯示排序," + str( self.ui.qtFromNewToOldRadioButton.isChecked() ) + '\n' )
             f.write( "顯示數量," + str( self.ui.qtShowAllRadioButton.isChecked() ) + '\n' )
             f.write( "顯示單位," + str( self.ui.qtShow1StockRadioButton.isChecked() ) + '\n' )
@@ -1238,7 +1235,7 @@ class MainWindow( QMainWindow ):
                 f.write( f",{ self.list_stock_list_column_width[ i ] }" )
             f.write( "\n" )
 
-    def load_UI_state( self ):
+    def load_share_UI_state( self ):
         with ( # QSignalBlocker( self.ui.qtStockListTableView.horizontalHeader() ),
                # QSignalBlocker( self.ui.qtDiscountCheckBox ),
                # QSignalBlocker( self.ui.qtDiscountRateDoubleSpinBox ),
@@ -1470,6 +1467,11 @@ class MainWindow( QMainWindow ):
 
         for index in range( self.ui.qtTabWidget.count() - 1 ):
             tab_widget = self.ui.qtTabWidget.widget( index )
+
+            qt_discount_check_box = tab_widget.findChildren( QCheckBox, name="discount")
+            qt_double_spin_box = tab_widget.findChild( QDoubleSpinBox )
+            qt_insurance_check_box = tab_widget.findChildren( QCheckBox, name="insurance")
+
             str_tab_title = self.ui.qtTabWidget.tabText( index )
             str_tab_name = tab_widget.objectName()
             value_dict_per_account_all_stock_trading_data = dict_all_account_all_stock_trading_data[ str_tab_name ]
@@ -1501,13 +1503,16 @@ class MainWindow( QMainWindow ):
                 export_dict_per_account_all_stock_trading_data[ key_stock ] = export_data
             export_dict_per_account_all_info[ "account_name" ] = str_tab_title
             export_dict_per_account_all_info[ "trading_data" ] = export_dict_per_account_all_stock_trading_data
+            export_dict_per_account_all_info[ "discount_checkbox" ] = qt_discount_check_box[ 0 ].isChecked()
+            export_dict_per_account_all_info[ "discount_value" ] = qt_double_spin_box.value()
+            export_dict_per_account_all_info[ "insurance_checkbox" ] = qt_insurance_check_box[ 0 ].isChecked()
 
             export_list_all_account_all_stock_trading_data.append( export_dict_per_account_all_info )
 
         with open( file_path, 'w', encoding='utf-8' ) as f:
             json.dump( export_list_all_account_all_stock_trading_data, f, ensure_ascii=False, indent=4 )
 
-    def load_trading_data_and_create_tab( self, file_path, dict_all_account_all_stock_trading_data ): #done
+    def load_trading_data_and_create_tab( self, file_path, dict_all_account_all_stock_trading_data, dict_all_account_ui_state ): #done
         if not os.path.exists( file_path ):
             return
         with open( file_path,'r', encoding='utf-8' ) as f:
@@ -1515,8 +1520,16 @@ class MainWindow( QMainWindow ):
 
         for item_account in data:
             if "account_name" in item_account and \
-                "trading_data" in item_account:
+               "trading_data" in item_account and \
+               "discount_checkbox" in item_account and \
+               "discount_value" in item_account and \
+               "insurance_checkbox" in item_account:
                 dict_per_account_all_stock_trading_data = item_account[ "trading_data" ]
+                dict_ui_state = {}
+                dict_ui_state[ "discount_checkbox" ] = item_account[ "discount_checkbox" ]
+                dict_ui_state[ "discount_value" ] = item_account[ "discount_value" ]
+                dict_ui_state[ "insurance_checkbox" ] = item_account[ "insurance_checkbox" ]
+
                 dict_per_stock_trading_data = {} 
                 for key_stock_number, value_list_trading_data  in dict_per_account_all_stock_trading_data.items():
                     list_trading_data = []
@@ -1546,12 +1559,14 @@ class MainWindow( QMainWindow ):
                             list_trading_data.append( dict_per_trading_data )
                     dict_per_stock_trading_data[ key_stock_number ] = list_trading_data
                 str_tab_name = self.add_new_tab_and_table( item_account[ "account_name" ] )
+                dict_all_account_ui_state[ str_tab_name ] = dict_ui_state
                 dict_all_account_all_stock_trading_data[ str_tab_name ] = dict_per_stock_trading_data
 
     def initialize( self ): #done
         with QSignalBlocker( self.ui.qtTabWidget ):
-            self.load_UI_state()
-            self.load_trading_data_and_create_tab( g_trading_data_json_file_path, self.dict_all_account_all_stock_trading_data )
+            self.load_share_UI_state()
+            dict_all_account_ui_state = {}
+            self.load_trading_data_and_create_tab( g_trading_data_json_file_path, self.dict_all_account_all_stock_trading_data, dict_all_account_ui_state )
             if len( self.dict_all_account_all_stock_trading_data ) == 0:
                 str_tab_name = self.add_new_tab_and_table()
                 self.dict_all_account_all_stock_trading_data[ str_tab_name ] = {}

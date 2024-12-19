@@ -2452,7 +2452,10 @@
                     "capital_reduction_per_share": 0
                 }
             ]
-        }
+        },
+        "discount_checkbox": true,
+        "discount_value": 6.0,
+        "insurance_checkbox": false
     },
     {
         "account_name": "維謙",
@@ -2543,6 +2546,9 @@
                     "capital_reduction_per_share": 0
                 }
             ]
-        }
+        },
+        "discount_checkbox": false,
+        "discount_value": 4.5,
+        "insurance_checkbox": true
     }
 ]
