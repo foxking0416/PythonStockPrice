@@ -2235,7 +2235,7 @@ v1.0.0
             ]
         },
         "discount_checkbox": true,
-        "discount_value": 6.0,
+        "discount_value": 0.45,
         "insurance_checkbox": true
     },
     {
@@ -2322,7 +2322,7 @@ v1.0.0
             ]
         },
         "discount_checkbox": false,
-        "discount_value": 4.5,
+        "discount_value": 0.6,
         "insurance_checkbox": true
     }
 ]
