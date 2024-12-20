@@ -281,7 +281,8 @@
      <string>檔案</string>
     </property>
     <addaction name="qtActionImport"/>
-    <addaction name="qtActionExport"/>
+    <addaction name="qtActionExportAllAccount"/>
+    <addaction name="qtActionExportCurrentAccount"/>
    </widget>
    <addaction name="menu"/>
   </widget>
@@ -291,9 +292,14 @@
     <string>匯入</string>
    </property>
   </action>
-  <action name="qtActionExport">
+  <action name="qtActionExportAllAccount">
    <property name="text">
-    <string>匯出</string>
+    <string>匯出所有帳號資料</string>
+   </property>
+  </action>
+  <action name="qtActionExportCurrentAccount">
+   <property name="text">
+    <string>匯出目前帳號資料</string>
    </property>
   </action>
  </widget>

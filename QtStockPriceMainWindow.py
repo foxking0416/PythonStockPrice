@@ -28,8 +28,10 @@ class Ui_MainWindow(object):
         MainWindow.resize(938, 893)
         self.qtActionImport = QAction(MainWindow)
         self.qtActionImport.setObjectName(u"qtActionImport")
-        self.qtActionExport = QAction(MainWindow)
-        self.qtActionExport.setObjectName(u"qtActionExport")
+        self.qtActionExportAllAccount = QAction(MainWindow)
+        self.qtActionExportAllAccount.setObjectName(u"qtActionExportAllAccount")
+        self.qtActionExportCurrentAccount = QAction(MainWindow)
+        self.qtActionExportCurrentAccount.setObjectName(u"qtActionExportCurrentAccount")
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         self.verticalLayout = QVBoxLayout(self.centralwidget)
@@ -191,7 +193,8 @@ class Ui_MainWindow(object):
 
         self.menubar.addAction(self.menu.menuAction())
         self.menu.addAction(self.qtActionImport)
-        self.menu.addAction(self.qtActionExport)
+        self.menu.addAction(self.qtActionExportAllAccount)
+        self.menu.addAction(self.qtActionExportCurrentAccount)
 
         self.retranslateUi(MainWindow)
 
@@ -204,7 +207,8 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"MainWindow", None))
         self.qtActionImport.setText(QCoreApplication.translate("MainWindow", u"\u532f\u5165", None))
-        self.qtActionExport.setText(QCoreApplication.translate("MainWindow", u"\u532f\u51fa", None))
+        self.qtActionExportAllAccount.setText(QCoreApplication.translate("MainWindow", u"\u532f\u51fa\u6240\u6709\u5e33\u865f\u8cc7\u6599", None))
+        self.qtActionExportCurrentAccount.setText(QCoreApplication.translate("MainWindow", u"\u532f\u51fa\u76ee\u524d\u5e33\u865f\u8cc7\u6599", None))
         self.qtTabWidget.setTabText(self.qtTabWidget.indexOf(self.tab_add), QCoreApplication.translate("MainWindow", u"+", None))
         self.qtFromNewToOldRadioButton.setText(QCoreApplication.translate("MainWindow", u"\u7531\u65b0\u5230\u820a", None))
         self.qtFromOldToNewRadioButton.setText(QCoreApplication.translate("MainWindow", u"\u7531\u820a\u5230\u65b0", None))

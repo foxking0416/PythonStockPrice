@@ -521,7 +521,8 @@ class MainWindow( QMainWindow ):
         self.ui.qtExportAllStockTradingDataPushButton.clicked.connect( self.on_export_all_to_excell_button_clicked )
         self.ui.qtExportSelectedStockTradingDataPushButton.clicked.connect( self.on_export_selected_to_excell_button_clicked )
 
-        self.ui.qtActionExport.triggered.connect( self.on_export_all_account_trading_data_action_triggered )
+        self.ui.qtActionExportAllAccount.triggered.connect( self.on_export_all_account_trading_data_action_triggered )
+        self.ui.qtActionExportCurrentAccount.triggered.connect( self.on_export_per_account_trading_data_action_triggered )
         self.ui.qtActionImport.triggered.connect( self.on_import_trading_data_action_triggered )
         
 
@@ -1115,7 +1116,14 @@ class MainWindow( QMainWindow ):
     def on_export_all_account_trading_data_action_triggered( self ): #done
         file_path = self.open_save_json_file_dialog()
         if file_path:
-            self.manual_save_trading_data( self.dict_all_account_all_stock_trading_data, file_path )
+            list_save_tab_widget = list( range( self.ui.qtTabWidget.count() - 1 ) )
+            self.manual_save_trading_data( list_save_tab_widget, file_path )
+
+    def on_export_per_account_trading_data_action_triggered( self ): #done
+        file_path = self.open_save_json_file_dialog()
+        if file_path:
+            list_save_tab_widget = [ self.ui.qtTabWidget.currentIndex() ]
+            self.manual_save_trading_data( list_save_tab_widget, file_path )
 
     def on_import_trading_data_action_triggered( self ):
         file_path = self.open_load_json_file_dialog()
@@ -1456,19 +1464,22 @@ class MainWindow( QMainWindow ):
                 self.process_single_trading_data( key_account_name, key_stock_name )
 
     def auto_save_trading_data( self ): #done
-        self.manual_save_trading_data( self.dict_all_account_all_stock_trading_data, g_trading_data_json_file_path )
+        list_save_tab_widget = list( range( self.ui.qtTabWidget.count() - 1 ) )
+        self.manual_save_trading_data( list_save_tab_widget, g_trading_data_json_file_path )
 
-    def manual_save_trading_data( self, dict_all_account_all_stock_trading_data, file_path ): #done
+    def manual_save_trading_data( self, list_save_tab_indice, file_path ): #done
         export_list_all_account_all_stock_trading_data = []
 
         for index in range( self.ui.qtTabWidget.count() - 1 ):
+            if index not in list_save_tab_indice:
+                continue
             tab_widget = self.ui.qtTabWidget.widget( index )
 
             list_qt_insurance_check_box = tab_widget.findChildren( QCheckBox, name="insurance")
 
             str_tab_title = self.ui.qtTabWidget.tabText( index )
             str_tab_widget_name = tab_widget.objectName()
-            value_dict_per_account_all_stock_trading_data = dict_all_account_all_stock_trading_data[ str_tab_widget_name ]
+            value_dict_per_account_all_stock_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ]
             export_dict_per_account_all_info = {}
             export_dict_per_account_all_stock_trading_data = {}
             for key_stock, value_list_per_stock_trading_data in value_dict_per_account_all_stock_trading_data.items():
