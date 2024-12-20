@@ -25,7 +25,7 @@ class Ui_Dialog(object):
     def setupUi(self, Dialog):
         if not Dialog.objectName():
             Dialog.setObjectName(u"Dialog")
-        Dialog.resize(255, 369)
+        Dialog.resize(255, 358)
         sizePolicy = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -267,27 +267,6 @@ class Ui_Dialog(object):
 
         self.verticalLayout.addLayout(self.horizontalLayout_8)
 
-        self.horizontalLayout_9 = QHBoxLayout()
-        self.horizontalLayout_9.setObjectName(u"horizontalLayout_9")
-        self.label_8 = QLabel(Dialog)
-        self.label_8.setObjectName(u"label_8")
-        self.label_8.setMinimumSize(QSize(50, 0))
-
-        self.horizontalLayout_9.addWidget(self.label_8)
-
-        self.qtInsuranceLineEdit = QLineEdit(Dialog)
-        self.qtInsuranceLineEdit.setObjectName(u"qtInsuranceLineEdit")
-        self.qtInsuranceLineEdit.setEnabled(False)
-
-        self.horizontalLayout_9.addWidget(self.qtInsuranceLineEdit)
-
-        self.horizontalSpacer_8 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
-
-        self.horizontalLayout_9.addItem(self.horizontalSpacer_8)
-
-
-        self.verticalLayout.addLayout(self.horizontalLayout_9)
-
         self.horizontalLayout_10 = QHBoxLayout()
         self.horizontalLayout_10.setObjectName(u"horizontalLayout_10")
         self.label_9 = QLabel(Dialog)
@@ -345,8 +324,6 @@ class Ui_Dialog(object):
         self.qtFeeLineEdit.setText(QCoreApplication.translate("Dialog", u"0", None))
         self.label_7.setText(QCoreApplication.translate("Dialog", u"\u4ea4\u6613\u7a05", None))
         self.qtTaxLineEdit.setText(QCoreApplication.translate("Dialog", u"0", None))
-        self.label_8.setText(QCoreApplication.translate("Dialog", u"\u88dc\u5145\u4fdd\u8cbb", None))
-        self.qtInsuranceLineEdit.setText(QCoreApplication.translate("Dialog", u"0", None))
         self.label_9.setText(QCoreApplication.translate("Dialog", u"\u7e3d\u984d", None))
         self.qtTotalCostLineEdit.setText(QCoreApplication.translate("Dialog", u"0", None))
     # retranslateUi
