@@ -914,8 +914,8 @@ class MainWindow( QMainWindow ):
             elif n_column == len( g_list_stock_list_table_horizontal_header ) - 2:#匯出按鈕
                 file_path = self.open_save_json_file_dialog()
                 if file_path:
-                    dict_stock_trading_data = { str_stock_number: self.dict_all_account_all_stock_trading_data[ str_stock_number ] }
-                    self.manual_save_trading_data( dict_stock_trading_data, file_path )
+                    list_save_tab_widget = [ self.ui.qtTabWidget.currentIndex() ]
+                    self.manual_save_trading_data( list_save_tab_widget, file_path, str_stock_number )
                 
                 if str_stock_number != self.str_picked_stock_number:
                     self.str_picked_stock_number = str_stock_number
@@ -1467,7 +1467,7 @@ class MainWindow( QMainWindow ):
         list_save_tab_widget = list( range( self.ui.qtTabWidget.count() - 1 ) )
         self.manual_save_trading_data( list_save_tab_widget, g_trading_data_json_file_path )
 
-    def manual_save_trading_data( self, list_save_tab_indice, file_path ): #done
+    def manual_save_trading_data( self, list_save_tab_indice, file_path, str_stock_number = None ): #done
         export_list_all_account_all_stock_trading_data = []
 
         for index in range( self.ui.qtTabWidget.count() - 1 ):
@@ -1483,6 +1483,8 @@ class MainWindow( QMainWindow ):
             export_dict_per_account_all_info = {}
             export_dict_per_account_all_stock_trading_data = {}
             for key_stock, value_list_per_stock_trading_data in value_dict_per_account_all_stock_trading_data.items():
+                if str_stock_number is not None and key_stock != str_stock_number:
+                    continue
                 export_data = []
                 for item in value_list_per_stock_trading_data:
                     if TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE in item and item[ TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE ] == True:
