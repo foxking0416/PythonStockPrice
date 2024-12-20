@@ -549,6 +549,7 @@ class MainWindow( QMainWindow ):
         self.dict_all_account_ui_state = {}
         self.dict_all_account_all_stock_trading_data = {}
         self.list_stock_list_column_width = []
+        self.n_current_tab = 0
         self.n_tab_index = 0
         
         self.initialize()
@@ -639,8 +640,9 @@ class MainWindow( QMainWindow ):
 
         if not str_tab_title:
             str_tab_title = "新群組"
-        self.ui.qtTabWidget.insertTab( self.n_tab_index, increased_tab, str_tab_title )
-        self.ui.qtTabWidget.setCurrentIndex( self.n_tab_index )
+        with QSignalBlocker( self.ui.qtTabWidget ):
+            self.ui.qtTabWidget.insertTab( self.n_tab_index, increased_tab, str_tab_title )
+            self.ui.qtTabWidget.setCurrentIndex( self.n_tab_index )
         self.n_tab_index += 1
         return str_tab_name
 
@@ -658,7 +660,9 @@ class MainWindow( QMainWindow ):
     def on_tab_widget_double_clicked( self, index ): #done
         n_tab_count = self.ui.qtTabWidget.count()
         if index == n_tab_count - 1:
-            self.add_new_tab_and_table()
+            str_tab_name = self.add_new_tab_and_table()
+            self.dict_all_account_all_stock_trading_data[ str_tab_name ] = {}
+            self.dict_all_account_ui_state[ str_tab_name ] = { "discount_checkbox": True, "discount_value": 0.6, "insurance_checkbox": False }
         else:
             current_title = self.ui.qtTabWidget.tabText( index )
             dialog = EditTabTitleDialog( current_title, self )
@@ -1577,6 +1581,7 @@ class MainWindow( QMainWindow ):
             if len( self.dict_all_account_all_stock_trading_data ) == 0:
                 str_tab_name = self.add_new_tab_and_table()
                 self.dict_all_account_all_stock_trading_data[ str_tab_name ] = {}
+                self.dict_all_account_ui_state[ str_tab_name ] = { "discount_checkbox": True, "discount_value": 0.6, "insurance_checkbox": False }
             self.ui.qtTabWidget.setCurrentIndex( 0 )
             self.process_all_trading_data()
             self.refresh_stock_list_table()
