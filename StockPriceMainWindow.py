@@ -35,6 +35,9 @@ from decimal import Decimal
 # pyside6-uic QtStockCapitalReductionEditDialog.ui -o QtStockCapitalReductionEditDialog.py
 # pyside6-uic QtDuplicateOptionDialog.ui -o QtDuplicateOptionDialog.py
 
+# 靜態掃描
+# pylint --disable=all --enable=E1120,E1121 StockPriceMainWindow.py 只顯示參數數量錯誤
+# pylint -E StockPriceMainWindow.py 只顯示錯誤級別的資訊
 g_user_dir = os.path.expanduser("~")  #開發模式跟打包模式下都是C:\Users\foxki
 g_exe_dir = os.path.dirname(__file__) #開發模式下是D:\_2.code\PythonStockPrice #打包模式後是C:\Users\foxki\AppData\Local\Temp\_MEI60962 最後那個資料夾是暫時性的隨機名稱
 g_exe2_dir = os.path.dirname( sys.executable ) #開發模式下是C:\Users\foxki\AppData\Local\Programs\Python\Python312 #打包模式後是:D:\_2.code\PythonStockPrice\dist
@@ -982,7 +985,7 @@ class MainWindow( QMainWindow ):
                     if dialog.exec():
                         dict_trading_data = dialog.dict_trading_data
                         dict_per_account_all_stock_trading_data[ str_stock_number ][ n_findindex ] = dict_trading_data
-                        sorted_list = self.process_single_trading_data( str_stock_number )
+                        sorted_list = self.process_single_trading_data( str_tab_widget_name, str_stock_number )
                         self.refresh_stock_list_table()
                         self.refresh_trading_data_table( sorted_list )
                         self.auto_save_trading_data()
@@ -991,7 +994,7 @@ class MainWindow( QMainWindow ):
                     result = self.show_message_box( "警告", f"確定要刪掉這筆交易資料嗎?" )
                     if result:
                         del dict_per_account_all_stock_trading_data[ str_stock_number ][ n_findindex ]
-                        sorted_list = self.process_single_trading_data( str_stock_number )
+                        sorted_list = self.process_single_trading_data( str_tab_widget_name, str_stock_number )
                         self.refresh_stock_list_table()
                         self.refresh_trading_data_table( sorted_list )
                         self.auto_save_trading_data()
@@ -1125,44 +1128,62 @@ class MainWindow( QMainWindow ):
     def on_import_trading_data_action_triggered( self ):
         file_path = self.open_load_json_file_dialog()
         if file_path:
+            dict_account_to_tab_widget_name = {}
+            for index in range( self.ui.qtTabWidget.count() - 1 ):
+                tab_widget = self.ui.qtTabWidget.widget( index )
+                str_tab_title = self.ui.qtTabWidget.tabText( index )
+                str_tab_widget_name = tab_widget.objectName()
+                dict_account_to_tab_widget_name[ str_tab_title ] = str_tab_widget_name
 
-            dict_all_stock_trading_data_new = {}
-            self.load_trading_data_and_create_tab( file_path, dict_all_stock_trading_data_new )
+                # self.dict_all_account_all_stock_trading_data[ self.str_picked_stock_number ] 
+
+            dict_all_account_all_stock_trading_data_LOAD = {}
+            dict_all_account_ui_state_LOAD = {}
+            self.load_trading_data_and_create_tab( file_path, dict_all_account_all_stock_trading_data_LOAD, dict_all_account_ui_state_LOAD, False )
             b_duplicate = False
-            for key_stock_number, value in dict_all_stock_trading_data_new.items():
-                if key_stock_number in self.dict_all_account_all_stock_trading_data:
-                    b_duplicate = True
-                    break
+            for str_account_name, dict_per_account_all_stock_trading_data_LOAD in dict_all_account_all_stock_trading_data_LOAD.items():
+                if str_account_name in dict_account_to_tab_widget_name:
+                    str_tab_widget_name = dict_account_to_tab_widget_name[ str_account_name ]
+                    for key_stock_number, value in dict_per_account_all_stock_trading_data_LOAD.items():
+                        if key_stock_number in self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ]:
+                            b_duplicate = True
+                            break
+                    if b_duplicate:
+                        break
 
             if b_duplicate:
                 dialog = ImportDataDuplicateOptionDialog( self )
                 if dialog.exec():
                     if dialog.b_overwrite:
-                        self.dict_all_account_all_stock_trading_data.update( dict_all_stock_trading_data_new )
-                        self.process_all_trading_data()
-                        self.refresh_stock_list_table()
-                        self.auto_save_trading_data()
-                        if self.str_picked_stock_number != None:
-                            self.refresh_trading_data_table( self.dict_all_account_all_stock_trading_data[ self.str_picked_stock_number ] )
-                    else:
-                        for key_stock_number, value in dict_all_stock_trading_data_new.items():
-                            if key_stock_number in self.dict_all_account_all_stock_trading_data:
-                                self.dict_all_account_all_stock_trading_data[ key_stock_number ] += value
+                        for str_account_name, dict_per_account_all_stock_trading_data_LOAD in dict_all_account_all_stock_trading_data_LOAD.items():
+                            if str_account_name in dict_account_to_tab_widget_name:
+                                self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ] = dict_per_account_all_stock_trading_data_LOAD
                             else:
-                                self.dict_all_account_all_stock_trading_data[ key_stock_number ] = value
-                        self.process_all_trading_data()
-                        self.refresh_stock_list_table()
-                        self.auto_save_trading_data()
-                        if self.str_picked_stock_number != None:
-                            self.refresh_trading_data_table( self.dict_all_account_all_stock_trading_data[ self.str_picked_stock_number ] )
-
+                                str_tab_name = self.add_new_tab_and_table( str_account_name )
+                                self.dict_all_account_all_stock_trading_data[ str_tab_name ] = dict_per_account_all_stock_trading_data_LOAD
+                    else:
+                        for str_account_name, dict_per_account_all_stock_trading_data_LOAD in dict_all_account_all_stock_trading_data_LOAD.items():
+                            if str_account_name in dict_account_to_tab_widget_name:
+                                str_tab_widget_name = dict_account_to_tab_widget_name[ str_account_name ]
+                                self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ].update( dict_per_account_all_stock_trading_data_LOAD )
+                            else:
+                                str_tab_name = self.add_new_tab_and_table( str_account_name )
+                                self.dict_all_account_all_stock_trading_data[ str_tab_name ] = dict_per_account_all_stock_trading_data_LOAD
             else:
-                self.dict_all_account_all_stock_trading_data.update( dict_all_stock_trading_data_new )
-                self.process_all_trading_data()
-                self.refresh_stock_list_table()
-                self.auto_save_trading_data()
-                if self.str_picked_stock_number != None:
-                    self.refresh_trading_data_table( self.dict_all_account_all_stock_trading_data[ self.str_picked_stock_number ] )
+                for str_account_name, dict_per_account_all_stock_trading_data_LOAD in dict_all_account_all_stock_trading_data_LOAD.items():
+                    if str_account_name in dict_account_to_tab_widget_name:
+                        str_tab_widget_name = dict_account_to_tab_widget_name[ str_account_name ]
+                        self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ].update( dict_per_account_all_stock_trading_data_LOAD )
+                    else:
+                        str_tab_name = self.add_new_tab_and_table( str_account_name )
+                        self.dict_all_account_all_stock_trading_data[ str_tab_name ] = dict_per_account_all_stock_trading_data_LOAD
+
+            self.process_all_trading_data()
+            self.str_picked_stock_number = None
+            self.refresh_stock_list_table()
+            self.clear_per_stock_trading_table()
+            self.update_button_enable_disable_status()
+            self.auto_save_trading_data()
 
     def open_load_json_file_dialog( self ): #done
         # 彈出讀取檔案對話框
@@ -1517,7 +1538,7 @@ class MainWindow( QMainWindow ):
             f.write( "v1.0.0" '\n' )
             json.dump( export_list_all_account_all_stock_trading_data, f, ensure_ascii=False, indent=4 )
 
-    def load_trading_data_and_create_tab( self, file_path, dict_all_account_all_stock_trading_data, dict_all_account_ui_state ): #done
+    def load_trading_data_and_create_tab( self, file_path, dict_all_account_all_stock_trading_data, dict_all_account_ui_state, b_create_tab ): #done
         if not os.path.exists( file_path ):
             return
 
@@ -1562,13 +1583,17 @@ class MainWindow( QMainWindow ):
                                 dict_per_trading_data[ TradingData.USE_AUTO_DIVIDEND_DATA ] = item_trading_data[ "use_auto_dividend_data" ]       
                             list_trading_data.append( dict_per_trading_data )
                     dict_per_stock_trading_data[ key_stock_number ] = list_trading_data
-                str_tab_name = self.add_new_tab_and_table( item_account[ "account_name" ] )
-                dict_all_account_ui_state[ str_tab_name ] = dict_ui_state
-                dict_all_account_all_stock_trading_data[ str_tab_name ] = dict_per_stock_trading_data
+                if b_create_tab:
+                    str_tab_name = self.add_new_tab_and_table( item_account[ "account_name" ] )
+                    dict_all_account_ui_state[ str_tab_name ] = dict_ui_state
+                    dict_all_account_all_stock_trading_data[ str_tab_name ] = dict_per_stock_trading_data
+                else:
+                    dict_all_account_ui_state[ item_account[ "account_name" ] ] = dict_ui_state
+                    dict_all_account_all_stock_trading_data[ item_account[ "account_name" ] ] = dict_per_stock_trading_data
 
     def initialize( self ): #done
         with QSignalBlocker( self.ui.qtTabWidget ):
-            self.load_trading_data_and_create_tab( g_trading_data_json_file_path, self.dict_all_account_all_stock_trading_data, self.dict_all_account_ui_state )
+            self.load_trading_data_and_create_tab( g_trading_data_json_file_path, self.dict_all_account_all_stock_trading_data, self.dict_all_account_ui_state, True )
             self.load_share_UI_state()
             if len( self.dict_all_account_all_stock_trading_data ) == 0:
                 str_tab_name = self.add_new_tab_and_table()
@@ -1704,7 +1729,7 @@ class MainWindow( QMainWindow ):
             str_weekday = "(五)"
         elif n_weekday == 5:
             str_weekday = "(六)"
-        elif n_weekday == 6:
+        else:
             str_weekday = "(日)"
         f_trading_price = dict_per_trading_data[ TradingData.TRADING_PRICE ]
         n_trading_count = dict_per_trading_data[ TradingData.TRADING_COUNT ]
