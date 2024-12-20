@@ -230,6 +230,13 @@
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="qtAddLimitBuyingDataPushButton">
+        <property name="text">
+         <string>新增增資認購資料</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="qtAddCapitalReductionDataPushButton">
         <property name="enabled">
          <bool>false</bool>
