@@ -1242,6 +1242,7 @@ class MainWindow( QMainWindow ):
         os.makedirs( os.path.dirname( g_UISetting_file_path ), exist_ok = True )
 
         with open( g_UISetting_file_path, 'w', encoding='utf-8' ) as f:
+            f.write( "版本," + 'v1.0.0' + '\n' )
             f.write( "顯示排序," + str( self.ui.qtFromNewToOldRadioButton.isChecked() ) + '\n' )
             f.write( "顯示數量," + str( self.ui.qtShowAllRadioButton.isChecked() ) + '\n' )
             f.write( "顯示單位," + str( self.ui.qtShow1StockRadioButton.isChecked() ) + '\n' )
@@ -1284,7 +1285,9 @@ class MainWindow( QMainWindow ):
                     data = f.readlines()
                     for i, row in enumerate( data ):
                         row = row.strip().split( ',' )
-                        if row[0] == "顯示排序":
+                        if row[0] == "版本":
+                            continue
+                        elif row[0] == "顯示排序":
                             if row[ 1 ] == 'True':
                                 self.ui.qtFromNewToOldRadioButton.setChecked( True )
                             else:
@@ -1530,12 +1533,15 @@ class MainWindow( QMainWindow ):
             export_list_all_account_all_stock_trading_data.append( export_dict_per_account_all_info )
 
         with open( file_path, 'w', encoding='utf-8' ) as f:
+            f.write( "v1.0.0" '\n' )
             json.dump( export_list_all_account_all_stock_trading_data, f, ensure_ascii=False, indent=4 )
 
     def load_trading_data_and_create_tab( self, file_path, dict_all_account_all_stock_trading_data, dict_all_account_ui_state ): #done
         if not os.path.exists( file_path ):
             return
-        with open( file_path,'r', encoding='utf-8' ) as f:
+
+        with open( file_path, 'r', encoding='utf-8' ) as f:
+            version = f.readline().strip()
             data = json.load( f )
 
         for item_account in data:
