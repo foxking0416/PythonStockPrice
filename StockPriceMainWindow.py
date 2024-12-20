@@ -1254,7 +1254,7 @@ class MainWindow( QMainWindow ):
                 f.write( f",{ self.list_stock_list_column_width[ i ] }" )
             f.write( "\n" )
 
-    def load_share_UI_state( self ): #done
+    def load_account_UI_state( self ): #done
         for index in range( self.ui.qtTabWidget.count() - 1 ):
             tab_widget = self.ui.qtTabWidget.widget( index )
             str_tab_name = tab_widget.objectName()
@@ -1273,6 +1273,7 @@ class MainWindow( QMainWindow ):
                 qt_double_spin_box.setEnabled( b_discount )
                 list_qt_insurance_check_box[ 0 ].setChecked( b_insurance )
 
+    def load_share_UI_state( self ): #done
         with ( QSignalBlocker( self.ui.qtFromNewToOldRadioButton ),
                QSignalBlocker( self.ui.qtFromOldToNewRadioButton ), 
                QSignalBlocker( self.ui.qtShowAllRadioButton ), 
@@ -1592,6 +1593,7 @@ class MainWindow( QMainWindow ):
     def initialize( self ): #done
         with QSignalBlocker( self.ui.qtTabWidget ):
             self.load_trading_data_and_create_tab( g_trading_data_json_file_path, self.dict_all_account_all_stock_trading_data, self.dict_all_account_ui_state )
+            self.load_account_UI_state()
             self.load_share_UI_state()
             if len( self.dict_all_account_all_stock_trading_data ) == 0:
                 str_tab_name = self.add_new_tab_and_table()
