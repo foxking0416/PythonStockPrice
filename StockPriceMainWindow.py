@@ -654,7 +654,7 @@ class MainWindow( QMainWindow ):
             self.n_current_tab = index
             self.str_picked_stock_number = None
             self.refresh_stock_list_table()
-            self.per_stock_trading_data_model.clear()
+            self.clear_per_stock_trading_table()
             self.update_button_enable_disable_status()
 
     def on_tab_widget_double_clicked( self, index ): #done
@@ -913,7 +913,7 @@ class MainWindow( QMainWindow ):
                     del dict_per_account_all_stock_trading_data[ str_stock_number ]
                     self.str_picked_stock_number = None
                     self.refresh_stock_list_table()
-                    self.per_stock_trading_data_model.clear()
+                    self.clear_per_stock_trading_table()
                     self.auto_save_trading_data()
             elif n_column == len( g_list_stock_list_table_horizontal_header ) - 2:#匯出按鈕
                 file_path = self.open_save_json_file_dialog()
@@ -1809,8 +1809,17 @@ class MainWindow( QMainWindow ):
                       str_average_cost ]            #均價
         return list_data
 
-    def refresh_trading_data_table( self, sorted_list ):
+    def clear_per_stock_trading_table( self ):
         self.per_stock_trading_data_model.clear()
+        self.per_stock_trading_data_model.setVerticalHeaderLabels( self.get_trading_data_header() )
+        for row in range( len( self.get_trading_data_header() ) ):
+            if row == 10 or row == 11:
+                self.ui.qtTradingDataTableView.setRowHeight( row, 40 )
+            else:
+                self.ui.qtTradingDataTableView.setRowHeight( row, 25 )
+
+    def refresh_trading_data_table( self, sorted_list ):
+        self.clear_per_stock_trading_table()
         self.per_stock_trading_data_model.setVerticalHeaderLabels( self.get_trading_data_header() )
         self.ui.qtTradingDataTableView.horizontalHeader().hide()
 
