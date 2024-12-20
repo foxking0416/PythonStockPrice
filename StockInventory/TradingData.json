@@ -13,7 +13,7 @@ v1.0.0
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
                     "capital_reduction_per_share": 0,
-                    "use_auto_dividend_data": false
+                    "use_auto_dividend_data": true
                 },
                 {
                     "trading_date": "2023-10-31",
@@ -2236,7 +2236,7 @@ v1.0.0
         },
         "discount_checkbox": true,
         "discount_value": 0.45,
-        "insurance_checkbox": true
+        "insurance_checkbox": false
     },
     {
         "account_name": "維謙",
@@ -2323,6 +2323,6 @@ v1.0.0
         },
         "discount_checkbox": false,
         "discount_value": 0.6,
-        "insurance_checkbox": true
+        "insurance_checkbox": false
     }
 ]
