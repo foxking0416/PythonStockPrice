@@ -110,21 +110,20 @@ class TradingData( Enum ):
     TRADING_FEE_DISCOUNT = 5
     STOCK_DIVIDEND_PER_SHARE = 6
     CASH_DIVIDEND_PER_SHARE = 7
-    IS_REQUIRED_EXTRA_INSURANCE_FEE = 8
-    CAPITAL_REDUCTION_PER_SHARE = 9
-    USE_AUTO_DIVIDEND_DATA = 10
-    SORTED_INDEX_NON_SAVE = 11 #不會記錄
-    TRADING_VALUE_NON_SAVE = 12 #不會記錄
-    TRADING_FEE_NON_SAVE = 13 #不會記錄
-    TRADING_TAX_NON_SAVE = 14 #不會記錄
-    TRADING_COST_NON_SAVE = 15 #不會記錄
-    STOCK_DIVIDEND_GAIN_NON_SAVE = 16 #不會記錄
-    CASH_DIVIDEND_GAIN_NON_SAVE = 17 #不會記錄
-    EXTRA_INSURANCE_FEE_NON_SAVE = 18 #不會記錄
-    ACCUMULATED_COST_NON_SAVE = 19 #不會記錄
-    ACCUMULATED_INVENTORY_NON_SAVE = 20 #不會記錄
-    AVERAGE_COST_NON_SAVE = 21 #不會記錄
-    IS_AUTO_DIVIDEND_DATA_NON_SAVE = 22 #不會記錄
+    CAPITAL_REDUCTION_PER_SHARE = 8
+    USE_AUTO_DIVIDEND_DATA = 9
+    SORTED_INDEX_NON_SAVE = 10 #不會記錄
+    TRADING_VALUE_NON_SAVE = 11 #不會記錄
+    TRADING_FEE_NON_SAVE = 12 #不會記錄
+    TRADING_TAX_NON_SAVE = 13 #不會記錄
+    TRADING_COST_NON_SAVE = 14 #不會記錄
+    STOCK_DIVIDEND_GAIN_NON_SAVE = 15 #不會記錄
+    CASH_DIVIDEND_GAIN_NON_SAVE = 16 #不會記錄
+    EXTRA_INSURANCE_FEE_NON_SAVE = 17 #不會記錄
+    ACCUMULATED_COST_NON_SAVE = 18 #不會記錄
+    ACCUMULATED_INVENTORY_NON_SAVE = 19 #不會記錄
+    AVERAGE_COST_NON_SAVE = 20 #不會記錄
+    IS_AUTO_DIVIDEND_DATA_NON_SAVE = 21 #不會記錄
 
 class TradingCost( Enum ):
     TRADING_VALUE = 0
@@ -175,7 +174,6 @@ class Utility():
                                f_trading_fee_discount,      #手續費折扣
                                f_stock_dividend_per_share,  #每股股票股利
                                f_cash_dividend_per_share,   #每股現金股利
-                               b_extra_insurance_fee,       #是否需扣除補充保費
                                f_capital_reduction_per_share ): #每股減資金額
         dict_trading_data = {}
         dict_trading_data[ TradingData.STOCK_NUMBER ] = str_stock_number
@@ -186,7 +184,6 @@ class Utility():
         dict_trading_data[ TradingData.TRADING_FEE_DISCOUNT ] = f_trading_fee_discount
         dict_trading_data[ TradingData.STOCK_DIVIDEND_PER_SHARE ] = f_stock_dividend_per_share
         dict_trading_data[ TradingData.CASH_DIVIDEND_PER_SHARE ] = f_cash_dividend_per_share
-        dict_trading_data[ TradingData.IS_REQUIRED_EXTRA_INSURANCE_FEE ] = b_extra_insurance_fee
         dict_trading_data[ TradingData.CAPITAL_REDUCTION_PER_SHARE ] = f_capital_reduction_per_share
         return dict_trading_data
 
@@ -271,7 +268,6 @@ class StockCapitalReductionEditDialog( QDialog ):
                                                                     1,                                                  #手續費折扣                                   
                                                                     0,                                                  #每股股票股利
                                                                     0,                                                  #每股現金股利
-                                                                    False,                                              #是否需扣除補充保費
                                                                     f_stock_capital_reduction_per_share )               #每股減資金額           
             self.accept()
         else:
@@ -281,7 +277,7 @@ class StockCapitalReductionEditDialog( QDialog ):
         self.reject()
 
 class StockDividendEditDialog( QDialog ):
-    def __init__( self, str_stock_number, str_stock_name, b_extra_insurance_fee, parent = None ):
+    def __init__( self, str_stock_number, str_stock_name, parent = None ):
         super().__init__( parent )
 
         self.ui = Ui_StockDividendDialog()
@@ -291,7 +287,6 @@ class StockDividendEditDialog( QDialog ):
 
         self.ui.qtStockNumberLabel.setText( str_stock_number )
         self.ui.qtStockNameLabel.setText( str_stock_name )
-        self.ui.qtExtraInsuranceFeeCheckBox.setChecked( b_extra_insurance_fee )
         obj_current_date = datetime.datetime.today()
         self.ui.qtDateEdit.setDate( obj_current_date.date() )
         self.ui.qtDateEdit.setCalendarPopup( True )
@@ -308,13 +303,9 @@ class StockDividendEditDialog( QDialog ):
     def setup_cash_dividend( self, f_cash_dividend_per_share ):
         self.ui.qtCashDividendDoubleSpinBox.setValue( f_cash_dividend_per_share )
 
-    def setup_extra_insurance_fee( self, b_extra_insurance_fee ):
-        self.ui.qtExtraInsuranceFeeCheckBox.setChecked( b_extra_insurance_fee )
-
     def accept_data( self ):
         f_stock_dividend_per_share = self.ui.qtStockDividendDoubleSpinBox.value()
         f_cash_dividend_per_share = self.ui.qtCashDividendDoubleSpinBox.value()
-        b_extra_insurance_fee = self.ui.qtExtraInsuranceFeeCheckBox.isChecked()
         if f_stock_dividend_per_share != 0 or f_cash_dividend_per_share != 0:
 
             self.dict_trading_data = Utility.generate_trading_data( self.ui.qtStockNumberLabel.text(),                  #股票代碼
@@ -325,7 +316,6 @@ class StockDividendEditDialog( QDialog ):
                                                                     1,                                                  #手續費折扣                                   
                                                                     f_stock_dividend_per_share,                         #每股股票股利
                                                                     f_cash_dividend_per_share,                          #每股現金股利
-                                                                    b_extra_insurance_fee,                              #是否需扣除補充保費
                                                                     0 )                                                 #每股減資金額
             self.accept()
         else:
@@ -416,7 +406,6 @@ class StockTradingEditDialog( QDialog ):
                                                                     self.get_trading_fee_discount(),                    #手續費折扣
                                                                     0,                                                  #每股股票股利
                                                                     0,                                                  #每股現金股利
-                                                                    False,                                              #是否需扣除補充保費
                                                                     0 )                                                 #每股減資金額
             self.accept()
         else:
@@ -553,6 +542,7 @@ class MainWindow( QMainWindow ):
                 break
 
         self.str_picked_stock_number = None
+        self.dict_all_account_ui_state = {}
         self.dict_all_account_all_stock_trading_data = {}
         self.list_stock_list_column_width = []
         self.n_tab_index = 0
@@ -656,7 +646,7 @@ class MainWindow( QMainWindow ):
         uiqt_add_stock_push_button.clicked.connect( self.on_add_stock_push_button_clicked )
         uiqt_discount_check_box.stateChanged.connect( self.on_discount_check_box_state_changed )
         uiqt_discount_rate_double_spin_box.valueChanged.connect( self.save_share_UI_state )
-        uiqt_extra_insurance_fee_check_box.stateChanged.connect( self.save_share_UI_state )
+        uiqt_extra_insurance_fee_check_box.stateChanged.connect( self.on_extra_insurance_fee_check_box_state_changed )
 
 
         if not str_tab_title:
@@ -766,7 +756,6 @@ class MainWindow( QMainWindow ):
                                                                1,                    #手續費折扣
                                                                0,                    #每股股票股利
                                                                0,                    #每股現金股利
-                                                               False,                #是否需扣除補充保費
                                                                0 )                   #每股減資金額
             dict_trading_data[ TradingData.USE_AUTO_DIVIDEND_DATA ] = True
             dict_per_account_all_stock_trading_data[ str_first_four_chars ] = [ dict_trading_data ]
@@ -782,6 +771,22 @@ class MainWindow( QMainWindow ):
             qt_double_spin_box.setEnabled( False )
 
         self.save_share_UI_state()
+
+    def on_extra_insurance_fee_check_box_state_changed( self, state ): #done
+        str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
+        if state == 2:
+            self.dict_all_account_ui_state[ str_tab_widget_name ][ "insurance_checkbox"] = True
+        else:
+            self.dict_all_account_ui_state[ str_tab_widget_name ][ "insurance_checkbox"] = False
+        
+        dict_per_company_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ]
+        for key_stock_name, value_list_trading_data in dict_per_company_trading_data.items():
+            self.process_single_trading_data( str_tab_widget_name, key_stock_name )
+
+        self.refresh_stock_list_table()
+        if self.str_picked_stock_number != None:
+            self.refresh_trading_data_table( dict_per_company_trading_data[ self.str_picked_stock_number ] )
+        self.auto_save_trading_data()
 
     def on_change_display_mode( self ): #done
         if self.str_picked_stock_number != None:
@@ -817,7 +822,6 @@ class MainWindow( QMainWindow ):
     def on_add_dividend_data_push_button_clicked( self ): #done
         if self.str_picked_stock_number is None:
             return
-        list_qt_insurance_check_box = self.ui.qtTabWidget.currentWidget().findChildren( QCheckBox, name="insurance")
 
         str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
         dict_per_account_all_stock_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ]
@@ -825,7 +829,7 @@ class MainWindow( QMainWindow ):
         str_stock_number = self.str_picked_stock_number
         list_stock_name_and_type = self.dict_all_company_number_to_name_and_type[ str_stock_number ]
         str_stock_name = list_stock_name_and_type[ 0 ]
-        dialog = StockDividendEditDialog( str_stock_number, str_stock_name, list_qt_insurance_check_box[ 0 ].isChecked(), self )
+        dialog = StockDividendEditDialog( str_stock_number, str_stock_name, self )
 
         if dialog.exec():
             dict_trading_data = dialog.dict_trading_data
@@ -943,7 +947,6 @@ class MainWindow( QMainWindow ):
         if item is not None:
             qt_double_spin_box = self.ui.qtTabWidget.currentWidget().findChild( QDoubleSpinBox )
             list_qt_discount_check_box = self.ui.qtTabWidget.currentWidget().findChildren( QCheckBox, name="discount")
-            list_qt_insurance_check_box = self.ui.qtTabWidget.currentWidget().findChildren( QCheckBox, name="insurance")
 
             n_column = index.column()  # 獲取列索引
             n_row = index.row()  # 獲取行索引
@@ -982,11 +985,10 @@ class MainWindow( QMainWindow ):
                         dialog.setup_trading_price( dict_selected_data[ TradingData.TRADING_PRICE ] )
                         dialog.setup_trading_count( dict_selected_data[ TradingData.TRADING_COUNT ] )
                     elif dict_selected_data[ TradingData.TRADING_TYPE ] == TradingType.DIVIDEND:
-                        dialog = StockDividendEditDialog( str_stock_number, str_stock_name, list_qt_insurance_check_box[ 0 ].isChecked(), self )
+                        dialog = StockDividendEditDialog( str_stock_number, str_stock_name, self )
                         dialog.setup_trading_date( dict_selected_data[ TradingData.TRADING_DATE ] )
                         dialog.setup_stock_dividend( dict_selected_data[ TradingData.STOCK_DIVIDEND_PER_SHARE ] )
                         dialog.setup_cash_dividend( dict_selected_data[ TradingData.CASH_DIVIDEND_PER_SHARE ] )
-                        dialog.setup_extra_insurance_fee( dict_selected_data[ TradingData.IS_REQUIRED_EXTRA_INSURANCE_FEE ] )
                     elif dict_selected_data[ TradingData.TRADING_TYPE ] == TradingType.CAPITAL_REDUCTION:
                         dialog = StockCapitalReductionEditDialog( str_stock_number, str_stock_name, self )
                         dialog.setup_trading_date( dict_selected_data[ TradingData.TRADING_DATE ] )
@@ -1252,7 +1254,7 @@ class MainWindow( QMainWindow ):
                 f.write( f",{ self.list_stock_list_column_width[ i ] }" )
             f.write( "\n" )
 
-    def load_share_UI_state( self, dict_all_account_ui_state ): #done
+    def load_share_UI_state( self ): #done
         for index in range( self.ui.qtTabWidget.count() - 1 ):
             tab_widget = self.ui.qtTabWidget.widget( index )
             str_tab_name = tab_widget.objectName()
@@ -1263,9 +1265,9 @@ class MainWindow( QMainWindow ):
             with ( QSignalBlocker( list_qt_discount_check_box[ 0 ] ),
                    QSignalBlocker( qt_double_spin_box ),
                    QSignalBlocker( list_qt_insurance_check_box[ 0 ] ) ):
-                b_discount = dict_all_account_ui_state[ str_tab_name ][ "discount_checkbox"]
-                f_discount_value = dict_all_account_ui_state[ str_tab_name ][ "discount_value"]
-                b_insurance = dict_all_account_ui_state[ str_tab_name ][ "insurance_checkbox"]
+                b_discount = self.dict_all_account_ui_state[ str_tab_name ][ "discount_checkbox"]
+                f_discount_value = self.dict_all_account_ui_state[ str_tab_name ][ "discount_value"]
+                b_insurance = self.dict_all_account_ui_state[ str_tab_name ][ "insurance_checkbox"]
                 list_qt_discount_check_box[ 0 ].setChecked( b_discount )
                 qt_double_spin_box.setValue( f_discount_value )
                 qt_double_spin_box.setEnabled( b_discount )
@@ -1312,10 +1314,12 @@ class MainWindow( QMainWindow ):
                             for i in range( 1, len( row ) ):
                                 self.list_stock_list_column_width.append( int( row[ i ] ) )
 
-    def process_single_trading_data( self, str_account_name, str_stock_number ): #done
-        list_trading_data = self.dict_all_account_all_stock_trading_data[ str_account_name ][ str_stock_number ]
+    def process_single_trading_data( self, str_tab_widget_name, str_stock_number ): #done
+        list_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ][ str_stock_number ]
         #先拔掉所有的AUTO_DIVIDEND_DATA，下面有需要再重新插入，避免重複插入
         list_trading_data = [item for item in list_trading_data if TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE not in item or not item[TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE]]
+
+        b_extra_insurance_fee = self.dict_all_account_ui_state[ str_tab_widget_name ][ "insurance_checkbox"]
 
         b_etf = self.dict_all_company_number_to_name_and_type[ str_stock_number ][ 1 ]
         sorted_list = sorted( list_trading_data, key=lambda x: ( datetime.datetime.strptime( x[ TradingData.TRADING_DATE ], "%Y-%m-%d"), -x[ TradingData.TRADING_TYPE ] ) )
@@ -1445,7 +1449,7 @@ class MainWindow( QMainWindow ):
                     if n_cash_dividend_gain > 10:
                         item[ TradingData.CASH_DIVIDEND_GAIN_NON_SAVE ] = n_cash_dividend_gain
                         item[ TradingData.TRADING_FEE_NON_SAVE ] = 10
-                        if item[ TradingData.IS_REQUIRED_EXTRA_INSURANCE_FEE ] and n_cash_dividend_gain >= 20000:
+                        if b_extra_insurance_fee and n_cash_dividend_gain >= 20000:
                             n_extra_insurance_fee = int( Decimal( str( n_cash_dividend_gain ) ) * Decimal( str( '0.0211' ) ) )
                         else:
                             n_extra_insurance_fee = 0
@@ -1474,7 +1478,7 @@ class MainWindow( QMainWindow ):
             item[ TradingData.ACCUMULATED_INVENTORY_NON_SAVE ] = n_accumulated_inventory
             item[ TradingData.AVERAGE_COST_NON_SAVE ] = n_accumulated_cost / n_accumulated_inventory if n_accumulated_inventory != 0 else 0
 
-        self.dict_all_account_all_stock_trading_data[ str_account_name ][ str_stock_number ] = list_calibration_data
+        self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ][ str_stock_number ] = list_calibration_data
         return list_calibration_data
 
     def process_all_trading_data( self ): #done
@@ -1517,7 +1521,6 @@ class MainWindow( QMainWindow ):
                     dict_per_trading_data[ "trading_fee_discount" ] = item[ TradingData.TRADING_FEE_DISCOUNT ]
                     dict_per_trading_data[ "stock_dividend_per_share" ] = item[ TradingData.STOCK_DIVIDEND_PER_SHARE ]
                     dict_per_trading_data[ "cash_dividend_per_share" ] = item[ TradingData.CASH_DIVIDEND_PER_SHARE ]
-                    dict_per_trading_data[ "extra_insurance_fee" ] = item[ TradingData.IS_REQUIRED_EXTRA_INSURANCE_FEE ]
                     dict_per_trading_data[ "capital_reduction_per_share" ] = item[ TradingData.CAPITAL_REDUCTION_PER_SHARE ]
                     if dict_per_trading_data[ "trading_date" ] == '0001-01-01':
                         dict_per_trading_data[ "use_auto_dividend_data" ] = item[ TradingData.USE_AUTO_DIVIDEND_DATA ]
@@ -1567,7 +1570,6 @@ class MainWindow( QMainWindow ):
                              "trading_fee_discount" in item_trading_data and
                              "stock_dividend_per_share" in item_trading_data and
                              "cash_dividend_per_share" in item_trading_data and
-                             "extra_insurance_fee" in item_trading_data and
                              "capital_reduction_per_share" in item_trading_data ):
 
                             dict_per_trading_data = Utility.generate_trading_data( '1101',                 #股票代碼
@@ -1578,7 +1580,6 @@ class MainWindow( QMainWindow ):
                                                                                    item_trading_data[ "trading_fee_discount" ],         #手續費折扣
                                                                                    item_trading_data[ "stock_dividend_per_share" ],     #每股股票股利
                                                                                    item_trading_data[ "cash_dividend_per_share" ],      #每股現金股利
-                                                                                   item_trading_data[ "extra_insurance_fee" ],          #是否須扣除補充保費
                                                                                    item_trading_data[ "capital_reduction_per_share" ] ) #每股減資金額     
                             if item_trading_data[ "trading_date" ] == '0001-01-01':
                                 dict_per_trading_data[ TradingData.USE_AUTO_DIVIDEND_DATA ] = item_trading_data[ "use_auto_dividend_data" ]       
@@ -1590,9 +1591,8 @@ class MainWindow( QMainWindow ):
 
     def initialize( self ): #done
         with QSignalBlocker( self.ui.qtTabWidget ):
-            dict_all_account_ui_state = {}
-            self.load_trading_data_and_create_tab( g_trading_data_json_file_path, self.dict_all_account_all_stock_trading_data, dict_all_account_ui_state )
-            self.load_share_UI_state( dict_all_account_ui_state )
+            self.load_trading_data_and_create_tab( g_trading_data_json_file_path, self.dict_all_account_all_stock_trading_data, self.dict_all_account_ui_state )
+            self.load_share_UI_state()
             if len( self.dict_all_account_all_stock_trading_data ) == 0:
                 str_tab_name = self.add_new_tab_and_table()
                 self.dict_all_account_all_stock_trading_data[ str_tab_name ] = {}
@@ -2384,7 +2384,6 @@ class MainWindow( QMainWindow ):
                                                                             1,                          #手續費折扣                                   
                                                                             f_stock_dividend_per_share, #每股股票股利
                                                                             f_cash_dividend_per_share,  #每股現金股利
-                                                                            False,                      #是否需扣除補充保費
                                                                             0 )                         #每股減資金額
                         dict_dividend_data[ TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE ] = True
 

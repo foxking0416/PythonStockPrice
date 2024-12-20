@@ -1,4 +1,4 @@
-v1.0
+v1.0.0
 [
     {
         "account_name": "華春",
@@ -12,9 +12,8 @@ v1.0
                     "trading_fee_discount": 1,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0,
-                    "use_auto_dividend_data": true
+                    "use_auto_dividend_data": false
                 },
                 {
                     "trading_date": "2023-10-31",
@@ -24,7 +23,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -35,7 +33,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -46,7 +43,6 @@ v1.0
                     "trading_fee_discount": 1,
                     "stock_dividend_per_share": 0.0,
                     "cash_dividend_per_share": 3.0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 }
             ],
@@ -59,7 +55,6 @@ v1.0
                     "trading_fee_discount": 1,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0,
                     "use_auto_dividend_data": true
                 },
@@ -71,7 +66,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -82,7 +76,6 @@ v1.0
                     "trading_fee_discount": 1,
                     "stock_dividend_per_share": 0.0,
                     "cash_dividend_per_share": 2.0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 }
             ],
@@ -95,7 +88,6 @@ v1.0
                     "trading_fee_discount": 1,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0,
                     "use_auto_dividend_data": true
                 },
@@ -107,7 +99,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -118,7 +109,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -129,7 +119,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -140,7 +129,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -151,7 +139,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -162,7 +149,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -173,7 +159,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -184,7 +169,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -195,7 +179,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -206,7 +189,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -217,7 +199,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -228,7 +209,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -239,7 +219,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -250,7 +229,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -261,7 +239,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -272,7 +249,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -283,7 +259,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -294,7 +269,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -305,7 +279,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -316,7 +289,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -327,7 +299,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -338,7 +309,6 @@ v1.0
                     "trading_fee_discount": 1,
                     "stock_dividend_per_share": 0.0,
                     "cash_dividend_per_share": 1.621,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -349,7 +319,6 @@ v1.0
                     "trading_fee_discount": 1,
                     "stock_dividend_per_share": 0.0,
                     "cash_dividend_per_share": 1.392,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -360,7 +329,6 @@ v1.0
                     "trading_fee_discount": 1,
                     "stock_dividend_per_share": 0.0,
                     "cash_dividend_per_share": 2.508,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -371,7 +339,6 @@ v1.0
                     "trading_fee_discount": 1,
                     "stock_dividend_per_share": 0.0,
                     "cash_dividend_per_share": 2.5,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -382,7 +349,6 @@ v1.0
                     "trading_fee_discount": 1,
                     "stock_dividend_per_share": 0.0,
                     "cash_dividend_per_share": 2.5,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -393,7 +359,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -404,7 +369,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -415,7 +379,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -426,7 +389,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -437,7 +399,6 @@ v1.0
                     "trading_fee_discount": 1,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 2.0
                 },
                 {
@@ -448,7 +409,6 @@ v1.0
                     "trading_fee_discount": 1,
                     "stock_dividend_per_share": 0.0,
                     "cash_dividend_per_share": 3.0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 }
             ],
@@ -461,7 +421,6 @@ v1.0
                     "trading_fee_discount": 1,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0,
                     "use_auto_dividend_data": true
                 },
@@ -473,7 +432,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -484,7 +442,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -495,7 +452,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -506,7 +462,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -517,7 +472,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -528,7 +482,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -539,7 +492,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -550,7 +502,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -561,7 +512,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -572,7 +522,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -583,7 +532,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -594,7 +542,6 @@ v1.0
                     "trading_fee_discount": 1,
                     "stock_dividend_per_share": 0.5,
                     "cash_dividend_per_share": 0.3,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -605,7 +552,6 @@ v1.0
                     "trading_fee_discount": 1,
                     "stock_dividend_per_share": 0.5,
                     "cash_dividend_per_share": 0.2,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -616,7 +562,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -627,7 +572,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -638,7 +582,6 @@ v1.0
                     "trading_fee_discount": 1,
                     "stock_dividend_per_share": 0.34,
                     "cash_dividend_per_share": 0.1,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -649,7 +592,6 @@ v1.0
                     "trading_fee_discount": 1,
                     "stock_dividend_per_share": 0.37,
                     "cash_dividend_per_share": 0.1,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -660,7 +602,6 @@ v1.0
                     "trading_fee_discount": 1,
                     "stock_dividend_per_share": 0.24,
                     "cash_dividend_per_share": 0.1,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -671,7 +612,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -682,7 +622,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -693,7 +632,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -704,7 +642,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -715,7 +652,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -726,7 +662,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -737,7 +672,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -748,7 +682,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -759,7 +692,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -770,7 +702,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -781,7 +712,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -792,7 +722,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -803,7 +732,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -814,7 +742,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -825,7 +752,6 @@ v1.0
                     "trading_fee_discount": 1,
                     "stock_dividend_per_share": 1.15,
                     "cash_dividend_per_share": 0.2,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -836,7 +762,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -847,7 +772,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -858,7 +782,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -869,7 +792,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -880,7 +802,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -891,7 +812,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -902,7 +822,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -913,7 +832,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -924,7 +842,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -935,7 +852,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -946,7 +862,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -957,7 +872,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 }
             ],
@@ -970,7 +884,6 @@ v1.0
                     "trading_fee_discount": 1,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0,
                     "use_auto_dividend_data": false
                 },
@@ -982,7 +895,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -993,7 +905,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1004,7 +915,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1015,7 +925,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1026,7 +935,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1037,7 +945,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1048,7 +955,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1059,7 +965,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1070,7 +975,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1081,7 +985,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1092,7 +995,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1103,7 +1005,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1114,7 +1015,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1125,7 +1025,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1136,7 +1035,6 @@ v1.0
                     "trading_fee_discount": 1,
                     "stock_dividend_per_share": 0.0,
                     "cash_dividend_per_share": 0.31,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1147,7 +1045,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1158,7 +1055,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1169,7 +1065,6 @@ v1.0
                     "trading_fee_discount": 1,
                     "stock_dividend_per_share": 0.0,
                     "cash_dividend_per_share": 0.335,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1180,7 +1075,6 @@ v1.0
                     "trading_fee_discount": 1,
                     "stock_dividend_per_share": 0.0,
                     "cash_dividend_per_share": 0.345,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1191,7 +1085,6 @@ v1.0
                     "trading_fee_discount": 1,
                     "stock_dividend_per_share": 0.0,
                     "cash_dividend_per_share": 0.34,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 }
             ],
@@ -1204,7 +1097,6 @@ v1.0
                     "trading_fee_discount": 1,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0,
                     "use_auto_dividend_data": true
                 },
@@ -1216,7 +1108,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1227,7 +1118,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1238,7 +1128,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1249,7 +1138,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1260,7 +1148,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1271,7 +1158,6 @@ v1.0
                     "trading_fee_discount": 1,
                     "stock_dividend_per_share": 0.9597,
                     "cash_dividend_per_share": 0.3031,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1282,7 +1168,6 @@ v1.0
                     "trading_fee_discount": 1,
                     "stock_dividend_per_share": 0.0,
                     "cash_dividend_per_share": 0.3,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1293,7 +1178,6 @@ v1.0
                     "trading_fee_discount": 1,
                     "stock_dividend_per_share": 1.0,
                     "cash_dividend_per_share": 1.0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1304,7 +1188,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1315,7 +1198,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1326,7 +1208,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1337,7 +1218,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1348,7 +1228,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1359,7 +1238,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1370,7 +1248,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1381,7 +1258,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1392,7 +1268,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1403,7 +1278,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1414,7 +1288,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1425,7 +1298,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1436,7 +1308,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1447,7 +1318,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1458,7 +1328,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1469,7 +1338,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 }
             ],
@@ -1482,7 +1350,6 @@ v1.0
                     "trading_fee_discount": 1,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0,
                     "use_auto_dividend_data": true
                 },
@@ -1494,7 +1361,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1505,7 +1371,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1516,7 +1381,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1527,7 +1391,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1538,7 +1401,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1549,7 +1411,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1560,7 +1421,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1571,7 +1431,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1582,7 +1441,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1593,7 +1451,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1604,7 +1461,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1615,7 +1471,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1626,7 +1481,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1637,7 +1491,6 @@ v1.0
                     "trading_fee_discount": 1,
                     "stock_dividend_per_share": 0.0,
                     "cash_dividend_per_share": 0.7,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1648,7 +1501,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1659,7 +1511,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1670,7 +1521,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1681,7 +1531,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1692,7 +1541,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1703,7 +1551,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 }
             ],
@@ -1716,7 +1563,6 @@ v1.0
                     "trading_fee_discount": 1,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0,
                     "use_auto_dividend_data": true
                 },
@@ -1728,7 +1574,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1739,7 +1584,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1750,7 +1594,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1761,7 +1604,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1772,7 +1614,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1783,7 +1624,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1794,7 +1634,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1805,7 +1644,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1816,7 +1654,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1827,7 +1664,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1838,7 +1674,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1849,7 +1684,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1860,7 +1694,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1871,7 +1704,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1882,7 +1714,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1893,7 +1724,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1904,7 +1734,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1915,7 +1744,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1926,7 +1754,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1937,7 +1764,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1948,7 +1774,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1959,7 +1784,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1970,7 +1794,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1981,7 +1804,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -1992,7 +1814,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -2003,7 +1824,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -2014,7 +1834,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -2025,7 +1844,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -2036,7 +1854,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -2047,7 +1864,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -2058,7 +1874,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -2069,7 +1884,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -2080,7 +1894,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -2091,7 +1904,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -2102,7 +1914,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -2113,7 +1924,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -2124,7 +1934,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 }
             ],
@@ -2137,7 +1946,6 @@ v1.0
                     "trading_fee_discount": 1,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0,
                     "use_auto_dividend_data": true
                 },
@@ -2149,7 +1957,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -2160,7 +1967,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -2171,7 +1977,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -2182,7 +1987,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -2193,7 +1997,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -2204,7 +2007,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -2215,7 +2017,6 @@ v1.0
                     "trading_fee_discount": 1,
                     "stock_dividend_per_share": 0.0,
                     "cash_dividend_per_share": 0.17,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -2226,7 +2027,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -2237,7 +2037,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -2248,7 +2047,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -2259,7 +2057,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -2270,7 +2067,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -2281,7 +2077,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -2292,7 +2087,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -2303,7 +2097,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -2314,7 +2107,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -2325,7 +2117,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -2336,7 +2127,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -2347,7 +2137,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -2358,7 +2147,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -2369,7 +2157,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -2380,7 +2167,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -2391,7 +2177,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -2402,7 +2187,6 @@ v1.0
                     "trading_fee_discount": 1,
                     "stock_dividend_per_share": 0.0,
                     "cash_dividend_per_share": 0.22,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -2413,7 +2197,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -2424,7 +2207,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 }
             ],
@@ -2437,7 +2219,6 @@ v1.0
                     "trading_fee_discount": 1,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0,
                     "use_auto_dividend_data": true
                 },
@@ -2449,14 +2230,13 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 }
             ]
         },
         "discount_checkbox": true,
         "discount_value": 6.0,
-        "insurance_checkbox": false
+        "insurance_checkbox": true
     },
     {
         "account_name": "維謙",
@@ -2470,7 +2250,6 @@ v1.0
                     "trading_fee_discount": 1,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0,
                     "use_auto_dividend_data": true
                 },
@@ -2482,7 +2261,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 }
             ],
@@ -2495,7 +2273,6 @@ v1.0
                     "trading_fee_discount": 1,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0,
                     "use_auto_dividend_data": true
                 },
@@ -2507,7 +2284,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 },
                 {
@@ -2518,7 +2294,6 @@ v1.0
                     "trading_fee_discount": 1,
                     "stock_dividend_per_share": 0.0,
                     "cash_dividend_per_share": 2.0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 }
             ],
@@ -2531,7 +2306,6 @@ v1.0
                     "trading_fee_discount": 1,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0,
                     "use_auto_dividend_data": true
                 },
@@ -2543,7 +2317,6 @@ v1.0
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
-                    "extra_insurance_fee": false,
                     "capital_reduction_per_share": 0
                 }
             ]
