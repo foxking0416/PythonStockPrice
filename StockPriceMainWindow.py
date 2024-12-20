@@ -521,7 +521,7 @@ class MainWindow( QMainWindow ):
         self.ui.qtExportAllStockTradingDataPushButton.clicked.connect( self.on_export_all_to_excell_button_clicked )
         self.ui.qtExportSelectedStockTradingDataPushButton.clicked.connect( self.on_export_selected_to_excell_button_clicked )
 
-        self.ui.qtActionExport.triggered.connect( self.on_export_trading_data_action_triggered )
+        self.ui.qtActionExport.triggered.connect( self.on_export_all_account_trading_data_action_triggered )
         self.ui.qtActionImport.triggered.connect( self.on_import_trading_data_action_triggered )
         
 
@@ -1112,7 +1112,7 @@ class MainWindow( QMainWindow ):
                 self.export_trading_data_to_excel( worksheet, key_stock_number, str_stock_name, value_list_trading_data )
             workbook.save( file_path )
 
-    def on_export_trading_data_action_triggered( self ): #done
+    def on_export_all_account_trading_data_action_triggered( self ): #done
         file_path = self.open_save_json_file_dialog()
         if file_path:
             self.manual_save_trading_data( self.dict_all_account_all_stock_trading_data, file_path )
