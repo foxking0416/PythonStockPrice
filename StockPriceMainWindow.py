@@ -102,28 +102,27 @@ class TradingType( IntEnum ):
     CAPITAL_REDUCTION = 4
 
 class TradingData( Enum ):
-    STOCK_NUMBER = 0
-    TRADING_DATE = 1
-    TRADING_TYPE = 2 # 0:賣出, 1:買進, 2:股利, 3:減資
-    TRADING_PRICE = 3
-    TRADING_COUNT = 4
-    TRADING_FEE_DISCOUNT = 5
-    STOCK_DIVIDEND_PER_SHARE = 6
-    CASH_DIVIDEND_PER_SHARE = 7
-    CAPITAL_REDUCTION_PER_SHARE = 8
-    USE_AUTO_DIVIDEND_DATA = 9
-    SORTED_INDEX_NON_SAVE = 10 #不會記錄
-    TRADING_VALUE_NON_SAVE = 11 #不會記錄
-    TRADING_FEE_NON_SAVE = 12 #不會記錄
-    TRADING_TAX_NON_SAVE = 13 #不會記錄
-    TRADING_COST_NON_SAVE = 14 #不會記錄
-    STOCK_DIVIDEND_GAIN_NON_SAVE = 15 #不會記錄
-    CASH_DIVIDEND_GAIN_NON_SAVE = 16 #不會記錄
-    EXTRA_INSURANCE_FEE_NON_SAVE = 17 #不會記錄
-    ACCUMULATED_COST_NON_SAVE = 18 #不會記錄
-    ACCUMULATED_INVENTORY_NON_SAVE = 19 #不會記錄
-    AVERAGE_COST_NON_SAVE = 20 #不會記錄
-    IS_AUTO_DIVIDEND_DATA_NON_SAVE = 21 #不會記錄
+    TRADING_DATE = 0
+    TRADING_TYPE = 1 # 0:賣出, 1:買進, 2:股利, 3:減資
+    TRADING_PRICE = 2
+    TRADING_COUNT = 3
+    TRADING_FEE_DISCOUNT = 4
+    STOCK_DIVIDEND_PER_SHARE = 5
+    CASH_DIVIDEND_PER_SHARE = 6
+    CAPITAL_REDUCTION_PER_SHARE = 7
+    USE_AUTO_DIVIDEND_DATA = 8
+    SORTED_INDEX_NON_SAVE = 9 #不會記錄
+    TRADING_VALUE_NON_SAVE = 10 #不會記錄
+    TRADING_FEE_NON_SAVE = 11 #不會記錄
+    TRADING_TAX_NON_SAVE = 12 #不會記錄
+    TRADING_COST_NON_SAVE = 13 #不會記錄
+    STOCK_DIVIDEND_GAIN_NON_SAVE = 14 #不會記錄
+    CASH_DIVIDEND_GAIN_NON_SAVE = 15 #不會記錄
+    EXTRA_INSURANCE_FEE_NON_SAVE = 16 #不會記錄
+    ACCUMULATED_COST_NON_SAVE = 17 #不會記錄
+    ACCUMULATED_INVENTORY_NON_SAVE = 18 #不會記錄
+    AVERAGE_COST_NON_SAVE = 19 #不會記錄
+    IS_AUTO_DIVIDEND_DATA_NON_SAVE = 20 #不會記錄
 
 class TradingCost( Enum ):
     TRADING_VALUE = 0
@@ -166,8 +165,7 @@ class Utility():
             dict_result[ TradingCost.TRADING_TOTAL_COST ] = 0
         return dict_result
 
-    def generate_trading_data( str_stock_number,            #股票代碼
-                               str_trading_date,            #交易日期
+    def generate_trading_data( str_trading_date,            #交易日期
                                e_trading_type,              #交易種類
                                f_trading_price,             #交易價格
                                n_trading_count,             #交易股數
@@ -176,7 +174,6 @@ class Utility():
                                f_cash_dividend_per_share,   #每股現金股利
                                f_capital_reduction_per_share ): #每股減資金額
         dict_trading_data = {}
-        dict_trading_data[ TradingData.STOCK_NUMBER ] = str_stock_number
         dict_trading_data[ TradingData.TRADING_DATE ] = str_trading_date
         dict_trading_data[ TradingData.TRADING_TYPE ] = e_trading_type
         dict_trading_data[ TradingData.TRADING_PRICE ] = f_trading_price
@@ -260,8 +257,7 @@ class StockCapitalReductionEditDialog( QDialog ):
         f_stock_capital_reduction_per_share = self.ui.qtCapitalReductionDoubleSpinBox.value()
         if f_stock_capital_reduction_per_share != 0:
 
-            self.dict_trading_data = Utility.generate_trading_data( self.ui.qtStockNumberLabel.text(),                  #股票代碼
-                                                                    self.ui.qtDateEdit.date().toString( "yyyy-MM-dd" ), #交易日期
+            self.dict_trading_data = Utility.generate_trading_data( self.ui.qtDateEdit.date().toString( "yyyy-MM-dd" ), #交易日期
                                                                     TradingType.CAPITAL_REDUCTION,                      #交易種類
                                                                     0,                                                  #交易價格                         
                                                                     0,                                                  #交易股數
@@ -308,8 +304,7 @@ class StockDividendEditDialog( QDialog ):
         f_cash_dividend_per_share = self.ui.qtCashDividendDoubleSpinBox.value()
         if f_stock_dividend_per_share != 0 or f_cash_dividend_per_share != 0:
 
-            self.dict_trading_data = Utility.generate_trading_data( self.ui.qtStockNumberLabel.text(),                  #股票代碼
-                                                                    self.ui.qtDateEdit.date().toString( "yyyy-MM-dd" ), #交易日期
+            self.dict_trading_data = Utility.generate_trading_data( self.ui.qtDateEdit.date().toString( "yyyy-MM-dd" ), #交易日期
                                                                     TradingType.DIVIDEND,                               #交易種類
                                                                     0,                                                  #交易價格                         
                                                                     0,                                                  #交易股數
@@ -401,8 +396,7 @@ class StockTradingEditDialog( QDialog ):
 
         if float( self.ui.qtTotalCostLineEdit.text().replace( ',', '' ) ) != 0:
             
-            self.dict_trading_data = Utility.generate_trading_data( self.ui.qtStockNumberLabel.text(),                  #股票代碼
-                                                                    self.ui.qtDateEdit.date().toString( "yyyy-MM-dd" ), #交易日期
+            self.dict_trading_data = Utility.generate_trading_data( self.ui.qtDateEdit.date().toString( "yyyy-MM-dd" ), #交易日期
                                                                     self.get_trading_type(),                            #交易種類
                                                                     self.ui.qtPriceDoubleSpinBox.value(),               #交易價格
                                                                     self.get_trading_count(),                           #交易股數
@@ -740,8 +734,7 @@ class MainWindow( QMainWindow ):
                 return
         
         if str_first_four_chars not in self.dict_all_account_all_stock_trading_data:
-            dict_trading_data = Utility.generate_trading_data( str_first_four_chars, #股票代碼
-                                                               "0001-01-01",         #交易日期
+            dict_trading_data = Utility.generate_trading_data( "0001-01-01",         #交易日期
                                                                TradingType.TEMPLATE, #交易種類
                                                                0,                    #交易價格
                                                                0,                    #交易股數
@@ -1557,8 +1550,7 @@ class MainWindow( QMainWindow ):
                              "cash_dividend_per_share" in item_trading_data and
                              "capital_reduction_per_share" in item_trading_data ):
 
-                            dict_per_trading_data = Utility.generate_trading_data( '1101',                 #股票代碼
-                                                                                   item_trading_data[ "trading_date" ],                 #交易日期
+                            dict_per_trading_data = Utility.generate_trading_data( item_trading_data[ "trading_date" ],                 #交易日期
                                                                                    TradingType( item_trading_data[ "trading_type" ] ),  #交易種類
                                                                                    item_trading_data[ "trading_price" ],                #交易價格
                                                                                    item_trading_data[ "trading_count" ],                #交易股數
@@ -2371,8 +2363,7 @@ class MainWindow( QMainWindow ):
                         pass
                     
                     if str_year_month_date != '':
-                        dict_dividend_data = Utility.generate_trading_data( item[0],                    #股票代碼
-                                                                            str_year_month_date,        #交易日期
+                        dict_dividend_data = Utility.generate_trading_data( str_year_month_date,        #交易日期
                                                                             TradingType.DIVIDEND,       #交易種類
                                                                             0,                          #交易價格                         
                                                                             0,                          #交易股數
