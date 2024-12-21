@@ -51,7 +51,7 @@ print( "g_abs_dir :" + g_abs_dir ) #開發模式下是D:\_2.code\PythonStockPric
 
 
 
-g_list_stock_list_table_horizontal_header = [ '自動帶入股利', '總成本', '庫存股數', '平均成本', '今日股價', '淨值', '損益', '匯出', '刪除' ]
+g_list_stock_list_table_horizontal_header = [ '自動帶入股利', '總成本', '庫存股數', '平均成本', '今日股價', '淨值', '總手續費', '總交易稅', '損益', '匯出', '刪除' ]
 if getattr( sys, 'frozen', False ):
     # PyInstaller 打包後執行時
     g_exe_root_dir = os.path.dirname(__file__) #C:\Users\foxki\AppData\Local\Temp\_MEI60962
@@ -1725,13 +1725,20 @@ class MainWindow( QMainWindow ):
             
             with QSignalBlocker( table_view.horizontalHeader() ):
                 list_vertical_labels = []
-                for index_row,( key_stock_number, value ) in enumerate( dict_per_account_all_stock_trading_data.items() ):
+                for index_row,( key_stock_number, value_list_stock_trading_data ) in enumerate( dict_per_account_all_stock_trading_data.items() ):
                     list_stock_name_and_type = self.dict_all_company_number_to_name_and_type[ key_stock_number ]
                     str_stock_name = list_stock_name_and_type[ 0 ]
                     list_vertical_labels.append( f"{key_stock_number} {str_stock_name}" )
+                    n_total_trading_fee = 0
+                    n_total_trading_tax = 0
+                    for index, item_trading_data in enumerate( value_list_stock_trading_data ):
+                        if index == 0:
+                            continue
+                        n_total_trading_fee += item_trading_data[ TradingData.TRADING_FEE_NON_SAVE ]
+                        n_total_trading_tax += item_trading_data[ TradingData.TRADING_TAX_NON_SAVE ]
 
-                    dict_trading_data_first = value[ 0 ] #取第一筆交易資料，因為第一筆交易資料有存是否使用自動帶入股利
-                    dict_trading_data_last = value[ len( value ) - 1 ] #取最後一筆交易資料，因為最後一筆交易資料的庫存等內容才是所有累計的結果
+                    dict_trading_data_first = value_list_stock_trading_data[ 0 ] #取第一筆交易資料，因為第一筆交易資料有存是否使用自動帶入股利
+                    dict_trading_data_last = value_list_stock_trading_data[ len( value_list_stock_trading_data ) - 1 ] #取最後一筆交易資料，因為最後一筆交易資料的庫存等內容才是所有累計的結果
                     n_accumulated_cost = dict_trading_data_last[ TradingData.ACCUMULATED_COST_NON_SAVE ]
                     n_accumulated_inventory = dict_trading_data_last[ TradingData.ACCUMULATED_INVENTORY_NON_SAVE ]
                     f_average_cost = round( dict_trading_data_last[ TradingData.AVERAGE_COST_NON_SAVE ], 3 )
@@ -1774,7 +1781,9 @@ class MainWindow( QMainWindow ):
                                   format( f_average_cost, "," ),          #平均成本
                                   str_stock_price,                        #當前股價
                                   str_net_value,                          #淨值
-                                  str_profit  ]                           #損益
+                                  format( n_total_trading_fee, ","),      #總手續費
+                                  format( n_total_trading_tax, ","),      #總交易稅
+                                  str_profit ]                            #損益
                                     
                     for column, data in enumerate( list_data ):
                         standard_item = QStandardItem( data )
