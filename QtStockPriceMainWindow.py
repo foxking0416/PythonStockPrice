@@ -25,7 +25,7 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(938, 893)
+        MainWindow.resize(1116, 893)
         self.qtActionImport = QAction(MainWindow)
         self.qtActionImport.setObjectName(u"qtActionImport")
         self.qtActionExportAllAccount = QAction(MainWindow)
@@ -188,7 +188,7 @@ class Ui_MainWindow(object):
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
-        self.menubar.setGeometry(QRect(0, 0, 938, 21))
+        self.menubar.setGeometry(QRect(0, 0, 1116, 21))
         self.menu = QMenu(self.menubar)
         self.menu.setObjectName(u"menu")
         MainWindow.setMenuBar(self.menubar)

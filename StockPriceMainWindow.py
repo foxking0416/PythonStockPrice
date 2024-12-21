@@ -604,7 +604,10 @@ class MainWindow( QMainWindow ):
         self.str_picked_stock_number = None
         self.dict_all_account_ui_state = {}
         self.dict_all_account_all_stock_trading_data = {}
-        self.list_stock_list_column_width = []
+        self.list_stock_list_column_width = [ 100 ] * len( g_list_stock_list_table_horizontal_header )
+        # self.list_stock_list_column_width[ 0 ] = 40
+        self.list_stock_list_column_width[ len( g_list_stock_list_table_horizontal_header ) - 2 ] = 40
+        self.list_stock_list_column_width[ len( g_list_stock_list_table_horizontal_header ) - 1 ] = 40
         self.n_current_tab = 0
         self.n_tab_index = 0
         
