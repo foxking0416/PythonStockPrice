@@ -697,8 +697,9 @@ class MainWindow( QMainWindow ):
         if not str_tab_title:
             str_tab_title = "新群組"
         with QSignalBlocker( self.ui.qtTabWidget ):
-            self.ui.qtTabWidget.insertTab( self.n_tab_index, increased_tab, str_tab_title )
-            self.ui.qtTabWidget.setCurrentIndex( self.n_tab_index )
+            n_ori_count = self.ui.qtTabWidget.count()
+            self.ui.qtTabWidget.insertTab( n_ori_count - 1, increased_tab, str_tab_title )
+            self.ui.qtTabWidget.setCurrentIndex( n_ori_count - 1 )
         self.n_tab_index += 1
         return str_tab_name
 
@@ -1243,10 +1244,13 @@ class MainWindow( QMainWindow ):
                     if dialog.b_overwrite:
                         for str_account_name, dict_per_account_all_stock_trading_data_LOAD in dict_all_account_all_stock_trading_data_LOAD.items():
                             if str_account_name in dict_account_to_tab_widget_name:
+                                str_tab_widget_name = dict_account_to_tab_widget_name[ str_account_name ]
                                 self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ] = dict_per_account_all_stock_trading_data_LOAD
                             else:
                                 str_tab_widget_name = self.add_new_tab_and_table( str_account_name )
                                 self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ] = dict_per_account_all_stock_trading_data_LOAD
+                                dict_per_account_ui_state_LOAD = dict_all_account_ui_state_LOAD[ str_account_name ]
+                                self.dict_all_account_ui_state[ str_tab_widget_name ] = dict_per_account_ui_state_LOAD
                     else:
                         for str_account_name, dict_per_account_all_stock_trading_data_LOAD in dict_all_account_all_stock_trading_data_LOAD.items():
                             if str_account_name in dict_account_to_tab_widget_name:
@@ -1255,6 +1259,8 @@ class MainWindow( QMainWindow ):
                             else:
                                 str_tab_widget_name = self.add_new_tab_and_table( str_account_name )
                                 self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ] = dict_per_account_all_stock_trading_data_LOAD
+                                dict_per_account_ui_state_LOAD = dict_all_account_ui_state_LOAD[ str_account_name ]
+                                self.dict_all_account_ui_state[ str_tab_widget_name ] = dict_per_account_ui_state_LOAD
             else:
                 for str_account_name, dict_per_account_all_stock_trading_data_LOAD in dict_all_account_all_stock_trading_data_LOAD.items():
                     if str_account_name in dict_account_to_tab_widget_name:
@@ -1263,6 +1269,8 @@ class MainWindow( QMainWindow ):
                     else:
                         str_tab_widget_name = self.add_new_tab_and_table( str_account_name )
                         self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ] = dict_per_account_all_stock_trading_data_LOAD
+                        dict_per_account_ui_state_LOAD = dict_all_account_ui_state_LOAD[ str_account_name ]
+                        self.dict_all_account_ui_state[ str_tab_widget_name ] = dict_per_account_ui_state_LOAD
 
             self.process_all_trading_data()
             self.str_picked_stock_number = None
