@@ -1245,24 +1245,24 @@ class MainWindow( QMainWindow ):
                             if str_account_name in dict_account_to_tab_widget_name:
                                 self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ] = dict_per_account_all_stock_trading_data_LOAD
                             else:
-                                str_tab_name = self.add_new_tab_and_table( str_account_name )
-                                self.dict_all_account_all_stock_trading_data[ str_tab_name ] = dict_per_account_all_stock_trading_data_LOAD
+                                str_tab_widget_name = self.add_new_tab_and_table( str_account_name )
+                                self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ] = dict_per_account_all_stock_trading_data_LOAD
                     else:
                         for str_account_name, dict_per_account_all_stock_trading_data_LOAD in dict_all_account_all_stock_trading_data_LOAD.items():
                             if str_account_name in dict_account_to_tab_widget_name:
                                 str_tab_widget_name = dict_account_to_tab_widget_name[ str_account_name ]
                                 self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ].update( dict_per_account_all_stock_trading_data_LOAD )
                             else:
-                                str_tab_name = self.add_new_tab_and_table( str_account_name )
-                                self.dict_all_account_all_stock_trading_data[ str_tab_name ] = dict_per_account_all_stock_trading_data_LOAD
+                                str_tab_widget_name = self.add_new_tab_and_table( str_account_name )
+                                self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ] = dict_per_account_all_stock_trading_data_LOAD
             else:
                 for str_account_name, dict_per_account_all_stock_trading_data_LOAD in dict_all_account_all_stock_trading_data_LOAD.items():
                     if str_account_name in dict_account_to_tab_widget_name:
                         str_tab_widget_name = dict_account_to_tab_widget_name[ str_account_name ]
                         self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ].update( dict_per_account_all_stock_trading_data_LOAD )
                     else:
-                        str_tab_name = self.add_new_tab_and_table( str_account_name )
-                        self.dict_all_account_all_stock_trading_data[ str_tab_name ] = dict_per_account_all_stock_trading_data_LOAD
+                        str_tab_widget_name = self.add_new_tab_and_table( str_account_name )
+                        self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ] = dict_per_account_all_stock_trading_data_LOAD
 
             self.process_all_trading_data()
             self.str_picked_stock_number = None
