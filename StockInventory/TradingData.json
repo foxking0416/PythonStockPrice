@@ -37,7 +37,7 @@ v1.0.0
                 },
                 {
                     "trading_date": "2024-09-06",
-                    "trading_type": 3,
+                    "trading_type": 4,
                     "trading_price": 0,
                     "trading_count": 0,
                     "trading_fee_discount": 1,
@@ -70,7 +70,7 @@ v1.0.0
                 },
                 {
                     "trading_date": "2024-07-09",
-                    "trading_type": 3,
+                    "trading_type": 4,
                     "trading_price": 0,
                     "trading_count": 0,
                     "trading_fee_discount": 1,
@@ -303,7 +303,7 @@ v1.0.0
                 },
                 {
                     "trading_date": "2019-08-14",
-                    "trading_type": 3,
+                    "trading_type": 4,
                     "trading_price": 0,
                     "trading_count": 0,
                     "trading_fee_discount": 1,
@@ -313,7 +313,7 @@ v1.0.0
                 },
                 {
                     "trading_date": "2020-07-30",
-                    "trading_type": 3,
+                    "trading_type": 4,
                     "trading_price": 0,
                     "trading_count": 0,
                     "trading_fee_discount": 1,
@@ -323,7 +323,7 @@ v1.0.0
                 },
                 {
                     "trading_date": "2021-07-30",
-                    "trading_type": 3,
+                    "trading_type": 4,
                     "trading_price": 0,
                     "trading_count": 0,
                     "trading_fee_discount": 1,
@@ -333,7 +333,7 @@ v1.0.0
                 },
                 {
                     "trading_date": "2022-05-13",
-                    "trading_type": 3,
+                    "trading_type": 4,
                     "trading_price": 0,
                     "trading_count": 0,
                     "trading_fee_discount": 1,
@@ -343,7 +343,7 @@ v1.0.0
                 },
                 {
                     "trading_date": "2023-04-20",
-                    "trading_type": 3,
+                    "trading_type": 4,
                     "trading_price": 0,
                     "trading_count": 0,
                     "trading_fee_discount": 1,
@@ -393,7 +393,7 @@ v1.0.0
                 },
                 {
                     "trading_date": "2023-10-30",
-                    "trading_type": 4,
+                    "trading_type": 5,
                     "trading_price": 0,
                     "trading_count": 0,
                     "trading_fee_discount": 1,
@@ -403,7 +403,7 @@ v1.0.0
                 },
                 {
                     "trading_date": "2024-04-11",
-                    "trading_type": 3,
+                    "trading_type": 4,
                     "trading_price": 0,
                     "trading_count": 0,
                     "trading_fee_discount": 1,
@@ -536,7 +536,7 @@ v1.0.0
                 },
                 {
                     "trading_date": "2019-09-19",
-                    "trading_type": 3,
+                    "trading_type": 4,
                     "trading_price": 0,
                     "trading_count": 0,
                     "trading_fee_discount": 1,
@@ -546,7 +546,7 @@ v1.0.0
                 },
                 {
                     "trading_date": "2020-07-22",
-                    "trading_type": 3,
+                    "trading_type": 4,
                     "trading_price": 0,
                     "trading_count": 0,
                     "trading_fee_discount": 1,
@@ -576,7 +576,7 @@ v1.0.0
                 },
                 {
                     "trading_date": "2021-09-08",
-                    "trading_type": 3,
+                    "trading_type": 4,
                     "trading_price": 0,
                     "trading_count": 0,
                     "trading_fee_discount": 1,
@@ -586,7 +586,7 @@ v1.0.0
                 },
                 {
                     "trading_date": "2022-08-02",
-                    "trading_type": 3,
+                    "trading_type": 4,
                     "trading_price": 0,
                     "trading_count": 0,
                     "trading_fee_discount": 1,
@@ -596,7 +596,7 @@ v1.0.0
                 },
                 {
                     "trading_date": "2023-08-31",
-                    "trading_type": 3,
+                    "trading_type": 4,
                     "trading_price": 0,
                     "trading_count": 0,
                     "trading_fee_discount": 1,
@@ -746,7 +746,7 @@ v1.0.0
                 },
                 {
                     "trading_date": "2024-08-08",
-                    "trading_type": 3,
+                    "trading_type": 4,
                     "trading_price": 0,
                     "trading_count": 0,
                     "trading_fee_discount": 1,
@@ -1029,7 +1029,7 @@ v1.0.0
                 },
                 {
                     "trading_date": "2024-02-27",
-                    "trading_type": 3,
+                    "trading_type": 4,
                     "trading_price": 0,
                     "trading_count": 0,
                     "trading_fee_discount": 1,
@@ -1059,7 +1059,7 @@ v1.0.0
                 },
                 {
                     "trading_date": "2024-05-17",
-                    "trading_type": 3,
+                    "trading_type": 4,
                     "trading_price": 0,
                     "trading_count": 0,
                     "trading_fee_discount": 1,
@@ -1069,7 +1069,7 @@ v1.0.0
                 },
                 {
                     "trading_date": "2024-08-16",
-                    "trading_type": 3,
+                    "trading_type": 4,
                     "trading_price": 0,
                     "trading_count": 0,
                     "trading_fee_discount": 1,
@@ -1079,7 +1079,7 @@ v1.0.0
                 },
                 {
                     "trading_date": "2024-11-18",
-                    "trading_type": 3,
+                    "trading_type": 4,
                     "trading_price": 0,
                     "trading_count": 0,
                     "trading_fee_discount": 1,
@@ -1152,7 +1152,7 @@ v1.0.0
                 },
                 {
                     "trading_date": "2020-08-28",
-                    "trading_type": 3,
+                    "trading_type": 4,
                     "trading_price": 0,
                     "trading_count": 0,
                     "trading_fee_discount": 1,
@@ -1162,7 +1162,7 @@ v1.0.0
                 },
                 {
                     "trading_date": "2021-08-26",
-                    "trading_type": 3,
+                    "trading_type": 4,
                     "trading_price": 0,
                     "trading_count": 0,
                     "trading_fee_discount": 1,
@@ -1172,7 +1172,7 @@ v1.0.0
                 },
                 {
                     "trading_date": "2022-09-05",
-                    "trading_type": 3,
+                    "trading_type": 4,
                     "trading_price": 0,
                     "trading_count": 0,
                     "trading_fee_discount": 1,
@@ -1485,7 +1485,7 @@ v1.0.0
                 },
                 {
                     "trading_date": "2019-08-22",
-                    "trading_type": 3,
+                    "trading_type": 4,
                     "trading_price": 0,
                     "trading_count": 0,
                     "trading_fee_discount": 1,
@@ -2011,7 +2011,7 @@ v1.0.0
                 },
                 {
                     "trading_date": "2023-06-16",
-                    "trading_type": 3,
+                    "trading_type": 4,
                     "trading_price": 0,
                     "trading_count": 0,
                     "trading_fee_discount": 1,
@@ -2181,7 +2181,7 @@ v1.0.0
                 },
                 {
                     "trading_date": "2024-06-20",
-                    "trading_type": 3,
+                    "trading_type": 4,
                     "trading_price": 0,
                     "trading_count": 0,
                     "trading_fee_discount": 1,
@@ -2236,93 +2236,6 @@ v1.0.0
         },
         "discount_checkbox": true,
         "discount_value": 0.45,
-        "insurance_checkbox": false
-    },
-    {
-        "account_name": "維謙",
-        "trading_data": {
-            "1216": [
-                {
-                    "trading_date": "0001-01-01",
-                    "trading_type": 0,
-                    "trading_price": 0,
-                    "trading_count": 0,
-                    "trading_fee_discount": 1,
-                    "stock_dividend_per_share": 0,
-                    "cash_dividend_per_share": 0,
-                    "capital_reduction_per_share": 0,
-                    "use_auto_dividend_data": true
-                },
-                {
-                    "trading_date": "2023-10-31",
-                    "trading_type": 2,
-                    "trading_price": 67.9,
-                    "trading_count": 10000,
-                    "trading_fee_discount": 0.45,
-                    "stock_dividend_per_share": 0,
-                    "cash_dividend_per_share": 0,
-                    "capital_reduction_per_share": 0
-                }
-            ],
-            "6505": [
-                {
-                    "trading_date": "0001-01-01",
-                    "trading_type": 0,
-                    "trading_price": 0,
-                    "trading_count": 0,
-                    "trading_fee_discount": 1,
-                    "stock_dividend_per_share": 0,
-                    "cash_dividend_per_share": 0,
-                    "capital_reduction_per_share": 0,
-                    "use_auto_dividend_data": true
-                },
-                {
-                    "trading_date": "2024-06-19",
-                    "trading_type": 2,
-                    "trading_price": 64.8,
-                    "trading_count": 20000,
-                    "trading_fee_discount": 0.45,
-                    "stock_dividend_per_share": 0,
-                    "cash_dividend_per_share": 0,
-                    "capital_reduction_per_share": 0
-                },
-                {
-                    "trading_date": "2024-07-09",
-                    "trading_type": 3,
-                    "trading_price": 0,
-                    "trading_count": 0,
-                    "trading_fee_discount": 1,
-                    "stock_dividend_per_share": 0.0,
-                    "cash_dividend_per_share": 2.0,
-                    "capital_reduction_per_share": 0
-                }
-            ],
-            "2535": [
-                {
-                    "trading_date": "0001-01-01",
-                    "trading_type": 0,
-                    "trading_price": 0,
-                    "trading_count": 0,
-                    "trading_fee_discount": 1,
-                    "stock_dividend_per_share": 0,
-                    "cash_dividend_per_share": 0,
-                    "capital_reduction_per_share": 0,
-                    "use_auto_dividend_data": true
-                },
-                {
-                    "trading_date": "2018-10-03",
-                    "trading_type": 2,
-                    "trading_price": 21.05,
-                    "trading_count": 25000,
-                    "trading_fee_discount": 0.45,
-                    "stock_dividend_per_share": 0,
-                    "cash_dividend_per_share": 0,
-                    "capital_reduction_per_share": 0
-                }
-            ]
-        },
-        "discount_checkbox": false,
-        "discount_value": 0.6,
         "insurance_checkbox": false
     }
 ]
