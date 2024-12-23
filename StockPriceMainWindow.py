@@ -62,7 +62,7 @@ print( "g_abs_dir :" + g_abs_dir ) #開發模式下是D:\_2.code\PythonStockPric
 
 
 
-g_list_stock_list_table_horizontal_header = [ '自動帶入股利', '總成本', '庫存股數', '平均成本', '今日股價', '淨值', '總手續費', '總交易稅', '損益', '匯出', '刪除' ]
+g_list_stock_list_table_horizontal_header = [ '自動帶入股利', '總成本', '庫存股數', '平均成本', '今日股價', '淨值', '總手續費', '總交易稅', '損益', '股利所得', '匯出', '刪除' ]
 if getattr( sys, 'frozen', False ):
     # PyInstaller 打包後執行時
     g_exe_root_dir = os.path.dirname(__file__) #C:\Users\foxki\AppData\Local\Temp\_MEI60962
@@ -140,6 +140,8 @@ class TradingData( Enum ):
     ACCUMULATED_INVENTORY_NON_SAVE = 18 #不會記錄
     AVERAGE_COST_NON_SAVE = 19 #不會記錄
     IS_AUTO_DIVIDEND_DATA_NON_SAVE = 20 #不會記錄
+    ALL_STOCK_DIVIDEND_GAIN_NON_SAVE = 21 #不會記錄
+    ALL_CASH_DIVIDEND_GAIN_NON_SAVE = 22 #不會記錄
 
 class TradingCost( Enum ):
     TRADING_VALUE = 0
@@ -1453,6 +1455,8 @@ class MainWindow( QMainWindow ):
 
         n_accumulated_inventory = 0
         n_accumulated_cost = 0
+        n_accumulated_stock_dividend = 0
+        n_accumulated_cash_dividend = 0
         str_last_buying_date = ''
         n_last_buying_count = 0
         list_calibration_data = [] #因為若是已經沒有庫存股票，那麼股利分配或是減資的資料就不會被計算
@@ -1584,10 +1588,13 @@ class MainWindow( QMainWindow ):
                             n_extra_insurance_fee = 0
                         item[ TradingData.EXTRA_INSURANCE_FEE_NON_SAVE ] = n_extra_insurance_fee
                         n_accumulated_cost = n_accumulated_cost - n_cash_dividend_gain + 10 + n_extra_insurance_fee
+                        n_accumulated_cash_dividend = n_accumulated_cash_dividend + n_cash_dividend_gain - 10 - n_extra_insurance_fee #要想一下要不要扣掉手續費
                     else:
                         item[ TradingData.CASH_DIVIDEND_GAIN_NON_SAVE ] = 0
                         item[ TradingData.TRADING_FEE_NON_SAVE ] = 0
                         item[ TradingData.EXTRA_INSURANCE_FEE_NON_SAVE ] = 0 
+                    n_accumulated_stock_dividend += n_stock_dividend_gain
+
                     list_calibration_data.append( item )
             elif e_trading_type == TradingType.CAPITAL_REDUCTION:
                 if n_accumulated_inventory > 0: #沒有庫存就不用算減資了
@@ -1606,6 +1613,8 @@ class MainWindow( QMainWindow ):
             item[ TradingData.ACCUMULATED_COST_NON_SAVE ] = n_accumulated_cost
             item[ TradingData.ACCUMULATED_INVENTORY_NON_SAVE ] = n_accumulated_inventory
             item[ TradingData.AVERAGE_COST_NON_SAVE ] = n_accumulated_cost / n_accumulated_inventory if n_accumulated_inventory != 0 else 0
+            item[ TradingData.ALL_STOCK_DIVIDEND_GAIN_NON_SAVE ] = n_accumulated_stock_dividend
+            item[ TradingData.ALL_CASH_DIVIDEND_GAIN_NON_SAVE ] = n_accumulated_cash_dividend
 
         self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ][ str_stock_number ] = list_calibration_data
         return list_calibration_data
@@ -1765,6 +1774,8 @@ class MainWindow( QMainWindow ):
                     n_accumulated_cost = dict_trading_data_last[ TradingData.ACCUMULATED_COST_NON_SAVE ]
                     n_accumulated_inventory = dict_trading_data_last[ TradingData.ACCUMULATED_INVENTORY_NON_SAVE ]
                     f_average_cost = round( dict_trading_data_last[ TradingData.AVERAGE_COST_NON_SAVE ], 3 )
+                    n_accumulated_stock_dividend = dict_trading_data_last[ TradingData.ALL_STOCK_DIVIDEND_GAIN_NON_SAVE ]
+                    n_accumulated_cash_dividend = dict_trading_data_last[ TradingData.ALL_CASH_DIVIDEND_GAIN_NON_SAVE ]
 
                     if key_stock_number in self.dict_all_company_number_to_price_info:
                         try:
@@ -1773,6 +1784,7 @@ class MainWindow( QMainWindow ):
                             n_net_value = int( n_accumulated_inventory * f_stock_price )
                             str_net_value = format( n_net_value, "," )
                             n_profit = n_net_value - n_accumulated_cost
+                            n_accumulated_dividend_profit = n_accumulated_stock_dividend * f_stock_price + n_accumulated_cash_dividend
                             str_profit = format( n_profit, "," )
                             if n_profit > 0:
                                 str_color = QBrush( '#FF0000' )
@@ -1806,13 +1818,14 @@ class MainWindow( QMainWindow ):
                                   str_net_value,                          #淨值
                                   format( n_total_trading_fee, ","),      #總手續費
                                   format( n_total_trading_tax, ","),      #總交易稅
-                                  str_profit ]                            #損益
+                                  str_profit,                             #損益
+                                  format( n_accumulated_dividend_profit, ",") ] #股利所得
                                     
                     for column, data in enumerate( list_data ):
                         standard_item = QStandardItem( data )
                         standard_item.setTextAlignment( Qt.AlignHCenter | Qt.AlignVCenter )
                         standard_item.setFlags( standard_item.flags() & ~Qt.ItemIsEditable )
-                        if column == len( list_data ) - 1:
+                        if column == len( list_data ) - 2:
                             standard_item.setForeground( QBrush( str_color ) )
                         table_model.setItem( index_row, column + 1, standard_item ) 
 
