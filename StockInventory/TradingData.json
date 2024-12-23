@@ -2274,6 +2274,16 @@ v1.0.0
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
                     "capital_reduction_per_share": 0
+                },
+                {
+                    "trading_date": "2023-06-27",
+                    "trading_type": 1,
+                    "trading_price": 110.5,
+                    "trading_count": 361,
+                    "trading_fee_discount": 0.45,
+                    "stock_dividend_per_share": 0,
+                    "cash_dividend_per_share": 0,
+                    "capital_reduction_per_share": 0
                 }
             ],
             "0050": [
