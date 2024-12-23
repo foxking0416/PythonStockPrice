@@ -2195,7 +2195,9 @@ class MainWindow( QMainWindow ):
                                               data[ 5 ] == 'CEOGBU' or
                                               data[ 5 ] == 'CEOGEU' or 
                                               data[ 5 ] == 'CEOJBU' or 
-                                              data[ 5 ] == 'CEOIBU' ): 
+                                              data[ 5 ] == 'CEOIBU' or
+                                              data[ 5 ] == 'CEOIEU' or
+                                              data[ 5 ] == 'CEOIRU' ): 
                         b_ETF = False if data[ 5 ] == 'ESVUFR' else True
                         total_company_count += 1
                         if '\u3000' in data[ 0 ]:
