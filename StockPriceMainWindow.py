@@ -1373,7 +1373,7 @@ class MainWindow( QMainWindow ):
             return False
 
     def update_button_enable_disable_status( self ): 
-        if self.str_picked_stock_number is None:
+        if self.str_picked_stock_number is None or self.ui.qtTabWidget.currentWidget().objectName() not in self.dict_all_account_all_stock_trading_data:
             self.ui.qtAddTradingDataPushButton.setEnabled( False )
             self.ui.qtAddDividendDataPushButton.setEnabled( False )
             self.ui.qtAddCapitalReductionDataPushButton.setEnabled( False )
@@ -1384,6 +1384,7 @@ class MainWindow( QMainWindow ):
             self.ui.qtAddCapitalReductionDataPushButton.setEnabled( True )
             self.ui.qtExportSelectedStockTradingDataPushButton.setEnabled( True )
             str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
+
             dict_per_account_all_stock_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ]
             if self.str_picked_stock_number in dict_per_account_all_stock_trading_data:
                 list_trading_data = dict_per_account_all_stock_trading_data[ self.str_picked_stock_number ]
