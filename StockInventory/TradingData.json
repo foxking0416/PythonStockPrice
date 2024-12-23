@@ -1199,6 +1199,36 @@ v1.0.0
                     "stock_dividend_per_share": 0,
                     "cash_dividend_per_share": 0,
                     "capital_reduction_per_share": 0
+                },
+                {
+                    "trading_date": "2024-12-17",
+                    "trading_type": 2,
+                    "trading_price": 14.95,
+                    "trading_count": 50000,
+                    "trading_fee_discount": 0.45,
+                    "stock_dividend_per_share": 0,
+                    "cash_dividend_per_share": 0,
+                    "capital_reduction_per_share": 0
+                },
+                {
+                    "trading_date": "2024-12-17",
+                    "trading_type": 2,
+                    "trading_price": 14.9,
+                    "trading_count": 100000,
+                    "trading_fee_discount": 0.45,
+                    "stock_dividend_per_share": 0,
+                    "cash_dividend_per_share": 0,
+                    "capital_reduction_per_share": 0
+                },
+                {
+                    "trading_date": "2024-12-17",
+                    "trading_type": 2,
+                    "trading_price": 14.85,
+                    "trading_count": 100000,
+                    "trading_fee_discount": 0.45,
+                    "stock_dividend_per_share": 0,
+                    "cash_dividend_per_share": 0,
+                    "capital_reduction_per_share": 0
                 }
             ],
             "2884": [
