@@ -1950,6 +1950,79 @@ v1.0.0
                     "capital_reduction_per_share": 0
                 }
             ],
+            "5864": [
+                {
+                    "trading_date": "0001-01-01",
+                    "trading_type": 0,
+                    "trading_price": 0,
+                    "trading_count": 0,
+                    "trading_fee_discount": 1,
+                    "stock_dividend_per_share": 0,
+                    "cash_dividend_per_share": 0,
+                    "capital_reduction_per_share": 0,
+                    "use_auto_dividend_data": true
+                },
+                {
+                    "trading_date": "2023-07-13",
+                    "trading_type": 2,
+                    "trading_price": 25.6,
+                    "trading_count": 20000,
+                    "trading_fee_discount": 0.45,
+                    "stock_dividend_per_share": 0,
+                    "cash_dividend_per_share": 0,
+                    "capital_reduction_per_share": 0
+                },
+                {
+                    "trading_date": "2023-07-13",
+                    "trading_type": 2,
+                    "trading_price": 25.5,
+                    "trading_count": 50000,
+                    "trading_fee_discount": 0.45,
+                    "stock_dividend_per_share": 0,
+                    "cash_dividend_per_share": 0,
+                    "capital_reduction_per_share": 0
+                },
+                {
+                    "trading_date": "2023-07-13",
+                    "trading_type": 2,
+                    "trading_price": 25.4,
+                    "trading_count": 30000,
+                    "trading_fee_discount": 0.45,
+                    "stock_dividend_per_share": 0,
+                    "cash_dividend_per_share": 0,
+                    "capital_reduction_per_share": 0
+                },
+                {
+                    "trading_date": "2023-07-13",
+                    "trading_type": 2,
+                    "trading_price": 25.25,
+                    "trading_count": 50000,
+                    "trading_fee_discount": 0.45,
+                    "stock_dividend_per_share": 0,
+                    "cash_dividend_per_share": 0,
+                    "capital_reduction_per_share": 0
+                },
+                {
+                    "trading_date": "2023-11-30",
+                    "trading_type": 3,
+                    "trading_price": 12.9,
+                    "trading_count": 15000,
+                    "trading_fee_discount": 1,
+                    "stock_dividend_per_share": 0,
+                    "cash_dividend_per_share": 0,
+                    "capital_reduction_per_share": 0
+                },
+                {
+                    "trading_date": "2024-10-23",
+                    "trading_type": 3,
+                    "trading_price": 13.8,
+                    "trading_count": 32694,
+                    "trading_fee_discount": 1,
+                    "stock_dividend_per_share": 0,
+                    "cash_dividend_per_share": 0,
+                    "capital_reduction_per_share": 0
+                }
+            ],
             "5706": [
                 {
                     "trading_date": "0001-01-01",
