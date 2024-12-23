@@ -662,16 +662,26 @@ class MainWindow( QMainWindow ):
         uiqt_add_stock_push_button.setText( "新增股票" )
         uiqt_horizontal_layout_1.addWidget( uiqt_add_stock_push_button )
 
-        uiqt_horizontal_spacer_1_1 = QSpacerItem( 40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum )
+        uiqt_horizontal_spacer_1_1 = QSpacerItem( 40, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum )
         uiqt_horizontal_layout_1.addItem( uiqt_horizontal_spacer_1_1 )
-
-        uiqt_horizontal_spacer_1_2 = QSpacerItem( 40, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum )
-        uiqt_horizontal_layout_1.addItem( uiqt_horizontal_spacer_1_2)
 
         uiqt_extra_insurance_fee_check_box = QCheckBox( increased_tab )
         uiqt_extra_insurance_fee_check_box.setText( "補充保費" )
         uiqt_extra_insurance_fee_check_box.setObjectName( "insurance" )
         uiqt_horizontal_layout_1.addWidget( uiqt_extra_insurance_fee_check_box )
+
+        uiqt_horizontal_spacer_1_2 = QSpacerItem( 40, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum )
+        uiqt_horizontal_layout_1.addItem( uiqt_horizontal_spacer_1_2)
+
+        uiqt_total_profit_label = QLabel( increased_tab )
+        uiqt_total_profit_label.setText( "總損益: " )
+        uiqt_total_profit_label.setObjectName( "total_profit_label" )
+        uiqt_total_profit_value_label = QLabel( increased_tab )
+        uiqt_total_profit_value_label.setText( "" )
+        uiqt_total_profit_value_label.setObjectName( "total_profit_value_label" )
+        
+        uiqt_horizontal_layout_1.addWidget( uiqt_total_profit_label )
+        uiqt_horizontal_layout_1.addWidget( uiqt_total_profit_value_label )
 
         uiqt_horizontal_spacer_1_3 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
         uiqt_horizontal_layout_1.addItem( uiqt_horizontal_spacer_1_3 )
@@ -1762,6 +1772,7 @@ class MainWindow( QMainWindow ):
         str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
         dict_per_account_all_stock_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ]
         table_view = self.ui.qtTabWidget.currentWidget().findChild( QTableView )
+        n_total_profit = 0
         if table_view:
             table_model = table_view.model()
             table_model.clear()
@@ -1796,6 +1807,7 @@ class MainWindow( QMainWindow ):
                             n_net_value = int( n_accumulated_inventory * f_stock_price )
                             str_net_value = format( n_net_value, "," )
                             n_profit = n_net_value - n_accumulated_cost
+                            n_total_profit += n_profit
                             n_accumulated_dividend_profit = n_accumulated_stock_dividend * f_stock_price + n_accumulated_cash_dividend
                             str_profit = format( n_profit, "," )
                             if n_profit > 0:
@@ -1861,6 +1873,9 @@ class MainWindow( QMainWindow ):
                 for index_row in range( len( dict_per_account_all_stock_trading_data ) ):
                     table_view.setRowHeight( index_row, 25 )
                 table_model.setVerticalHeaderLabels( list_vertical_labels )
+        labels = self.ui.qtTabWidget.currentWidget().findChildren( QLabel, name="total_profit_value_label")
+        if labels:
+            labels[ 0 ].setText( format( n_total_profit, "," ) )
 
     def get_trading_data_header( self ):
         if self.ui.qtShow1StockRadioButton.isChecked():

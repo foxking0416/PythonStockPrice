@@ -85,6 +85,9 @@
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Minimum</enum>
+            </property>
             <property name="sizeHint" stdset="0">
              <size>
               <width>40</width>
@@ -94,31 +97,9 @@
            </spacer>
           </item>
           <item>
-           <widget class="QCheckBox" name="qtDiscountCheckBox">
+           <widget class="QCheckBox" name="qtExtraInsuranceFeeCheckBox">
             <property name="text">
-             <string>手續費折扣</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QDoubleSpinBox" name="qtDiscountRateDoubleSpinBox">
-            <property name="enabled">
-             <bool>true</bool>
-            </property>
-            <property name="decimals">
-             <number>1</number>
-            </property>
-            <property name="maximum">
-             <double>10.000000000000000</double>
-            </property>
-            <property name="singleStep">
-             <double>0.500000000000000</double>
-            </property>
-            <property name="value">
-             <double>6.000000000000000</double>
+             <string>補充保費</string>
             </property>
            </widget>
           </item>
@@ -139,9 +120,16 @@
            </spacer>
           </item>
           <item>
-           <widget class="QCheckBox" name="qtExtraInsuranceFeeCheckBox">
+           <widget class="QLabel" name="label">
             <property name="text">
-             <string>補充保費</string>
+             <string>TextLabel</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>TextLabel</string>
             </property>
            </widget>
           </item>

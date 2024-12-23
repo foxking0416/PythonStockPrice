@@ -16,8 +16,8 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
     QIcon, QImage, QKeySequence, QLinearGradient,
     QPainter, QPalette, QPixmap, QRadialGradient,
     QTransform)
-from PySide6.QtWidgets import (QApplication, QCheckBox, QComboBox, QDoubleSpinBox,
-    QHBoxLayout, QHeaderView, QLineEdit, QMainWindow,
+from PySide6.QtWidgets import (QApplication, QCheckBox, QComboBox, QHBoxLayout,
+    QHeaderView, QLabel, QLineEdit, QMainWindow,
     QMenu, QMenuBar, QPushButton, QRadioButton,
     QSizePolicy, QSpacerItem, QStatusBar, QTabWidget,
     QTableView, QVBoxLayout, QWidget)
@@ -65,34 +65,28 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout.addWidget(self.qtAddStockPushButton)
 
-        self.horizontalSpacer_6 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+        self.horizontalSpacer_6 = QSpacerItem(40, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
 
         self.horizontalLayout.addItem(self.horizontalSpacer_6)
-
-        self.qtDiscountCheckBox = QCheckBox(self.tab)
-        self.qtDiscountCheckBox.setObjectName(u"qtDiscountCheckBox")
-        self.qtDiscountCheckBox.setChecked(True)
-
-        self.horizontalLayout.addWidget(self.qtDiscountCheckBox)
-
-        self.qtDiscountRateDoubleSpinBox = QDoubleSpinBox(self.tab)
-        self.qtDiscountRateDoubleSpinBox.setObjectName(u"qtDiscountRateDoubleSpinBox")
-        self.qtDiscountRateDoubleSpinBox.setEnabled(True)
-        self.qtDiscountRateDoubleSpinBox.setDecimals(1)
-        self.qtDiscountRateDoubleSpinBox.setMaximum(10.000000000000000)
-        self.qtDiscountRateDoubleSpinBox.setSingleStep(0.500000000000000)
-        self.qtDiscountRateDoubleSpinBox.setValue(6.000000000000000)
-
-        self.horizontalLayout.addWidget(self.qtDiscountRateDoubleSpinBox)
-
-        self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
-
-        self.horizontalLayout.addItem(self.horizontalSpacer)
 
         self.qtExtraInsuranceFeeCheckBox = QCheckBox(self.tab)
         self.qtExtraInsuranceFeeCheckBox.setObjectName(u"qtExtraInsuranceFeeCheckBox")
 
         self.horizontalLayout.addWidget(self.qtExtraInsuranceFeeCheckBox)
+
+        self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout.addItem(self.horizontalSpacer)
+
+        self.label = QLabel(self.tab)
+        self.label.setObjectName(u"label")
+
+        self.horizontalLayout.addWidget(self.label)
+
+        self.label_2 = QLabel(self.tab)
+        self.label_2.setObjectName(u"label_2")
+
+        self.horizontalLayout.addWidget(self.label_2)
 
         self.horizontalSpacer_2 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
@@ -292,8 +286,9 @@ class Ui_MainWindow(object):
         self.qtActionImport.setText(QCoreApplication.translate("MainWindow", u"\u532f\u5165", None))
         self.qtActionExport.setText(QCoreApplication.translate("MainWindow", u"\u532f\u51fa", None))
         self.qtAddStockPushButton.setText(QCoreApplication.translate("MainWindow", u"\u65b0\u589e\u80a1\u7968", None))
-        self.qtDiscountCheckBox.setText(QCoreApplication.translate("MainWindow", u"\u624b\u7e8c\u8cbb\u6298\u6263", None))
         self.qtExtraInsuranceFeeCheckBox.setText(QCoreApplication.translate("MainWindow", u"\u88dc\u5145\u4fdd\u8cbb", None))
+        self.label.setText(QCoreApplication.translate("MainWindow", u"TextLabel", None))
+        self.label_2.setText(QCoreApplication.translate("MainWindow", u"TextLabel", None))
         self.qtTabWidget.setTabText(self.qtTabWidget.indexOf(self.tab), QCoreApplication.translate("MainWindow", u"Tab 1", None))
         self.qtTabWidget.setTabText(self.qtTabWidget.indexOf(self.tab_2), QCoreApplication.translate("MainWindow", u"Tab 2", None))
         self.qtFromNewToOldRadioButton.setText(QCoreApplication.translate("MainWindow", u"\u7531\u65b0\u5230\u820a", None))
