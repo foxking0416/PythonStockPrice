@@ -1557,11 +1557,11 @@ class MainWindow( QMainWindow ):
                 n_trading_count = item[ TradingData.TRADING_COUNT ]
                 f_trading_fee_discount = item[ TradingData.TRADING_FEE_DISCOUNT ]
                 
-                item[ TradingData.TRADING_VALUE_NON_SAVE ] = f_trading_price * n_trading_count
+                n_per_trading_total_cost = item[ TradingData.TRADING_COST_NON_SAVE ] = int( f_trading_price * n_trading_count )
+                item[ TradingData.TRADING_VALUE_NON_SAVE ] = n_per_trading_total_cost
                 item[ TradingData.TRADING_FEE_NON_SAVE ] = 0
                 item[ TradingData.TRADING_TAX_NON_SAVE ] = 0
                 item[ TradingData.EXTRA_INSURANCE_FEE_NON_SAVE ] = 0 
-                n_per_trading_total_cost = item[ TradingData.TRADING_COST_NON_SAVE ] = f_trading_price * n_trading_count
                 n_accumulated_inventory += n_trading_count
                 n_accumulated_cost += n_per_trading_total_cost
 
