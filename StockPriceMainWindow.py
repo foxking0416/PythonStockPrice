@@ -764,6 +764,8 @@ class MainWindow( QMainWindow ):
             str_tab_widget_name = tab_widget.objectName()
             value = self.dict_all_account_all_stock_trading_data.pop( str_tab_widget_name, None )
             self.ui.qtTabWidget.removeTab( index )
+            self.clear_per_stock_trading_table()
+            self.update_button_enable_disable_status()
             self.auto_save_trading_data()
 
     def on_tab_moved( self, n_from, n_to ): 
