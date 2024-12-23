@@ -769,7 +769,7 @@ class MainWindow( QMainWindow ):
 
         str_tab_title = self.ui.qtTabWidget.tabText( index )
         tab_widget = self.ui.qtTabWidget.widget( index )
-        result = self.show_message_box( "警告", f"確定要刪掉『{str_tab_title}』的所有資料嗎?" )
+        result = self.show_message_box( "警告", f"確定要刪掉『{str_tab_title}』的所有資料嗎?\n建議先從「檔案」=>「匯出目前帳號資料」，匯出檔案做備份" )
         if result:
             str_tab_widget_name = tab_widget.objectName()
             value = self.dict_all_account_all_stock_trading_data.pop( str_tab_widget_name, None )
