@@ -1263,7 +1263,7 @@ class MainWindow( QMainWindow ):
                         for str_account_name, dict_per_account_all_stock_trading_data_LOAD in dict_all_account_all_stock_trading_data_LOAD.items():
                             if str_account_name in dict_account_to_tab_widget_name:
                                 str_tab_widget_name = dict_account_to_tab_widget_name[ str_account_name ]
-                                self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ] = dict_per_account_all_stock_trading_data_LOAD
+                                self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ].update( dict_per_account_all_stock_trading_data_LOAD )
                             else:
                                 str_tab_widget_name = self.add_new_tab_and_table( str_account_name )
                                 self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ] = dict_per_account_all_stock_trading_data_LOAD
@@ -1273,7 +1273,12 @@ class MainWindow( QMainWindow ):
                         for str_account_name, dict_per_account_all_stock_trading_data_LOAD in dict_all_account_all_stock_trading_data_LOAD.items():
                             if str_account_name in dict_account_to_tab_widget_name:
                                 str_tab_widget_name = dict_account_to_tab_widget_name[ str_account_name ]
-                                self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ].update( dict_per_account_all_stock_trading_data_LOAD )
+                                for key_stock_number, value in dict_per_account_all_stock_trading_data_LOAD.items():
+                                    if key_stock_number not in self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ]:
+                                        self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ][ key_stock_number ] = value
+                                    else:
+                                        value.pop( 0 ) #移除第一筆資料 因為第一筆資料是虛的
+                                        self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ][ key_stock_number ].extend( value )
                             else:
                                 str_tab_widget_name = self.add_new_tab_and_table( str_account_name )
                                 self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ] = dict_per_account_all_stock_trading_data_LOAD
