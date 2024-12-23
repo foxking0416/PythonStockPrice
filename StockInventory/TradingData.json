@@ -3482,12 +3482,5 @@ v1.0.0
         "discount_checkbox": true,
         "discount_value": 0.45,
         "insurance_checkbox": false
-    },
-    {
-        "account_name": "新群組",
-        "trading_data": {},
-        "discount_checkbox": true,
-        "discount_value": 0.6,
-        "insurance_checkbox": false
     }
 ]
