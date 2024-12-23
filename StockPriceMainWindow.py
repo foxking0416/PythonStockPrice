@@ -874,7 +874,8 @@ class MainWindow( QMainWindow ):
         str_stock_number = self.str_picked_stock_number
         list_stock_name_and_type = self.dict_all_company_number_to_name_and_type[ str_stock_number ]
         str_stock_name = list_stock_name_and_type[ 0 ]
-        b_etf = self.dict_all_company_number_to_name_and_type[ str_stock_number ][ 1 ]
+        str_b_etf = self.dict_all_company_number_to_name_and_type[ str_stock_number ][ 1 ]
+        b_etf = True if str_b_etf == "True" else False
         dialog = StockTradingEditDialog( str_stock_number, str_stock_name, b_etf, b_discount, f_discount_value, self )
 
         if dialog.exec():
@@ -1074,7 +1075,8 @@ class MainWindow( QMainWindow ):
                     if dict_selected_data[ TradingData.TRADING_TYPE ] == TradingType.TEMPLATE:
                         return
                     if dict_selected_data[ TradingData.TRADING_TYPE ] == TradingType.BUY or dict_selected_data[ TradingData.TRADING_TYPE ] == TradingType.SELL:
-                        b_etf = self.dict_all_company_number_to_name_and_type[ str_stock_number ][ 1 ]
+                        str_b_etf = self.dict_all_company_number_to_name_and_type[ str_stock_number ][ 1 ]
+                        b_etf = True if str_b_etf == "True" else False
                         dialog = StockTradingEditDialog( str_stock_number, str_stock_name, b_etf, True, 0, self )
                         dialog.setup_trading_date( dict_selected_data[ TradingData.TRADING_DATE ] )
                         dialog.setup_trading_type( dict_selected_data[ TradingData.TRADING_TYPE ] )
@@ -1442,7 +1444,8 @@ class MainWindow( QMainWindow ):
 
         b_extra_insurance_fee = self.dict_all_account_ui_state[ str_tab_widget_name ][ "insurance_checkbox"]
 
-        b_etf = self.dict_all_company_number_to_name_and_type[ str_stock_number ][ 1 ]
+        str_b_etf = self.dict_all_company_number_to_name_and_type[ str_stock_number ][ 1 ]
+        b_etf = True if str_b_etf == "True" else False
         sorted_list = sorted( list_trading_data, key=lambda x: ( datetime.datetime.strptime( x[ TradingData.TRADING_DATE ], "%Y-%m-%d"), -x[ TradingData.TRADING_TYPE ] ) )
 
         str_current_date = datetime.datetime.today().strftime("%Y-%m-%d")
