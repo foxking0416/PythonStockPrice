@@ -604,7 +604,14 @@ class MainWindow( QMainWindow ):
         self.download_OTC_etf_all_yearly_dividend_data( 2019, str_date )
         self.dict_auto_stock_yearly_dividned = self.load_general_company_all_yearly_dividend_data( 2019 )
         self.dict_auto_stock_listed_etf_yearly_dividned = self.load_listed_etf_all_yearly_dividend_data( 2019 )
-        common_keys = set(self.dict_auto_stock_yearly_dividned.keys()) & set(self.dict_auto_stock_listed_etf_yearly_dividned.keys())
+        self.dict_auto_stock_OTC_etf_yearly_dividned = self.load_OTC_etf_all_yearly_dividend_data( 2019 )
+        self.dict_auto_stock_yearly_dividned.update( self.dict_auto_stock_listed_etf_yearly_dividned )
+        for key, value in self.dict_auto_stock_OTC_etf_yearly_dividned.items():
+            if key not in self.dict_auto_stock_yearly_dividned:
+                self.dict_auto_stock_yearly_dividned[ key ] = value
+
+
+        # common_keys = set(self.dict_auto_stock_yearly_dividned.keys()) & set(self.dict_auto_stock_listed_etf_yearly_dividned.keys())
         n_retry = 0
         while len( self.dict_all_company_number_to_price_info ) == 0:
             #因為我們要下載前一天的股價資訊，但有時候遇到前一天是假日，就要再往前，若是連續假日，就要一直往前直到可以下載
@@ -2705,9 +2712,111 @@ class MainWindow( QMainWindow ):
         print( "\033[32m<<<<<<<<<<<<<<< Finish downloading OTC etf all yearly dividend data.\033[0m" )
 
     def download_OTC_etf_yearly_dividend_data( self, n_year, str_date, str_output_path, b_overwrite ):
+        # 假如是西元，轉成民國
+        if n_year > 1990:
+            n_year -= 1911
+
+        file_exist = [ True ]
+        str_output_path = self.process_output_file_path( str_output_path, file_exist, 'Dividend', 'OTCETFDividend_', n_year, 0, b_overwrite )
+        if file_exist[0]:
+            print("dividend file exists")
+            return
+
+        b_need_to_download = False
+        if os.path.exists( str_output_path ):
+            with open( str_output_path, 'r', encoding='utf-8' ) as f:
+                date = f.readline().strip()
+                if date != str_date:
+                    if self.check_internet_via_http(): #日期不一樣，且又有網路時才重新下載，不然就用舊的
+                        b_need_to_download = True
+        else:
+            b_need_to_download = True
+
+        if b_need_to_download:
+            # 請求的 URL
+            url = 'https://www.tpex.org.tw/www/zh-tw/bulletin/exDailyQ'
+
+            if n_year < 1990:
+                n_year += 1911
+            # POST 請求的數據
+            payload = {
+                'startDate': str( n_year ) + '/01/01',
+                'endDate': str( n_year ) + '/12/31',
+                'response': 'json'
+            }
+
+            try:
+                res = self.send_post_request( url, payload )
+                json_value = json.loads( res.text )
+                with open( str_output_path, 'w', encoding='utf-8' ) as f:
+                    f.write( str_date + '\n' )
+                    json.dump( json_value[ 'tables' ][0]['data'], f, ensure_ascii=False, indent=4 )
+
+            except Exception as e:
+                print(f"Final error: {e}")
         pass
 
+    def load_OTC_etf_all_yearly_dividend_data( self, n_dividend_data_start_year ):
+        current_date = datetime.datetime.today()
+        n_current_year = current_date.year
+        dict_stock_yearly_dividned = {}
+        for n_year in range( n_dividend_data_start_year, n_current_year + 1 ):
+            # 假如是西元，轉成民國
+            if n_current_year > 1990:
+                n_current_year -= 1911
+            if n_year > 1990:
+                n_year -= 1911
+            list_yearly_dividend = self.read_OTC_etf_yearly_dividend_raw_data( n_year )
+            if list_yearly_dividend != None:
+                for index, item in enumerate( list_yearly_dividend ):
+                    if item[13] != None:
+                        try:
+                            value = float( item[ 13 ].strip() )
+                            if value > 0:
+                                # 字串是數值且大於 0
+                                str_stock_number = item[ 1 ]
+                                taiwan_date_str  = item[ 0 ]
+                                # taiwan_year = int(taiwan_date_str .split('年')[0]) + 1911
+                                taiwan_year = int(taiwan_date_str .split('/')[0]) + 1911
+                                str_year_month_date = f"{taiwan_year}-{taiwan_date_str.split('/')[1]}-{taiwan_date_str.split('/')[2]}"
+
+                                str_cash_dividend = item[ 13 ].strip()
+                                f_cash_dividend_per_share = Decimal( str_cash_dividend )
+                                dict_dividend_data = Utility.generate_trading_data( str_year_month_date,        #交易日期
+                                                                                    TradingType.DIVIDEND,       #交易種類
+                                                                                    0,                          #交易價格                         
+                                                                                    0,                          #交易股數
+                                                                                    1,                          #手續費折扣                                   
+                                                                                    0,                          #每股股票股利
+                                                                                    f_cash_dividend_per_share,  #每股現金股利
+                                                                                    0 )                         #每股減資金額
+                                
+                                dict_dividend_data[ TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE ] = True
+                                if str_stock_number in dict_stock_yearly_dividned:
+                                    dict_stock_yearly_dividned[ str_stock_number ].append( dict_dividend_data )
+                                else:
+                                    dict_stock_yearly_dividned[ str_stock_number ] = [ dict_dividend_data ]
+                                pass
+                        except ValueError:
+                            # 不是有效的數值
+                            pass
+
+        return dict_stock_yearly_dividned
     
+    def read_OTC_etf_yearly_dividend_raw_data( self, n_year ):
+        if n_year > 1990:
+            n_year -= 1911
+        file_exist = [ True ]
+        file_path = self.process_output_file_path( None, file_exist, 'Dividend', 'OTCETFDividend_', n_year, 0, False )
+        if not os.path.exists( file_path ):
+            return None
+        
+        with open( file_path, 'r', encoding = 'utf-8' ) as f:
+            date = f.readline()
+            list_data = json.load( f )
+
+            return list_data
+        return []
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)  # 創建應用程式
