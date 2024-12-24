@@ -18,14 +18,14 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
     QTransform)
 from PySide6.QtWidgets import (QApplication, QHBoxLayout, QHeaderView, QMainWindow,
     QMenu, QMenuBar, QPushButton, QRadioButton,
-    QSizePolicy, QSpacerItem, QStatusBar, QTabWidget,
-    QTableView, QVBoxLayout, QWidget)
+    QScrollArea, QSizePolicy, QSpacerItem, QStatusBar,
+    QTabWidget, QTableView, QVBoxLayout, QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(1116, 893)
+        MainWindow.resize(1131, 893)
         self.qtActionNew = QAction(MainWindow)
         self.qtActionNew.setObjectName(u"qtActionNew")
         self.qtActionSaveAs = QAction(MainWindow)
@@ -38,12 +38,16 @@ class Ui_MainWindow(object):
         self.qtActionExportCurrentGroup.setObjectName(u"qtActionExportCurrentGroup")
         self.qtActionImport = QAction(MainWindow)
         self.qtActionImport.setObjectName(u"qtActionImport")
-        self.centralwidget = QWidget(MainWindow)
-        self.centralwidget.setObjectName(u"centralwidget")
-        self.verticalLayout = QVBoxLayout(self.centralwidget)
+        self.scrollArea = QScrollArea(MainWindow)
+        self.scrollArea.setObjectName(u"scrollArea")
+        self.scrollArea.setWidgetResizable(True)
+        self.scrollAreaWidgetContents = QWidget()
+        self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 1129, 850))
+        self.verticalLayout = QVBoxLayout(self.scrollAreaWidgetContents)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.verticalLayout.setContentsMargins(-1, 0, -1, 0)
-        self.qtTabWidget = QTabWidget(self.centralwidget)
+        self.qtTabWidget = QTabWidget(self.scrollAreaWidgetContents)
         self.qtTabWidget.setObjectName(u"qtTabWidget")
         self.qtTabWidget.setIconSize(QSize(10, 10))
         self.qtTabWidget.setTabsClosable(True)
@@ -58,13 +62,13 @@ class Ui_MainWindow(object):
         self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
         self.verticalLayout_4 = QVBoxLayout()
         self.verticalLayout_4.setObjectName(u"verticalLayout_4")
-        self.qtFromNewToOldRadioButton = QRadioButton(self.centralwidget)
+        self.qtFromNewToOldRadioButton = QRadioButton(self.scrollAreaWidgetContents)
         self.qtFromNewToOldRadioButton.setObjectName(u"qtFromNewToOldRadioButton")
         self.qtFromNewToOldRadioButton.setChecked(True)
 
         self.verticalLayout_4.addWidget(self.qtFromNewToOldRadioButton)
 
-        self.qtFromOldToNewRadioButton = QRadioButton(self.centralwidget)
+        self.qtFromOldToNewRadioButton = QRadioButton(self.scrollAreaWidgetContents)
         self.qtFromOldToNewRadioButton.setObjectName(u"qtFromOldToNewRadioButton")
 
         self.verticalLayout_4.addWidget(self.qtFromOldToNewRadioButton)
@@ -78,13 +82,13 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_3 = QVBoxLayout()
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
-        self.qtShowAllRadioButton = QRadioButton(self.centralwidget)
+        self.qtShowAllRadioButton = QRadioButton(self.scrollAreaWidgetContents)
         self.qtShowAllRadioButton.setObjectName(u"qtShowAllRadioButton")
         self.qtShowAllRadioButton.setChecked(True)
 
         self.verticalLayout_3.addWidget(self.qtShowAllRadioButton)
 
-        self.qtShow10RadioButton = QRadioButton(self.centralwidget)
+        self.qtShow10RadioButton = QRadioButton(self.scrollAreaWidgetContents)
         self.qtShow10RadioButton.setObjectName(u"qtShow10RadioButton")
 
         self.verticalLayout_3.addWidget(self.qtShow10RadioButton)
@@ -98,14 +102,15 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_2 = QVBoxLayout()
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
-        self.qtShow1StockRadioButton = QRadioButton(self.centralwidget)
+        self.qtShow1StockRadioButton = QRadioButton(self.scrollAreaWidgetContents)
         self.qtShow1StockRadioButton.setObjectName(u"qtShow1StockRadioButton")
         self.qtShow1StockRadioButton.setChecked(True)
 
         self.verticalLayout_2.addWidget(self.qtShow1StockRadioButton)
 
-        self.qtShow1000StockRadioButton = QRadioButton(self.centralwidget)
+        self.qtShow1000StockRadioButton = QRadioButton(self.scrollAreaWidgetContents)
         self.qtShow1000StockRadioButton.setObjectName(u"qtShow1000StockRadioButton")
+        self.qtShow1000StockRadioButton.setEnabled(True)
 
         self.verticalLayout_2.addWidget(self.qtShow1000StockRadioButton)
 
@@ -118,13 +123,13 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_5 = QVBoxLayout()
         self.verticalLayout_5.setObjectName(u"verticalLayout_5")
-        self.qtADYearRadioButton = QRadioButton(self.centralwidget)
+        self.qtADYearRadioButton = QRadioButton(self.scrollAreaWidgetContents)
         self.qtADYearRadioButton.setObjectName(u"qtADYearRadioButton")
         self.qtADYearRadioButton.setChecked(True)
 
         self.verticalLayout_5.addWidget(self.qtADYearRadioButton)
 
-        self.qtROCYearRadioButton = QRadioButton(self.centralwidget)
+        self.qtROCYearRadioButton = QRadioButton(self.scrollAreaWidgetContents)
         self.qtROCYearRadioButton.setObjectName(u"qtROCYearRadioButton")
 
         self.verticalLayout_5.addWidget(self.qtROCYearRadioButton)
@@ -139,7 +144,7 @@ class Ui_MainWindow(object):
 
         self.verticalLayout.addLayout(self.horizontalLayout_4)
 
-        self.qtTradingDataTableView = QTableView(self.centralwidget)
+        self.qtTradingDataTableView = QTableView(self.scrollAreaWidgetContents)
         self.qtTradingDataTableView.setObjectName(u"qtTradingDataTableView")
         self.qtTradingDataTableView.setMinimumSize(QSize(0, 470))
         self.qtTradingDataTableView.verticalHeader().setMinimumSectionSize(15)
@@ -148,25 +153,25 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_3 = QHBoxLayout()
         self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
-        self.qtAddTradingDataPushButton = QPushButton(self.centralwidget)
+        self.qtAddTradingDataPushButton = QPushButton(self.scrollAreaWidgetContents)
         self.qtAddTradingDataPushButton.setObjectName(u"qtAddTradingDataPushButton")
         self.qtAddTradingDataPushButton.setEnabled(False)
 
         self.horizontalLayout_3.addWidget(self.qtAddTradingDataPushButton)
 
-        self.qtAddDividendDataPushButton = QPushButton(self.centralwidget)
+        self.qtAddDividendDataPushButton = QPushButton(self.scrollAreaWidgetContents)
         self.qtAddDividendDataPushButton.setObjectName(u"qtAddDividendDataPushButton")
         self.qtAddDividendDataPushButton.setEnabled(False)
 
         self.horizontalLayout_3.addWidget(self.qtAddDividendDataPushButton)
 
-        self.qtAddLimitBuyingDataPushButton = QPushButton(self.centralwidget)
+        self.qtAddLimitBuyingDataPushButton = QPushButton(self.scrollAreaWidgetContents)
         self.qtAddLimitBuyingDataPushButton.setObjectName(u"qtAddLimitBuyingDataPushButton")
         self.qtAddLimitBuyingDataPushButton.setEnabled(False)
 
         self.horizontalLayout_3.addWidget(self.qtAddLimitBuyingDataPushButton)
 
-        self.qtAddCapitalReductionDataPushButton = QPushButton(self.centralwidget)
+        self.qtAddCapitalReductionDataPushButton = QPushButton(self.scrollAreaWidgetContents)
         self.qtAddCapitalReductionDataPushButton.setObjectName(u"qtAddCapitalReductionDataPushButton")
         self.qtAddCapitalReductionDataPushButton.setEnabled(False)
 
@@ -177,13 +182,13 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_5 = QHBoxLayout()
         self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
-        self.qtExportAllStockTradingDataPushButton = QPushButton(self.centralwidget)
+        self.qtExportAllStockTradingDataPushButton = QPushButton(self.scrollAreaWidgetContents)
         self.qtExportAllStockTradingDataPushButton.setObjectName(u"qtExportAllStockTradingDataPushButton")
         self.qtExportAllStockTradingDataPushButton.setEnabled(True)
 
         self.horizontalLayout_5.addWidget(self.qtExportAllStockTradingDataPushButton)
 
-        self.qtExportSelectedStockTradingDataPushButton = QPushButton(self.centralwidget)
+        self.qtExportSelectedStockTradingDataPushButton = QPushButton(self.scrollAreaWidgetContents)
         self.qtExportSelectedStockTradingDataPushButton.setObjectName(u"qtExportSelectedStockTradingDataPushButton")
         self.qtExportSelectedStockTradingDataPushButton.setEnabled(False)
 
@@ -192,10 +197,11 @@ class Ui_MainWindow(object):
 
         self.verticalLayout.addLayout(self.horizontalLayout_5)
 
-        MainWindow.setCentralWidget(self.centralwidget)
+        self.scrollArea.setWidget(self.scrollAreaWidgetContents)
+        MainWindow.setCentralWidget(self.scrollArea)
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
-        self.menubar.setGeometry(QRect(0, 0, 1116, 21))
+        self.menubar.setGeometry(QRect(0, 0, 1131, 21))
         self.menu = QMenu(self.menubar)
         self.menu.setObjectName(u"menu")
         MainWindow.setMenuBar(self.menubar)
