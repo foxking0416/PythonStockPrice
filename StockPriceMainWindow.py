@@ -635,13 +635,13 @@ class MainWindow( QMainWindow ):
         self.ui.qtActionOpen.setShortcut( "Ctrl+O" )
         self.ui.qtActionOpen.triggered.connect( self.on_open_file_action_triggered )
         self.ui.qtActionSaveAs.setShortcut( "Ctrl+A" )
-        self.ui.qtActionSaveAs.triggered.connect( self.on_save_as_all_account_trading_data_action_triggered )
+        self.ui.qtActionSaveAs.triggered.connect( self.on_save_as_action_triggered )
         self.ui.qtActionSave.setShortcut( "Ctrl+S" )
-        self.ui.qtActionSave.triggered.connect( self.on_save_all_account_trading_data_action_triggered )
+        self.ui.qtActionSave.triggered.connect( self.on_save_action_triggered )
         self.ui.qtActionExportCurrentGroup.setShortcut( "Ctrl+E" )
-        self.ui.qtActionExportCurrentGroup.triggered.connect( self.on_export_current_group_trading_data_action_triggered )
+        self.ui.qtActionExportCurrentGroup.triggered.connect( self.on_export_current_group_action_triggered )
         self.ui.qtActionImport.setShortcut( "Ctrl+I" )
-        self.ui.qtActionImport.triggered.connect( self.on_import_trading_data_action_triggered )
+        self.ui.qtActionImport.triggered.connect( self.on_import_action_triggered )
         
 
         obj_current_date = datetime.datetime.today() - datetime.timedelta( days = 1 )
@@ -1479,27 +1479,27 @@ class MainWindow( QMainWindow ):
             self.auto_save_trading_data()
             self.str_current_save_file_path = file_path
 
-    def on_save_as_all_account_trading_data_action_triggered( self ): 
+    def on_save_as_action_triggered( self ): 
         file_path = self.open_save_json_file_dialog()
         if file_path:
             list_save_tab_widget = list( range( self.ui.qtTabWidget.count() - 1 ) )
             self.manual_save_trading_data( list_save_tab_widget, file_path )
             self.str_current_save_file_path = file_path
 
-    def on_save_all_account_trading_data_action_triggered( self ): 
+    def on_save_action_triggered( self ): 
         file_path = self.str_current_save_file_path or self.open_save_json_file_dialog()
         if file_path:
             list_save_tab_widget = list( range( self.ui.qtTabWidget.count() - 1 ) )
             self.manual_save_trading_data( list_save_tab_widget, file_path )
             self.str_current_save_file_path = file_path
 
-    def on_export_current_group_trading_data_action_triggered( self ): 
+    def on_export_current_group_action_triggered( self ): 
         file_path = self.open_save_json_file_dialog()
         if file_path:
             list_save_tab_widget = [ self.ui.qtTabWidget.currentIndex() ]
             self.manual_save_trading_data( list_save_tab_widget, file_path )
 
-    def on_import_trading_data_action_triggered( self ):
+    def on_import_action_triggered( self ):
         file_path = self.open_load_json_file_dialog()
         if file_path:
             dict_account_to_tab_widget_name = {}
