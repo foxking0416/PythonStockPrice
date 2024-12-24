@@ -663,7 +663,17 @@ class MainWindow( QMainWindow ):
         modifiers = QApplication.keyboardModifiers()
         if modifiers == Qt.ControlModifier:
             if event.key() == Qt.Key_S:
+                #儲存
                 pass
+            elif event.key() == Qt.Key_O:
+                #開啟
+                pass
+            elif event.key() == Qt.Key_N:
+                #新增
+                pass
+            elif event.key() == Qt.Key_A:
+                #開新檔案
+                pass   
 
     def keyReleaseEvent(self, event):
         print(f"釋放了: {event.text()} 鍵")
