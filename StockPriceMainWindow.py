@@ -17,7 +17,7 @@ from PySide6.QtGui import QStandardItemModel, QStandardItem, QIcon, QBrush
 from PySide6.QtCore import Qt, QModelIndex, QRect, QSignalBlocker, QSize
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
-from openpyxl.styles import Alignment, PatternFill, Font
+from openpyxl.styles import Alignment, PatternFill, Font, Border, Side
 from enum import Enum, IntEnum
 from decimal import Decimal
 
@@ -1149,8 +1149,36 @@ class MainWindow( QMainWindow ):
                         self.auto_save_trading_data()
 
     def export_trading_data_to_excel( self, worksheet, str_stock_number, str_stock_name, list_trading_data ): 
+        all_thin_border = Border(
+        left = Side( style = 'thin', color = "000000" ),  # 左邊框：細線，黑色
+        right = Side( style = 'thin', color = "000000" ), # 右邊框：細線，黑色
+        top = Side( style = 'thin', color = "000000" ),   # 上邊框：細線，黑色
+        bottom = Side( style = 'thin', color = "000000" ) # 下邊框：細線，黑色
+        )
+
+        top_thick_border = Border(
+        left = Side( style = 'thin', color = "000000" ),  # 左邊框：細線，黑色
+        right = Side( style = 'thin', color = "000000" ), # 右邊框：細線，黑色
+        top = Side( style = 'thick', color = "000000" ),   # 上邊框：細線，黑色
+        bottom = Side( style = 'thin', color = "000000" ) # 下邊框：細線，黑色
+        )
+
+        bottom_thick_border = Border(
+        left = Side( style = 'thin', color = "000000" ),  # 左邊框：細線，黑色
+        right = Side( style = 'thin', color = "000000" ), # 右邊框：細線，黑色
+        top = Side( style = 'thin', color = "000000" ),   # 上邊框：細線，黑色
+        bottom = Side( style = 'thick', color = "000000" ) # 下邊框：細線，黑色
+        )
+
+        right_thick_border = Border(
+        left = Side( style = 'thin', color = "000000" ),  # 左邊框：細線，黑色
+        right = Side( style = 'thick', color = "000000" ), # 右邊框：細線，黑色
+        top = Side( style = 'thin', color = "000000" ),   # 上邊框：細線，黑色
+        bottom = Side( style = 'thin', color = "000000" ) # 下邊框：細線，黑色
+        )
+
         str_title = str_stock_number + " " + str_stock_name
-        worksheet.column_dimensions['A'].width = 30
+        worksheet.column_dimensions['A'].width = 22
 
         b_use_auto_dividend = list_trading_data[ 0 ][ TradingData.USE_AUTO_DIVIDEND_DATA ]
         data_index = 0
@@ -1176,12 +1204,12 @@ class MainWindow( QMainWindow ):
                 for index_row, str_header in enumerate( list_data_header ):
                     if index_row == len( list_data_header ) - 2:
                         break
-                    worksheet.cell( row = n_row_start + index_row + 1, column = 1, value = str_header )
+                    worksheet.cell( row = n_row_start + index_row + 1, column = 1, value = str_header ).border = all_thin_border
                     if index_row == 0:
                         worksheet.cell( row = n_row_start + index_row + 1, column = 1 ).font = Font( bold = True )
                 index_column = 0
 
-            worksheet.column_dimensions[ get_column_letter( index_column + 2 ) ].width = 15
+            worksheet.column_dimensions[ get_column_letter( index_column + 2 ) ].width = 12
 
             list_data = self.get_per_trading_data_text_list( dict_per_trading_data )
             list_data.insert( 0, "" )
@@ -1208,7 +1236,7 @@ class MainWindow( QMainWindow ):
 
                 str_cell = get_column_letter( n_cell_column ) + str( n_cell_row )
                 if index_row == 1:
-                    worksheet.cell( row = n_cell_row, column = n_cell_column, value = str_data )
+                    worksheet.cell( row = n_cell_row, column = n_cell_column, value = str_data ).border = all_thin_border
                 else:
                     try:
                         f_data= float( str_data )
@@ -1221,11 +1249,11 @@ class MainWindow( QMainWindow ):
                             worksheet[ str_cell ].number_format = "#,##0.00"
                         elif ( f_data * 1000 ).is_integer():
                             worksheet[ str_cell ].number_format = "#,##0.000"
-                        worksheet.cell( row = n_cell_row, column = n_cell_column, value = f_data )
+                        worksheet.cell( row = n_cell_row, column = n_cell_column, value = f_data ).border = all_thin_border
                     except ValueError:
-                        worksheet.cell( row = n_cell_row, column = n_cell_column, value = str_data )
+                        worksheet.cell( row = n_cell_row, column = n_cell_column, value = str_data ).border = all_thin_border
 
-                worksheet[ str_cell ].alignment = Alignment( horizontal = "center", vertical = "center" )
+                worksheet[ str_cell ].alignment = Alignment( horizontal = "center", vertical = "center", shrink_to_fit = True )
             data_index += 1
             index_column += 1
 
@@ -1243,6 +1271,14 @@ class MainWindow( QMainWindow ):
             workbook = Workbook()
             worksheet = workbook.active
             worksheet.title = str_stock_number + " " + str_stock_name
+            worksheet.page_setup.orientation = "landscape"
+            worksheet.page_setup.paperSize = 9
+            worksheet.page_margins.left = 0.7    # 左邊界
+            worksheet.page_margins.right = 0.7   # 右邊界
+            worksheet.page_margins.top = 0.75    # 上邊界
+            worksheet.page_margins.bottom = 0.75 # 下邊界
+            worksheet.page_margins.header = 0.3  # 頁眉邊界
+            worksheet.page_margins.footer = 0.3  # 頁腳邊界
             self.export_trading_data_to_excel( worksheet, str_stock_number, str_stock_name, list_trading_data )
             workbook.save( file_path )
 
@@ -1260,8 +1296,24 @@ class MainWindow( QMainWindow ):
                 if index == 0:
                     worksheet = workbook.active
                     worksheet.title = str_tab_title
+                    worksheet.page_setup.orientation = "landscape"
+                    worksheet.page_setup.paperSize = 9
+                    worksheet.page_margins.left = 0.7    # 左邊界
+                    worksheet.page_margins.right = 0.7   # 右邊界
+                    worksheet.page_margins.top = 0.75    # 上邊界
+                    worksheet.page_margins.bottom = 0.75 # 下邊界
+                    worksheet.page_margins.header = 0.3  # 頁眉邊界
+                    worksheet.page_margins.footer = 0.3  # 頁腳邊界
                 else:
                     worksheet = workbook.create_sheet( str_tab_title, index )
+                    worksheet.page_setup.orientation = "landscape"
+                    worksheet.page_setup.paperSize = 9
+                    worksheet.page_margins.left = 0.7    # 左邊界
+                    worksheet.page_margins.right = 0.7   # 右邊界
+                    worksheet.page_margins.top = 0.75    # 上邊界
+                    worksheet.page_margins.bottom = 0.75 # 下邊界
+                    worksheet.page_margins.header = 0.3  # 頁眉邊界
+                    worksheet.page_margins.footer = 0.3  # 頁腳邊界
                 self.export_trading_data_to_excel( worksheet, key_stock_number, str_stock_name, value_list_trading_data )
             workbook.save( file_path )
 
