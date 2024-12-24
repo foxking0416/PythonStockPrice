@@ -3,14 +3,20 @@ QMainWindow {
     color: white;              /* 文字顏色 */
 }
 
+QDialog {
+    background-color: #1E1E1E;  
+    color: white;              /* 文字顏色 */
+}
+
+
 QMenuBar {
-                background-color: #00FF00;  /* 菜單欄背景顏色 */
+                background-color: #4B4B4B;  /* 菜單欄背景顏色 */
                 color: #D8DEE9;             /* 文字顏色 */
             }
 
 QMenuBar::item {
                 background-color: transparent;  /* 預設透明背景 */
-                padding: 5px 15px;             /* 內邊距調整 */
+                /*padding: 5px 15px;             /* 內邊距調整 */
             }
 
 QTabWidget {
@@ -23,6 +29,16 @@ QTabBar::tab {
                 color: #FFFFFF;           /* Tab 文字顏色 */
                 /*border: 1px solid #4C566A;*/
 }
+
+/*QTabWidget::tab-bar{background-color:#82be0f;}*/
+/*QTabBar{background-color:#282828;}*/
+QTabBar::tab{ font-size:12px; font-weight:bold; text-align:center;border:1px solid #a0a0a0; background-color:#282828;Color:#c8c8c8;border-radius: 2px;}
+/* QTabBar::tab{ font-size:12px; font-weight:bold; text-align:center;border:1px solid #a0a0a0; background-color:#282828;Color:#c8c8c8;} */
+QTabBar::tab:left, QTabBar::tab:right { min-width:25px; min-height:80px; }
+QTabBar::tab:top, QTabBar::tab:bottom { min-width:80px; min-height:25px; }
+QTabBar::tab:hover  {background-color:#505050;Color:#c8c8c8;}
+QTabBar::tab:selected { background-color:#505050;color:#c8c8c8; spacing: 5px;}
+
 
 QTableView {
     background-color: #2D2D2D;  /* 深藍灰色背景 */
@@ -37,9 +53,17 @@ QHeaderView::section {
                 /*padding: 5px;              /* 內邊距 */
             }
 			
-QRadioButton{
-	color: #FFFFFF;
-}
+QRadioButton{color: #FFFFFF;}
+QRadioButton:hover{color:#c8c8c8; }
+QRadioButton:disabled{color:#464646;}
+QRadioButton::indicator::unchecked         { image: url(./icon/Elements/RadioOff.svg); }
+QRadioButton::indicator:unchecked:hover    { image: url(./icon/Elements/RadioOff_hov.svg); }
+QRadioButton::indicator:unchecked:pressed  { image: url(./icon/Elements/RadioOff_hov.svg); }
+QRadioButton::indicator:unchecked:disabled { image: url(./icon/Elements/RadioOff_dis.svg); }
+QRadioButton::indicator::checked           { image: url(./icon/Elements/RadioOn.svg); }
+QRadioButton::indicator:checked:hover      { image: url(./icon/Elements/RadioOn_hov.svg); }
+QRadioButton::indicator:checked:pressed    { image: url(./icon/Elements/RadioOn_hov.svg);}
+QRadioButton::indicator:checked:disabled   { image: url(./icon/Elements/RadioOn_dis.svg);}
 
 QCheckBox{
 	color: #FFFFFF;

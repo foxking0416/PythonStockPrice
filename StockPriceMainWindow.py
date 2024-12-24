@@ -344,6 +344,7 @@ class StockTradingEditDialog( QDialog ):
 
         self.ui = Ui_StockTradingDialog()
         self.ui.setupUi( self )
+        
         window_icon = QIcon( window_icon_file_path ) 
         self.setWindowIcon( window_icon )
 
@@ -368,8 +369,18 @@ class StockTradingEditDialog( QDialog ):
         self.ui.qtOkButtonBox.accepted.connect( self.accept_data )
         self.ui.qtOkButtonBox.rejected.connect( self.cancel )
         self.b_etf = b_etf
-
+        # self.load_stylesheet("style.css")
         self.dict_trading_data = {}
+
+    def load_stylesheet( self, file_path ):
+        try:
+            with open(file_path, "r", encoding="utf-8") as file:  # 指定 UTF-8 編碼
+                stylesheet = file.read()
+                self.setStyleSheet(stylesheet)
+        except FileNotFoundError:
+            print(f"CSS 檔案 {file_path} 找不到")
+        except Exception as e:
+            print(f"讀取 CSS 檔案時發生錯誤: {e}")
 
     def on_discount_check_box_state_changed( self, state ):
         if state == 2:
@@ -634,7 +645,7 @@ class MainWindow( QMainWindow ):
         self.list_stock_list_column_width[ len( g_list_stock_list_table_horizontal_header ) - 1 ] = 40
         self.n_current_tab = 0
         self.n_tab_index = 0
-        self.load_stylesheet("style.css")
+        # self.load_stylesheet("style.css")
         self.initialize()
 
     def load_stylesheet( self, file_path ):
@@ -1190,6 +1201,9 @@ class MainWindow( QMainWindow ):
                     cell.fill = color_fill
                 elif str_data == "減資":
                     color_fill = PatternFill( start_color = "B1A0C7", end_color = "B1A0C7", fill_type="solid")
+                    cell.fill = color_fill
+                elif str_data == "增資":
+                    color_fill = PatternFill( start_color = "FABF8F", end_color = "FABF8F", fill_type="solid")
                     cell.fill = color_fill
 
                 str_cell = get_column_letter( n_cell_column ) + str( n_cell_row )
@@ -2067,15 +2081,15 @@ class MainWindow( QMainWindow ):
             for row, data in enumerate( list_data ):
                 standard_item = QStandardItem( data )
                 if data == "買進":
-                    standard_item.setBackground( QBrush( '#550000' ) )
+                    standard_item.setBackground( QBrush( '#DA9694' ) )
                 elif data == "賣出":
-                    standard_item.setBackground( QBrush( '#005555' ) )
+                    standard_item.setBackground( QBrush( '#76933C' ) )
                 elif data == "股利分配":
-                    standard_item.setBackground( QBrush( '#555500' ) )
+                    standard_item.setBackground( QBrush( '#8DB4E2' ) )
                 elif data == "減資":
-                    standard_item.setBackground( QBrush( '#6EBD61' ) )
+                    standard_item.setBackground( QBrush( '#B1A0C7' ) )
                 elif data == "增資":
-                    standard_item.setBackground( QBrush( '#E0C37E' ) )
+                    standard_item.setBackground( QBrush( '#FABF8F' ) )
                 standard_item.setTextAlignment( Qt.AlignHCenter | Qt.AlignVCenter )
                 standard_item.setFlags( standard_item.flags() & ~Qt.ItemIsEditable )
                 self.per_stock_trading_data_model.setItem( row, column, standard_item ) 
