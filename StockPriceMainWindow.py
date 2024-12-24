@@ -956,6 +956,90 @@ class MainWindow( QMainWindow ):
             self.refresh_trading_data_table( dict_per_company_trading_data[ self.str_picked_stock_number ] )
         self.auto_save_trading_data()
 
+    def on_stock_list_table_vertical_header_section_moved( self, n_logical_index, n_old_visual_index, n_new_visual_index ): 
+        str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
+        dict_per_account_all_stock_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ]
+        list_stock_number = []
+        for index_row,( key_stock_number, value ) in enumerate( dict_per_account_all_stock_trading_data.items() ):
+            list_stock_number.append( key_stock_number )
+
+        element = list_stock_number.pop( n_old_visual_index )
+        list_stock_number.insert( n_new_visual_index, element )
+
+        dict_all_stock_trading_data_new = {}
+        for index_row, str_stock_number in enumerate( list_stock_number ):
+            dict_all_stock_trading_data_new[ str_stock_number ] = dict_per_account_all_stock_trading_data[ str_stock_number ]
+
+
+        self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ] = dict_all_stock_trading_data_new
+        self.refresh_stock_list_table()
+        self.auto_save_trading_data()
+
+    def on_stock_list_table_vertical_section_clicked( self, n_logical_index ): 
+        table_view = self.ui.qtTabWidget.currentWidget().findChild( QTableView )
+        if table_view:
+            table_model = table_view.model()
+
+            str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
+            dict_per_account_all_stock_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ]
+            header_text = table_model.verticalHeaderItem( n_logical_index ).text()
+            str_stock_number = header_text.split(" ")[0]
+
+            if str_stock_number in dict_per_account_all_stock_trading_data:
+                if str_stock_number != self.str_picked_stock_number:
+                    self.str_picked_stock_number = str_stock_number
+                    list_trading_data = dict_per_account_all_stock_trading_data[ str_stock_number ]
+                    self.refresh_trading_data_table( list_trading_data )
+            self.update_button_enable_disable_status()
+
+    def on_stock_list_table_horizontal_section_resized( self, n_logical_index, n_old_size, n_new_size ): 
+        self.list_stock_list_column_width[ n_logical_index ] = n_new_size
+        self.save_share_UI_state()
+
+    def on_stock_list_table_item_clicked( self, index: QModelIndex, table_model ):
+        str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
+        dict_per_account_all_stock_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ]
+        item = table_model.itemFromIndex( index )
+        if item is not None:
+            n_column = index.column()  # 獲取列索引
+            n_row = index.row()  # 獲取行索引
+            header_text = table_model.verticalHeaderItem( index.row() ).text()
+            str_stock_number = header_text.split(" ")[0]
+            
+            if n_column == 0:#自動帶入股利按鈕
+                list_trading_data = dict_per_account_all_stock_trading_data[ str_stock_number ]
+                list_trading_data[ 0 ][ TradingData.USE_AUTO_DIVIDEND_DATA ] = not list_trading_data[ 0 ][ TradingData.USE_AUTO_DIVIDEND_DATA ]
+                self.str_picked_stock_number = str_stock_number
+                sorted_list = self.process_single_trading_data( str_tab_widget_name, str_stock_number )
+                self.refresh_stock_list_table()
+                self.refresh_trading_data_table( sorted_list )
+                self.auto_save_trading_data()
+            elif n_column == len( g_list_stock_list_table_horizontal_header ) - 1:#刪除按鈕
+                result = self.show_message_box( "警告", f"確定要刪掉『{header_text}』的所有資料嗎?" )
+                if result:
+                    del dict_per_account_all_stock_trading_data[ str_stock_number ]
+                    self.str_picked_stock_number = None
+                    self.refresh_stock_list_table()
+                    self.clear_per_stock_trading_table()
+                    self.auto_save_trading_data()
+            elif n_column == len( g_list_stock_list_table_horizontal_header ) - 2:#匯出按鈕
+                file_path = self.open_save_json_file_dialog()
+                if file_path:
+                    list_save_tab_widget = [ self.ui.qtTabWidget.currentIndex() ]
+                    self.manual_save_trading_data( list_save_tab_widget, file_path, str_stock_number )
+                
+                if str_stock_number != self.str_picked_stock_number:
+                    self.str_picked_stock_number = str_stock_number
+                    list_trading_data = dict_per_account_all_stock_trading_data[ str_stock_number ]
+                    self.refresh_trading_data_table( list_trading_data )
+            elif str_stock_number in dict_per_account_all_stock_trading_data:
+                if str_stock_number != self.str_picked_stock_number:
+                    self.str_picked_stock_number = str_stock_number
+                    list_trading_data = dict_per_account_all_stock_trading_data[ str_stock_number ]
+                    self.refresh_trading_data_table( list_trading_data )
+
+        self.update_button_enable_disable_status()
+
     def on_change_display_mode( self ): 
         if self.str_picked_stock_number != None:
             str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
@@ -1056,90 +1140,6 @@ class MainWindow( QMainWindow ):
             self.refresh_stock_list_table()
             self.refresh_trading_data_table( sorted_list )
             self.auto_save_trading_data()
-
-    def on_stock_list_table_vertical_header_section_moved( self, n_logical_index, n_old_visual_index, n_new_visual_index ): 
-        str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
-        dict_per_account_all_stock_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ]
-        list_stock_number = []
-        for index_row,( key_stock_number, value ) in enumerate( dict_per_account_all_stock_trading_data.items() ):
-            list_stock_number.append( key_stock_number )
-
-        element = list_stock_number.pop( n_old_visual_index )
-        list_stock_number.insert( n_new_visual_index, element )
-
-        dict_all_stock_trading_data_new = {}
-        for index_row, str_stock_number in enumerate( list_stock_number ):
-            dict_all_stock_trading_data_new[ str_stock_number ] = dict_per_account_all_stock_trading_data[ str_stock_number ]
-
-
-        self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ] = dict_all_stock_trading_data_new
-        self.refresh_stock_list_table()
-        self.auto_save_trading_data()
-
-    def on_stock_list_table_vertical_section_clicked( self, n_logical_index ): 
-        table_view = self.ui.qtTabWidget.currentWidget().findChild( QTableView )
-        if table_view:
-            table_model = table_view.model()
-
-            str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
-            dict_per_account_all_stock_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ]
-            header_text = table_model.verticalHeaderItem( n_logical_index ).text()
-            str_stock_number = header_text.split(" ")[0]
-
-            if str_stock_number in dict_per_account_all_stock_trading_data:
-                if str_stock_number != self.str_picked_stock_number:
-                    self.str_picked_stock_number = str_stock_number
-                    list_trading_data = dict_per_account_all_stock_trading_data[ str_stock_number ]
-                    self.refresh_trading_data_table( list_trading_data )
-            self.update_button_enable_disable_status()
-
-    def on_stock_list_table_horizontal_section_resized( self, n_logical_index, n_old_size, n_new_size ): 
-        self.list_stock_list_column_width[ n_logical_index ] = n_new_size
-        self.save_share_UI_state()
-
-    def on_stock_list_table_item_clicked( self, index: QModelIndex, table_model ):
-        str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
-        dict_per_account_all_stock_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ]
-        item = table_model.itemFromIndex( index )
-        if item is not None:
-            n_column = index.column()  # 獲取列索引
-            n_row = index.row()  # 獲取行索引
-            header_text = table_model.verticalHeaderItem( index.row() ).text()
-            str_stock_number = header_text.split(" ")[0]
-            
-            if n_column == 0:#自動帶入股利按鈕
-                list_trading_data = dict_per_account_all_stock_trading_data[ str_stock_number ]
-                list_trading_data[ 0 ][ TradingData.USE_AUTO_DIVIDEND_DATA ] = not list_trading_data[ 0 ][ TradingData.USE_AUTO_DIVIDEND_DATA ]
-                self.str_picked_stock_number = str_stock_number
-                sorted_list = self.process_single_trading_data( str_tab_widget_name, str_stock_number )
-                self.refresh_stock_list_table()
-                self.refresh_trading_data_table( sorted_list )
-                self.auto_save_trading_data()
-            elif n_column == len( g_list_stock_list_table_horizontal_header ) - 1:#刪除按鈕
-                result = self.show_message_box( "警告", f"確定要刪掉『{header_text}』的所有資料嗎?" )
-                if result:
-                    del dict_per_account_all_stock_trading_data[ str_stock_number ]
-                    self.str_picked_stock_number = None
-                    self.refresh_stock_list_table()
-                    self.clear_per_stock_trading_table()
-                    self.auto_save_trading_data()
-            elif n_column == len( g_list_stock_list_table_horizontal_header ) - 2:#匯出按鈕
-                file_path = self.open_save_json_file_dialog()
-                if file_path:
-                    list_save_tab_widget = [ self.ui.qtTabWidget.currentIndex() ]
-                    self.manual_save_trading_data( list_save_tab_widget, file_path, str_stock_number )
-                
-                if str_stock_number != self.str_picked_stock_number:
-                    self.str_picked_stock_number = str_stock_number
-                    list_trading_data = dict_per_account_all_stock_trading_data[ str_stock_number ]
-                    self.refresh_trading_data_table( list_trading_data )
-            elif str_stock_number in dict_per_account_all_stock_trading_data:
-                if str_stock_number != self.str_picked_stock_number:
-                    self.str_picked_stock_number = str_stock_number
-                    list_trading_data = dict_per_account_all_stock_trading_data[ str_stock_number ]
-                    self.refresh_trading_data_table( list_trading_data )
-
-        self.update_button_enable_disable_status()
 
     def on_trading_data_table_item_clicked( self, index: QModelIndex, table_model ): 
         item = table_model.itemFromIndex( index )
@@ -1571,90 +1571,128 @@ class MainWindow( QMainWindow ):
             self.update_button_enable_disable_status()
             self.auto_save_trading_data()
 
-    def open_load_json_file_dialog( self ): 
-        # 彈出讀取檔案對話框
-        file_path, _ = QFileDialog.getOpenFileName(
-            self,
-            "匯入交易資料",     # 對話框標題
-            "",                # 預設路徑
-            "JSON (*.json);;"  # 檔案類型過濾
-        )
-        return file_path
+    def initialize( self ): 
+        with QSignalBlocker( self.ui.qtTabWidget ):
+            self.load_trading_data_and_create_tab( g_trading_data_json_file_path, self.dict_all_account_all_stock_trading_data, self.dict_all_account_ui_state, True )
+            self.load_share_UI_state()
+            if len( self.dict_all_account_all_stock_trading_data ) == 0:
+                str_tab_name = self.add_new_tab_and_table()
+                self.dict_all_account_all_stock_trading_data[ str_tab_name ] = {}
+                self.dict_all_account_ui_state[ str_tab_name ] = { "discount_checkbox": True, "discount_value": 0.6, "insurance_checkbox": False }
+            self.ui.qtTabWidget.setCurrentIndex( 0 )
+            self.process_all_trading_data()
+            self.refresh_stock_list_table()
 
-    def open_save_json_file_dialog( self ): 
-        # 彈出儲存檔案對話框
-        file_path, _ = QFileDialog.getSaveFileName(
-            self,
-            "匯出交易資料",     # 對話框標題
-            "",                # 預設路徑
-            "JSON (*.json);;"  # 檔案類型過濾
-        )
-        return file_path
+    def load_trading_data_and_create_tab( self, file_path, dict_all_account_all_stock_trading_data, dict_all_account_ui_state, b_create_tab ): 
+        if not os.path.exists( file_path ):
+            return
+
+        with open( file_path, 'r', encoding='utf-8' ) as f:
+            version = f.readline().strip()
+            data = json.load( f )
+
+        for item_account in data:
+            if "account_name" in item_account and \
+               "trading_data" in item_account and \
+               "discount_checkbox" in item_account and \
+               "discount_value" in item_account and \
+               "insurance_checkbox" in item_account:
+                dict_per_account_all_stock_trading_data = item_account[ "trading_data" ]
+                dict_ui_state = {}
+                dict_ui_state[ "discount_checkbox" ] = item_account[ "discount_checkbox" ]
+                dict_ui_state[ "discount_value" ] = item_account[ "discount_value" ]
+                dict_ui_state[ "insurance_checkbox" ] = item_account[ "insurance_checkbox" ]
+
+                dict_per_stock_trading_data = {} 
+                for key_stock_number, value_list_trading_data  in dict_per_account_all_stock_trading_data.items():
+                    list_trading_data = []
+                    for item_trading_data in value_list_trading_data:
+                        if ( "trading_date" in item_trading_data and
+                             "trading_type" in item_trading_data and
+                             "trading_price" in item_trading_data and
+                             "trading_count" in item_trading_data and
+                             "trading_fee_discount" in item_trading_data and
+                             "stock_dividend_per_share" in item_trading_data and
+                             "cash_dividend_per_share" in item_trading_data and
+                             "capital_reduction_per_share" in item_trading_data ):
+
+                            dict_per_trading_data = Utility.generate_trading_data( item_trading_data[ "trading_date" ],                 #交易日期
+                                                                                   TradingType( item_trading_data[ "trading_type" ] ),  #交易種類
+                                                                                   item_trading_data[ "trading_price" ],                #交易價格
+                                                                                   item_trading_data[ "trading_count" ],                #交易股數
+                                                                                   item_trading_data[ "trading_fee_discount" ],         #手續費折扣
+                                                                                   item_trading_data[ "stock_dividend_per_share" ],     #每股股票股利
+                                                                                   item_trading_data[ "cash_dividend_per_share" ],      #每股現金股利
+                                                                                   item_trading_data[ "capital_reduction_per_share" ] ) #每股減資金額     
+                            if item_trading_data[ "trading_date" ] == '0001-01-01':
+                                dict_per_trading_data[ TradingData.USE_AUTO_DIVIDEND_DATA ] = item_trading_data[ "use_auto_dividend_data" ]       
+                            list_trading_data.append( dict_per_trading_data )
+                    dict_per_stock_trading_data[ key_stock_number ] = list_trading_data
+                if b_create_tab:
+                    str_tab_name = self.add_new_tab_and_table( item_account[ "account_name" ] )
+                    dict_all_account_ui_state[ str_tab_name ] = dict_ui_state
+                    dict_all_account_all_stock_trading_data[ str_tab_name ] = dict_per_stock_trading_data
+                else:
+                    dict_all_account_ui_state[ item_account[ "account_name" ] ] = dict_ui_state
+                    dict_all_account_all_stock_trading_data[ item_account[ "account_name" ] ] = dict_per_stock_trading_data
+
+    def auto_save_trading_data( self ): 
+        list_save_tab_widget = list( range( self.ui.qtTabWidget.count() - 1 ) )
+        self.manual_save_trading_data( list_save_tab_widget, g_trading_data_json_file_path )
+
+    def manual_save_trading_data( self, list_save_tab_indice, file_path, str_stock_number = None ): 
+        export_list_all_account_all_stock_trading_data = []
+
+        for index in range( self.ui.qtTabWidget.count() - 1 ):
+            if index not in list_save_tab_indice:
+                continue
+            tab_widget = self.ui.qtTabWidget.widget( index )
+
+            list_qt_insurance_check_box = tab_widget.findChildren( QCheckBox, name="insurance")
+
+            str_tab_title = self.ui.qtTabWidget.tabText( index )
+            str_tab_widget_name = tab_widget.objectName()
+            value_dict_per_account_all_stock_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ]
+            export_dict_per_account_all_info = {}
+            export_dict_per_account_all_stock_trading_data = {}
+            for key_stock, value_list_per_stock_trading_data in value_dict_per_account_all_stock_trading_data.items():
+                if str_stock_number is not None and key_stock != str_stock_number:
+                    continue
+                export_data = []
+                for item in value_list_per_stock_trading_data:
+                    if TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE in item and item[ TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE ] == True:
+                        continue
+                    dict_per_trading_data = {}
+                    dict_per_trading_data[ "trading_date" ] = item[ TradingData.TRADING_DATE ]
+                    dict_per_trading_data[ "trading_type" ] = int( item[ TradingData.TRADING_TYPE ].value )
+                    if item[ TradingData.TRADING_TYPE ] == TradingType.CAPITAL_REDUCTION: #CAPITAL_REDUCTION 為了顯示，所以需要寫一些數值進去，但實際上不用存
+                        dict_per_trading_data[ "trading_price" ] = 0
+                        dict_per_trading_data[ "trading_count" ] = 0
+                    else:
+                        dict_per_trading_data[ "trading_price" ] = item[ TradingData.TRADING_PRICE ]
+                        dict_per_trading_data[ "trading_count" ] = item[ TradingData.TRADING_COUNT ]
+                    dict_per_trading_data[ "trading_fee_discount" ] = item[ TradingData.TRADING_FEE_DISCOUNT ]
+                    dict_per_trading_data[ "stock_dividend_per_share" ] = item[ TradingData.STOCK_DIVIDEND_PER_SHARE ]
+                    dict_per_trading_data[ "cash_dividend_per_share" ] = item[ TradingData.CASH_DIVIDEND_PER_SHARE ]
+                    dict_per_trading_data[ "capital_reduction_per_share" ] = item[ TradingData.CAPITAL_REDUCTION_PER_SHARE ]
+                    if dict_per_trading_data[ "trading_date" ] == '0001-01-01':
+                        dict_per_trading_data[ "use_auto_dividend_data" ] = item[ TradingData.USE_AUTO_DIVIDEND_DATA ]
+
+                    export_data.append( dict_per_trading_data )
+                export_dict_per_account_all_stock_trading_data[ key_stock ] = export_data
+            export_dict_per_account_all_info[ "account_name" ] = str_tab_title
+            export_dict_per_account_all_info[ "trading_data" ] = export_dict_per_account_all_stock_trading_data
+            export_dict_per_account_all_info[ "discount_checkbox" ] = self.dict_all_account_ui_state[ str_tab_widget_name ][ "discount_checkbox"]
+            export_dict_per_account_all_info[ "discount_value" ] = self.dict_all_account_ui_state[ str_tab_widget_name ][ "discount_value"]
+            export_dict_per_account_all_info[ "insurance_checkbox" ] = list_qt_insurance_check_box[ 0 ].isChecked()
+
+
+            export_list_all_account_all_stock_trading_data.append( export_dict_per_account_all_info )
+
+        with open( file_path, 'w', encoding='utf-8' ) as f:
+            f.write( "v1.0.0" '\n' )
+            json.dump( export_list_all_account_all_stock_trading_data, f, ensure_ascii=False, indent=4 )
     
-    def open_save_excel_file_dialog( self ): 
-        # 彈出儲存檔案對話框
-        file_path, _ = QFileDialog.getSaveFileName(
-            self,
-            "Save File",             # 對話框標題
-            "",                      # 預設路徑
-            "Excel 活頁簿 (*.xlsx);;All Files (*)"  # 檔案類型過濾
-        )
-        return file_path
-
-    def show_message_box( self, str_title, str_message ): 
-        message_box = QMessageBox( self )
-        message_box.setIcon( QMessageBox.Warning )  # 設置為警告圖示
-        message_box.setWindowTitle( str_title )
-        message_box.setText( str_message )
-
-        # 添加自訂按鈕
-        button_ok = message_box.addButton("確定", QMessageBox.AcceptRole)
-        button_cancel = message_box.addButton("取消", QMessageBox.RejectRole)
-
-        message_box.exec()
-
-        if message_box.clickedButton() == button_ok:
-            return True
-        elif message_box.clickedButton() == button_cancel:
-            return False
-
-    def compare_json_files( self, file1, file2 ):
-        """比較兩個 JSON 文件內容是否一致"""
-        if os.path.exists( file1 ) and os.path.exists( file2 ):
-            with open( file1, 'r', encoding='utf-8') as f1, open( file2, 'r', encoding='utf-8') as f2:
-                f1.readline()  # 跳過第一行
-                data1 = json.load(f1)  # 解析第一個 JSON 文件
-                
-                f2.readline()  # 跳過第一行
-                data2 = json.load(f2)  # 解析第二個 JSON 文件
-
-            # 返回比較結果
-            return data1 == data2
-        else:
-            return False
-    
-    def update_button_enable_disable_status( self ): 
-        if self.str_picked_stock_number is None or self.ui.qtTabWidget.currentWidget().objectName() not in self.dict_all_account_all_stock_trading_data:
-            self.ui.qtAddTradingDataPushButton.setEnabled( False )
-            self.ui.qtAddDividendDataPushButton.setEnabled( False )
-            self.ui.qtAddLimitBuyingDataPushButton.setEnabled( False )
-            self.ui.qtAddCapitalReductionDataPushButton.setEnabled( False )
-            self.ui.qtExportSelectedStockTradingDataPushButton.setEnabled( False )
-        else:
-            self.ui.qtAddTradingDataPushButton.setEnabled( True )
-            self.ui.qtAddLimitBuyingDataPushButton.setEnabled( True )
-            self.ui.qtAddCapitalReductionDataPushButton.setEnabled( True )
-            self.ui.qtExportSelectedStockTradingDataPushButton.setEnabled( True )
-            str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
-
-            dict_per_account_all_stock_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ]
-            if self.str_picked_stock_number in dict_per_account_all_stock_trading_data:
-                list_trading_data = dict_per_account_all_stock_trading_data[ self.str_picked_stock_number ]
-                b_use_auto_dividend = list_trading_data[ 0 ][ TradingData.USE_AUTO_DIVIDEND_DATA ]
-                self.ui.qtAddDividendDataPushButton.setEnabled( not b_use_auto_dividend )
-            else:
-                self.ui.qtAddDividendDataPushButton.setEnabled( False )
-
     def save_share_UI_state( self ): 
         # 確保目錄存在，若不存在則遞歸創建
         os.makedirs( os.path.dirname( g_UISetting_file_path ), exist_ok = True )
@@ -1712,6 +1750,11 @@ class MainWindow( QMainWindow ):
                             for i in range( 1, len( row ) ):
                                 self.list_stock_list_column_width.append( int( row[ i ] ) )
 
+    def process_all_trading_data( self ): 
+        for key_account_name, value_dict_per_company_trading_data in self.dict_all_account_all_stock_trading_data.items():
+            for key_stock_name, value_list_trading_data in value_dict_per_company_trading_data.items():
+                self.process_single_trading_data( key_account_name, key_stock_name )
+    
     def process_single_trading_data( self, str_tab_widget_name, str_stock_number ): 
         list_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ][ str_stock_number ]
         #先拔掉所有的AUTO_DIVIDEND_DATA，下面有需要再重新插入，避免重複插入
@@ -1903,134 +1946,7 @@ class MainWindow( QMainWindow ):
 
         self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ][ str_stock_number ] = list_calibration_data
         return list_calibration_data
-
-    def process_all_trading_data( self ): 
-        for key_account_name, value_dict_per_company_trading_data in self.dict_all_account_all_stock_trading_data.items():
-            for key_stock_name, value_list_trading_data in value_dict_per_company_trading_data.items():
-                self.process_single_trading_data( key_account_name, key_stock_name )
-
-    def auto_save_trading_data( self ): 
-        list_save_tab_widget = list( range( self.ui.qtTabWidget.count() - 1 ) )
-        self.manual_save_trading_data( list_save_tab_widget, g_trading_data_json_file_path )
-
-    def manual_save_trading_data( self, list_save_tab_indice, file_path, str_stock_number = None ): 
-        export_list_all_account_all_stock_trading_data = []
-
-        for index in range( self.ui.qtTabWidget.count() - 1 ):
-            if index not in list_save_tab_indice:
-                continue
-            tab_widget = self.ui.qtTabWidget.widget( index )
-
-            list_qt_insurance_check_box = tab_widget.findChildren( QCheckBox, name="insurance")
-
-            str_tab_title = self.ui.qtTabWidget.tabText( index )
-            str_tab_widget_name = tab_widget.objectName()
-            value_dict_per_account_all_stock_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ]
-            export_dict_per_account_all_info = {}
-            export_dict_per_account_all_stock_trading_data = {}
-            for key_stock, value_list_per_stock_trading_data in value_dict_per_account_all_stock_trading_data.items():
-                if str_stock_number is not None and key_stock != str_stock_number:
-                    continue
-                export_data = []
-                for item in value_list_per_stock_trading_data:
-                    if TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE in item and item[ TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE ] == True:
-                        continue
-                    dict_per_trading_data = {}
-                    dict_per_trading_data[ "trading_date" ] = item[ TradingData.TRADING_DATE ]
-                    dict_per_trading_data[ "trading_type" ] = int( item[ TradingData.TRADING_TYPE ].value )
-                    if item[ TradingData.TRADING_TYPE ] == TradingType.CAPITAL_REDUCTION: #CAPITAL_REDUCTION 為了顯示，所以需要寫一些數值進去，但實際上不用存
-                        dict_per_trading_data[ "trading_price" ] = 0
-                        dict_per_trading_data[ "trading_count" ] = 0
-                    else:
-                        dict_per_trading_data[ "trading_price" ] = item[ TradingData.TRADING_PRICE ]
-                        dict_per_trading_data[ "trading_count" ] = item[ TradingData.TRADING_COUNT ]
-                    dict_per_trading_data[ "trading_fee_discount" ] = item[ TradingData.TRADING_FEE_DISCOUNT ]
-                    dict_per_trading_data[ "stock_dividend_per_share" ] = item[ TradingData.STOCK_DIVIDEND_PER_SHARE ]
-                    dict_per_trading_data[ "cash_dividend_per_share" ] = item[ TradingData.CASH_DIVIDEND_PER_SHARE ]
-                    dict_per_trading_data[ "capital_reduction_per_share" ] = item[ TradingData.CAPITAL_REDUCTION_PER_SHARE ]
-                    if dict_per_trading_data[ "trading_date" ] == '0001-01-01':
-                        dict_per_trading_data[ "use_auto_dividend_data" ] = item[ TradingData.USE_AUTO_DIVIDEND_DATA ]
-
-                    export_data.append( dict_per_trading_data )
-                export_dict_per_account_all_stock_trading_data[ key_stock ] = export_data
-            export_dict_per_account_all_info[ "account_name" ] = str_tab_title
-            export_dict_per_account_all_info[ "trading_data" ] = export_dict_per_account_all_stock_trading_data
-            export_dict_per_account_all_info[ "discount_checkbox" ] = self.dict_all_account_ui_state[ str_tab_widget_name ][ "discount_checkbox"]
-            export_dict_per_account_all_info[ "discount_value" ] = self.dict_all_account_ui_state[ str_tab_widget_name ][ "discount_value"]
-            export_dict_per_account_all_info[ "insurance_checkbox" ] = list_qt_insurance_check_box[ 0 ].isChecked()
-
-
-            export_list_all_account_all_stock_trading_data.append( export_dict_per_account_all_info )
-
-        with open( file_path, 'w', encoding='utf-8' ) as f:
-            f.write( "v1.0.0" '\n' )
-            json.dump( export_list_all_account_all_stock_trading_data, f, ensure_ascii=False, indent=4 )
-
-    def load_trading_data_and_create_tab( self, file_path, dict_all_account_all_stock_trading_data, dict_all_account_ui_state, b_create_tab ): 
-        if not os.path.exists( file_path ):
-            return
-
-        with open( file_path, 'r', encoding='utf-8' ) as f:
-            version = f.readline().strip()
-            data = json.load( f )
-
-        for item_account in data:
-            if "account_name" in item_account and \
-               "trading_data" in item_account and \
-               "discount_checkbox" in item_account and \
-               "discount_value" in item_account and \
-               "insurance_checkbox" in item_account:
-                dict_per_account_all_stock_trading_data = item_account[ "trading_data" ]
-                dict_ui_state = {}
-                dict_ui_state[ "discount_checkbox" ] = item_account[ "discount_checkbox" ]
-                dict_ui_state[ "discount_value" ] = item_account[ "discount_value" ]
-                dict_ui_state[ "insurance_checkbox" ] = item_account[ "insurance_checkbox" ]
-
-                dict_per_stock_trading_data = {} 
-                for key_stock_number, value_list_trading_data  in dict_per_account_all_stock_trading_data.items():
-                    list_trading_data = []
-                    for item_trading_data in value_list_trading_data:
-                        if ( "trading_date" in item_trading_data and
-                             "trading_type" in item_trading_data and
-                             "trading_price" in item_trading_data and
-                             "trading_count" in item_trading_data and
-                             "trading_fee_discount" in item_trading_data and
-                             "stock_dividend_per_share" in item_trading_data and
-                             "cash_dividend_per_share" in item_trading_data and
-                             "capital_reduction_per_share" in item_trading_data ):
-
-                            dict_per_trading_data = Utility.generate_trading_data( item_trading_data[ "trading_date" ],                 #交易日期
-                                                                                   TradingType( item_trading_data[ "trading_type" ] ),  #交易種類
-                                                                                   item_trading_data[ "trading_price" ],                #交易價格
-                                                                                   item_trading_data[ "trading_count" ],                #交易股數
-                                                                                   item_trading_data[ "trading_fee_discount" ],         #手續費折扣
-                                                                                   item_trading_data[ "stock_dividend_per_share" ],     #每股股票股利
-                                                                                   item_trading_data[ "cash_dividend_per_share" ],      #每股現金股利
-                                                                                   item_trading_data[ "capital_reduction_per_share" ] ) #每股減資金額     
-                            if item_trading_data[ "trading_date" ] == '0001-01-01':
-                                dict_per_trading_data[ TradingData.USE_AUTO_DIVIDEND_DATA ] = item_trading_data[ "use_auto_dividend_data" ]       
-                            list_trading_data.append( dict_per_trading_data )
-                    dict_per_stock_trading_data[ key_stock_number ] = list_trading_data
-                if b_create_tab:
-                    str_tab_name = self.add_new_tab_and_table( item_account[ "account_name" ] )
-                    dict_all_account_ui_state[ str_tab_name ] = dict_ui_state
-                    dict_all_account_all_stock_trading_data[ str_tab_name ] = dict_per_stock_trading_data
-                else:
-                    dict_all_account_ui_state[ item_account[ "account_name" ] ] = dict_ui_state
-                    dict_all_account_all_stock_trading_data[ item_account[ "account_name" ] ] = dict_per_stock_trading_data
-
-    def initialize( self ): 
-        with QSignalBlocker( self.ui.qtTabWidget ):
-            self.load_trading_data_and_create_tab( g_trading_data_json_file_path, self.dict_all_account_all_stock_trading_data, self.dict_all_account_ui_state, True )
-            self.load_share_UI_state()
-            if len( self.dict_all_account_all_stock_trading_data ) == 0:
-                str_tab_name = self.add_new_tab_and_table()
-                self.dict_all_account_all_stock_trading_data[ str_tab_name ] = {}
-                self.dict_all_account_ui_state[ str_tab_name ] = { "discount_checkbox": True, "discount_value": 0.6, "insurance_checkbox": False }
-            self.ui.qtTabWidget.setCurrentIndex( 0 )
-            self.process_all_trading_data()
-            self.refresh_stock_list_table()
-
+    
     def refresh_stock_list_table( self ): 
         str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
         dict_per_account_all_stock_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ]
@@ -2144,6 +2060,82 @@ class MainWindow( QMainWindow ):
         labels = self.ui.qtTabWidget.currentWidget().findChildren( QLabel, name="total_inventory_value_label")
         if labels:
             labels[ 0 ].setText( format( n_total_inventory, "," ) )
+    
+    def refresh_trading_data_table( self, sorted_list ):
+        self.clear_per_stock_trading_table()
+        self.per_stock_trading_data_model.setVerticalHeaderLabels( self.get_trading_data_header() )
+        self.ui.qtTradingDataTableView.horizontalHeader().hide()
+
+        if self.ui.qtFromNewToOldRadioButton.isChecked():
+            loop_list = sorted_list[::-1]
+            if self.ui.qtShow10RadioButton.isChecked():
+                loop_list = loop_list[:10]
+        else:
+            loop_list = sorted_list
+            if self.ui.qtShow10RadioButton.isChecked():
+                loop_list = loop_list[:11]
+
+        b_use_auto_dividend = sorted_list[ 0 ][ TradingData.USE_AUTO_DIVIDEND_DATA ]
+        column = 0
+        for dict_per_trading_data in loop_list:
+            e_trading_type = dict_per_trading_data[ TradingData.TRADING_TYPE ]
+            if e_trading_type == TradingType.TEMPLATE:
+                continue
+
+            if e_trading_type == TradingType.DIVIDEND:
+                if b_use_auto_dividend:#使用自動帶入股利資料，但是這筆資料不是自動股利資料，就跳過，反之亦然
+                    if TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE not in dict_per_trading_data or not dict_per_trading_data[TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE]:
+                        continue
+                else:
+                    if TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE in dict_per_trading_data and dict_per_trading_data[TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE]:
+                        continue
+
+            list_data = self.get_per_trading_data_text_list( dict_per_trading_data )
+
+            for row, data in enumerate( list_data ):
+                standard_item = QStandardItem( data )
+                if data == "買進":
+                    standard_item.setBackground( QBrush( '#DA9694' ) )
+                elif data == "賣出":
+                    standard_item.setBackground( QBrush( '#76933C' ) )
+                elif data == "股利分配":
+                    standard_item.setBackground( QBrush( '#8DB4E2' ) )
+                elif data == "減資":
+                    standard_item.setBackground( QBrush( '#B1A0C7' ) )
+                elif data == "增資":
+                    standard_item.setBackground( QBrush( '#FABF8F' ) )
+                standard_item.setTextAlignment( Qt.AlignHCenter | Qt.AlignVCenter )
+                standard_item.setFlags( standard_item.flags() & ~Qt.ItemIsEditable )
+                self.per_stock_trading_data_model.setItem( row, column, standard_item ) 
+
+            if e_trading_type != TradingType.DIVIDEND or not b_use_auto_dividend:
+                edit_icon_item = QStandardItem("")
+                edit_icon_item.setIcon( edit_icon )
+                edit_icon_item.setFlags( edit_icon_item.flags() & ~Qt.ItemIsEditable )
+                edit_icon_item.setData( dict_per_trading_data[ TradingData.SORTED_INDEX_NON_SAVE ], Qt.UserRole )
+                delete_icon_item = QStandardItem("")
+                delete_icon_item.setIcon( delete_icon )
+                delete_icon_item.setFlags( delete_icon_item.flags() & ~Qt.ItemIsEditable )
+                delete_icon_item.setData( dict_per_trading_data[ TradingData.SORTED_INDEX_NON_SAVE ], Qt.UserRole )
+
+                self.per_stock_trading_data_model.setItem( len( list_data ), column, edit_icon_item )
+                self.per_stock_trading_data_model.setItem( len( list_data ) + 1, column, delete_icon_item )
+            column += 1
+
+        for row in range( len( self.get_trading_data_header() ) ):
+            if row == 10 or row == 11:
+                self.ui.qtTradingDataTableView.setRowHeight( row, 40 )
+            else:
+                self.ui.qtTradingDataTableView.setRowHeight( row, 25 )
+
+    def clear_per_stock_trading_table( self ):
+        self.per_stock_trading_data_model.clear()
+        self.per_stock_trading_data_model.setVerticalHeaderLabels( self.get_trading_data_header() )
+        for row in range( len( self.get_trading_data_header() ) ):
+            if row == 10 or row == 11:
+                self.ui.qtTradingDataTableView.setRowHeight( row, 40 )
+            else:
+                self.ui.qtTradingDataTableView.setRowHeight( row, 25 )
 
     def get_trading_data_header( self ):
         if self.ui.qtShow1StockRadioButton.isChecked():
@@ -2281,82 +2273,91 @@ class MainWindow( QMainWindow ):
                       str_average_cost ]            #均價
         return list_data
 
-    def clear_per_stock_trading_table( self ):
-        self.per_stock_trading_data_model.clear()
-        self.per_stock_trading_data_model.setVerticalHeaderLabels( self.get_trading_data_header() )
-        for row in range( len( self.get_trading_data_header() ) ):
-            if row == 10 or row == 11:
-                self.ui.qtTradingDataTableView.setRowHeight( row, 40 )
-            else:
-                self.ui.qtTradingDataTableView.setRowHeight( row, 25 )
-
-    def refresh_trading_data_table( self, sorted_list ):
-        self.clear_per_stock_trading_table()
-        self.per_stock_trading_data_model.setVerticalHeaderLabels( self.get_trading_data_header() )
-        self.ui.qtTradingDataTableView.horizontalHeader().hide()
-
-        if self.ui.qtFromNewToOldRadioButton.isChecked():
-            loop_list = sorted_list[::-1]
-            if self.ui.qtShow10RadioButton.isChecked():
-                loop_list = loop_list[:10]
+    def update_button_enable_disable_status( self ): 
+        if self.str_picked_stock_number is None or self.ui.qtTabWidget.currentWidget().objectName() not in self.dict_all_account_all_stock_trading_data:
+            self.ui.qtAddTradingDataPushButton.setEnabled( False )
+            self.ui.qtAddDividendDataPushButton.setEnabled( False )
+            self.ui.qtAddLimitBuyingDataPushButton.setEnabled( False )
+            self.ui.qtAddCapitalReductionDataPushButton.setEnabled( False )
+            self.ui.qtExportSelectedStockTradingDataPushButton.setEnabled( False )
         else:
-            loop_list = sorted_list
-            if self.ui.qtShow10RadioButton.isChecked():
-                loop_list = loop_list[:11]
+            self.ui.qtAddTradingDataPushButton.setEnabled( True )
+            self.ui.qtAddLimitBuyingDataPushButton.setEnabled( True )
+            self.ui.qtAddCapitalReductionDataPushButton.setEnabled( True )
+            self.ui.qtExportSelectedStockTradingDataPushButton.setEnabled( True )
+            str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
 
-        b_use_auto_dividend = sorted_list[ 0 ][ TradingData.USE_AUTO_DIVIDEND_DATA ]
-        column = 0
-        for dict_per_trading_data in loop_list:
-            e_trading_type = dict_per_trading_data[ TradingData.TRADING_TYPE ]
-            if e_trading_type == TradingType.TEMPLATE:
-                continue
-
-            if e_trading_type == TradingType.DIVIDEND:
-                if b_use_auto_dividend:#使用自動帶入股利資料，但是這筆資料不是自動股利資料，就跳過，反之亦然
-                    if TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE not in dict_per_trading_data or not dict_per_trading_data[TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE]:
-                        continue
-                else:
-                    if TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE in dict_per_trading_data and dict_per_trading_data[TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE]:
-                        continue
-
-            list_data = self.get_per_trading_data_text_list( dict_per_trading_data )
-
-            for row, data in enumerate( list_data ):
-                standard_item = QStandardItem( data )
-                if data == "買進":
-                    standard_item.setBackground( QBrush( '#DA9694' ) )
-                elif data == "賣出":
-                    standard_item.setBackground( QBrush( '#76933C' ) )
-                elif data == "股利分配":
-                    standard_item.setBackground( QBrush( '#8DB4E2' ) )
-                elif data == "減資":
-                    standard_item.setBackground( QBrush( '#B1A0C7' ) )
-                elif data == "增資":
-                    standard_item.setBackground( QBrush( '#FABF8F' ) )
-                standard_item.setTextAlignment( Qt.AlignHCenter | Qt.AlignVCenter )
-                standard_item.setFlags( standard_item.flags() & ~Qt.ItemIsEditable )
-                self.per_stock_trading_data_model.setItem( row, column, standard_item ) 
-
-            if e_trading_type != TradingType.DIVIDEND or not b_use_auto_dividend:
-                edit_icon_item = QStandardItem("")
-                edit_icon_item.setIcon( edit_icon )
-                edit_icon_item.setFlags( edit_icon_item.flags() & ~Qt.ItemIsEditable )
-                edit_icon_item.setData( dict_per_trading_data[ TradingData.SORTED_INDEX_NON_SAVE ], Qt.UserRole )
-                delete_icon_item = QStandardItem("")
-                delete_icon_item.setIcon( delete_icon )
-                delete_icon_item.setFlags( delete_icon_item.flags() & ~Qt.ItemIsEditable )
-                delete_icon_item.setData( dict_per_trading_data[ TradingData.SORTED_INDEX_NON_SAVE ], Qt.UserRole )
-
-                self.per_stock_trading_data_model.setItem( len( list_data ), column, edit_icon_item )
-                self.per_stock_trading_data_model.setItem( len( list_data ) + 1, column, delete_icon_item )
-            column += 1
-
-        for row in range( len( self.get_trading_data_header() ) ):
-            if row == 10 or row == 11:
-                self.ui.qtTradingDataTableView.setRowHeight( row, 40 )
+            dict_per_account_all_stock_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ]
+            if self.str_picked_stock_number in dict_per_account_all_stock_trading_data:
+                list_trading_data = dict_per_account_all_stock_trading_data[ self.str_picked_stock_number ]
+                b_use_auto_dividend = list_trading_data[ 0 ][ TradingData.USE_AUTO_DIVIDEND_DATA ]
+                self.ui.qtAddDividendDataPushButton.setEnabled( not b_use_auto_dividend )
             else:
-                self.ui.qtTradingDataTableView.setRowHeight( row, 25 )
+                self.ui.qtAddDividendDataPushButton.setEnabled( False )
 
+    def open_load_json_file_dialog( self ): 
+        # 彈出讀取檔案對話框
+        file_path, _ = QFileDialog.getOpenFileName(
+            self,
+            "匯入交易資料",     # 對話框標題
+            "",                # 預設路徑
+            "JSON (*.json);;"  # 檔案類型過濾
+        )
+        return file_path
+
+    def open_save_json_file_dialog( self ): 
+        # 彈出儲存檔案對話框
+        file_path, _ = QFileDialog.getSaveFileName(
+            self,
+            "匯出交易資料",     # 對話框標題
+            "",                # 預設路徑
+            "JSON (*.json);;"  # 檔案類型過濾
+        )
+        return file_path
+    
+    def open_save_excel_file_dialog( self ): 
+        # 彈出儲存檔案對話框
+        file_path, _ = QFileDialog.getSaveFileName(
+            self,
+            "Save File",             # 對話框標題
+            "",                      # 預設路徑
+            "Excel 活頁簿 (*.xlsx);;All Files (*)"  # 檔案類型過濾
+        )
+        return file_path
+
+    def show_message_box( self, str_title, str_message ): 
+        message_box = QMessageBox( self )
+        message_box.setIcon( QMessageBox.Warning )  # 設置為警告圖示
+        message_box.setWindowTitle( str_title )
+        message_box.setText( str_message )
+
+        # 添加自訂按鈕
+        button_ok = message_box.addButton("確定", QMessageBox.AcceptRole)
+        button_cancel = message_box.addButton("取消", QMessageBox.RejectRole)
+
+        message_box.exec()
+
+        if message_box.clickedButton() == button_ok:
+            return True
+        elif message_box.clickedButton() == button_cancel:
+            return False
+
+    def compare_json_files( self, file1, file2 ):
+        """比較兩個 JSON 文件內容是否一致"""
+        if os.path.exists( file1 ) and os.path.exists( file2 ):
+            with open( file1, 'r', encoding='utf-8') as f1, open( file2, 'r', encoding='utf-8') as f2:
+                f1.readline()  # 跳過第一行
+                data1 = json.load(f1)  # 解析第一個 JSON 文件
+                
+                f2.readline()  # 跳過第一行
+                data2 = json.load(f2)  # 解析第二個 JSON 文件
+
+            # 返回比較結果
+            return data1 == data2
+        else:
+            return False
+
+    #region 從網上下載資料
     def check_internet_via_http( self, url="https://www.google.com", timeout=3):
         """
         檢測是否有網路連線（透過 HTTP 請求）
@@ -3107,6 +3108,7 @@ class MainWindow( QMainWindow ):
 
             return list_data
         return []
+    #endregion
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)  # 創建應用程式
