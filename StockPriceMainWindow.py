@@ -634,8 +634,18 @@ class MainWindow( QMainWindow ):
         self.list_stock_list_column_width[ len( g_list_stock_list_table_horizontal_header ) - 1 ] = 40
         self.n_current_tab = 0
         self.n_tab_index = 0
-        
+        self.load_stylesheet("style.css")
         self.initialize()
+
+    def load_stylesheet( self, file_path ):
+        try:
+            with open(file_path, "r", encoding="utf-8") as file:  # 指定 UTF-8 編碼
+                stylesheet = file.read()
+                self.setStyleSheet(stylesheet)
+        except FileNotFoundError:
+            print(f"CSS 檔案 {file_path} 找不到")
+        except Exception as e:
+            print(f"讀取 CSS 檔案時發生錯誤: {e}")
 
     def add_new_tab_and_table( self, str_tab_title = None ): 
         str_tab_name = f"TabIndex{ self.n_tab_index }"

@@ -1,0 +1,65 @@
+QMainWindow {
+    background-color: #1E1E1E;  
+    color: white;              /* 文字顏色 */
+}
+
+QMenuBar {
+                background-color: #00FF00;  /* 菜單欄背景顏色 */
+                color: #D8DEE9;             /* 文字顏色 */
+            }
+
+QMenuBar::item {
+                background-color: transparent;  /* 預設透明背景 */
+                padding: 5px 15px;             /* 內邊距調整 */
+            }
+
+QTabWidget {
+    background-color: #4B4B4B;  /* 深藍灰色背景 */
+    color: #FFFFFF;              /* 文字顏色 */
+}
+
+QTabBar::tab {
+                background: #454545;      /* Tab 背景顏色 */
+                color: #FFFFFF;           /* Tab 文字顏色 */
+                /*border: 1px solid #4C566A;*/
+}
+
+QTableView {
+    background-color: #2D2D2D;  /* 深藍灰色背景 */
+    color: white;              /* 文字顏色 */
+}
+
+QHeaderView::section {
+                background-color: #474747;  /* 表頭背景顏色 */
+                color: #FFFFFF;            /* 表頭文字顏色 */
+                /*font-weight: bold;         /* 粗體文字 */
+                /*border: 1px solid #FFFFFF; /* 邊框顏色 */
+                /*padding: 5px;              /* 內邊距 */
+            }
+			
+QRadioButton{
+	color: #FFFFFF;
+}
+
+QCheckBox{
+	color: #FFFFFF;
+}
+
+QLabel{
+	color: #FFFFFF;
+}
+			
+QPushButton {
+	background: qlineargradient(
+    x1: 0, y1: 0, x2: 0, y2: 1,
+    stop: 0 #545454, stop: 1 #474747
+	);
+    border: 1px solid #686868; /* 邊框顏色 */
+	border-radius: 2px;       /* 圓角 */
+    color: #FFFFFF;           /* 按鈕文字顏色 */
+}
+
+QPushButton:hover {
+    background-color: #81A1C1; /* 滑鼠懸停時按鈕顏色 */
+}
+
