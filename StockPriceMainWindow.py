@@ -11,6 +11,7 @@ from QtStockTradingEditDialog import Ui_Dialog as Ui_StockTradingDialog
 from QtStockDividendEditDialog import Ui_Dialog as Ui_StockDividendDialog
 from QtStockCapitalReductionEditDialog import Ui_Dialog as Ui_StockCapitalReductionDialog
 from QtDuplicateOptionDialog import Ui_Dialog as Ui_DuplicateOptionDialog
+from QtSaveCheckDialog import Ui_Dialog as Ui_SaveCheckDialog
 from PySide6.QtWidgets import QApplication, QMainWindow, QDialog, QButtonGroup, QMessageBox, QStyledItemDelegate, QFileDialog, QHeaderView, QVBoxLayout, QHBoxLayout, \
                               QLabel, QLineEdit, QDialogButtonBox, QTabBar, QWidget, QTableView, QComboBox, QPushButton, QSizePolicy, QSpacerItem, QCheckBox, QDoubleSpinBox
 from PySide6.QtGui import QStandardItemModel, QStandardItem, QIcon, QBrush
@@ -40,6 +41,7 @@ from decimal import Decimal
 # pyside6-uic QtStockCapitalReductionEditDialog.ui -o QtStockCapitalReductionEditDialog.py
 # pyside6-uic QtStockCapitalIncreaseEditDialog.ui -o QtStockCapitalIncreaseEditDialog.py
 # pyside6-uic QtDuplicateOptionDialog.ui -o QtDuplicateOptionDialog.py
+# pyside6-uic QtSaveCheckDialog.ui -o QtSaveCheckDialog.py
 
 # 以下兩個網站都可以下載"上市"ETF的股利
 # https://www.twse.com.tw/zh/products/securities/etf/products/div.html
@@ -541,6 +543,33 @@ class StockCapitalIncreaseEditDialog( QDialog ):
         n_trading_count = self.get_trading_count()
         self.ui.qtTotalCostLineEdit.setText( format( f_trading_price * n_trading_count, ',' ) )
 
+class SaveCheckDialog( QDialog ):
+    def __init__( self, str_title = '', parent = None ):
+        super().__init__( parent )
+
+        self.ui = Ui_SaveCheckDialog()
+        self.ui.setupUi( self )
+        self.setWindowTitle( str_title )
+        window_icon = QIcon( window_icon_file_path ) 
+        self.setWindowIcon( window_icon )
+
+        self.ui.qtSavePushButton.clicked.connect( self.save )
+        self.ui.qtNoSavePushButton.clicked.connect( self.no_save )
+        self.ui.qtAbortPushButton.clicked.connect( self.abort )
+        self.n_return = 0
+
+    def save( self ):
+        self.n_return = 1
+        self.accept()
+
+    def no_save( self ):
+        self.n_return = 2
+        self.accept()
+    
+    def abort( self ):
+        self.n_return = 3
+        self.accept()
+
 class MainWindow( QMainWindow ):
     def __init__(self):
         super( MainWindow, self ).__init__()
@@ -601,8 +630,17 @@ class MainWindow( QMainWindow ):
         self.ui.qtExportAllStockTradingDataPushButton.clicked.connect( self.on_export_all_to_excell_button_clicked )
         self.ui.qtExportSelectedStockTradingDataPushButton.clicked.connect( self.on_export_selected_to_excell_button_clicked )
 
-        self.ui.qtActionExportAllAccount.triggered.connect( self.on_export_all_account_trading_data_action_triggered )
-        self.ui.qtActionExportCurrentAccount.triggered.connect( self.on_export_per_account_trading_data_action_triggered )
+        self.ui.qtActionNew.setShortcut( "Ctrl+N" )
+        self.ui.qtActionNew.triggered.connect( self.on_new_file_action_triggered )
+        self.ui.qtActionOpen.setShortcut( "Ctrl+O" )
+        self.ui.qtActionOpen.triggered.connect( self.on_open_file_action_triggered )
+        self.ui.qtActionSaveAs.setShortcut( "Ctrl+A" )
+        self.ui.qtActionSaveAs.triggered.connect( self.on_save_as_all_account_trading_data_action_triggered )
+        self.ui.qtActionSave.setShortcut( "Ctrl+S" )
+        self.ui.qtActionSave.triggered.connect( self.on_save_all_account_trading_data_action_triggered )
+        self.ui.qtActionExportCurrentGroup.setShortcut( "Ctrl+E" )
+        self.ui.qtActionExportCurrentGroup.triggered.connect( self.on_export_current_group_trading_data_action_triggered )
+        self.ui.qtActionImport.setShortcut( "Ctrl+I" )
         self.ui.qtActionImport.triggered.connect( self.on_import_trading_data_action_triggered )
         
 
@@ -645,6 +683,7 @@ class MainWindow( QMainWindow ):
         self.list_stock_list_column_width[ len( g_list_stock_list_table_horizontal_header ) - 1 ] = 40
         self.n_current_tab = 0
         self.n_tab_index = 0
+        self.str_current_save_file_path = None
         # self.load_stylesheet("style.css")
         self.initialize()
 
@@ -658,25 +697,7 @@ class MainWindow( QMainWindow ):
         except Exception as e:
             print(f"讀取 CSS 檔案時發生錯誤: {e}")
 
-    def keyPressEvent(self, event):
-        key = event.key()
-        modifiers = QApplication.keyboardModifiers()
-        if modifiers == Qt.ControlModifier:
-            if event.key() == Qt.Key_S:
-                #儲存
-                pass
-            elif event.key() == Qt.Key_O:
-                #開啟
-                pass
-            elif event.key() == Qt.Key_N:
-                #新增
-                pass
-            elif event.key() == Qt.Key_A:
-                #開新檔案
-                pass   
-
     def keyReleaseEvent(self, event):
-        print(f"釋放了: {event.text()} 鍵")
         key = event.key()
         modifiers = QApplication.keyboardModifiers()
 
@@ -1365,13 +1386,114 @@ class MainWindow( QMainWindow ):
                 self.export_trading_data_to_excel( worksheet, key_stock_number, str_stock_name, value_list_trading_data )
             workbook.save( file_path )
 
-    def on_export_all_account_trading_data_action_triggered( self ): 
+    def on_new_file_action_triggered( self ): 
+        b_need_save = False
+        if self.str_current_save_file_path is None or not self.compare_json_files( self.str_current_save_file_path, g_trading_data_json_file_path ):
+            dialog = SaveCheckDialog( '開新檔案', self )
+            if dialog.exec():
+                if dialog.n_return == 1: #儲存
+                    b_need_save = True
+                elif dialog.n_return == 2: #不儲存
+                    pass
+                else: #取消
+                    return
+            else:
+                return
+        if b_need_save:
+            if self.str_current_save_file_path:
+                list_save_tab_widget = list( range( self.ui.qtTabWidget.count() - 1 ) )
+                self.manual_save_trading_data( list_save_tab_widget, self.str_current_save_file_path )
+            else:
+                file_path = self.open_save_json_file_dialog()
+                if file_path:
+                    list_save_tab_widget = list( range( self.ui.qtTabWidget.count() - 1 ) )
+                    self.manual_save_trading_data( list_save_tab_widget, file_path )
+                    self.str_current_save_file_path = file_path
+                else:
+                    return
+
+        with QSignalBlocker( self.ui.qtTabWidget ):
+            for index in range( self.ui.qtTabWidget.count() - 2, -1, -1 ):
+                self.ui.qtTabWidget.removeTab( index )
+
+        self.dict_all_account_all_stock_trading_data = {}
+        self.dict_all_account_ui_state = {}
+        str_tab_name = self.add_new_tab_and_table()
+        self.dict_all_account_all_stock_trading_data[ str_tab_name ] = {}
+        self.dict_all_account_ui_state[ str_tab_name ] = { "discount_checkbox": True, "discount_value": 0.6, "insurance_checkbox": False }
+        self.ui.qtTabWidget.setCurrentIndex( 0 )
+        self.str_picked_stock_number = None
+        self.refresh_stock_list_table()
+        self.clear_per_stock_trading_table()
+        self.update_button_enable_disable_status()
+        self.auto_save_trading_data()
+        self.str_current_save_file_path = None
+
+    def on_open_file_action_triggered( self ): 
+        file_path = self.open_load_json_file_dialog()
+        if file_path:
+            b_need_save = False
+            if self.str_current_save_file_path is None or not self.compare_json_files( self.str_current_save_file_path, g_trading_data_json_file_path ):
+                dialog = SaveCheckDialog( '開啟舊檔', self )
+                if dialog.exec():
+                    if dialog.n_return == 1: #儲存
+                        b_need_save = True
+                    elif dialog.n_return == 2: #不儲存
+                        pass
+                    else: #取消
+                        return
+                else:
+                    return
+            if b_need_save:
+                if self.str_current_save_file_path:
+                    list_save_tab_widget = list( range( self.ui.qtTabWidget.count() - 1 ) )
+                    self.manual_save_trading_data( list_save_tab_widget, self.str_current_save_file_path )
+                else:
+                    file_path = self.open_save_json_file_dialog()
+                    if file_path:
+                        list_save_tab_widget = list( range( self.ui.qtTabWidget.count() - 1 ) )
+                        self.manual_save_trading_data( list_save_tab_widget, file_path )
+                        self.str_current_save_file_path = file_path
+                    else:
+                        return
+
+            with QSignalBlocker( self.ui.qtTabWidget ):
+                for index in range( self.ui.qtTabWidget.count() - 2, -1, -1 ):
+                    self.ui.qtTabWidget.removeTab( index )
+
+
+            self.dict_all_account_all_stock_trading_data = {}
+            self.dict_all_account_ui_state = {}
+            self.load_trading_data_and_create_tab( file_path, self.dict_all_account_all_stock_trading_data, self.dict_all_account_ui_state, True )
+            if len( self.dict_all_account_all_stock_trading_data ) == 0:
+                str_tab_name = self.add_new_tab_and_table()
+                self.dict_all_account_all_stock_trading_data[ str_tab_name ] = {}
+                self.dict_all_account_ui_state[ str_tab_name ] = { "discount_checkbox": True, "discount_value": 0.6, "insurance_checkbox": False }
+            self.ui.qtTabWidget.setCurrentIndex( 0 )
+
+            self.process_all_trading_data()
+            self.str_picked_stock_number = None
+            self.refresh_stock_list_table()
+            self.clear_per_stock_trading_table()
+            self.update_button_enable_disable_status()
+            self.auto_save_trading_data()
+            self.str_current_save_file_path = file_path
+
+    def on_save_as_all_account_trading_data_action_triggered( self ): 
         file_path = self.open_save_json_file_dialog()
         if file_path:
             list_save_tab_widget = list( range( self.ui.qtTabWidget.count() - 1 ) )
             self.manual_save_trading_data( list_save_tab_widget, file_path )
+            self.str_current_save_file_path = file_path
 
-    def on_export_per_account_trading_data_action_triggered( self ): 
+    def on_save_all_account_trading_data_action_triggered( self ): 
+        file_path = self.str_current_save_file_path or self.open_save_json_file_dialog()
+        if file_path:
+            list_save_tab_widget = list( range( self.ui.qtTabWidget.count() - 1 ) )
+            self.manual_save_trading_data( list_save_tab_widget, file_path )
+            self.str_current_save_file_path = file_path
+
+    def on_export_current_group_trading_data_action_triggered( self ): 
         file_path = self.open_save_json_file_dialog()
         if file_path:
             list_save_tab_widget = [ self.ui.qtTabWidget.currentIndex() ]
@@ -1496,6 +1618,21 @@ class MainWindow( QMainWindow ):
         elif message_box.clickedButton() == button_cancel:
             return False
 
+    def compare_json_files( self, file1, file2 ):
+        """比較兩個 JSON 文件內容是否一致"""
+        if os.path.exists( file1 ) and os.path.exists( file2 ):
+            with open( file1, 'r', encoding='utf-8') as f1, open( file2, 'r', encoding='utf-8') as f2:
+                f1.readline()  # 跳過第一行
+                data1 = json.load(f1)  # 解析第一個 JSON 文件
+                
+                f2.readline()  # 跳過第一行
+                data2 = json.load(f2)  # 解析第二個 JSON 文件
+
+            # 返回比較結果
+            return data1 == data2
+        else:
+            return False
+    
     def update_button_enable_disable_status( self ): 
         if self.str_picked_stock_number is None or self.ui.qtTabWidget.currentWidget().objectName() not in self.dict_all_account_all_stock_trading_data:
             self.ui.qtAddTradingDataPushButton.setEnabled( False )
