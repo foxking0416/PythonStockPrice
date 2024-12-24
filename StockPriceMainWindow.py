@@ -658,6 +658,31 @@ class MainWindow( QMainWindow ):
         except Exception as e:
             print(f"讀取 CSS 檔案時發生錯誤: {e}")
 
+    def keyPressEvent(self, event):
+        key = event.key()
+        modifiers = QApplication.keyboardModifiers()
+        if modifiers == Qt.ControlModifier:
+            if event.key() == Qt.Key_S:
+                pass
+
+    def keyReleaseEvent(self, event):
+        print(f"釋放了: {event.text()} 鍵")
+        key = event.key()
+        modifiers = QApplication.keyboardModifiers()
+
+        if key == Qt.Key_T:
+            if self.ui.qtAddTradingDataPushButton.isEnabled():
+                self.on_add_trading_data_push_button_clicked()
+        elif key == Qt.Key_D:
+            if self.ui.qtAddDividendDataPushButton.isEnabled():
+                self.on_add_dividend_data_push_button_clicked()
+        elif key == Qt.Key_A:
+            if self.ui.qtAddLimitBuyingDataPushButton.isEnabled():
+                self.on_add_limit_buying_data_push_button_clicked()
+        elif key == Qt.Key_R:
+            if self.ui.qtAddCapitalReductionDataPushButton.isEnabled():
+                self.on_add_capital_reduction_data_push_button_clicked()
+
     def add_new_tab_and_table( self, str_tab_title = None ): 
         str_tab_name = f"TabIndex{ self.n_tab_index }"
         increased_tab = QWidget()
@@ -1465,11 +1490,12 @@ class MainWindow( QMainWindow ):
         if self.str_picked_stock_number is None or self.ui.qtTabWidget.currentWidget().objectName() not in self.dict_all_account_all_stock_trading_data:
             self.ui.qtAddTradingDataPushButton.setEnabled( False )
             self.ui.qtAddDividendDataPushButton.setEnabled( False )
+            self.ui.qtAddLimitBuyingDataPushButton.setEnabled( False )
             self.ui.qtAddCapitalReductionDataPushButton.setEnabled( False )
             self.ui.qtExportSelectedStockTradingDataPushButton.setEnabled( False )
         else:
             self.ui.qtAddTradingDataPushButton.setEnabled( True )
-            
+            self.ui.qtAddLimitBuyingDataPushButton.setEnabled( True )
             self.ui.qtAddCapitalReductionDataPushButton.setEnabled( True )
             self.ui.qtExportSelectedStockTradingDataPushButton.setEnabled( True )
             str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()

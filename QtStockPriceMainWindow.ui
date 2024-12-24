@@ -215,7 +215,7 @@
          <bool>false</bool>
         </property>
         <property name="text">
-         <string>新增交易紀錄</string>
+         <string>新增交易紀錄(T)</string>
         </property>
        </widget>
       </item>
@@ -225,14 +225,17 @@
          <bool>false</bool>
         </property>
         <property name="text">
-         <string>新增配股配息紀錄</string>
+         <string>新增配股配息紀錄(D)</string>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QPushButton" name="qtAddLimitBuyingDataPushButton">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="text">
-         <string>新增增資認購資料</string>
+         <string>新增增資認購資料(A)</string>
         </property>
        </widget>
       </item>
@@ -242,7 +245,7 @@
          <bool>false</bool>
         </property>
         <property name="text">
-         <string>新增現金減資紀錄</string>
+         <string>新增現金減資紀錄(R)</string>
         </property>
        </widget>
       </item>
