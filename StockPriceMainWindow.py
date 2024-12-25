@@ -701,6 +701,7 @@ class MainWindow( QMainWindow ):
         self.str_picked_stock_number = None
         self.dict_all_account_ui_state = {}
         self.dict_all_account_all_stock_trading_data = {}
+        self.dict_all_account_all_stock_trading_data_INITIAL = {}
         self.list_stock_list_column_width = [ 85 ] * len( g_list_stock_list_table_horizontal_header )
         # self.list_stock_list_column_width[ 0 ] = 40
         self.list_stock_list_column_width[ len( g_list_stock_list_table_horizontal_header ) - 2 ] = 40
@@ -1412,7 +1413,8 @@ class MainWindow( QMainWindow ):
 
     def on_new_file_action_triggered( self ): 
         b_need_save = False
-        if self.str_current_save_file_path is None or not self.compare_json_files( self.str_current_save_file_path, g_trading_data_json_file_path ):
+        if ( ( self.dict_all_account_all_stock_trading_data_INITIAL != self.dict_all_account_all_stock_trading_data ) and
+             ( self.str_current_save_file_path is None or not self.compare_json_files( self.str_current_save_file_path, g_trading_data_json_file_path ) ) ):
             dialog = SaveCheckDialog( '開新檔案', self )
             if dialog.exec():
                 if dialog.n_return == 1: #儲存
@@ -1457,7 +1459,8 @@ class MainWindow( QMainWindow ):
         file_path = self.open_load_json_file_dialog()
         if file_path:
             b_need_save = False
-            if self.str_current_save_file_path is None or not self.compare_json_files( self.str_current_save_file_path, g_trading_data_json_file_path ):
+            if ( ( self.dict_all_account_all_stock_trading_data_INITIAL != self.dict_all_account_all_stock_trading_data ) and
+                 ( self.str_current_save_file_path is None or not self.compare_json_files( self.str_current_save_file_path, g_trading_data_json_file_path ) ) ):
                 dialog = SaveCheckDialog( '開啟舊檔', self )
                 if dialog.exec():
                     if dialog.n_return == 1: #儲存
@@ -1603,6 +1606,7 @@ class MainWindow( QMainWindow ):
                 str_tab_name = self.add_new_tab_and_table()
                 self.dict_all_account_all_stock_trading_data[ str_tab_name ] = {}
                 self.dict_all_account_ui_state[ str_tab_name ] = { "discount_checkbox": True, "discount_value": 0.6, "insurance_checkbox": False }
+            self.dict_all_account_all_stock_trading_data_INITIAL = self.dict_all_account_all_stock_trading_data.copy()
             self.ui.qtTabWidget.setCurrentIndex( 0 )
             self.process_all_trading_data()
             self.refresh_stock_list_table()
