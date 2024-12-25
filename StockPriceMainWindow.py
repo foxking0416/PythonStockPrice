@@ -85,7 +85,7 @@ print( "g_exe_dir :" + g_exe_dir ) #開發模式下是D:\_2.code\PythonStockPric
 print( "g_exe2_dir :" + g_exe2_dir ) #開發模式下是C:\Users\foxki\AppData\Local\Programs\Python\Python312 #打包模式後是:D:\_2.code\PythonStockPrice\dist
 print( "g_abs_dir :" + g_abs_dir ) #開發模式下是D:\_2.code\PythonStockPrice #打包模式後是C:\Users\foxki\AppData\Local\Temp\_MEI60962 最後那個資料夾是暫時性的隨機名稱
 
-g_list_stock_list_table_horizontal_header = [ '自動帶入股利', '總成本', '庫存股數', '平均成本', '今日股價', '淨值', '總手續費', '總交易稅', '損益', '股利所得', '匯出', '刪除' ]
+
 if getattr( sys, 'frozen', False ):
     # PyInstaller 打包後執行時
     g_exe_root_dir = os.path.dirname(__file__) #C:\Users\foxki\AppData\Local\Temp\_MEI60962
@@ -672,6 +672,7 @@ class MainWindow( QMainWindow ):
 
         obj_current_date = datetime.datetime.today() - datetime.timedelta( days = 1 )
         str_date = obj_current_date.strftime('%Y%m%d')
+
         self.dict_all_company_number_to_name_and_type = self.download_all_company_stock_number( str_date )
         self.dict_all_company_number_to_price_info = self.download_day_stock_price( str_date )
         self.download_general_company_all_yearly_dividend_data( 2019, str_date )
@@ -699,15 +700,16 @@ class MainWindow( QMainWindow ):
             n_retry += 1
             if n_retry > 30:
                 break
-
+        str_valid_month_date = obj_current_date.strftime('%m/%d')
+        self.g_list_stock_list_table_horizontal_header = [ '自動帶入股利', '總成本', '庫存股數', '平均成本', str_valid_month_date + ' 收盤價', '淨值', '總手續費', '總交易稅', '損益', '股利所得', '匯出', '刪除' ]
         self.str_picked_stock_number = None
         self.dict_all_account_ui_state = {}
         self.dict_all_account_all_stock_trading_data = {}
         self.dict_all_account_all_stock_trading_data_INITIAL = {}
-        self.list_stock_list_column_width = [ 85 ] * len( g_list_stock_list_table_horizontal_header )
+        self.list_stock_list_column_width = [ 85 ] * len( self.g_list_stock_list_table_horizontal_header )
         # self.list_stock_list_column_width[ 0 ] = 40
-        self.list_stock_list_column_width[ len( g_list_stock_list_table_horizontal_header ) - 2 ] = 40
-        self.list_stock_list_column_width[ len( g_list_stock_list_table_horizontal_header ) - 1 ] = 40
+        self.list_stock_list_column_width[ len( self.g_list_stock_list_table_horizontal_header ) - 2 ] = 40
+        self.list_stock_list_column_width[ len( self.g_list_stock_list_table_horizontal_header ) - 1 ] = 40
         self.n_current_tab = 0
         self.n_tab_index = 0
         self.str_current_save_file_path = None
@@ -831,7 +833,7 @@ class MainWindow( QMainWindow ):
 
         delegate = CenterIconDelegate()
         stock_list_model = QStandardItemModel( 0, 0 )
-        stock_list_model.setHorizontalHeaderLabels( g_list_stock_list_table_horizontal_header )
+        stock_list_model.setHorizontalHeaderLabels( self.g_list_stock_list_table_horizontal_header )
         uiqt_stock_list_table_view.verticalHeader().setSectionsMovable( True )
         uiqt_stock_list_table_view.verticalHeader().sectionMoved.connect( self.on_stock_list_table_vertical_header_section_moved )
         uiqt_stock_list_table_view.verticalHeader().sectionClicked.connect( self.on_stock_list_table_vertical_section_clicked )
@@ -1045,7 +1047,7 @@ class MainWindow( QMainWindow ):
                 self.refresh_stock_list_table()
                 self.refresh_trading_data_table( sorted_list )
                 self.auto_save_trading_data()
-            elif n_column == len( g_list_stock_list_table_horizontal_header ) - 1:#刪除按鈕
+            elif n_column == len( self.g_list_stock_list_table_horizontal_header ) - 1:#刪除按鈕
                 result = self.show_message_box( "警告", f"確定要刪掉『{header_text}』的所有資料嗎?" )
                 if result:
                     del dict_per_account_all_stock_trading_data[ str_stock_number ]
@@ -1053,7 +1055,7 @@ class MainWindow( QMainWindow ):
                     self.refresh_stock_list_table()
                     self.clear_per_stock_trading_table()
                     self.auto_save_trading_data()
-            elif n_column == len( g_list_stock_list_table_horizontal_header ) - 2:#匯出按鈕
+            elif n_column == len( self.g_list_stock_list_table_horizontal_header ) - 2:#匯出按鈕
                 file_path = self.open_save_json_file_dialog()
                 if file_path:
                     list_save_tab_widget = [ self.ui.qtTabWidget.currentIndex() ]
@@ -1990,7 +1992,7 @@ class MainWindow( QMainWindow ):
         if table_view:
             table_model = table_view.model()
             table_model.clear()
-            table_model.setHorizontalHeaderLabels( g_list_stock_list_table_horizontal_header )
+            table_model.setHorizontalHeaderLabels( self.g_list_stock_list_table_horizontal_header )
             
             with QSignalBlocker( table_view.horizontalHeader() ):
                 list_vertical_labels = []
@@ -2072,13 +2074,13 @@ class MainWindow( QMainWindow ):
                     export_icon_item = QStandardItem("")
                     export_icon_item.setIcon( export_icon )
                     export_icon_item.setFlags( export_icon_item.flags() & ~Qt.ItemIsEditable )
-                    table_model.setItem( index_row, len( g_list_stock_list_table_horizontal_header ) - 2, export_icon_item )
+                    table_model.setItem( index_row, len( self.g_list_stock_list_table_horizontal_header ) - 2, export_icon_item )
                     delete_icon_item = QStandardItem("")
                     delete_icon_item.setIcon( delete_icon )
                     delete_icon_item.setFlags( delete_icon_item.flags() & ~Qt.ItemIsEditable )
-                    table_model.setItem( index_row, len( g_list_stock_list_table_horizontal_header ) - 1, delete_icon_item )
+                    table_model.setItem( index_row, len( self.g_list_stock_list_table_horizontal_header ) - 1, delete_icon_item )
 
-                for column in range( len( g_list_stock_list_table_horizontal_header ) ):
+                for column in range( len( self.g_list_stock_list_table_horizontal_header ) ):
                     if column < len( self.list_stock_list_column_width ):
                         table_view.setColumnWidth( column, self.list_stock_list_column_width[ column ] )
                     else:
