@@ -5,6 +5,8 @@ import os
 import sys
 import datetime
 import time
+import traceback
+import logging
 from QtStockPriceMainWindow import Ui_MainWindow  # 導入轉換後的 UI 類
 from QtStockCapitalIncreaseEditDialog import Ui_Dialog as Ui_StockCapitalIncreaseDialog
 from QtStockTradingEditDialog import Ui_Dialog as Ui_StockTradingDialog
@@ -53,6 +55,28 @@ from decimal import Decimal
 # 靜態掃描
 # pylint --disable=all --enable=E1120,E1121 StockPriceMainWindow.py 只顯示參數數量錯誤
 # pylint -E StockPriceMainWindow.py 只顯示錯誤級別的資訊
+
+# 設定 logging
+logging.basicConfig(
+    filename='log.txt',  # 日誌檔案名稱
+    level=logging.ERROR,  # 日誌層級
+    format='%(asctime)s - %(levelname)s - %(message)s'  # 日誌格式
+)
+
+# 自定義未處理例外的鉤子
+def handle_exception(exc_type, exc_value, exc_traceback):
+    if issubclass(exc_type, KeyboardInterrupt):
+        # 如果是鍵盤中斷，保持預設行為
+        sys.__excepthook__(exc_type, exc_value, exc_traceback)
+        return
+    # 記錄例外
+    logging.error("Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback))
+
+# 將自定義的鉤子設定為全局的未處理例外處理器
+sys.excepthook = handle_exception
+
+
+
 g_user_dir = os.path.expanduser("~")  #開發模式跟打包模式下都是C:\Users\foxki
 g_exe_dir = os.path.dirname(__file__) #開發模式下是D:\_2.code\PythonStockPrice #打包模式後是C:\Users\foxki\AppData\Local\Temp\_MEI60962 最後那個資料夾是暫時性的隨機名稱
 g_exe2_dir = os.path.dirname( sys.executable ) #開發模式下是C:\Users\foxki\AppData\Local\Programs\Python\Python312 #打包模式後是:D:\_2.code\PythonStockPrice\dist
