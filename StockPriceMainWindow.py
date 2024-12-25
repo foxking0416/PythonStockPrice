@@ -184,8 +184,13 @@ class Utility():
         if e_trading_type == TradingType.BUY or e_trading_type == TradingType.SELL:
             n_trading_value = int( f_trading_price * n_trading_count )
             n_trading_fee = int( n_trading_value * Decimal( '0.001425' ) * f_trading_fee_discount )
-            if n_trading_fee < 20 and n_trading_fee != 0:
-                n_trading_fee = 20
+            
+            if n_trading_value != 0:
+                if n_trading_count % 1000 == 0:
+                    n_trading_fee = max( 20, n_trading_fee )
+                else:#零股交易
+                    n_trading_fee = max( 1, n_trading_fee )
+            
             if e_trading_type == TradingType.SELL:
                 if b_etf:
                     n_trading_tax = int( n_trading_value * Decimal( '0.001' ) )
