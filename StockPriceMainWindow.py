@@ -743,7 +743,7 @@ class MainWindow( QMainWindow ):
             if self.ui.qtAddCapitalReductionDataPushButton.isEnabled():
                 self.on_add_capital_reduction_data_push_button_clicked()
         elif key == Qt.Key_Enter:
-            qt_line_edit = self.ui.qtTabWidget.currentWidget().findChild( QLineEdit )
+            qt_line_edit = self.ui.qtTabWidget.currentWidget().findChild( QLineEdit, "StockInputLineEdit" )
             if qt_line_edit and qt_line_edit.hasFocus():
                 self.on_add_stock_push_button_clicked()
 
@@ -765,11 +765,13 @@ class MainWindow( QMainWindow ):
         uiqt_stock_input_line_edit.setSizePolicy( sizePolicy )
         uiqt_stock_input_line_edit.setMinimumSize( QSize( 200, 0 ) )
         uiqt_stock_input_line_edit.setMaximumSize( QSize( 200, 16777215 ) )
+        uiqt_stock_input_line_edit.setObjectName( "StockInputLineEdit" )
         uiqt_horizontal_layout_1.addWidget( uiqt_stock_input_line_edit )
 
         uiqt_add_stock_push_button = QPushButton(increased_tab)
         uiqt_add_stock_push_button.setMaximumSize( QSize( 100, 16777215 ) )
         uiqt_add_stock_push_button.setText( "新增股票" )
+        uiqt_add_stock_push_button.setObjectName( "AddStockPushButton" )
         uiqt_horizontal_layout_1.addWidget( uiqt_add_stock_push_button )
 
         uiqt_horizontal_spacer_1_1 = QSpacerItem( 40, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum )
@@ -777,37 +779,37 @@ class MainWindow( QMainWindow ):
 
         uiqt_extra_insurance_fee_check_box = QCheckBox( increased_tab )
         uiqt_extra_insurance_fee_check_box.setText( "補充保費" )
-        uiqt_extra_insurance_fee_check_box.setObjectName( "insurance" )
+        uiqt_extra_insurance_fee_check_box.setObjectName( "ExtraInsuranceFeeCheckBox" )
         uiqt_horizontal_layout_1.addWidget( uiqt_extra_insurance_fee_check_box )
 
         uiqt_horizontal_spacer_1_2 = QSpacerItem( 40, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum )
-        uiqt_horizontal_layout_1.addItem( uiqt_horizontal_spacer_1_2)
+        uiqt_horizontal_layout_1.addItem( uiqt_horizontal_spacer_1_2 )
 
         uiqt_total_inventory_label = QLabel( increased_tab )
         uiqt_total_inventory_label.setText( "總庫存: " )
-        uiqt_total_inventory_label.setObjectName( "total_inventory_label" )
+        uiqt_total_inventory_label.setObjectName( "TotalInventoryLabel" )
         uiqt_total_inventory_value_label = QLabel( increased_tab )
         uiqt_total_inventory_value_label.setText( "" )
-        uiqt_total_inventory_value_label.setObjectName( "total_inventory_value_label" )
+        uiqt_total_inventory_value_label.setObjectName( "TotalInventoryValueLabel" )
         
         uiqt_horizontal_layout_1.addWidget( uiqt_total_inventory_label )
         uiqt_horizontal_layout_1.addWidget( uiqt_total_inventory_value_label )
 
-        uiqt_horizontal_spacer_1_3 = QSpacerItem( 40, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum )
-        uiqt_horizontal_layout_1.addItem( uiqt_horizontal_spacer_1_3 )
+        uiqt_horizontal_spacer_1_4 = QSpacerItem( 40, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum )
+        uiqt_horizontal_layout_1.addItem( uiqt_horizontal_spacer_1_4 )
 
         uiqt_total_profit_label = QLabel( increased_tab )
         uiqt_total_profit_label.setText( "總損益: " )
-        uiqt_total_profit_label.setObjectName( "total_profit_label" )
+        uiqt_total_profit_label.setObjectName( "TotalProfitLabel" )
         uiqt_total_profit_value_label = QLabel( increased_tab )
         uiqt_total_profit_value_label.setText( "" )
-        uiqt_total_profit_value_label.setObjectName( "total_profit_value_label" )
+        uiqt_total_profit_value_label.setObjectName( "TotalProfitValueLabel" )
         
         uiqt_horizontal_layout_1.addWidget( uiqt_total_profit_label )
         uiqt_horizontal_layout_1.addWidget( uiqt_total_profit_value_label )
 
-        uiqt_horizontal_spacer_1_4 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
-        uiqt_horizontal_layout_1.addItem( uiqt_horizontal_spacer_1_4 )
+        uiqt_horizontal_spacer_1_5 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+        uiqt_horizontal_layout_1.addItem( uiqt_horizontal_spacer_1_5 )
 
         uiqt_vertical_layout_main.addLayout( uiqt_horizontal_layout_1 )
 
@@ -816,6 +818,7 @@ class MainWindow( QMainWindow ):
 
         uiqt_stock_select_combo_box = QComboBox( increased_tab )
         uiqt_stock_select_combo_box.setMinimumSize( QSize( 200, 0 ) )
+        uiqt_stock_select_combo_box.setObjectName( "StockSelectComboBox" )
         uiqt_horizontal_layout_2.addWidget( uiqt_stock_select_combo_box )
 
         uiqt_horizontal_spacer_2_1 = QSpacerItem( 40, 0, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum )
@@ -827,6 +830,7 @@ class MainWindow( QMainWindow ):
 
         uiqt_stock_list_table_view = QTableView( increased_tab )
         uiqt_stock_list_table_view.setMinimumSize( QSize( 0, 100 ) )
+        uiqt_stock_list_table_view.setObjectName( "StockListTableView" )
         uiqt_horizontal_layout_3.addWidget( uiqt_stock_list_table_view )
 
         uiqt_vertical_layout_main.addLayout( uiqt_horizontal_layout_3 )
@@ -852,7 +856,6 @@ class MainWindow( QMainWindow ):
 
         uiqt_add_stock_push_button.clicked.connect( self.on_add_stock_push_button_clicked )
         uiqt_extra_insurance_fee_check_box.stateChanged.connect( self.on_extra_insurance_fee_check_box_state_changed )
-
 
         if not str_tab_title:
             str_tab_title = "新群組"
@@ -910,8 +913,8 @@ class MainWindow( QMainWindow ):
             self.auto_save_trading_data()
 
     def on_stock_input_text_changed( self ): 
-        qt_combo_box = self.ui.qtTabWidget.currentWidget().findChild( QComboBox )
-        qt_line_edit = self.ui.qtTabWidget.currentWidget().findChild( QLineEdit )
+        qt_combo_box = self.ui.qtTabWidget.currentWidget().findChild( QComboBox, "StockSelectComboBox" )
+        qt_line_edit = self.ui.qtTabWidget.currentWidget().findChild( QLineEdit, "StockInputLineEdit" )
 
         with QSignalBlocker( qt_combo_box ), QSignalBlocker( qt_line_edit ):
             qt_combo_box.clear()
@@ -930,8 +933,8 @@ class MainWindow( QMainWindow ):
             qt_line_edit.setFocus()
 
     def on_stock_select_combo_box_current_index_changed( self, index ): 
-        qt_combo_box = self.ui.qtTabWidget.currentWidget().findChild( QComboBox )
-        qt_line_edit = self.ui.qtTabWidget.currentWidget().findChild( QLineEdit )
+        qt_combo_box = self.ui.qtTabWidget.currentWidget().findChild( QComboBox, "StockSelectComboBox" )
+        qt_line_edit = self.ui.qtTabWidget.currentWidget().findChild( QLineEdit, "StockInputLineEdit" )
 
         str_stock_input = qt_combo_box.currentText()
         qt_line_edit.setText( str_stock_input )
@@ -941,7 +944,7 @@ class MainWindow( QMainWindow ):
     def on_add_stock_push_button_clicked( self ): 
         str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
         dict_per_account_all_stock_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ]
-        qt_line_edit = self.ui.qtTabWidget.currentWidget().findChild( QLineEdit )
+        qt_line_edit = self.ui.qtTabWidget.currentWidget().findChild( QLineEdit, "StockInputLineEdit" )
 
         str_stock_input = qt_line_edit.text()
         qt_line_edit.clear()
@@ -1009,7 +1012,7 @@ class MainWindow( QMainWindow ):
         self.auto_save_trading_data()
 
     def on_stock_list_table_vertical_section_clicked( self, n_logical_index ): 
-        table_view = self.ui.qtTabWidget.currentWidget().findChild( QTableView )
+        table_view = self.ui.qtTabWidget.currentWidget().findChild( QTableView, "StockListTableView" )
         if table_view:
             table_model = table_view.model()
 
@@ -1177,11 +1180,6 @@ class MainWindow( QMainWindow ):
     def on_trading_data_table_item_clicked( self, index: QModelIndex, table_model ): 
         item = table_model.itemFromIndex( index )
         if item is not None:
-            qt_double_spin_box = self.ui.qtTabWidget.currentWidget().findChild( QDoubleSpinBox )
-            list_qt_discount_check_box = self.ui.qtTabWidget.currentWidget().findChildren( QCheckBox, name="discount")
-
-
-            n_column = index.column()  # 獲取列索引
             n_row = index.row()  # 獲取行索引
             str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
             dict_per_account_all_stock_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ]
@@ -1684,7 +1682,7 @@ class MainWindow( QMainWindow ):
                 continue
             tab_widget = self.ui.qtTabWidget.widget( index )
 
-            list_qt_insurance_check_box = tab_widget.findChildren( QCheckBox, name="insurance")
+            qt_insurance_check_box = tab_widget.findChild( QCheckBox, "ExtraInsuranceFeeCheckBox" )
 
             str_tab_title = self.ui.qtTabWidget.tabText( index )
             str_tab_widget_name = tab_widget.objectName()
@@ -1720,7 +1718,7 @@ class MainWindow( QMainWindow ):
             export_dict_per_account_all_info[ "trading_data" ] = export_dict_per_account_all_stock_trading_data
             export_dict_per_account_all_info[ "discount_checkbox" ] = self.dict_all_account_ui_state[ str_tab_widget_name ][ "discount_checkbox"]
             export_dict_per_account_all_info[ "discount_value" ] = self.dict_all_account_ui_state[ str_tab_widget_name ][ "discount_value"]
-            export_dict_per_account_all_info[ "insurance_checkbox" ] = list_qt_insurance_check_box[ 0 ].isChecked()
+            export_dict_per_account_all_info[ "insurance_checkbox" ] = qt_insurance_check_box.isChecked()
 
 
             export_list_all_account_all_stock_trading_data.append( export_dict_per_account_all_info )
@@ -1986,7 +1984,7 @@ class MainWindow( QMainWindow ):
     def refresh_stock_list_table( self ): 
         str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
         dict_per_account_all_stock_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ]
-        table_view = self.ui.qtTabWidget.currentWidget().findChild( QTableView )
+        table_view = self.ui.qtTabWidget.currentWidget().findChild( QTableView, "StockListTableView" )
         n_total_profit = 0
         n_total_inventory = 0
         if table_view:
@@ -2090,12 +2088,10 @@ class MainWindow( QMainWindow ):
                 for index_row in range( len( dict_per_account_all_stock_trading_data ) ):
                     table_view.setRowHeight( index_row, 25 )
                 table_model.setVerticalHeaderLabels( list_vertical_labels )
-        labels = self.ui.qtTabWidget.currentWidget().findChildren( QLabel, name="total_profit_value_label")
-        if labels:
-            labels[ 0 ].setText( format( n_total_profit, "," ) )
-        labels = self.ui.qtTabWidget.currentWidget().findChildren( QLabel, name="total_inventory_value_label")
-        if labels:
-            labels[ 0 ].setText( format( n_total_inventory, "," ) )
+        total_profit_value_label = self.ui.qtTabWidget.currentWidget().findChild( QLabel, "TotalProfitValueLabel")
+        total_profit_value_label.setText( format( n_total_profit, "," ) )
+        total_inventory_value_label = self.ui.qtTabWidget.currentWidget().findChild( QLabel, "TotalInventoryValueLabel")
+        total_inventory_value_label.setText( format( n_total_inventory, "," ) )
     
     def refresh_trading_data_table( self, sorted_list ):
         self.clear_per_stock_trading_table()
