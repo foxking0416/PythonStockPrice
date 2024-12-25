@@ -56,13 +56,14 @@ from decimal import Decimal
 # pylint --disable=all --enable=E1120,E1121 StockPriceMainWindow.py 只顯示參數數量錯誤
 # pylint -E StockPriceMainWindow.py 只顯示錯誤級別的資訊
 
-# 設定 logging
+
+
+# region 設定 錯誤資訊 logging
 logging.basicConfig(
     filename='log.txt',  # 日誌檔案名稱
     level=logging.ERROR,  # 日誌層級
     format='%(asctime)s - %(levelname)s - %(message)s'  # 日誌格式
 )
-
 # 自定義未處理例外的鉤子
 def handle_exception(exc_type, exc_value, exc_traceback):
     if issubclass(exc_type, KeyboardInterrupt):
@@ -71,11 +72,9 @@ def handle_exception(exc_type, exc_value, exc_traceback):
         return
     # 記錄例外
     logging.error("Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback))
-
 # 將自定義的鉤子設定為全局的未處理例外處理器
 sys.excepthook = handle_exception
-
-
+# endregion
 
 g_user_dir = os.path.expanduser("~")  #開發模式跟打包模式下都是C:\Users\foxki
 g_exe_dir = os.path.dirname(__file__) #開發模式下是D:\_2.code\PythonStockPrice #打包模式後是C:\Users\foxki\AppData\Local\Temp\_MEI60962 最後那個資料夾是暫時性的隨機名稱
@@ -85,8 +84,6 @@ print( "g_user_dir :" + g_user_dir ) #開發模式下是C:\Users\foxki
 print( "g_exe_dir :" + g_exe_dir ) #開發模式下是D:\_2.code\PythonStockPrice #打包模式後是C:\Users\foxki\AppData\Local\Temp\_MEI60962 最後那個資料夾是暫時性的隨機名稱
 print( "g_exe2_dir :" + g_exe2_dir ) #開發模式下是C:\Users\foxki\AppData\Local\Programs\Python\Python312 #打包模式後是:D:\_2.code\PythonStockPrice\dist
 print( "g_abs_dir :" + g_abs_dir ) #開發模式下是D:\_2.code\PythonStockPrice #打包模式後是C:\Users\foxki\AppData\Local\Temp\_MEI60962 最後那個資料夾是暫時性的隨機名稱
-
-
 
 g_list_stock_list_table_horizontal_header = [ '自動帶入股利', '總成本', '庫存股數', '平均成本', '今日股價', '淨值', '總手續費', '總交易稅', '損益', '股利所得', '匯出', '刪除' ]
 if getattr( sys, 'frozen', False ):
@@ -743,6 +740,10 @@ class MainWindow( QMainWindow ):
         elif key == Qt.Key_R:
             if self.ui.qtAddCapitalReductionDataPushButton.isEnabled():
                 self.on_add_capital_reduction_data_push_button_clicked()
+        elif key == Qt.Key_Enter:
+            qt_line_edit = self.ui.qtTabWidget.currentWidget().findChild( QLineEdit )
+            if qt_line_edit and qt_line_edit.hasFocus():
+                self.on_add_stock_push_button_clicked()
 
     def add_new_tab_and_table( self, str_tab_title = None ): 
         str_tab_name = f"TabIndex{ self.n_tab_index }"
