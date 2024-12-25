@@ -5,9 +5,9 @@ import os
 import sys
 import datetime
 import time
-import traceback
-import logging
+from logging.handlers import TimedRotatingFileHandler
 from QtStockPriceMainWindow import Ui_MainWindow  # 導入轉換後的 UI 類
+import logging
 from QtStockCapitalIncreaseEditDialog import Ui_Dialog as Ui_StockCapitalIncreaseDialog
 from QtStockTradingEditDialog import Ui_Dialog as Ui_StockTradingDialog
 from QtStockDividendEditDialog import Ui_Dialog as Ui_StockDividendDialog
@@ -57,13 +57,35 @@ from decimal import Decimal
 # pylint -E StockPriceMainWindow.py 只顯示錯誤級別的資訊
 
 
-
 # region 設定 錯誤資訊 logging
-logging.basicConfig(
-    filename='log.txt',  # 日誌檔案名稱
-    level=logging.ERROR,  # 日誌層級
-    format='%(asctime)s - %(levelname)s - %(message)s'  # 日誌格式
+# 設定日誌
+logger = logging.getLogger()
+logger.setLevel(logging.ERROR)
+
+current_date = datetime.datetime.today().strftime("%Y-%m-%d")
+log_filename = f"log_{current_date}.txt"
+# 日誌檔案處理器
+file_handler = TimedRotatingFileHandler(
+    filename = log_filename,  # 基本文件名
+    when = "midnight",  # 依據每天午夜分割日誌
+    interval = 1,  # 每 1 天生成一個新檔案
+    backupCount = 7,  # 保留最近 7 天的日誌檔案
+    encoding = "utf-8"  # 確保支援 UTF-8 編碼
 )
+file_handler.setLevel(logging.ERROR)
+file_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+file_handler.setFormatter(file_formatter)
+
+# 終端處理器
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.ERROR)
+console_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+console_handler.setFormatter(console_formatter)
+
+# 添加處理器到 logger
+logger.addHandler(file_handler)
+logger.addHandler(console_handler)
+
 # 自定義未處理例外的鉤子
 def handle_exception(exc_type, exc_value, exc_traceback):
     if issubclass(exc_type, KeyboardInterrupt):
