@@ -785,6 +785,16 @@ class MainWindow( QMainWindow ):
         uiqt_horizontal_spacer_1_2 = QSpacerItem( 40, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum )
         uiqt_horizontal_layout_1.addItem( uiqt_horizontal_spacer_1_2 )
 
+        uiqt_display_type_combobox = QComboBox( increased_tab )
+        uiqt_display_type_combobox.addItem( "顯示所有交易" )
+        uiqt_display_type_combobox.addItem( "僅顯示目前庫存" )
+        uiqt_display_type_combobox.addItem( "僅顯示已無庫存" )
+        uiqt_display_type_combobox.setObjectName( "DisplayTypeComboBox" )
+        uiqt_horizontal_layout_1.addWidget( uiqt_display_type_combobox )
+
+        uiqt_horizontal_spacer_1_3 = QSpacerItem( 40, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum )
+        uiqt_horizontal_layout_1.addItem( uiqt_horizontal_spacer_1_3 )
+
         uiqt_total_inventory_label = QLabel( increased_tab )
         uiqt_total_inventory_label.setText( "總庫存: " )
         uiqt_total_inventory_label.setObjectName( "TotalInventoryLabel" )
@@ -856,6 +866,7 @@ class MainWindow( QMainWindow ):
 
         uiqt_add_stock_push_button.clicked.connect( self.on_add_stock_push_button_clicked )
         uiqt_extra_insurance_fee_check_box.stateChanged.connect( self.on_extra_insurance_fee_check_box_state_changed )
+        uiqt_display_type_combobox.activated.connect( self.on_display_type_combo_box_current_index_changed )
 
         if not str_tab_title:
             str_tab_title = "新群組"
@@ -945,6 +956,7 @@ class MainWindow( QMainWindow ):
         str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
         dict_per_account_all_stock_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ]
         qt_line_edit = self.ui.qtTabWidget.currentWidget().findChild( QLineEdit, "StockInputLineEdit" )
+        display_type_combobox = self.ui.qtTabWidget.currentWidget().findChild( QComboBox, "DisplayTypeComboBox")
 
         str_stock_input = qt_line_edit.text()
         qt_line_edit.clear()
@@ -961,7 +973,7 @@ class MainWindow( QMainWindow ):
                 QMessageBox.warning( self, "警告", "輸入的股票代碼不存在", QMessageBox.Ok )
                 return
         
-        if str_first_four_chars not in self.dict_all_account_all_stock_trading_data:
+        if str_first_four_chars not in dict_per_account_all_stock_trading_data:
             dict_trading_data = Utility.generate_trading_data( "0001-01-01",         #交易日期
                                                                TradingType.TEMPLATE, #交易種類
                                                                0,                    #交易價格
@@ -973,8 +985,13 @@ class MainWindow( QMainWindow ):
             dict_trading_data[ TradingData.USE_AUTO_DIVIDEND_DATA ] = True
             dict_per_account_all_stock_trading_data[ str_first_four_chars ] = [ dict_trading_data ]
             sorted_list = self.process_single_trading_data( str_tab_widget_name, str_first_four_chars )
+            display_type_combobox.setCurrentIndex( 0 )
             self.refresh_stock_list_table()
             self.auto_save_trading_data()
+        else:
+            if display_type_combobox.currentIndex() != 0:
+                display_type_combobox.setCurrentIndex( 0 )
+                self.refresh_stock_list_table()
 
     def on_extra_insurance_fee_check_box_state_changed( self, state ): 
         str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
@@ -991,6 +1008,12 @@ class MainWindow( QMainWindow ):
         if self.str_picked_stock_number != None:
             self.refresh_trading_data_table( dict_per_company_trading_data[ self.str_picked_stock_number ] )
         self.auto_save_trading_data()
+
+    def on_display_type_combo_box_current_index_changed( self, index ):
+        self.str_picked_stock_number = None
+        self.refresh_stock_list_table()
+        self.clear_per_stock_trading_table()
+        self.update_button_enable_disable_status()
 
     def on_stock_list_table_vertical_header_section_moved( self, n_logical_index, n_old_visual_index, n_new_visual_index ): 
         str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
@@ -1985,6 +2008,7 @@ class MainWindow( QMainWindow ):
         str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
         dict_per_account_all_stock_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ]
         table_view = self.ui.qtTabWidget.currentWidget().findChild( QTableView, "StockListTableView" )
+        display_type_combobox = self.ui.qtTabWidget.currentWidget().findChild( QComboBox, "DisplayTypeComboBox")
         n_total_profit = 0
         n_total_inventory = 0
         if table_view:
@@ -1994,7 +2018,19 @@ class MainWindow( QMainWindow ):
             
             with QSignalBlocker( table_view.horizontalHeader() ):
                 list_vertical_labels = []
-                for index_row,( key_stock_number, value_list_stock_trading_data ) in enumerate( dict_per_account_all_stock_trading_data.items() ):
+                index_row = 0
+                for key_stock_number, value_list_stock_trading_data in dict_per_account_all_stock_trading_data.items():
+                    dict_trading_data_first = value_list_stock_trading_data[ 0 ] #取第一筆交易資料，因為第一筆交易資料有存是否使用自動帶入股利
+                    dict_trading_data_last = value_list_stock_trading_data[ len( value_list_stock_trading_data ) - 1 ] #取最後一筆交易資料，因為最後一筆交易資料的庫存等內容才是所有累計的結果
+
+                    n_accumulated_inventory = dict_trading_data_last[ TradingData.ACCUMULATED_INVENTORY_NON_SAVE ]
+                    if display_type_combobox.currentIndex() == 1:
+                        if n_accumulated_inventory == 0:
+                            continue
+                    elif display_type_combobox.currentIndex() == 2:
+                        if n_accumulated_inventory != 0:
+                            continue
+
                     list_stock_name_and_type = self.dict_all_company_number_to_name_and_type[ key_stock_number ]
                     str_stock_name = list_stock_name_and_type[ 0 ]
                     list_vertical_labels.append( f"{key_stock_number} {str_stock_name}" )
@@ -2006,10 +2042,7 @@ class MainWindow( QMainWindow ):
                         n_total_trading_fee += item_trading_data[ TradingData.TRADING_FEE_NON_SAVE ]
                         n_total_trading_tax += item_trading_data[ TradingData.TRADING_TAX_NON_SAVE ]
 
-                    dict_trading_data_first = value_list_stock_trading_data[ 0 ] #取第一筆交易資料，因為第一筆交易資料有存是否使用自動帶入股利
-                    dict_trading_data_last = value_list_stock_trading_data[ len( value_list_stock_trading_data ) - 1 ] #取最後一筆交易資料，因為最後一筆交易資料的庫存等內容才是所有累計的結果
                     n_accumulated_cost = dict_trading_data_last[ TradingData.ACCUMULATED_COST_NON_SAVE ]
-                    n_accumulated_inventory = dict_trading_data_last[ TradingData.ACCUMULATED_INVENTORY_NON_SAVE ]
                     f_average_cost = round( dict_trading_data_last[ TradingData.AVERAGE_COST_NON_SAVE ], 3 )
                     n_accumulated_stock_dividend = dict_trading_data_last[ TradingData.ALL_STOCK_DIVIDEND_GAIN_NON_SAVE ]
                     n_accumulated_cash_dividend = dict_trading_data_last[ TradingData.ALL_CASH_DIVIDEND_GAIN_NON_SAVE ]
@@ -2077,6 +2110,7 @@ class MainWindow( QMainWindow ):
                     delete_icon_item.setIcon( delete_icon )
                     delete_icon_item.setFlags( delete_icon_item.flags() & ~Qt.ItemIsEditable )
                     table_model.setItem( index_row, len( self.g_list_stock_list_table_horizontal_header ) - 1, delete_icon_item )
+                    index_row += 1
 
                 for column in range( len( self.g_list_stock_list_table_horizontal_header ) ):
                     if column < len( self.list_stock_list_column_width ):
