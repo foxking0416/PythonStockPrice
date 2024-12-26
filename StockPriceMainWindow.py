@@ -15,9 +15,10 @@ from QtStockCapitalReductionEditDialog import Ui_Dialog as Ui_StockCapitalReduct
 from QtDuplicateOptionDialog import Ui_Dialog as Ui_DuplicateOptionDialog
 from QtSaveCheckDialog import Ui_Dialog as Ui_SaveCheckDialog
 from PySide6.QtWidgets import QApplication, QMainWindow, QDialog, QButtonGroup, QMessageBox, QStyledItemDelegate, QFileDialog, QHeaderView, QVBoxLayout, QHBoxLayout, \
-                              QLabel, QLineEdit, QDialogButtonBox, QTabBar, QWidget, QTableView, QComboBox, QPushButton, QSizePolicy, QSpacerItem, QCheckBox, QDoubleSpinBox
+                              QLabel, QLineEdit, QDialogButtonBox, QTabBar, QWidget, QTableView, QComboBox, QPushButton, QSizePolicy, QSpacerItem, QCheckBox, QDoubleSpinBox, \
+                              QProgressBar
 from PySide6.QtGui import QStandardItemModel, QStandardItem, QIcon, QBrush
-from PySide6.QtCore import Qt, QModelIndex, QRect, QSignalBlocker, QSize
+from PySide6.QtCore import Qt, QModelIndex, QRect, QSignalBlocker, QSize, QThread, QObject, Signal
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import Alignment, PatternFill, Font, Border, Side
@@ -618,6 +619,22 @@ class SaveCheckDialog( QDialog ):
         self.n_return = 3
         self.accept()
 
+class Worker( QObject ):
+    progress = Signal( int )  # Signal to emit progress updates
+    finished = Signal( dict )  # Signal to emit the result when done
+
+    def __init__( self, main_window ):
+        super().__init__()
+        self.main_window = main_window  # 傳入 MainWindow 的實例
+
+    def run( self ):
+        # Perform the time-consuming operation (e.g. loading stock data)
+        self.main_window.initialize( self.update_progress )
+        self.finished.emit({})  # Emit the result when done
+
+    def update_progress( self, value ):
+        self.progress.emit( value )  # Emit progress updates
+
 class MainWindow( QMainWindow ):
     def __init__(self):
         super( MainWindow, self ).__init__()
@@ -625,6 +642,11 @@ class MainWindow( QMainWindow ):
         self.ui.setupUi( self )  # 設置 UI
         window_icon = QIcon( window_icon_file_path ) 
         self.setWindowIcon( window_icon )
+
+        self.progress_bar = QProgressBar( self )
+        self.progress_bar.setGeometry( 30, 40, 200, 25 )  # Adjust position and size as needed
+        self.progress_bar.setMaximum( 100 )
+        self.progress_bar.setVisible( False )
 
         self.ui.qtTabWidget.currentChanged.connect( self.on_tab_current_changed )
         self.ui.qtTabWidget.tabBarDoubleClicked.connect( self.on_tab_widget_double_clicked )
@@ -693,7 +715,22 @@ class MainWindow( QMainWindow ):
         self.ui.qtActionImportSingleStock.setShortcut( "Ctrl+I" )
         self.ui.qtActionImportSingleStock.triggered.connect( self.on_import_single_stock_action_triggered )
         
+        self.g_list_stock_list_table_horizontal_header = [ '自動帶入股利', '總成本', '庫存股數', '平均成本', ' 收盤價', '淨值', '總手續費', '總交易稅', '損益', '股利所得', '匯出', '刪除' ]
+        self.str_picked_stock_number = None
+        self.dict_all_account_ui_state = {}
+        self.dict_all_account_all_stock_trading_data = {}
+        self.dict_all_account_all_stock_trading_data_INITIAL = {}
+        self.list_stock_list_column_width = [ 85 ] * len( self.g_list_stock_list_table_horizontal_header )
+        self.list_stock_list_column_width[ len( self.g_list_stock_list_table_horizontal_header ) - 2 ] = 40
+        self.list_stock_list_column_width[ len( self.g_list_stock_list_table_horizontal_header ) - 1 ] = 40
+        self.n_current_tab = 0
+        self.n_tab_index = 0
+        self.str_current_save_file_path = None
+        # self.load_stylesheet("style.css")
 
+        self.start_loading_stock_data()
+
+    def initialize( self, update_progress_callback = None ):
         obj_current_date = datetime.datetime.today() - datetime.timedelta( days = 1 )
         str_date = obj_current_date.strftime('%Y%m%d')
 
@@ -705,13 +742,13 @@ class MainWindow( QMainWindow ):
         self.dict_auto_stock_yearly_dividned = self.load_general_company_all_yearly_dividend_data( 2019 )
         self.dict_auto_stock_listed_etf_yearly_dividned = self.load_listed_etf_all_yearly_dividend_data( 2019 )
         self.dict_auto_stock_OTC_etf_yearly_dividned = self.load_OTC_etf_all_yearly_dividend_data( 2019 )
+
+        # common_keys = set(self.dict_auto_stock_yearly_dividned.keys()) & set(self.dict_auto_stock_listed_etf_yearly_dividned.keys())
         self.dict_auto_stock_yearly_dividned.update( self.dict_auto_stock_listed_etf_yearly_dividned )
         for key, value in self.dict_auto_stock_OTC_etf_yearly_dividned.items():
             if key not in self.dict_auto_stock_yearly_dividned:
                 self.dict_auto_stock_yearly_dividned[ key ] = value
 
-
-        # common_keys = set(self.dict_auto_stock_yearly_dividned.keys()) & set(self.dict_auto_stock_listed_etf_yearly_dividned.keys())
         n_retry = 0
         while len( self.dict_all_company_number_to_price_info ) == 0:
             #因為我們要下載前一天的股價資訊，但有時候遇到前一天是假日，就要再往前，若是連續假日，就要一直往前直到可以下載
@@ -725,20 +762,36 @@ class MainWindow( QMainWindow ):
             if n_retry > 30:
                 break
         str_valid_month_date = obj_current_date.strftime('%m/%d')
-        self.g_list_stock_list_table_horizontal_header = [ '自動帶入股利', '總成本', '庫存股數', '平均成本', str_valid_month_date + ' 收盤價', '淨值', '總手續費', '總交易稅', '損益', '股利所得', '匯出', '刪除' ]
-        self.str_picked_stock_number = None
-        self.dict_all_account_ui_state = {}
-        self.dict_all_account_all_stock_trading_data = {}
-        self.dict_all_account_all_stock_trading_data_INITIAL = {}
-        self.list_stock_list_column_width = [ 85 ] * len( self.g_list_stock_list_table_horizontal_header )
-        # self.list_stock_list_column_width[ 0 ] = 40
-        self.list_stock_list_column_width[ len( self.g_list_stock_list_table_horizontal_header ) - 2 ] = 40
-        self.list_stock_list_column_width[ len( self.g_list_stock_list_table_horizontal_header ) - 1 ] = 40
-        self.n_current_tab = 0
-        self.n_tab_index = 0
-        self.str_current_save_file_path = None
-        # self.load_stylesheet("style.css")
-        self.initialize()
+        self.g_list_stock_list_table_horizontal_header[ 4 ] = str_valid_month_date + ' 收盤價'
+
+        # self.load_initialize_data()
+
+    def start_loading_stock_data( self ):
+        # Show the progress bar
+        self.progress_bar.setVisible( True )
+
+        # Create and start a QThread for the worker
+        self.thread = QThread()
+        self.worker = Worker(self)
+
+        # Move the worker to the new thread
+        self.worker.moveToThread( self.thread )
+
+        # Connect signals and slots
+        self.worker.progress.connect( self.update_progress )
+        self.worker.finished.connect( self.on_loading_finished )
+        self.thread.started.connect( self.worker.run )
+        self.worker.finished.connect( self.thread.quit )
+
+        # Start the thread
+        self.thread.start()
+
+    def update_progress( self, value ):
+        self.progress_bar.setValue( value )
+
+    def on_loading_finished( self ):
+        self.progress_bar.setVisible( False )
+        self.load_initialize_data()
 
     def load_stylesheet( self, file_path ):
         try:
@@ -1698,7 +1751,7 @@ class MainWindow( QMainWindow ):
             self.update_button_enable_disable_status()
             self.auto_save_trading_data()
 
-    def initialize( self ): 
+    def load_initialize_data( self ): 
         with QSignalBlocker( self.ui.qtTabWidget ):
             self.load_trading_data_and_create_tab( g_trading_data_json_file_path, self.dict_all_account_all_stock_trading_data, self.dict_all_account_ui_state, True )
             self.load_share_UI_state()
