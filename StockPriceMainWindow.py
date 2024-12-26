@@ -642,9 +642,9 @@ class MainWindow( QMainWindow ):
         self.ui.setupUi( self )  # 設置 UI
         window_icon = QIcon( window_icon_file_path ) 
         self.setWindowIcon( window_icon )
-
+        
         self.progress_bar = QProgressBar( self )
-        self.progress_bar.setGeometry( 30, 40, 200, 25 )  # Adjust position and size as needed
+        self.progress_bar.setGeometry( 400, 350, 300, 25 )  # Adjust position and size as needed
         self.progress_bar.setMaximum( 100 )
         self.progress_bar.setVisible( False )
 
@@ -731,14 +731,21 @@ class MainWindow( QMainWindow ):
         self.start_loading_stock_data()
 
     def initialize( self, update_progress_callback = None ):
+        self.setEnabled( False ) # 資料下載前先Disable整個視窗
         obj_current_date = datetime.datetime.today() - datetime.timedelta( days = 1 )
         str_date = obj_current_date.strftime('%Y%m%d')
 
+        self.set_progress_value( update_progress_callback, 0 )
         self.dict_all_company_number_to_name_and_type = self.download_all_company_stock_number( str_date )
+        self.set_progress_value( update_progress_callback, 10 )
         self.dict_all_company_number_to_price_info = self.download_day_stock_price( str_date )
+        self.set_progress_value( update_progress_callback, 20 )
         self.download_general_company_all_yearly_dividend_data( 2010, str_date )
+        self.set_progress_value( update_progress_callback, 50 )
         self.download_listed_etf_all_yearly_dividend_data( 2010, str_date )
+        self.set_progress_value( update_progress_callback, 80 )
         self.download_OTC_etf_all_yearly_dividend_data( 2010, str_date )
+        
         self.dict_auto_stock_yearly_dividned = self.load_general_company_all_yearly_dividend_data( 2010 )
         self.dict_auto_stock_listed_etf_yearly_dividned = self.load_listed_etf_all_yearly_dividend_data( 2010 )
         self.dict_auto_stock_OTC_etf_yearly_dividned = self.load_OTC_etf_all_yearly_dividend_data( 2010 )
@@ -763,8 +770,13 @@ class MainWindow( QMainWindow ):
                 break
         str_valid_month_date = obj_current_date.strftime('%m/%d')
         self.g_list_stock_list_table_horizontal_header[ 4 ] = str_valid_month_date + ' 收盤價'
-
+        self.set_progress_value( update_progress_callback, 100 )
         # self.load_initialize_data()
+        self.setEnabled( True ) # 資料下載完後就會Enable
+
+    def set_progress_value( self, update_progress_callback, f_progress ):
+        if update_progress_callback:
+            update_progress_callback( f_progress )
 
     def start_loading_stock_data( self ):
         # Show the progress bar
