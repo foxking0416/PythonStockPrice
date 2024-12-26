@@ -930,7 +930,7 @@ class MainWindow( QMainWindow ):
 
         str_tab_title = self.ui.qtTabWidget.tabText( index )
         tab_widget = self.ui.qtTabWidget.widget( index )
-        result = self.show_message_box( "警告", f"確定要刪掉『{str_tab_title}』的所有資料嗎?\n建議先從「檔案」=>「匯出目前帳號資料」，匯出檔案做備份" )
+        result = self.show_warning_message_box_with_ok_cancel_button( "警告", f"確定要刪掉『{str_tab_title}』的所有資料嗎?\n建議先從「檔案」=>「匯出目前帳號資料」，匯出檔案做備份" )
         if result:
             str_tab_widget_name = tab_widget.objectName()
             value = self.dict_all_account_all_stock_trading_data.pop( str_tab_widget_name, None )
@@ -1098,7 +1098,7 @@ class MainWindow( QMainWindow ):
                 self.refresh_trading_data_table( sorted_list )
                 self.auto_save_trading_data()
             elif n_column == len( self.g_list_stock_list_table_horizontal_header ) - 1:#刪除按鈕
-                result = self.show_message_box( "警告", f"確定要刪掉『{header_text}』的所有資料嗎?" )
+                result = self.show_warning_message_box_with_ok_cancel_button( "警告", f"確定要刪掉『{header_text}』的所有資料嗎?" )
                 if result:
                     del dict_per_account_all_stock_trading_data[ str_stock_number ]
                     self.str_picked_stock_number = None
@@ -1287,7 +1287,7 @@ class MainWindow( QMainWindow ):
                         self.auto_save_trading_data()
 
                 elif n_row == len( self.get_trading_data_header() ) - 1: #刪除
-                    result = self.show_message_box( "警告", f"確定要刪掉這筆交易資料嗎?" )
+                    result = self.show_warning_message_box_with_ok_cancel_button( "警告", f"確定要刪掉這筆交易資料嗎?" )
                     if result:
                         del dict_per_account_all_stock_trading_data[ str_stock_number ][ n_findindex ]
                         sorted_list = self.process_single_trading_data( str_tab_widget_name, str_stock_number )
@@ -1660,14 +1660,14 @@ class MainWindow( QMainWindow ):
             if len( dict_all_account_all_stock_trading_data_LOAD ) == 0:
                 return
             elif len( dict_all_account_all_stock_trading_data_LOAD ) > 1:
-                self.show_message_box( "錯誤", "請選擇只包含單一帳戶及單一個股的檔案" )
+                self.show_warning_message_box_with_ok_cancel_button( "錯誤", "請選擇只包含單一帳戶及單一個股的檔案" )
                 return
             
             dict_per_account_all_stock_trading_data_LOAD = dict_all_account_all_stock_trading_data_LOAD.popitem()[ 1 ]
             if len( dict_per_account_all_stock_trading_data_LOAD ) == 0:
                 return
             elif len( dict_per_account_all_stock_trading_data_LOAD ) > 1:
-                self.show_message_box( "錯誤", "請選擇只包含單一帳戶及單一個股的檔案" )
+                self.show_warning_message_box_with_ok_cancel_button( "錯誤", "請選擇只包含單一帳戶及單一個股的檔案" )
                 return
             str_stock_number, list_trading_data = dict_per_account_all_stock_trading_data_LOAD.popitem()
 
@@ -2459,7 +2459,7 @@ class MainWindow( QMainWindow ):
         )
         return file_path
 
-    def show_message_box( self, str_title, str_message ): 
+    def show_warning_message_box_with_ok_cancel_button( self, str_title, str_message ): 
         message_box = QMessageBox( self )
         message_box.setIcon( QMessageBox.Warning )  # 設置為警告圖示
         message_box.setWindowTitle( str_title )
