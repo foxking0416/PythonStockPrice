@@ -1660,16 +1660,20 @@ class MainWindow( QMainWindow ):
             if len( dict_all_account_all_stock_trading_data_LOAD ) == 0:
                 return
             elif len( dict_all_account_all_stock_trading_data_LOAD ) > 1:
-                self.show_warning_message_box_with_ok_cancel_button( "錯誤", "請選擇只包含單一帳戶及單一個股的檔案" )
+                self.show_error_message_box_with_ok_button( "錯誤", "請選擇只包含單一帳戶及單一個股的檔案" )
                 return
             
             dict_per_account_all_stock_trading_data_LOAD = dict_all_account_all_stock_trading_data_LOAD.popitem()[ 1 ]
             if len( dict_per_account_all_stock_trading_data_LOAD ) == 0:
                 return
             elif len( dict_per_account_all_stock_trading_data_LOAD ) > 1:
-                self.show_warning_message_box_with_ok_cancel_button( "錯誤", "請選擇只包含單一帳戶及單一個股的檔案" )
+                self.show_error_message_box_with_ok_button( "錯誤", "請選擇只包含單一帳戶及單一個股的檔案" )
                 return
             str_stock_number, list_trading_data = dict_per_account_all_stock_trading_data_LOAD.popitem()
+
+            if self.ui.qtTabWidget.count() <= 1:
+                self.show_error_message_box_with_ok_button( "錯誤", "請先建立群組" )
+                return
 
             str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
             dict_per_account_all_stock_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ]
@@ -2475,6 +2479,20 @@ class MainWindow( QMainWindow ):
             return True
         elif message_box.clickedButton() == button_cancel:
             return False
+        
+    def show_error_message_box_with_ok_button( self, str_title, str_message ): 
+        message_box = QMessageBox( self )
+        message_box.setIcon( QMessageBox.Critical )  # 設置為警告圖示
+        message_box.setWindowTitle( str_title )
+        message_box.setText( str_message )
+
+        # 添加自訂按鈕
+        button_ok = message_box.addButton("確定", QMessageBox.AcceptRole)
+
+        message_box.exec()
+
+        if message_box.clickedButton() == button_ok:
+            return True
 
     def compare_json_files( self, file1, file2 ):
         """比較兩個 JSON 文件內容是否一致"""
