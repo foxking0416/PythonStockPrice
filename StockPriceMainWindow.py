@@ -2929,28 +2929,91 @@ class MainWindow( QMainWindow ):
                         if not raw.find( 'th' ):
                             data = []
                             td_elements = raw.findAll( "td" )
-                            if len( td_elements ) == 19:
-                                for index, td in enumerate( td_elements ):
-                                    text = td.get_text().strip()
-                                    if index == 4 or index == 5 or index == 7 or index == 8 or index == 9 or index == 13 or index == 14:
-                                        if text == '\xa0' or text == ''  or text == '-' or text == '--':
-                                            data.append( 0 )
+                            if n_year >= 105 and n_year < 108:
+                                if len( td_elements ) == 18:
+                                    # [0]公司代號,
+                                    # [1]公司名稱,
+                                    # [2]股利所屬期間,
+                                    # [3]權利分派基準日,
+                                    # [4]股票股利_盈餘轉增資配股(元/股),
+                                    # [5]股票股利_法定盈餘公積、資本公積轉增資配股(元/股),                        
+                                    # [6]股票股利_除權交易日,
+                                    # [7]現金股利_盈餘分配之股東現金股利(元/股),
+                                    # [8]現金股利_法定盈餘公積、資本公積發放之現金(元/股),
+                                    # [9]現金股利_特別股配發現金股利(元/股),                        
+                                    # [10]現金股利_除息交易日,
+                                    # [11]現金股利_現金股利發放日,
+                                    # [12]現金增資總股數(股),
+                                    # [13]現金增資認股比率(%),
+                                    # [14]現金增資認購價(元/股),                        
+                                    # [15]公告日期,
+                                    # [16]公告時間,
+                                    # [17]普通股每股面額
+                                    for index, td in enumerate( td_elements ):
+                                        text = td.get_text().strip()
+                                        if index == 4 or index == 5 or index == 7 or index == 8 or index == 9 or index == 13 or index == 14:
+                                            if text == '\xa0' or text == ''  or text == '-' or text == '--':
+                                                data.append( 0 )
+                                            else:
+                                                number = float( text.replace( ',', '' ) ) 
+                                                data.append( number )
+                                        elif index == 12:
+                                            if text == '\xa0' or text == ''  or text == '-' or text == '--':
+                                                data.append( 0 )
+                                            else:
+                                                number = int( text.replace( ',', '' ) ) 
+                                                data.append( number )
                                         else:
-                                            number = float( text.replace( ',', '' ) ) 
-                                            data.append( number )
-                                    elif index == 12 or index == 15:
-                                        if text == '\xa0' or text == ''  or text == '-' or text == '--':
-                                            data.append( 0 )
-                                        else:
-                                            number = int( text.replace( ',', '' ) ) 
-                                            data.append( number )
-                                    else:
-                                        if text == '\xa0' or text == ''  or text == '-' or text == '--':
-                                            data.append( '--' )
-                                        else:
-                                            data.append( text )
+                                            if text == '\xa0' or text == ''  or text == '-' or text == '--':
+                                                data.append( '--' )
+                                            else:
+                                                data.append( text )
 
-                                all_company_dividend.append( data )
+                                    all_company_dividend.append( data )
+                            elif n_year >= 108:
+                                if len( td_elements ) == 19:
+                                    # [0]公司代號,
+                                    # [1]公司名稱,
+                                    # [2]股利所屬期間,
+                                    # [3]權利分派基準日,
+                                    # [4]股票股利_盈餘轉增資配股(元/股),
+                                    # [5]股票股利_法定盈餘公積、資本公積轉增資配股(元/股),                        
+                                    # [6]股票股利_除權交易日,
+                                    # [7]現金股利_盈餘分配之股東現金股利(元/股),
+                                    # [8]現金股利_法定盈餘公積、資本公積發放之現金(元/股),
+                                    # [9]現金股利_特別股配發現金股利(元/股),                        
+                                    # [10]現金股利_除息交易日,
+                                    # [11]現金股利_現金股利發放日,
+                                    # [12]現金增資總股數(股),
+                                    # [13]現金增資認股比率(%),
+                                    # [14]現金增資認購價(元/股),                        
+                                    # [15]參加分派總股數,
+                                    # [16]公告日期,
+                                    # [17]公告時間,
+                                    # [18]普通股每股面額
+                                    for index, td in enumerate( td_elements ):
+                                        text = td.get_text().strip()
+                                        if index == 4 or index == 5 or index == 7 or index == 8 or index == 9 or index == 13 or index == 14:
+                                            if text == '\xa0' or text == ''  or text == '-' or text == '--':
+                                                data.append( 0 )
+                                            else:
+                                                number = float( text.replace( ',', '' ) ) 
+                                                data.append( number )
+                                        elif index == 12:
+                                            if text == '\xa0' or text == ''  or text == '-' or text == '--':
+                                                data.append( 0 )
+                                            else:
+                                                number = int( text.replace( ',', '' ) ) 
+                                                data.append( number )
+                                        elif index == 15:
+                                            continue
+                                        else:
+                                            if text == '\xa0' or text == ''  or text == '-' or text == '--':
+                                                data.append( '--' )
+                                            else:
+                                                data.append( text )
+
+                                    all_company_dividend.append( data )
             except Exception as e:
                 print(f"Final error: {e}")
 
@@ -2962,9 +3025,9 @@ class MainWindow( QMainWindow ):
                 f.write( str_date + '\n' )
                 f.write( str( n_year ) + '\n' )
                 f.write( '[0]公司代號,[1]公司名稱,[2]股利所屬期間,[3]權利分派基準日,[4]股票股利_盈餘轉增資配股(元/股),[5]股票股利_法定盈餘公積、資本公積轉增資配股(元/股),\
-                        [6]股票股利_除權交易日,[7]現金股利_盈餘分配之股東現金股利(元/股),[8]現金股利_法定盈餘公積、資本公積發放之現金(元/股),[9]現金股利_特別股配發現金股利(元/股),\
-                        [10]現金股利_除息交易日,[11]現金股利_現金股利發放日,[12]現金增資總股數(股),[13]現金增資認股比率(%),[14]現金增資認購價(元/股),\
-                        [15]參加分派總股數,[16]公告日期,[17]公告時間,[18]普通股每股面額\n' )
+                          [6]股票股利_除權交易日,[7]現金股利_盈餘分配之股東現金股利(元/股),[8]現金股利_法定盈餘公積、資本公積發放之現金(元/股),[9]現金股利_特別股配發現金股利(元/股),\
+                          [10]現金股利_除息交易日,[11]現金股利_現金股利發放日,[12]現金增資總股數(股),[13]現金增資認股比率(%),[14]現金增資認購價(元/股),\
+                          [15]公告日期,[16]公告時間,[17]普通股每股面額\n' )
                 for row in all_company_dividend:
                     b_first = True
                     for ele in row:
