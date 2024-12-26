@@ -737,8 +737,8 @@ class MainWindow( QMainWindow ):
         self.dict_all_company_number_to_name_and_type = self.download_all_company_stock_number( str_date )
         self.dict_all_company_number_to_price_info = self.download_day_stock_price( str_date )
         self.download_general_company_all_yearly_dividend_data( 2019, str_date )
-        self.download_listed_etf_all_yearly_dividend_data( 2019, str_date )
-        self.download_OTC_etf_all_yearly_dividend_data( 2019, str_date )
+        self.download_listed_etf_all_yearly_dividend_data( 2010, str_date )
+        self.download_OTC_etf_all_yearly_dividend_data( 2010, str_date )
         self.dict_auto_stock_yearly_dividned = self.load_general_company_all_yearly_dividend_data( 2019 )
         self.dict_auto_stock_listed_etf_yearly_dividned = self.load_listed_etf_all_yearly_dividend_data( 2019 )
         self.dict_auto_stock_OTC_etf_yearly_dividned = self.load_OTC_etf_all_yearly_dividend_data( 2019 )
@@ -3114,13 +3114,20 @@ class MainWindow( QMainWindow ):
             n_year += 1911
 
         if b_need_to_download:
-            dict_stock_yearly_dividned = {}
             url = "https://www.twse.com.tw/rwd/zh/ETF/etfDiv?stkNo=&startDate=" + str( n_year ) + "0101&endDate=" + str( n_year ) + "0101&response=json&_=1734754779791"
             try:
                 res = self.send_get_request( url )
                 json_value = json.loads( res.text )
                 with open( str_output_path, 'w', encoding='utf-8' ) as f:
                     f.write( str_date + '\n' )
+                    # 證券代號	
+                    # 證券簡稱	
+                    # 除息交易日	
+                    # 收益分配基準日	
+                    # 收益分配發放日	
+                    # 收益分配金額 (每1受益權益單位)	
+                    # 收益分配標準 (102年度起啟用)	
+                    # 公告年度
                     json.dump( json_value[ 'data' ], f, ensure_ascii=False, indent=4 )
             except Exception as e:
                 print(f"Final error: {e}")
@@ -3246,6 +3253,53 @@ class MainWindow( QMainWindow ):
                 json_value = json.loads( res.text )
                 with open( str_output_path, 'w', encoding='utf-8' ) as f:
                     f.write( str_date + '\n' )
+                    # 民國104年之前(包含104年)   
+                    # 除權息日期                 
+                    # 代號	                    
+                    # 名稱	                    
+                    # 除權息前收盤價             	
+                    # 除權息參考價               	
+                    # 權值                      	
+                    # 息值                      	
+                    # 權值＋息值	             
+                    # 權/息                   
+                    # 漲停價	
+                    # 跌停價	
+                    # 開始交易基準價	
+                    # 減除股利參考價	
+                    # 現金股利	
+                    # 每仟股無償配股	
+                    # 員工紅利轉增資	
+                    # 現金增資股數	
+                    # 現金增資認購價	
+                    # 公開承銷股數	
+                    # 員工認購股數	
+                    # 原股東認購股數	
+                    # 按持股比例仟股認購
+
+                    # 民國105年之後
+                    # 除權息日期                 
+                    # 代號	                    
+                    # 名稱	                    
+                    # 除權息前收盤價             	
+                    # 除權息參考價               	
+                    # 權值                      	
+                    # 息值                      	
+                    # 權值＋息值	             
+                    # 權/息                   
+                    # 漲停價	
+                    # 跌停價	
+                    # 開始交易基準價	
+                    # 減除股利參考價	
+                    # 現金股利	
+                    # 每仟股無償配股	
+                    # 缺---------------員工紅利轉增資	
+                    # 現金增資股數	
+                    # 現金增資認購價	
+                    # 公開承銷股數	
+                    # 員工認購股數	
+                    # 原股東認購股數	
+                    # 按持股比例仟股認購
                     json.dump( json_value[ 'tables' ][0]['data'], f, ensure_ascii=False, indent=4 )
 
             except Exception as e:
