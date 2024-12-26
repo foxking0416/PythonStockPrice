@@ -736,12 +736,12 @@ class MainWindow( QMainWindow ):
 
         self.dict_all_company_number_to_name_and_type = self.download_all_company_stock_number( str_date )
         self.dict_all_company_number_to_price_info = self.download_day_stock_price( str_date )
-        self.download_general_company_all_yearly_dividend_data( 2019, str_date )
+        self.download_general_company_all_yearly_dividend_data( 2010, str_date )
         self.download_listed_etf_all_yearly_dividend_data( 2010, str_date )
         self.download_OTC_etf_all_yearly_dividend_data( 2010, str_date )
-        self.dict_auto_stock_yearly_dividned = self.load_general_company_all_yearly_dividend_data( 2019 )
-        self.dict_auto_stock_listed_etf_yearly_dividned = self.load_listed_etf_all_yearly_dividend_data( 2019 )
-        self.dict_auto_stock_OTC_etf_yearly_dividned = self.load_OTC_etf_all_yearly_dividend_data( 2019 )
+        self.dict_auto_stock_yearly_dividned = self.load_general_company_all_yearly_dividend_data( 2010 )
+        self.dict_auto_stock_listed_etf_yearly_dividned = self.load_listed_etf_all_yearly_dividend_data( 2010 )
+        self.dict_auto_stock_OTC_etf_yearly_dividned = self.load_OTC_etf_all_yearly_dividend_data( 2010 )
 
         # common_keys = set(self.dict_auto_stock_yearly_dividned.keys()) & set(self.dict_auto_stock_listed_etf_yearly_dividned.keys())
         self.dict_auto_stock_yearly_dividned.update( self.dict_auto_stock_listed_etf_yearly_dividned )
@@ -2929,7 +2929,57 @@ class MainWindow( QMainWindow ):
                         if not raw.find( 'th' ):
                             data = []
                             td_elements = raw.findAll( "td" )
-                            if n_year >= 105 and n_year < 108:
+                            if n_year >= 99 and n_year < 105:
+                                if len( td_elements ) == 23:
+                                    # [0]公司代號
+                                    # [1]公司名稱	
+                                    # [2]股利所屬年度	
+                                    # [3]權利分派基準日	
+                                    # [4]股票股利_盈餘轉增資配股(元/股)
+                                    # [5]股票股利_法定盈餘公積、資本公積轉增資配股(元/股)
+                                    # [6]股票股利_除權交易日
+                                    # X [7]配股總股數(股)
+                                    # X [8]配股總金額(元)
+                                    # X [9]配股總股數佔盈餘配股總股數之比例(%)
+                                    # X [10]員工紅利配股率
+                                    # [11]現金股利_盈餘分配之股東現金股利(元/股)
+                                    # [12]現金股利_法定盈餘公積、資本公積發放之現金(元/股)
+                                    # [13]現金股利_除息交易日
+                                    # [14]現金股利_現金股利發放日
+                                    # X [15]員工紅利總金額(元)
+                                    # [16]現金增資總股數(股)	
+                                    # [17]現金增資認股比率(%)	
+                                    # [18]現金增資認購價(元/股)		
+                                    # X [19]董監酬勞(元)
+                                    # [20]公告日期
+                                    # [21]公告時間
+                                    # [22]普通股每股面額
+                                    for index, td in enumerate( td_elements ):
+                                        text = td.get_text().strip()
+                                        if index == 4 or index == 5 or index == 11 or index == 12 or index == 17 or index == 18:
+                                            if text == '\xa0' or text == ''  or text == '-' or text == '--':
+                                                data.append( 0 )
+                                            else:
+                                                number = float( text.replace( ',', '' ) ) 
+                                                data.append( number )
+                                            if index == 12:
+                                                data.append( 0 ) # 為了跟後續的格式有一致性，因為105年之後的表格有「現金股利_特別股配發現金股利(元/股)」，但因為現在沒有，所以直接補0
+                                        elif index == 16:
+                                            if text == '\xa0' or text == ''  or text == '-' or text == '--':
+                                                data.append( 0 )
+                                            else:
+                                                number = int( text.replace( ',', '' ) ) 
+                                                data.append( number )
+                                        elif index == 7 or index == 8 or index == 9 or index == 10 or index == 15 or index == 19:
+                                            continue
+                                        else:
+                                            if text == '\xa0' or text == ''  or text == '-' or text == '--':
+                                                data.append( '--' )
+                                            else:
+                                                data.append( text )
+
+                                    all_company_dividend.append( data )
+                            elif n_year >= 105 and n_year < 108:
                                 if len( td_elements ) == 18:
                                     # [0]公司代號,
                                     # [1]公司名稱,
