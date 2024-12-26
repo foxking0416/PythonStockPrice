@@ -313,7 +313,8 @@
     <addaction name="qtActionSave"/>
     <addaction name="separator"/>
     <addaction name="qtActionExportCurrentGroup"/>
-    <addaction name="qtActionImport"/>
+    <addaction name="qtActionImportFull"/>
+    <addaction name="qtActionImportSingleStock"/>
    </widget>
    <addaction name="menu"/>
   </widget>
@@ -343,9 +344,14 @@
     <string>匯出目前群組</string>
    </property>
   </action>
-  <action name="qtActionImport">
+  <action name="qtActionImportFull">
    <property name="text">
-    <string>匯入檔案</string>
+    <string>匯入所有群組資料</string>
+   </property>
+  </action>
+  <action name="qtActionImportSingleStock">
+   <property name="text">
+    <string>匯入單支股票到當前群組</string>
    </property>
   </action>
  </widget>

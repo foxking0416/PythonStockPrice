@@ -688,8 +688,10 @@ class MainWindow( QMainWindow ):
         self.ui.qtActionSave.triggered.connect( self.on_save_action_triggered )
         self.ui.qtActionExportCurrentGroup.setShortcut( "Ctrl+E" )
         self.ui.qtActionExportCurrentGroup.triggered.connect( self.on_export_current_group_action_triggered )
-        self.ui.qtActionImport.setShortcut( "Ctrl+I" )
-        self.ui.qtActionImport.triggered.connect( self.on_import_action_triggered )
+        self.ui.qtActionImportFull.setShortcut( "Ctrl+U" )
+        self.ui.qtActionImportFull.triggered.connect( self.on_import_full_action_triggered )
+        self.ui.qtActionImportSingleStock.setShortcut( "Ctrl+I" )
+        self.ui.qtActionImportSingleStock.triggered.connect( self.on_import_single_stock_action_triggered )
         
 
         obj_current_date = datetime.datetime.today() - datetime.timedelta( days = 1 )
@@ -1577,7 +1579,7 @@ class MainWindow( QMainWindow ):
             list_save_tab_widget = [ self.ui.qtTabWidget.currentIndex() ]
             self.manual_save_trading_data( list_save_tab_widget, file_path )
 
-    def on_import_action_triggered( self ):
+    def on_import_full_action_triggered( self ):
         file_path = self.open_load_json_file_dialog()
         if file_path:
             dict_account_to_tab_widget_name = {}
@@ -1641,6 +1643,49 @@ class MainWindow( QMainWindow ):
                         self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ] = dict_per_account_all_stock_trading_data_LOAD
                         dict_per_account_ui_state_LOAD = dict_all_account_ui_state_LOAD[ str_account_name ]
                         self.dict_all_account_ui_state[ str_tab_widget_name ] = dict_per_account_ui_state_LOAD
+
+            self.process_all_trading_data()
+            self.str_picked_stock_number = None
+            self.refresh_stock_list_table()
+            self.clear_per_stock_trading_table()
+            self.update_button_enable_disable_status()
+            self.auto_save_trading_data()
+
+    def on_import_single_stock_action_triggered( self ):
+        file_path = self.open_load_json_file_dialog()
+        if file_path:
+            dict_all_account_all_stock_trading_data_LOAD = {}
+            dict_all_account_ui_state_LOAD = {}
+            self.load_trading_data_and_create_tab( file_path, dict_all_account_all_stock_trading_data_LOAD, dict_all_account_ui_state_LOAD, False )
+            if len( dict_all_account_all_stock_trading_data_LOAD ) == 0:
+                return
+            elif len( dict_all_account_all_stock_trading_data_LOAD ) > 1:
+                self.show_message_box( "錯誤", "請選擇只包含單一帳戶及單一個股的檔案" )
+                return
+            
+            dict_per_account_all_stock_trading_data_LOAD = dict_all_account_all_stock_trading_data_LOAD.popitem()[ 1 ]
+            if len( dict_per_account_all_stock_trading_data_LOAD ) == 0:
+                return
+            elif len( dict_per_account_all_stock_trading_data_LOAD ) > 1:
+                self.show_message_box( "錯誤", "請選擇只包含單一帳戶及單一個股的檔案" )
+                return
+            str_stock_number, list_trading_data = dict_per_account_all_stock_trading_data_LOAD.popitem()
+
+            str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
+            dict_per_account_all_stock_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ]
+
+            b_duplicate = str_stock_number in dict_per_account_all_stock_trading_data
+
+            if b_duplicate:
+                dialog = ImportDataDuplicateOptionDialog( self )
+                if dialog.exec():
+                    if dialog.b_overwrite:
+                        self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ][ str_stock_number ] = list_trading_data
+                    else:
+                        list_trading_data.pop( 0 ) #移除第一筆資料 因為第一筆資料是虛的
+                        self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ][ str_stock_number ].extend( list_trading_data )
+            else:
+                self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ][ str_stock_number ] = list_trading_data
 
             self.process_all_trading_data()
             self.str_picked_stock_number = None
@@ -2069,6 +2114,7 @@ class MainWindow( QMainWindow ):
                     n_accumulated_stock_dividend = dict_trading_data_last[ TradingData.ALL_STOCK_DIVIDEND_GAIN_NON_SAVE ]
                     n_accumulated_cash_dividend = dict_trading_data_last[ TradingData.ALL_CASH_DIVIDEND_GAIN_NON_SAVE ]
 
+                    n_accumulated_dividend_profit = 0
                     if key_stock_number in self.dict_all_company_number_to_price_info:
                         try:
                             f_stock_price = float( self.dict_all_company_number_to_price_info[ key_stock_number ] )
