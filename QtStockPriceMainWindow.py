@@ -161,11 +161,6 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_3.addWidget(self.qtAddTradingDataPushButton)
 
-        self.qtAddRegularTradingDataPushButton = QPushButton(self.scrollAreaWidgetContents)
-        self.qtAddRegularTradingDataPushButton.setObjectName(u"qtAddRegularTradingDataPushButton")
-
-        self.horizontalLayout_3.addWidget(self.qtAddRegularTradingDataPushButton)
-
         self.qtAddDividendDataPushButton = QPushButton(self.scrollAreaWidgetContents)
         self.qtAddDividendDataPushButton.setObjectName(u"qtAddDividendDataPushButton")
         self.qtAddDividendDataPushButton.setEnabled(False)
@@ -253,8 +248,7 @@ class Ui_MainWindow(object):
         self.qtShow1000StockRadioButton.setText(QCoreApplication.translate("MainWindow", u"\u4ee5\u4e00\u5f35\u70ba\u55ae\u4f4d", None))
         self.qtADYearRadioButton.setText(QCoreApplication.translate("MainWindow", u"\u4ee5\u897f\u5143\u986f\u793a", None))
         self.qtROCYearRadioButton.setText(QCoreApplication.translate("MainWindow", u"\u4ee5\u6c11\u570b\u986f\u793a", None))
-        self.qtAddTradingDataPushButton.setText(QCoreApplication.translate("MainWindow", u"\u65b0\u589e\u73fe\u80a1\u4ea4\u6613\u7d00\u9304(T)", None))
-        self.qtAddRegularTradingDataPushButton.setText(QCoreApplication.translate("MainWindow", u"\u65b0\u589e\u5b9a\u671f\u5b9a\u984d\u4ea4\u6613\u7d00\u9304", None))
+        self.qtAddTradingDataPushButton.setText(QCoreApplication.translate("MainWindow", u"\u65b0\u589e\u4ea4\u6613\u7d00\u9304(T)", None))
         self.qtAddDividendDataPushButton.setText(QCoreApplication.translate("MainWindow", u"\u65b0\u589e\u914d\u80a1\u914d\u606f\u7d00\u9304(D)", None))
         self.qtAddLimitBuyingDataPushButton.setText(QCoreApplication.translate("MainWindow", u"\u65b0\u589e\u589e\u8cc7\u8a8d\u8cfc\u8cc7\u6599(A)", None))
         self.qtAddCapitalReductionDataPushButton.setText(QCoreApplication.translate("MainWindow", u"\u65b0\u589e\u73fe\u91d1\u6e1b\u8cc7\u7d00\u9304(R)", None))

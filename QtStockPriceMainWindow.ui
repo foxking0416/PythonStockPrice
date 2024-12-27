@@ -230,14 +230,7 @@
           <bool>false</bool>
          </property>
          <property name="text">
-          <string>新增現股交易紀錄(T)</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="qtAddRegularTradingDataPushButton">
-         <property name="text">
-          <string>新增定期定額交易紀錄</string>
+          <string>新增交易紀錄(T)</string>
          </property>
         </widget>
        </item>
