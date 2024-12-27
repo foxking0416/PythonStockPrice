@@ -10,6 +10,7 @@ from QtStockPriceMainWindow import Ui_MainWindow  # 導入轉換後的 UI 類
 import logging
 from QtStockCapitalIncreaseEditDialog import Ui_Dialog as Ui_StockCapitalIncreaseDialog
 from QtStockTradingEditDialog import Ui_Dialog as Ui_StockTradingDialog
+from QtStockRegularTradingEditDialog import Ui_Dialog as Ui_StockRegularTradingDialog
 from QtStockDividendEditDialog import Ui_Dialog as Ui_StockDividendDialog
 from QtStockCapitalReductionEditDialog import Ui_Dialog as Ui_StockCapitalReductionDialog
 from QtDuplicateOptionDialog import Ui_Dialog as Ui_DuplicateOptionDialog
@@ -40,6 +41,7 @@ from decimal import Decimal
 # pyside6-uic QtStockPriceMainWindowTemplate.ui -o QtStockPriceMainWindowTemplate.py
 # pyside6-uic QtStockPriceMainWindow.ui -o QtStockPriceMainWindow.py
 # pyside6-uic QtStockTradingEditDialog.ui -o QtStockTradingEditDialog.py
+# pyside6-uic QtStockRegularTradingEditDialog.ui -o QtStockRegularTradingEditDialog.py
 # pyside6-uic QtStockDividendEditDialog.ui -o QtStockDividendEditDialog.py
 # pyside6-uic QtStockCapitalReductionEditDialog.ui -o QtStockCapitalReductionEditDialog.py
 # pyside6-uic QtStockCapitalIncreaseEditDialog.ui -o QtStockCapitalIncreaseEditDialog.py
@@ -160,9 +162,10 @@ class TradingType( IntEnum ):
     TEMPLATE = 0
     SELL = 1
     BUY = 2
-    CAPITAL_INCREASE = 3
-    DIVIDEND = 4
-    CAPITAL_REDUCTION = 5
+    REGULAR_BUY = 3
+    CAPITAL_INCREASE = 4
+    DIVIDEND = 5
+    CAPITAL_REDUCTION = 6
 
 class TradingData( Enum ):
     TRADING_DATE = 0
@@ -536,6 +539,155 @@ class StockTradingEditDialog( QDialog ):
             self.ui.qtTotalCostLineEdit.setText( format( -dict_result[ TradingCost.TRADING_TOTAL_COST ], ',' ) )
         self.ui.qtFeeLineEdit.setText( format( dict_result[ TradingCost.TRADING_FEE ], ',' ) )
         self.ui.qtTaxLineEdit.setText( format( dict_result[ TradingCost.TRADING_TAX ], ',' ) )
+
+class StockRegularTradingEditDialog( QDialog ):
+    def __init__( self, str_stock_number, str_stock_name, b_etf, b_discount, f_discount_value, parent = None ):
+        super().__init__( parent )
+
+        self.ui = Ui_StockRegularTradingDialog()
+        self.ui.setupUi( self )
+        
+        window_icon = QIcon( window_icon_file_path ) 
+        self.setWindowIcon( window_icon )
+
+        self.ui.qtStockNumberLabel.setText( str_stock_number )
+        self.ui.qtStockNameLabel.setText( str_stock_name )
+        obj_current_date = datetime.datetime.today()
+        self.ui.qtDateEdit.setDate( obj_current_date.date() )
+        self.ui.qtDateEdit.setCalendarPopup( True )
+        self.ui.qtDiscountCheckBox.setChecked( b_discount )
+        self.ui.qtDiscountRateDoubleSpinBox.setValue( f_discount_value * 10 )
+        self.ui.qtDiscountRateDoubleSpinBox.setEnabled( b_discount )
+
+        self.ui.qtDiscountCheckBox.stateChanged.connect( self.on_discount_check_box_state_changed )
+        self.ui.qtDiscountRateDoubleSpinBox.valueChanged.connect( self.compute_cost )
+        self.ui.qtBuyRadioButton.toggled.connect( self.compute_cost )
+        self.ui.qtSellRadioButton.toggled.connect( self.compute_cost )
+        self.ui.qtCommonTradeRadioButton.toggled.connect( self.on_trading_type_changed )
+        self.ui.qtOddTradeRadioButton.toggled.connect( self.on_trading_type_changed )
+        self.ui.qtPriceDoubleSpinBox.valueChanged.connect( self.compute_cost )
+        self.ui.qtCommonTradeCountSpinBox.valueChanged.connect( self.compute_cost )
+        self.ui.qtOddTradeCountSpinBox.valueChanged.connect( self.compute_cost )
+        self.ui.qtOkButtonBox.accepted.connect( self.accept_data )
+        self.ui.qtOkButtonBox.rejected.connect( self.cancel )
+        self.b_etf = b_etf
+        # self.load_stylesheet("style.css")
+        self.dict_trading_data = {}
+
+    def load_stylesheet( self, file_path ):
+        try:
+            with open(file_path, "r", encoding="utf-8") as file:  # 指定 UTF-8 編碼
+                stylesheet = file.read()
+                self.setStyleSheet(stylesheet)
+        except FileNotFoundError:
+            print(f"CSS 檔案 {file_path} 找不到")
+        except Exception as e:
+            print(f"讀取 CSS 檔案時發生錯誤: {e}")
+
+    def on_discount_check_box_state_changed( self, state ):
+        if state == 2:
+            self.ui.qtDiscountRateDoubleSpinBox.setEnabled( True )
+        else:
+            self.ui.qtDiscountRateDoubleSpinBox.setEnabled( False )
+
+        self.compute_cost()
+
+    def setup_trading_date( self, str_date ):
+        self.ui.qtDateEdit.setDate( datetime.datetime.strptime( str_date, "%Y-%m-%d" ).date() )
+
+    def setup_trading_type( self, e_trading_type ):
+        if e_trading_type == TradingType.BUY:
+            self.ui.qtBuyRadioButton.setChecked( True )
+        else:
+            self.ui.qtSellRadioButton.setChecked( True )
+
+    def setup_trading_discount( self, f_discount_value ):
+        if f_discount_value != 1:
+            self.ui.qtDiscountCheckBox.setChecked( True )
+            self.ui.qtDiscountRateDoubleSpinBox.setValue( f_discount_value * 10 )
+            self.ui.qtDiscountRateDoubleSpinBox.setEnabled( True )
+        else:
+            self.ui.qtDiscountCheckBox.setChecked( False )
+            self.ui.qtDiscountRateDoubleSpinBox.setValue( 6 )
+            self.ui.qtDiscountRateDoubleSpinBox.setEnabled( False )
+
+    def setup_trading_price( self, f_price ):
+        self.ui.qtPriceDoubleSpinBox.setValue( f_price )
+
+    def setup_trading_count( self, f_count ):
+        if f_count % 1000 == 0:
+            self.ui.qtCommonTradeRadioButton.setChecked( True )
+            self.ui.qtCommonTradeCountSpinBox.setValue( f_count / 1000 )
+            self.ui.qtOddTradeCountSpinBox.setValue( 0 )
+        else:
+            self.ui.qtOddTradeRadioButton.setChecked( True )
+            self.ui.qtCommonTradeCountSpinBox.setValue( 0 )
+            self.ui.qtOddTradeCountSpinBox.setValue( f_count )
+
+    def accept_data( self ):
+
+        if float( self.ui.qtTotalCostLineEdit.text().replace( ',', '' ) ) != 0:
+            
+            self.dict_trading_data = Utility.generate_trading_data( self.ui.qtDateEdit.date().toString( "yyyy-MM-dd" ), #交易日期
+                                                                    self.get_trading_type(),                            #交易種類
+                                                                    self.ui.qtPriceDoubleSpinBox.value(),               #交易價格
+                                                                    self.get_trading_count(),                           #交易股數
+                                                                    self.get_trading_fee_discount(),                    #手續費折扣
+                                                                    0,                                                  #每股股票股利
+                                                                    0,                                                  #每股現金股利
+                                                                    0 )                                                 #每股減資金額
+            self.accept()
+        else:
+            self.reject()
+    
+    def cancel( self ):
+        self.reject()
+
+    def on_trading_type_changed( self ):
+        if self.ui.qtCommonTradeRadioButton.isChecked():
+            self.ui.qtCommonTradeCountSpinBox.setEnabled( True )
+            self.ui.qtOddTradeCountSpinBox.setEnabled( False )
+        else:
+            self.ui.qtCommonTradeCountSpinBox.setEnabled( False )
+            self.ui.qtOddTradeCountSpinBox.setEnabled( True )
+
+        self.compute_cost()
+
+    def get_trading_type( self ):
+        if self.ui.qtBuyRadioButton.isChecked():
+            return TradingType.BUY
+        else:
+            return TradingType.SELL
+
+    def get_trading_count( self ):
+        if self.ui.qtCommonTradeRadioButton.isChecked():
+            return self.ui.qtCommonTradeCountSpinBox.value() * 1000
+        else:
+            return self.ui.qtOddTradeCountSpinBox.value()
+        
+    def get_trading_fee_discount( self ):
+        if self.ui.qtDiscountCheckBox.isChecked():
+            return self.ui.qtDiscountRateDoubleSpinBox.value() / 10
+        else:
+            return 1
+
+    def compute_cost( self ):
+        e_trading_type = self.get_trading_type()
+        f_trading_price = self.ui.qtPriceDoubleSpinBox.value()
+        n_trading_count = self.get_trading_count()
+        f_trading_fee_discount = self.get_trading_fee_discount() 
+        
+        dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, self.b_etf, False )
+
+        if e_trading_type == TradingType.BUY:
+            self.ui.qtTradingValueLineEdit.setText( format( dict_result[ TradingCost.TRADING_VALUE ], ',' ) )
+            self.ui.qtTotalCostLineEdit.setText( format( dict_result[ TradingCost.TRADING_TOTAL_COST ], ',' ) )
+        elif e_trading_type == TradingType.SELL:
+            self.ui.qtTradingValueLineEdit.setText( format( -dict_result[ TradingCost.TRADING_VALUE ], ',' ) )
+            self.ui.qtTotalCostLineEdit.setText( format( -dict_result[ TradingCost.TRADING_TOTAL_COST ], ',' ) )
+        self.ui.qtFeeLineEdit.setText( format( dict_result[ TradingCost.TRADING_FEE ], ',' ) )
+        self.ui.qtTaxLineEdit.setText( format( dict_result[ TradingCost.TRADING_TAX ], ',' ) )
+
 
 class StockCapitalIncreaseEditDialog( QDialog ):
     def __init__( self, str_stock_number, str_stock_name, parent = None ):
@@ -1784,50 +1936,105 @@ class MainWindow( QMainWindow ):
             version = f.readline().strip()
             data = json.load( f )
 
-        for item_account in data:
-            if "account_name" in item_account and \
-               "trading_data" in item_account and \
-               "discount_checkbox" in item_account and \
-               "discount_value" in item_account and \
-               "insurance_checkbox" in item_account:
-                dict_per_account_all_stock_trading_data = item_account[ "trading_data" ]
-                dict_ui_state = {}
-                dict_ui_state[ "discount_checkbox" ] = item_account[ "discount_checkbox" ]
-                dict_ui_state[ "discount_value" ] = item_account[ "discount_value" ]
-                dict_ui_state[ "insurance_checkbox" ] = item_account[ "insurance_checkbox" ]
+        if version == "v1.0.0":
+            for item_account in data:
+                if "account_name" in item_account and \
+                   "trading_data" in item_account and \
+                   "discount_checkbox" in item_account and \
+                   "discount_value" in item_account and \
+                   "insurance_checkbox" in item_account:
+                    dict_per_account_all_stock_trading_data = item_account[ "trading_data" ]
+                    dict_ui_state = {}
+                    dict_ui_state[ "discount_checkbox" ] = item_account[ "discount_checkbox" ]
+                    dict_ui_state[ "discount_value" ] = item_account[ "discount_value" ]
+                    dict_ui_state[ "insurance_checkbox" ] = item_account[ "insurance_checkbox" ]
 
-                dict_per_stock_trading_data = {} 
-                for key_stock_number, value_list_trading_data  in dict_per_account_all_stock_trading_data.items():
-                    list_trading_data = []
-                    for item_trading_data in value_list_trading_data:
-                        if ( "trading_date" in item_trading_data and
-                             "trading_type" in item_trading_data and
-                             "trading_price" in item_trading_data and
-                             "trading_count" in item_trading_data and
-                             "trading_fee_discount" in item_trading_data and
-                             "stock_dividend_per_share" in item_trading_data and
-                             "cash_dividend_per_share" in item_trading_data and
-                             "capital_reduction_per_share" in item_trading_data ):
+                    dict_per_stock_trading_data = {} 
+                    for key_stock_number, value_list_trading_data  in dict_per_account_all_stock_trading_data.items():
+                        list_trading_data = []
+                        for item_trading_data in value_list_trading_data:
+                            if ( "trading_date" in item_trading_data and
+                                 "trading_type" in item_trading_data and
+                                 "trading_price" in item_trading_data and
+                                 "trading_count" in item_trading_data and
+                                 "trading_fee_discount" in item_trading_data and
+                                 "stock_dividend_per_share" in item_trading_data and
+                                 "cash_dividend_per_share" in item_trading_data and
+                                 "capital_reduction_per_share" in item_trading_data ):
+                                
+                                if item_trading_data[ "trading_type" ] == 3:
+                                    e_trading_type = TradingType.CAPITAL_INCREASE
+                                elif item_trading_data[ "trading_type" ] == 4:
+                                    e_trading_type = TradingType.DIVIDEND
+                                elif item_trading_data[ "trading_type" ] == 5:
+                                    e_trading_type = TradingType.CAPITAL_REDUCTION
+                                else:
+                                    e_trading_type = TradingType( item_trading_data[ "trading_type" ] )
+                                dict_per_trading_data = Utility.generate_trading_data( item_trading_data[ "trading_date" ],                 #交易日期
+                                                                                       e_trading_type,                                      #交易種類
+                                                                                       item_trading_data[ "trading_price" ],                #交易價格
+                                                                                       item_trading_data[ "trading_count" ],                #交易股數
+                                                                                       item_trading_data[ "trading_fee_discount" ],         #手續費折扣
+                                                                                       item_trading_data[ "stock_dividend_per_share" ],     #每股股票股利
+                                                                                       item_trading_data[ "cash_dividend_per_share" ],      #每股現金股利
+                                                                                       item_trading_data[ "capital_reduction_per_share" ] ) #每股減資金額     
+                                if item_trading_data[ "trading_date" ] == '0001-01-01':
+                                    dict_per_trading_data[ TradingData.USE_AUTO_DIVIDEND_DATA ] = item_trading_data[ "use_auto_dividend_data" ]       
+                                list_trading_data.append( dict_per_trading_data )
+                        dict_per_stock_trading_data[ key_stock_number ] = list_trading_data
+                    if b_create_tab:
+                        str_tab_name = self.add_new_tab_and_table( item_account[ "account_name" ] )
+                        dict_all_account_ui_state[ str_tab_name ] = dict_ui_state
+                        dict_all_account_all_stock_trading_data[ str_tab_name ] = dict_per_stock_trading_data
+                    else:
+                        dict_all_account_ui_state[ item_account[ "account_name" ] ] = dict_ui_state
+                        dict_all_account_all_stock_trading_data[ item_account[ "account_name" ] ] = dict_per_stock_trading_data
+        else:
+            for item_account in data:
+                if "account_name" in item_account and \
+                   "trading_data" in item_account and \
+                   "discount_checkbox" in item_account and \
+                   "discount_value" in item_account and \
+                   "insurance_checkbox" in item_account:
+                    dict_per_account_all_stock_trading_data = item_account[ "trading_data" ]
+                    dict_ui_state = {}
+                    dict_ui_state[ "discount_checkbox" ] = item_account[ "discount_checkbox" ]
+                    dict_ui_state[ "discount_value" ] = item_account[ "discount_value" ]
+                    dict_ui_state[ "insurance_checkbox" ] = item_account[ "insurance_checkbox" ]
 
-                            dict_per_trading_data = Utility.generate_trading_data( item_trading_data[ "trading_date" ],                 #交易日期
-                                                                                   TradingType( item_trading_data[ "trading_type" ] ),  #交易種類
-                                                                                   item_trading_data[ "trading_price" ],                #交易價格
-                                                                                   item_trading_data[ "trading_count" ],                #交易股數
-                                                                                   item_trading_data[ "trading_fee_discount" ],         #手續費折扣
-                                                                                   item_trading_data[ "stock_dividend_per_share" ],     #每股股票股利
-                                                                                   item_trading_data[ "cash_dividend_per_share" ],      #每股現金股利
-                                                                                   item_trading_data[ "capital_reduction_per_share" ] ) #每股減資金額     
-                            if item_trading_data[ "trading_date" ] == '0001-01-01':
-                                dict_per_trading_data[ TradingData.USE_AUTO_DIVIDEND_DATA ] = item_trading_data[ "use_auto_dividend_data" ]       
-                            list_trading_data.append( dict_per_trading_data )
-                    dict_per_stock_trading_data[ key_stock_number ] = list_trading_data
-                if b_create_tab:
-                    str_tab_name = self.add_new_tab_and_table( item_account[ "account_name" ] )
-                    dict_all_account_ui_state[ str_tab_name ] = dict_ui_state
-                    dict_all_account_all_stock_trading_data[ str_tab_name ] = dict_per_stock_trading_data
-                else:
-                    dict_all_account_ui_state[ item_account[ "account_name" ] ] = dict_ui_state
-                    dict_all_account_all_stock_trading_data[ item_account[ "account_name" ] ] = dict_per_stock_trading_data
+                    dict_per_stock_trading_data = {} 
+                    for key_stock_number, value_list_trading_data  in dict_per_account_all_stock_trading_data.items():
+                        list_trading_data = []
+                        for item_trading_data in value_list_trading_data:
+                            if ( "trading_date" in item_trading_data and
+                                 "trading_type" in item_trading_data and
+                                 "trading_price" in item_trading_data and
+                                 "trading_count" in item_trading_data and
+                                 "trading_fee_discount" in item_trading_data and
+                                 "stock_dividend_per_share" in item_trading_data and
+                                 "cash_dividend_per_share" in item_trading_data and
+                                 "capital_reduction_per_share" in item_trading_data ):
+                                
+                                e_trading_type = TradingType( item_trading_data[ "trading_type" ] )
+                                dict_per_trading_data = Utility.generate_trading_data( item_trading_data[ "trading_date" ],                 #交易日期
+                                                                                       e_trading_type,                                      #交易種類
+                                                                                       item_trading_data[ "trading_price" ],                #交易價格
+                                                                                       item_trading_data[ "trading_count" ],                #交易股數
+                                                                                       item_trading_data[ "trading_fee_discount" ],         #手續費折扣
+                                                                                       item_trading_data[ "stock_dividend_per_share" ],     #每股股票股利
+                                                                                       item_trading_data[ "cash_dividend_per_share" ],      #每股現金股利
+                                                                                       item_trading_data[ "capital_reduction_per_share" ] ) #每股減資金額     
+                                if item_trading_data[ "trading_date" ] == '0001-01-01':
+                                    dict_per_trading_data[ TradingData.USE_AUTO_DIVIDEND_DATA ] = item_trading_data[ "use_auto_dividend_data" ]       
+                                list_trading_data.append( dict_per_trading_data )
+                        dict_per_stock_trading_data[ key_stock_number ] = list_trading_data
+                    if b_create_tab:
+                        str_tab_name = self.add_new_tab_and_table( item_account[ "account_name" ] )
+                        dict_all_account_ui_state[ str_tab_name ] = dict_ui_state
+                        dict_all_account_all_stock_trading_data[ str_tab_name ] = dict_per_stock_trading_data
+                    else:
+                        dict_all_account_ui_state[ item_account[ "account_name" ] ] = dict_ui_state
+                        dict_all_account_all_stock_trading_data[ item_account[ "account_name" ] ] = dict_per_stock_trading_data
 
     def auto_save_trading_data( self ): 
         list_save_tab_widget = list( range( self.ui.qtTabWidget.count() - 1 ) )
@@ -1883,7 +2090,7 @@ class MainWindow( QMainWindow ):
             export_list_all_account_all_stock_trading_data.append( export_dict_per_account_all_info )
 
         with open( file_path, 'w', encoding='utf-8' ) as f:
-            f.write( "v1.0.0" '\n' )
+            f.write( "v1.0.1" '\n' )
             json.dump( export_list_all_account_all_stock_trading_data, f, ensure_ascii=False, indent=4 )
     
     def save_share_UI_state( self ): 
