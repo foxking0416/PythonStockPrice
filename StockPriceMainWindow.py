@@ -632,7 +632,7 @@ class Worker( QObject ):
         self.progress.emit( value )  # Emit progress updates
 
 class MainWindow( QMainWindow ):
-    def __init__( self, b_multi_thread = True ):
+    def __init__( self, b_multi_thread = True, str_initial_data_file = 'TradingData.json' ):
         super( MainWindow, self ).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi( self )  # 設置 UI
@@ -733,6 +733,7 @@ class MainWindow( QMainWindow ):
             self.start_loading_stock_data()
         else:
             self.initialize( None )
+            self.load_initialize_data()
 
     def initialize( self, update_progress_callback = None ):
         self.setEnabled( False ) # 資料下載前先Disable整個視窗
@@ -3501,7 +3502,7 @@ class MainWindow( QMainWindow ):
 def run_app():
     app = QApplication( sys.argv )
     app.setStyle('Fusion')
-    window = MainWindow( True )
+    window = MainWindow( True, 'TradingData.json' )
     window.show()
     return app.exec()
 
