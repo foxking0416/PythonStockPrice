@@ -636,17 +636,18 @@ class Worker( QObject ):
         self.progress.emit( value )  # Emit progress updates
 
 class MainWindow( QMainWindow ):
-    def __init__(self):
+    def __init__( self, b_multi_thread = True ):
         super( MainWindow, self ).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi( self )  # 設置 UI
         window_icon = QIcon( window_icon_file_path ) 
         self.setWindowIcon( window_icon )
         
-        self.progress_bar = QProgressBar( self )
-        self.progress_bar.setGeometry( 400, 350, 300, 25 )  # Adjust position and size as needed
-        self.progress_bar.setMaximum( 100 )
-        self.progress_bar.setVisible( False )
+        if b_multi_thread:
+            self.progress_bar = QProgressBar( self )
+            self.progress_bar.setGeometry( 400, 350, 300, 25 )  # Adjust position and size as needed
+            self.progress_bar.setMaximum( 100 )
+            self.progress_bar.setVisible( False )
 
         self.ui.qtTabWidget.currentChanged.connect( self.on_tab_current_changed )
         self.ui.qtTabWidget.tabBarDoubleClicked.connect( self.on_tab_widget_double_clicked )
@@ -727,8 +728,10 @@ class MainWindow( QMainWindow ):
         self.n_tab_index = 0
         self.str_current_save_file_path = None
         # self.load_stylesheet("style.css")
-
-        self.start_loading_stock_data()
+        if b_multi_thread:
+            self.start_loading_stock_data()
+        else:
+            self.initialize( None )
 
     def initialize( self, update_progress_callback = None ):
         self.setEnabled( False ) # 資料下載前先Disable整個視窗
@@ -3494,9 +3497,13 @@ class MainWindow( QMainWindow ):
         return []
     #endregion
 
-if __name__ == "__main__":
-    app = QApplication(sys.argv)  # 創建應用程式
+def run_app():
+    app = QApplication( sys.argv )
     app.setStyle('Fusion')
-    window = MainWindow()  # 創建主窗口
-    window.show()  # 顯示窗口
-    sys.exit(app.exec())  # 進入事件循環
+    window = MainWindow( True )
+    window.show()
+    return app.exec()
+
+if __name__ == "__main__":
+    sys.exit( run_app() )
+
