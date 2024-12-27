@@ -129,11 +129,7 @@ check_icon_file_path = os.path.join( g_exe_root_dir, 'icon\\CheckOn.svg' )
 check_icon = QIcon( check_icon_file_path )
 uncheck_icon_file_path = os.path.join( g_exe_root_dir, 'icon\\CheckOff.svg' ) 
 uncheck_icon = QIcon( uncheck_icon_file_path )
-g_trading_data_json_file_path = os.path.join( g_data_dir, 'StockInventory', 'TradingData.json' )
-g_trading_data_json_file_path_save = os.path.join( g_data_dir, 'StockInventory', 'TradingDataSave.json' )
-g_UISetting_file_path = os.path.join( g_data_dir, 'StockInventory', 'UISetting.config' )
-g_stock_number_file_path = os.path.join( g_data_dir, 'StockInventory', 'StockNumber.txt' )
-g_stock_price_file_path = os.path.join( g_data_dir, 'StockInventory', 'StockPrice.txt' )
+
 
 class CenterIconDelegate( QStyledItemDelegate ):
     def paint( self, painter, option, index ):
@@ -716,14 +712,19 @@ class MainWindow( QMainWindow ):
         self.ui.qtActionImportSingleStock.setShortcut( "Ctrl+I" )
         self.ui.qtActionImportSingleStock.triggered.connect( self.on_import_single_stock_action_triggered )
         
-        self.g_list_stock_list_table_horizontal_header = [ '自動帶入股利', '總成本', '庫存股數', '平均成本', ' 收盤價', '淨值', '總手續費', '總交易稅', '損益', '股利所得', '匯出', '刪除' ]
+        self.trading_data_json_file_path = os.path.join( g_data_dir, 'StockInventory', 'TradingData.json' )
+        self.UISetting_file_path = os.path.join( g_data_dir, 'StockInventory', 'UISetting.config' )
+        self.stock_number_file_path = os.path.join( g_data_dir, 'StockInventory', 'StockNumber.txt' )
+        self.stock_price_file_path = os.path.join( g_data_dir, 'StockInventory', 'StockPrice.txt' )
+
+        self.list_stock_list_table_horizontal_header = [ '自動帶入股利', '總成本', '庫存股數', '平均成本', ' 收盤價', '淨值', '總手續費', '總交易稅', '損益', '股利所得', '匯出', '刪除' ]
         self.str_picked_stock_number = None
         self.dict_all_account_ui_state = {}
         self.dict_all_account_all_stock_trading_data = {}
         self.dict_all_account_all_stock_trading_data_INITIAL = {}
-        self.list_stock_list_column_width = [ 85 ] * len( self.g_list_stock_list_table_horizontal_header )
-        self.list_stock_list_column_width[ len( self.g_list_stock_list_table_horizontal_header ) - 2 ] = 40
-        self.list_stock_list_column_width[ len( self.g_list_stock_list_table_horizontal_header ) - 1 ] = 40
+        self.list_stock_list_column_width = [ 85 ] * len( self.list_stock_list_table_horizontal_header )
+        self.list_stock_list_column_width[ len( self.list_stock_list_table_horizontal_header ) - 2 ] = 40
+        self.list_stock_list_column_width[ len( self.list_stock_list_table_horizontal_header ) - 1 ] = 40
         self.n_current_tab = 0
         self.n_tab_index = 0
         self.str_current_save_file_path = None
@@ -772,7 +773,7 @@ class MainWindow( QMainWindow ):
             if n_retry > 30:
                 break
         str_valid_month_date = obj_current_date.strftime('%m/%d')
-        self.g_list_stock_list_table_horizontal_header[ 4 ] = str_valid_month_date + ' 收盤價'
+        self.list_stock_list_table_horizontal_header[ 4 ] = str_valid_month_date + ' 收盤價'
         self.set_progress_value( update_progress_callback, 100 )
         # self.load_initialize_data()
         self.setEnabled( True ) # 資料下載完後就會Enable
@@ -939,7 +940,7 @@ class MainWindow( QMainWindow ):
 
         delegate = CenterIconDelegate()
         stock_list_model = QStandardItemModel( 0, 0 )
-        stock_list_model.setHorizontalHeaderLabels( self.g_list_stock_list_table_horizontal_header )
+        stock_list_model.setHorizontalHeaderLabels( self.list_stock_list_table_horizontal_header )
         uiqt_stock_list_table_view.verticalHeader().setSectionsMovable( True )
         uiqt_stock_list_table_view.verticalHeader().sectionMoved.connect( self.on_stock_list_table_vertical_header_section_moved )
         uiqt_stock_list_table_view.verticalHeader().sectionClicked.connect( self.on_stock_list_table_vertical_section_clicked )
@@ -1165,7 +1166,7 @@ class MainWindow( QMainWindow ):
                 self.refresh_stock_list_table()
                 self.refresh_trading_data_table( sorted_list )
                 self.auto_save_trading_data()
-            elif n_column == len( self.g_list_stock_list_table_horizontal_header ) - 1:#刪除按鈕
+            elif n_column == len( self.list_stock_list_table_horizontal_header ) - 1:#刪除按鈕
                 result = self.show_warning_message_box_with_ok_cancel_button( "警告", f"確定要刪掉『{header_text}』的所有資料嗎?" )
                 if result:
                     del dict_per_account_all_stock_trading_data[ str_stock_number ]
@@ -1173,7 +1174,7 @@ class MainWindow( QMainWindow ):
                     self.refresh_stock_list_table()
                     self.clear_per_stock_trading_table()
                     self.auto_save_trading_data()
-            elif n_column == len( self.g_list_stock_list_table_horizontal_header ) - 2:#匯出按鈕
+            elif n_column == len( self.list_stock_list_table_horizontal_header ) - 2:#匯出按鈕
                 file_path = self.open_save_json_file_dialog()
                 if file_path:
                     list_save_tab_widget = [ self.ui.qtTabWidget.currentIndex() ]
@@ -1535,7 +1536,7 @@ class MainWindow( QMainWindow ):
     def on_new_file_action_triggered( self ): 
         b_need_save = False
         if ( ( self.dict_all_account_all_stock_trading_data_INITIAL != self.dict_all_account_all_stock_trading_data ) and
-             ( self.str_current_save_file_path is None or not self.compare_json_files( self.str_current_save_file_path, g_trading_data_json_file_path ) ) ):
+             ( self.str_current_save_file_path is None or not self.compare_json_files( self.str_current_save_file_path, self.trading_data_json_file_path ) ) ):
             dialog = SaveCheckDialog( '開新檔案', self )
             if dialog.exec():
                 if dialog.n_return == 1: #儲存
@@ -1581,7 +1582,7 @@ class MainWindow( QMainWindow ):
         if file_path:
             b_need_save = False
             if ( ( self.dict_all_account_all_stock_trading_data_INITIAL != self.dict_all_account_all_stock_trading_data ) and
-                 ( self.str_current_save_file_path is None or not self.compare_json_files( self.str_current_save_file_path, g_trading_data_json_file_path ) ) ):
+                 ( self.str_current_save_file_path is None or not self.compare_json_files( self.str_current_save_file_path, self.trading_data_json_file_path ) ) ):
                 dialog = SaveCheckDialog( '開啟舊檔', self )
                 if dialog.exec():
                     if dialog.n_return == 1: #儲存
@@ -1768,7 +1769,7 @@ class MainWindow( QMainWindow ):
 
     def load_initialize_data( self ): 
         with QSignalBlocker( self.ui.qtTabWidget ):
-            self.load_trading_data_and_create_tab( g_trading_data_json_file_path, self.dict_all_account_all_stock_trading_data, self.dict_all_account_ui_state, True )
+            self.load_trading_data_and_create_tab( self.trading_data_json_file_path, self.dict_all_account_all_stock_trading_data, self.dict_all_account_ui_state, True )
             self.load_share_UI_state()
             if len( self.dict_all_account_all_stock_trading_data ) == 0:
                 str_tab_name = self.add_new_tab_and_table()
@@ -1834,7 +1835,7 @@ class MainWindow( QMainWindow ):
 
     def auto_save_trading_data( self ): 
         list_save_tab_widget = list( range( self.ui.qtTabWidget.count() - 1 ) )
-        self.manual_save_trading_data( list_save_tab_widget, g_trading_data_json_file_path )
+        self.manual_save_trading_data( list_save_tab_widget, self.trading_data_json_file_path )
 
     def manual_save_trading_data( self, list_save_tab_indice, file_path, str_stock_number = None ): 
         export_list_all_account_all_stock_trading_data = []
@@ -1891,9 +1892,9 @@ class MainWindow( QMainWindow ):
     
     def save_share_UI_state( self ): 
         # 確保目錄存在，若不存在則遞歸創建
-        os.makedirs( os.path.dirname( g_UISetting_file_path ), exist_ok = True )
+        os.makedirs( os.path.dirname( self.UISetting_file_path ), exist_ok = True )
 
-        with open( g_UISetting_file_path, 'w', encoding='utf-8' ) as f:
+        with open( self.UISetting_file_path, 'w', encoding='utf-8' ) as f:
             f.write( "版本," + 'v1.0.0' + '\n' )
             f.write( "顯示排序," + str( self.ui.qtFromNewToOldRadioButton.isChecked() ) + '\n' )
             f.write( "顯示數量," + str( self.ui.qtShowAllRadioButton.isChecked() ) + '\n' )
@@ -1914,8 +1915,8 @@ class MainWindow( QMainWindow ):
                QSignalBlocker( self.ui.qtADYearRadioButton ), 
                QSignalBlocker( self.ui.qtROCYearRadioButton ) ):
 
-            if os.path.exists( g_UISetting_file_path ):
-                with open( g_UISetting_file_path, 'r', encoding='utf-8' ) as f:
+            if os.path.exists( self.UISetting_file_path ):
+                with open( self.UISetting_file_path, 'r', encoding='utf-8' ) as f:
                     data = f.readlines()
                     for i, row in enumerate( data ):
                         row = row.strip().split( ',' )
@@ -2153,7 +2154,7 @@ class MainWindow( QMainWindow ):
         if table_view:
             table_model = table_view.model()
             table_model.clear()
-            table_model.setHorizontalHeaderLabels( self.g_list_stock_list_table_horizontal_header )
+            table_model.setHorizontalHeaderLabels( self.list_stock_list_table_horizontal_header )
             
             with QSignalBlocker( table_view.horizontalHeader() ):
                 list_vertical_labels = []
@@ -2245,14 +2246,14 @@ class MainWindow( QMainWindow ):
                     export_icon_item = QStandardItem("")
                     export_icon_item.setIcon( export_icon )
                     export_icon_item.setFlags( export_icon_item.flags() & ~Qt.ItemIsEditable )
-                    table_model.setItem( index_row, len( self.g_list_stock_list_table_horizontal_header ) - 2, export_icon_item )
+                    table_model.setItem( index_row, len( self.list_stock_list_table_horizontal_header ) - 2, export_icon_item )
                     delete_icon_item = QStandardItem("")
                     delete_icon_item.setIcon( delete_icon )
                     delete_icon_item.setFlags( delete_icon_item.flags() & ~Qt.ItemIsEditable )
-                    table_model.setItem( index_row, len( self.g_list_stock_list_table_horizontal_header ) - 1, delete_icon_item )
+                    table_model.setItem( index_row, len( self.list_stock_list_table_horizontal_header ) - 1, delete_icon_item )
                     index_row += 1
 
-                for column in range( len( self.g_list_stock_list_table_horizontal_header ) ):
+                for column in range( len( self.list_stock_list_table_horizontal_header ) ):
                     if column < len( self.list_stock_list_column_width ):
                         table_view.setColumnWidth( column, self.list_stock_list_column_width[ column ] )
                     else:
@@ -2639,8 +2640,8 @@ class MainWindow( QMainWindow ):
         dict_company_number_to_name = {}
 
         b_need_to_download = False
-        if os.path.exists( g_stock_number_file_path ):
-            with open( g_stock_number_file_path, 'r', encoding='utf-8' ) as f:
+        if os.path.exists( self.stock_number_file_path ):
+            with open( self.stock_number_file_path, 'r', encoding='utf-8' ) as f:
                 data = f.readlines()
                 for i, row in enumerate( data ):
                     if i == 0:
@@ -2741,8 +2742,8 @@ class MainWindow( QMainWindow ):
                 return
             
             # 確保目錄存在，若不存在則遞歸創建
-            os.makedirs( os.path.dirname( g_stock_number_file_path ), exist_ok = True )
-            with open( g_stock_number_file_path, 'w', encoding='utf-8' ) as f:
+            os.makedirs( os.path.dirname( self.stock_number_file_path ), exist_ok = True )
+            with open( self.stock_number_file_path, 'w', encoding='utf-8' ) as f:
                 f.write( str_date + '\n' )
                 for row in tds:
                     f.write( str( row[ 0 ] ) + ',' + str( row[ 1 ] ) + ',' + str( row[ 2 ] ) + '\n' )
@@ -2753,8 +2754,8 @@ class MainWindow( QMainWindow ):
     def download_day_stock_price( self, str_date ):
         dict_company_number_to_price_info = {}
         b_need_to_download = False
-        if os.path.exists( g_stock_price_file_path ):
-            with open( g_stock_price_file_path, 'r', encoding='utf-8' ) as f:
+        if os.path.exists( self.stock_price_file_path ):
+            with open( self.stock_price_file_path, 'r', encoding='utf-8' ) as f:
                 data = f.readlines()
                 for i, row in enumerate( data ):
                     if i == 0:
@@ -2850,8 +2851,8 @@ class MainWindow( QMainWindow ):
                 return dict_company_number_to_price_info
             
             # 確保目錄存在，若不存在則遞歸創建
-            os.makedirs( os.path.dirname( g_stock_price_file_path ), exist_ok = True )
-            with open( g_stock_price_file_path, 'w', encoding='utf-8' ) as f:
+            os.makedirs( os.path.dirname( self.stock_price_file_path ), exist_ok = True )
+            with open( self.stock_price_file_path, 'w', encoding='utf-8' ) as f:
                 f.write( str_date + '\n' )
                 for row in all_stock_price:
                     f.write( str( row[ 0 ] ) + ',' + str( row[ 1 ] ) + ',' + str( row[ 2 ] ) + '\n' )
