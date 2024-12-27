@@ -1,0 +1,44 @@
+v1.0.0
+[
+    {
+        "account_name": "華春",
+        "trading_data": {
+            "6505": [
+                {
+                    "trading_date": "0001-01-01",
+                    "trading_type": 0,
+                    "trading_price": 0,
+                    "trading_count": 0,
+                    "trading_fee_discount": 1,
+                    "stock_dividend_per_share": 0,
+                    "cash_dividend_per_share": 0,
+                    "capital_reduction_per_share": 0,
+                    "use_auto_dividend_data": true
+                },
+                {
+                    "trading_date": "2024-06-19",
+                    "trading_type": 2,
+                    "trading_price": 64.8,
+                    "trading_count": 20000,
+                    "trading_fee_discount": 0.45,
+                    "stock_dividend_per_share": 0,
+                    "cash_dividend_per_share": 0,
+                    "capital_reduction_per_share": 0
+                },
+                {
+                    "trading_date": "2024-07-09",
+                    "trading_type": 4,
+                    "trading_price": 0,
+                    "trading_count": 0,
+                    "trading_fee_discount": 1,
+                    "stock_dividend_per_share": 0.0,
+                    "cash_dividend_per_share": 2.0,
+                    "capital_reduction_per_share": 0
+                }
+            ]
+        },
+        "discount_checkbox": true,
+        "discount_value": 0.45,
+        "insurance_checkbox": false
+    }
+]

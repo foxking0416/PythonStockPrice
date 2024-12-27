@@ -712,7 +712,7 @@ class MainWindow( QMainWindow ):
         self.ui.qtActionImportSingleStock.setShortcut( "Ctrl+I" )
         self.ui.qtActionImportSingleStock.triggered.connect( self.on_import_single_stock_action_triggered )
         
-        self.trading_data_json_file_path = os.path.join( g_data_dir, 'StockInventory', 'TradingData.json' )
+        self.trading_data_json_file_path = os.path.join( g_data_dir, 'StockInventory', str_initial_data_file )
         self.UISetting_file_path = os.path.join( g_data_dir, 'StockInventory', 'UISetting.config' )
         self.stock_number_file_path = os.path.join( g_data_dir, 'StockInventory', 'StockNumber.txt' )
         self.stock_price_file_path = os.path.join( g_data_dir, 'StockInventory', 'StockPrice.txt' )

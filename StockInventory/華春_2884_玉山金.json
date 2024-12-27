@@ -1,0 +1,154 @@
+v1.0.0
+[
+    {
+        "account_name": "華春",
+        "trading_data": {
+            "2884": [
+                {
+                    "trading_date": "0001-01-01",
+                    "trading_type": 0,
+                    "trading_price": 0,
+                    "trading_count": 0,
+                    "trading_fee_discount": 1,
+                    "stock_dividend_per_share": 0,
+                    "cash_dividend_per_share": 0,
+                    "capital_reduction_per_share": 0,
+                    "use_auto_dividend_data": true
+                },
+                {
+                    "trading_date": "2023-03-09",
+                    "trading_type": 2,
+                    "trading_price": 24.95,
+                    "trading_count": 60000,
+                    "trading_fee_discount": 0.45,
+                    "stock_dividend_per_share": 0,
+                    "cash_dividend_per_share": 0,
+                    "capital_reduction_per_share": 0
+                },
+                {
+                    "trading_date": "2023-03-09",
+                    "trading_type": 2,
+                    "trading_price": 24.9,
+                    "trading_count": 60000,
+                    "trading_fee_discount": 0.45,
+                    "stock_dividend_per_share": 0,
+                    "cash_dividend_per_share": 0,
+                    "capital_reduction_per_share": 0
+                },
+                {
+                    "trading_date": "2023-03-09",
+                    "trading_type": 2,
+                    "trading_price": 24.85,
+                    "trading_count": 80000,
+                    "trading_fee_discount": 0.45,
+                    "stock_dividend_per_share": 0,
+                    "cash_dividend_per_share": 0,
+                    "capital_reduction_per_share": 0
+                },
+                {
+                    "trading_date": "2023-03-10",
+                    "trading_type": 2,
+                    "trading_price": 24.6,
+                    "trading_count": 40000,
+                    "trading_fee_discount": 0.45,
+                    "stock_dividend_per_share": 0,
+                    "cash_dividend_per_share": 0,
+                    "capital_reduction_per_share": 0
+                },
+                {
+                    "trading_date": "2023-03-13",
+                    "trading_type": 2,
+                    "trading_price": 24.25,
+                    "trading_count": 40000,
+                    "trading_fee_discount": 0.45,
+                    "stock_dividend_per_share": 0,
+                    "cash_dividend_per_share": 0,
+                    "capital_reduction_per_share": 0
+                },
+                {
+                    "trading_date": "2023-03-14",
+                    "trading_type": 2,
+                    "trading_price": 24.05,
+                    "trading_count": 40000,
+                    "trading_fee_discount": 0.45,
+                    "stock_dividend_per_share": 0,
+                    "cash_dividend_per_share": 0,
+                    "capital_reduction_per_share": 0
+                },
+                {
+                    "trading_date": "2023-03-15",
+                    "trading_type": 2,
+                    "trading_price": 24.15,
+                    "trading_count": 40000,
+                    "trading_fee_discount": 0.45,
+                    "stock_dividend_per_share": 0,
+                    "cash_dividend_per_share": 0,
+                    "capital_reduction_per_share": 0
+                },
+                {
+                    "trading_date": "2023-03-15",
+                    "trading_type": 2,
+                    "trading_price": 24.1,
+                    "trading_count": 40000,
+                    "trading_fee_discount": 0.45,
+                    "stock_dividend_per_share": 0,
+                    "cash_dividend_per_share": 0,
+                    "capital_reduction_per_share": 0
+                },
+                {
+                    "trading_date": "2023-04-20",
+                    "trading_type": 3,
+                    "trading_price": 20.0,
+                    "trading_count": 16812,
+                    "trading_fee_discount": 1,
+                    "stock_dividend_per_share": 0,
+                    "cash_dividend_per_share": 0,
+                    "capital_reduction_per_share": 0
+                },
+                {
+                    "trading_date": "2023-05-12",
+                    "trading_type": 2,
+                    "trading_price": 25.1,
+                    "trading_count": 20000,
+                    "trading_fee_discount": 0.45,
+                    "stock_dividend_per_share": 0,
+                    "cash_dividend_per_share": 0,
+                    "capital_reduction_per_share": 0
+                },
+                {
+                    "trading_date": "2023-05-24",
+                    "trading_type": 2,
+                    "trading_price": 26.0,
+                    "trading_count": 20000,
+                    "trading_fee_discount": 0.45,
+                    "stock_dividend_per_share": 0,
+                    "cash_dividend_per_share": 0,
+                    "capital_reduction_per_share": 0
+                },
+                {
+                    "trading_date": "2023-05-24",
+                    "trading_type": 2,
+                    "trading_price": 25.95,
+                    "trading_count": 30000,
+                    "trading_fee_discount": 0.45,
+                    "stock_dividend_per_share": 0,
+                    "cash_dividend_per_share": 0,
+                    "capital_reduction_per_share": 0
+                },
+                {
+                    "trading_date": "2023-05-24",
+                    "trading_type": 2,
+                    "trading_price": 25.75,
+                    "trading_count": 10000,
+                    "trading_fee_discount": 0.45,
+                    "stock_dividend_per_share": 0,
+                    "cash_dividend_per_share": 0,
+                    "capital_reduction_per_share": 0
+                }
+            ]
+        },
+        "discount_checkbox": true,
+        "discount_value": 0.45,
+        "insurance_checkbox": false
+    }
+]

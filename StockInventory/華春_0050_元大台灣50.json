@@ -1,0 +1,224 @@
+v1.0.0
+[
+    {
+        "account_name": "華春",
+        "trading_data": {
+            "0050": [
+                {
+                    "trading_date": "0001-01-01",
+                    "trading_type": 0,
+                    "trading_price": 0,
+                    "trading_count": 0,
+                    "trading_fee_discount": 1,
+                    "stock_dividend_per_share": 0,
+                    "cash_dividend_per_share": 0,
+                    "capital_reduction_per_share": 0,
+                    "use_auto_dividend_data": true
+                },
+                {
+                    "trading_date": "2019-03-04",
+                    "trading_type": 2,
+                    "trading_price": 77.4,
+                    "trading_count": 5000,
+                    "trading_fee_discount": 0.45,
+                    "stock_dividend_per_share": 0,
+                    "cash_dividend_per_share": 0,
+                    "capital_reduction_per_share": 0
+                },
+                {
+                    "trading_date": "2019-03-04",
+                    "trading_type": 2,
+                    "trading_price": 77.3,
+                    "trading_count": 5000,
+                    "trading_fee_discount": 0.45,
+                    "stock_dividend_per_share": 0,
+                    "cash_dividend_per_share": 0,
+                    "capital_reduction_per_share": 0
+                },
+                {
+                    "trading_date": "2019-03-04",
+                    "trading_type": 2,
+                    "trading_price": 77.2,
+                    "trading_count": 5000,
+                    "trading_fee_discount": 0.45,
+                    "stock_dividend_per_share": 0,
+                    "cash_dividend_per_share": 0,
+                    "capital_reduction_per_share": 0
+                },
+                {
+                    "trading_date": "2019-03-04",
+                    "trading_type": 2,
+                    "trading_price": 77.1,
+                    "trading_count": 5000,
+                    "trading_fee_discount": 0.45,
+                    "stock_dividend_per_share": 0,
+                    "cash_dividend_per_share": 0,
+                    "capital_reduction_per_share": 0
+                },
+                {
+                    "trading_date": "2019-03-04",
+                    "trading_type": 2,
+                    "trading_price": 77.05,
+                    "trading_count": 5000,
+                    "trading_fee_discount": 0.45,
+                    "stock_dividend_per_share": 0,
+                    "cash_dividend_per_share": 0,
+                    "capital_reduction_per_share": 0
+                },
+                {
+                    "trading_date": "2019-03-04",
+                    "trading_type": 2,
+                    "trading_price": 77.0,
+                    "trading_count": 5000,
+                    "trading_fee_discount": 0.45,
+                    "stock_dividend_per_share": 0,
+                    "cash_dividend_per_share": 0,
+                    "capital_reduction_per_share": 0
+                },
+                {
+                    "trading_date": "2019-03-04",
+                    "trading_type": 2,
+                    "trading_price": 76.9,
+                    "trading_count": 5000,
+                    "trading_fee_discount": 0.45,
+                    "stock_dividend_per_share": 0,
+                    "cash_dividend_per_share": 0,
+                    "capital_reduction_per_share": 0
+                },
+                {
+                    "trading_date": "2019-03-04",
+                    "trading_type": 2,
+                    "trading_price": 76.85,
+                    "trading_count": 5000,
+                    "trading_fee_discount": 0.45,
+                    "stock_dividend_per_share": 0,
+                    "cash_dividend_per_share": 0,
+                    "capital_reduction_per_share": 0
+                },
+                {
+                    "trading_date": "2019-03-04",
+                    "trading_type": 2,
+                    "trading_price": 76.8,
+                    "trading_count": 5000,
+                    "trading_fee_discount": 0.45,
+                    "stock_dividend_per_share": 0,
+                    "cash_dividend_per_share": 0,
+                    "capital_reduction_per_share": 0
+                },
+                {
+                    "trading_date": "2019-03-04",
+                    "trading_type": 2,
+                    "trading_price": 76.75,
+                    "trading_count": 5000,
+                    "trading_fee_discount": 0.45,
+                    "stock_dividend_per_share": 0,
+                    "cash_dividend_per_share": 0,
+                    "capital_reduction_per_share": 0
+                },
+                {
+                    "trading_date": "2019-03-05",
+                    "trading_type": 2,
+                    "trading_price": 76.6,
+                    "trading_count": 10000,
+                    "trading_fee_discount": 0.45,
+                    "stock_dividend_per_share": 0,
+                    "cash_dividend_per_share": 0,
+                    "capital_reduction_per_share": 0
+                },
+                {
+                    "trading_date": "2019-03-05",
+                    "trading_type": 2,
+                    "trading_price": 76.5,
+                    "trading_count": 10000,
+                    "trading_fee_discount": 0.45,
+                    "stock_dividend_per_share": 0,
+                    "cash_dividend_per_share": 0,
+                    "capital_reduction_per_share": 0
+                },
+                {
+                    "trading_date": "2019-05-09",
+                    "trading_type": 1,
+                    "trading_price": 81.75,
+                    "trading_count": 10000,
+                    "trading_fee_discount": 0.45,
+                    "stock_dividend_per_share": 0,
+                    "cash_dividend_per_share": 0,
+                    "capital_reduction_per_share": 0
+                },
+                {
+                    "trading_date": "2019-08-22",
+                    "trading_type": 4,
+                    "trading_price": 0,
+                    "trading_count": 0,
+                    "trading_fee_discount": 1,
+                    "stock_dividend_per_share": 0.0,
+                    "cash_dividend_per_share": 0.7,
+                    "capital_reduction_per_share": 0
+                },
+                {
+                    "trading_date": "2019-09-24",
+                    "trading_type": 1,
+                    "trading_price": 84.55,
+                    "trading_count": 10000,
+                    "trading_fee_discount": 0.45,
+                    "stock_dividend_per_share": 0,
+                    "cash_dividend_per_share": 0,
+                    "capital_reduction_per_share": 0
+                },
+                {
+                    "trading_date": "2019-10-18",
+                    "trading_type": 1,
+                    "trading_price": 88.5,
+                    "trading_count": 10000,
+                    "trading_fee_discount": 0.45,
+                    "stock_dividend_per_share": 0,
+                    "cash_dividend_per_share": 0,
+                    "capital_reduction_per_share": 0
+                },
+                {
+                    "trading_date": "2019-10-22",
+                    "trading_type": 1,
+                    "trading_price": 88.8,
+                    "trading_count": 8000,
+                    "trading_fee_discount": 0.45,
+                    "stock_dividend_per_share": 0,
+                    "cash_dividend_per_share": 0,
+                    "capital_reduction_per_share": 0
+                },
+                {
+                    "trading_date": "2019-10-25",
+                    "trading_type": 1,
+                    "trading_price": 89.2,
+                    "trading_count": 12000,
+                    "trading_fee_discount": 0.45,
+                    "stock_dividend_per_share": 0,
+                    "cash_dividend_per_share": 0,
+                    "capital_reduction_per_share": 0
+                },
+                {
+                    "trading_date": "2020-02-11",
+                    "trading_type": 1,
+                    "trading_price": 91.5,
+                    "trading_count": 10000,
+                    "trading_fee_discount": 0.45,
+                    "stock_dividend_per_share": 0,
+                    "cash_dividend_per_share": 0,
+                    "capital_reduction_per_share": 0
+                },
+                {
+                    "trading_date": "2020-02-13",
+                    "trading_type": 1,
+                    "trading_price": 92.45,
+                    "trading_count": 10000,
+                    "trading_fee_discount": 0.45,
+                    "stock_dividend_per_share": 0,
+                    "cash_dividend_per_share": 0,
+                    "capital_reduction_per_share": 0
+                }
+            ]
+        },
+        "discount_checkbox": true,
+        "discount_value": 0.45,
+        "insurance_checkbox": false
+    }
+]

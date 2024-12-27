@@ -1,6 +1,8 @@
 import unittest
 from PySide6.QtWidgets import QApplication
 from StockPriceMainWindow import MainWindow  # 假設你的主程式檔名是 main.py
+from StockPriceMainWindow import TradingType
+from StockPriceMainWindow import TradingData
 
 class TestMainWindow( unittest.TestCase ):
     @classmethod
@@ -31,7 +33,41 @@ class TestMainWindow( unittest.TestCase ):
         self.assertEqual( self.window.ui.qtTabWidget.count(), 3 )
         self.window.close()
 
+    def test_current_inventory(self):
+        self.window = MainWindow( False, '華春_All.json' )
+        self.assertEqual( self.window.ui.qtTabWidget.count(), 2 )
+
+        for key, value_dict_per_account_all_stock_trading_data in self.window.dict_all_account_all_stock_trading_data.items():
+            self.assertEqual( key, 'TabIndex0' )
+            for key_stock_number, value_dict_per_stock_trading_data in value_dict_per_account_all_stock_trading_data.items():
+                if key_stock_number == '1216':# 統一
+                    dict_trading_data_last = value_dict_per_stock_trading_data[ len( value_dict_per_stock_trading_data ) - 1 ]
+                    self.assertEqual( dict_trading_data_last[ TradingData.ACCUMULATED_COST_NON_SAVE ], 1942311 )
+                    self.assertEqual( dict_trading_data_last[ TradingData.ACCUMULATED_INVENTORY_NON_SAVE ], 30000 )
+                elif key_stock_number == '0056':# 元大高股息
+                    dict_trading_data_last = value_dict_per_stock_trading_data[ len( value_dict_per_stock_trading_data ) - 1 ]
+                    self.assertEqual( dict_trading_data_last[ TradingData.ACCUMULATED_COST_NON_SAVE ], 1584469 )
+                    self.assertEqual( dict_trading_data_last[ TradingData.ACCUMULATED_INVENTORY_NON_SAVE ], 100000 )
+                elif key_stock_number == '00679B':# 元大美債
+                    dict_trading_data_last = value_dict_per_stock_trading_data[ len( value_dict_per_stock_trading_data ) - 1 ]
+                    self.assertEqual( dict_trading_data_last[ TradingData.ACCUMULATED_COST_NON_SAVE ], 13998309 )
+                    self.assertEqual( dict_trading_data_last[ TradingData.ACCUMULATED_INVENTORY_NON_SAVE ], 500000 )
+                elif key_stock_number == '6505':# 台塑化
+                    dict_trading_data_last = value_dict_per_stock_trading_data[ len( value_dict_per_stock_trading_data ) - 1 ]
+                    self.assertEqual( dict_trading_data_last[ TradingData.ACCUMULATED_COST_NON_SAVE ], 1256841 )
+                    self.assertEqual( dict_trading_data_last[ TradingData.ACCUMULATED_INVENTORY_NON_SAVE ], 20000 )
+                elif key_stock_number == '2535':# 達欣工
+                    dict_trading_data_last = value_dict_per_stock_trading_data[ len( value_dict_per_stock_trading_data ) - 1 ]
+                    self.assertEqual( dict_trading_data_last[ TradingData.ACCUMULATED_COST_NON_SAVE ], 4901428 )
+                    self.assertEqual( dict_trading_data_last[ TradingData.ACCUMULATED_INVENTORY_NON_SAVE ], 400000 )
+                elif key_stock_number == '2834':# 台企銀
+                    dict_trading_data_last = value_dict_per_stock_trading_data[ len( value_dict_per_stock_trading_data ) - 1 ]
+                    self.assertEqual( dict_trading_data_last[ TradingData.ACCUMULATED_COST_NON_SAVE ], 55691180 )
+                    self.assertEqual( dict_trading_data_last[ TradingData.ACCUMULATED_INVENTORY_NON_SAVE ], 5458985 )
+
+        self.window.close()
+
 
 
 if __name__ == "__main__":
-    unittest.main()
+        unittest.main()
