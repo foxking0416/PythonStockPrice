@@ -185,7 +185,7 @@ class Ui_Dialog(object):
         self.qtOddTradeCountSpinBox.setObjectName(u"qtOddTradeCountSpinBox")
         self.qtOddTradeCountSpinBox.setEnabled(False)
         self.qtOddTradeCountSpinBox.setMinimumSize(QSize(75, 0))
-        self.qtOddTradeCountSpinBox.setMaximum(99999)
+        self.qtOddTradeCountSpinBox.setMaximum(999)
 
         self.horizontalLayout_6.addWidget(self.qtOddTradeCountSpinBox)
 
