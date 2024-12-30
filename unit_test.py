@@ -64,6 +64,38 @@ class TestMainWindow( unittest.TestCase ):
                     dict_trading_data_last = value_dict_per_stock_trading_data[ len( value_dict_per_stock_trading_data ) - 1 ]
                     self.assertEqual( dict_trading_data_last[ TradingData.ACCUMULATED_COST_NON_SAVE ], 55691180 )
                     self.assertEqual( dict_trading_data_last[ TradingData.ACCUMULATED_INVENTORY_NON_SAVE ], 5458985 )
+                elif key_stock_number == '2884':# 玉山銀
+                    dict_trading_data_last = value_dict_per_stock_trading_data[ len( value_dict_per_stock_trading_data ) - 1 ]
+                    self.assertEqual( dict_trading_data_last[ TradingData.ACCUMULATED_COST_NON_SAVE ], 11514031 )
+                    self.assertEqual( dict_trading_data_last[ TradingData.ACCUMULATED_INVENTORY_NON_SAVE ], 525958 )
+                elif key_stock_number == '2887':# 台新金
+                    dict_trading_data_last = value_dict_per_stock_trading_data[ len( value_dict_per_stock_trading_data ) - 1 ]
+                    self.assertEqual( dict_trading_data_last[ TradingData.ACCUMULATED_COST_NON_SAVE ], 11163223 )
+                    self.assertEqual( dict_trading_data_last[ TradingData.ACCUMULATED_INVENTORY_NON_SAVE ], 919826 )
+                elif key_stock_number == '5410':# 國眾
+                    dict_trading_data_last = value_dict_per_stock_trading_data[ len( value_dict_per_stock_trading_data ) - 1 ]
+                    self.assertEqual( dict_trading_data_last[ TradingData.ACCUMULATED_COST_NON_SAVE ], 431634 )
+                    self.assertEqual( dict_trading_data_last[ TradingData.ACCUMULATED_INVENTORY_NON_SAVE ], 103000 )
+                elif key_stock_number == '5864':# 致和證
+                    dict_trading_data_last = value_dict_per_stock_trading_data[ len( value_dict_per_stock_trading_data ) - 1 ]
+                    self.assertEqual( dict_trading_data_last[ TradingData.ACCUMULATED_COST_NON_SAVE ], 4376129 )
+                    self.assertEqual( dict_trading_data_last[ TradingData.ACCUMULATED_INVENTORY_NON_SAVE ], 214194 )
+                elif key_stock_number == '5706':# 鳳凰
+                    dict_trading_data_last = value_dict_per_stock_trading_data[ len( value_dict_per_stock_trading_data ) - 1 ]
+                    self.assertEqual( dict_trading_data_last[ TradingData.ACCUMULATED_COST_NON_SAVE ], -6550227 )
+                    self.assertEqual( dict_trading_data_last[ TradingData.ACCUMULATED_INVENTORY_NON_SAVE ], 0 )
+                elif key_stock_number == '9933':# 中鼎
+                    dict_trading_data_last = value_dict_per_stock_trading_data[ len( value_dict_per_stock_trading_data ) - 1 ]
+                    self.assertEqual( dict_trading_data_last[ TradingData.ACCUMULATED_COST_NON_SAVE ], 556472 )
+                    self.assertEqual( dict_trading_data_last[ TradingData.ACCUMULATED_INVENTORY_NON_SAVE ], 120000 )
+                elif key_stock_number == '00916':# 國泰全球品牌50
+                    dict_trading_data_last = value_dict_per_stock_trading_data[ len( value_dict_per_stock_trading_data ) - 1 ]
+                    self.assertEqual( dict_trading_data_last[ TradingData.ACCUMULATED_COST_NON_SAVE ], -2446753 )
+                    self.assertEqual( dict_trading_data_last[ TradingData.ACCUMULATED_INVENTORY_NON_SAVE ], 0 )
+                elif key_stock_number == '00893':# 國泰智能車
+                    dict_trading_data_last = value_dict_per_stock_trading_data[ len( value_dict_per_stock_trading_data ) - 1 ]
+                    self.assertEqual( dict_trading_data_last[ TradingData.ACCUMULATED_COST_NON_SAVE ], -4422255 )
+                    self.assertEqual( dict_trading_data_last[ TradingData.ACCUMULATED_INVENTORY_NON_SAVE ], 0 )
 
         self.window.close()
 

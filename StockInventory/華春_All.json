@@ -1449,7 +1449,7 @@ v1.0.0
                 {
                     "trading_date": "2020-11-10",
                     "trading_type": 1,
-                    "trading_price": 13.2,
+                    "trading_price": 13.15,
                     "trading_count": 30000,
                     "trading_fee_discount": 0.45,
                     "stock_dividend_per_share": 0,
