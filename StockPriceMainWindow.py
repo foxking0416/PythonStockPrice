@@ -931,7 +931,7 @@ class MainWindow( QMainWindow ):
         self.stock_number_file_path = os.path.join( g_data_dir, 'StockInventory', str_stock_number_file )
         self.stock_price_file_path = os.path.join( g_data_dir, 'StockInventory', str_stock_price_file )
 
-        self.list_stock_list_table_horizontal_header = [ '自動帶入股利', '總成本', '庫存股數', '平均成本', ' 收盤價', '淨值', '總手續費', '總交易稅', '損益', '股利所得', '匯出', '刪除' ]
+        self.list_stock_list_table_horizontal_header = [ '總成本', '庫存股數', '平均成本', ' 收盤價', '淨值', '總手續費', '總交易稅', '損益', '股利所得', '自動帶入股利', '匯出', '刪除' ]
         self.str_picked_stock_number = None
         self.dict_all_account_ui_state = {}
         self.dict_all_account_all_stock_trading_data = {}
@@ -1386,7 +1386,7 @@ class MainWindow( QMainWindow ):
             header_text = table_model.verticalHeaderItem( index.row() ).text()
             str_stock_number = header_text.split(" ")[0]
             
-            if n_column == 0:#自動帶入股利按鈕
+            if n_column == len( self.list_stock_list_table_horizontal_header ) - 3:#自動帶入股利按鈕
                 list_trading_data = dict_per_account_all_stock_trading_data[ str_stock_number ]
                 list_trading_data[ 0 ][ TradingData.USE_AUTO_DIVIDEND_DATA ] = not list_trading_data[ 0 ][ TradingData.USE_AUTO_DIVIDEND_DATA ]
                 self.str_picked_stock_number = str_stock_number
@@ -1394,14 +1394,6 @@ class MainWindow( QMainWindow ):
                 self.refresh_stock_list_table()
                 self.refresh_trading_data_table( sorted_list )
                 self.auto_save_trading_data()
-            elif n_column == len( self.list_stock_list_table_horizontal_header ) - 1:#刪除按鈕
-                result = self.show_warning_message_box_with_ok_cancel_button( "警告", f"確定要刪掉『{header_text}』的所有資料嗎?" )
-                if result:
-                    del dict_per_account_all_stock_trading_data[ str_stock_number ]
-                    self.str_picked_stock_number = None
-                    self.refresh_stock_list_table()
-                    self.clear_per_stock_trading_table()
-                    self.auto_save_trading_data()
             elif n_column == len( self.list_stock_list_table_horizontal_header ) - 2:#匯出按鈕
                 file_path = self.open_save_json_file_dialog()
                 if file_path:
@@ -1412,6 +1404,14 @@ class MainWindow( QMainWindow ):
                     self.str_picked_stock_number = str_stock_number
                     list_trading_data = dict_per_account_all_stock_trading_data[ str_stock_number ]
                     self.refresh_trading_data_table( list_trading_data )
+            elif n_column == len( self.list_stock_list_table_horizontal_header ) - 1:#刪除按鈕
+                result = self.show_warning_message_box_with_ok_cancel_button( "警告", f"確定要刪掉『{header_text}』的所有資料嗎?" )
+                if result:
+                    del dict_per_account_all_stock_trading_data[ str_stock_number ]
+                    self.str_picked_stock_number = None
+                    self.refresh_stock_list_table()
+                    self.clear_per_stock_trading_table()
+                    self.auto_save_trading_data()
             elif str_stock_number in dict_per_account_all_stock_trading_data:
                 if str_stock_number != self.str_picked_stock_number:
                     self.str_picked_stock_number = str_stock_number
@@ -2596,14 +2596,6 @@ class MainWindow( QMainWindow ):
                         str_net_value = "N/A"
                         str_profit = "N/A"
                         str_color = QBrush( '#FFFFFF' )
-                    
-                    use_auto_dividend_item = QStandardItem()
-                    if dict_trading_data_first[ TradingData.USE_AUTO_DIVIDEND_DATA ]:
-                        use_auto_dividend_item.setIcon( check_icon )
-                    else:
-                        use_auto_dividend_item.setIcon( uncheck_icon )
-                    use_auto_dividend_item.setFlags( use_auto_dividend_item.flags() & ~Qt.ItemIsEditable )
-                    table_model.setItem( index_row, 0, use_auto_dividend_item)
 
                     list_data = [ format( n_accumulated_cost, "," ),      #總成本
                                   format( n_accumulated_inventory, "," ), #庫存股數
@@ -2621,8 +2613,15 @@ class MainWindow( QMainWindow ):
                         standard_item.setFlags( standard_item.flags() & ~Qt.ItemIsEditable )
                         if column == len( list_data ) - 2:
                             standard_item.setForeground( QBrush( str_color ) )
-                        table_model.setItem( index_row, column + 1, standard_item ) 
+                        table_model.setItem( index_row, column, standard_item ) 
 
+                    use_auto_dividend_item = QStandardItem()
+                    if dict_trading_data_first[ TradingData.USE_AUTO_DIVIDEND_DATA ]:
+                        use_auto_dividend_item.setIcon( check_icon )
+                    else:
+                        use_auto_dividend_item.setIcon( uncheck_icon )
+                    use_auto_dividend_item.setFlags( use_auto_dividend_item.flags() & ~Qt.ItemIsEditable )
+                    table_model.setItem( index_row, len( self.list_stock_list_table_horizontal_header ) - 3, use_auto_dividend_item)
                         
                     export_icon_item = QStandardItem("")
                     export_icon_item.setIcon( export_icon )
