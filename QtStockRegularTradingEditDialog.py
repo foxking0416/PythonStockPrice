@@ -25,7 +25,7 @@ class Ui_Dialog(object):
     def setupUi(self, Dialog):
         if not Dialog.objectName():
             Dialog.setObjectName(u"Dialog")
-        Dialog.resize(308, 386)
+        Dialog.resize(358, 358)
         sizePolicy = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -71,23 +71,15 @@ class Ui_Dialog(object):
 
         self.verticalLayout.addLayout(self.horizontalLayout)
 
-        self.horizontalLayout_2 = QHBoxLayout()
-        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
-        self.qtBuyRadioButton = QRadioButton(Dialog)
-        self.qtBuyRadioButton.setObjectName(u"qtBuyRadioButton")
-        self.qtBuyRadioButton.setChecked(True)
-
-        self.horizontalLayout_2.addWidget(self.qtBuyRadioButton)
-
-
-        self.verticalLayout.addLayout(self.horizontalLayout_2)
-
+        self.verticalLayout_4 = QVBoxLayout()
+        self.verticalLayout_4.setObjectName(u"verticalLayout_4")
         self.horizontalLayout_11 = QHBoxLayout()
         self.horizontalLayout_11.setObjectName(u"horizontalLayout_11")
-        self.radioButton = QRadioButton(Dialog)
-        self.radioButton.setObjectName(u"radioButton")
+        self.qtVariableFeeRadioButton = QRadioButton(Dialog)
+        self.qtVariableFeeRadioButton.setObjectName(u"qtVariableFeeRadioButton")
+        self.qtVariableFeeRadioButton.setChecked(True)
 
-        self.horizontalLayout_11.addWidget(self.radioButton)
+        self.horizontalLayout_11.addWidget(self.qtVariableFeeRadioButton)
 
         self.qtDiscountCheckBox = QCheckBox(Dialog)
         self.qtDiscountCheckBox.setObjectName(u"qtDiscountCheckBox")
@@ -112,14 +104,65 @@ class Ui_Dialog(object):
         self.horizontalLayout_11.addItem(self.horizontalSpacer_10)
 
 
-        self.verticalLayout.addLayout(self.horizontalLayout_11)
+        self.verticalLayout_4.addLayout(self.horizontalLayout_11)
+
+        self.horizontalLayout_5 = QHBoxLayout()
+        self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
+        self.horizontalSpacer_12 = QSpacerItem(150, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout_5.addItem(self.horizontalSpacer_12)
+
+        self.label_8 = QLabel(Dialog)
+        self.label_8.setObjectName(u"label_8")
+
+        self.horizontalLayout_5.addWidget(self.label_8)
+
+        self.qtTradingFeeMinimumSpinBox = QSpinBox(Dialog)
+        self.qtTradingFeeMinimumSpinBox.setObjectName(u"qtTradingFeeMinimumSpinBox")
+        self.qtTradingFeeMinimumSpinBox.setMinimumSize(QSize(50, 0))
+        self.qtTradingFeeMinimumSpinBox.setMaximum(20)
+        self.qtTradingFeeMinimumSpinBox.setValue(20)
+
+        self.horizontalLayout_5.addWidget(self.qtTradingFeeMinimumSpinBox)
+
+        self.label_11 = QLabel(Dialog)
+        self.label_11.setObjectName(u"label_11")
+
+        self.horizontalLayout_5.addWidget(self.label_11)
+
+        self.horizontalSpacer_8 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout_5.addItem(self.horizontalSpacer_8)
+
+
+        self.verticalLayout_4.addLayout(self.horizontalLayout_5)
+
+
+        self.verticalLayout.addLayout(self.verticalLayout_4)
 
         self.horizontalLayout_9 = QHBoxLayout()
         self.horizontalLayout_9.setObjectName(u"horizontalLayout_9")
-        self.radioButton_2 = QRadioButton(Dialog)
-        self.radioButton_2.setObjectName(u"radioButton_2")
+        self.qtConstantFeeRadioButton = QRadioButton(Dialog)
+        self.qtConstantFeeRadioButton.setObjectName(u"qtConstantFeeRadioButton")
 
-        self.horizontalLayout_9.addWidget(self.radioButton_2)
+        self.horizontalLayout_9.addWidget(self.qtConstantFeeRadioButton)
+
+        self.qtTradingFeeConstantSpinBox = QSpinBox(Dialog)
+        self.qtTradingFeeConstantSpinBox.setObjectName(u"qtTradingFeeConstantSpinBox")
+        self.qtTradingFeeConstantSpinBox.setMinimumSize(QSize(50, 0))
+        self.qtTradingFeeConstantSpinBox.setMaximum(20)
+        self.qtTradingFeeConstantSpinBox.setValue(1)
+
+        self.horizontalLayout_9.addWidget(self.qtTradingFeeConstantSpinBox)
+
+        self.label_4 = QLabel(Dialog)
+        self.label_4.setObjectName(u"label_4")
+
+        self.horizontalLayout_9.addWidget(self.label_4)
+
+        self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout_9.addItem(self.horizontalSpacer)
 
 
         self.verticalLayout.addLayout(self.horizontalLayout_9)
@@ -152,49 +195,16 @@ class Ui_Dialog(object):
         self.verticalLayout_2.setSpacing(0)
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
         self.verticalLayout_2.setContentsMargins(0, 0, 0, 0)
-        self.horizontalLayout_5 = QHBoxLayout()
-        self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
-        self.qtCommonTradeRadioButton = QRadioButton(self.groupBox)
-        self.qtCommonTradeRadioButton.setObjectName(u"qtCommonTradeRadioButton")
-        self.qtCommonTradeRadioButton.setChecked(False)
-
-        self.horizontalLayout_5.addWidget(self.qtCommonTradeRadioButton)
-
-        self.qtCommonTradeCountSpinBox = QSpinBox(self.groupBox)
-        self.qtCommonTradeCountSpinBox.setObjectName(u"qtCommonTradeCountSpinBox")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
-        sizePolicy1.setHorizontalStretch(0)
-        sizePolicy1.setVerticalStretch(0)
-        sizePolicy1.setHeightForWidth(self.qtCommonTradeCountSpinBox.sizePolicy().hasHeightForWidth())
-        self.qtCommonTradeCountSpinBox.setSizePolicy(sizePolicy1)
-        self.qtCommonTradeCountSpinBox.setMinimumSize(QSize(75, 0))
-        self.qtCommonTradeCountSpinBox.setMaximum(99999)
-
-        self.horizontalLayout_5.addWidget(self.qtCommonTradeCountSpinBox)
-
-        self.label_4 = QLabel(self.groupBox)
-        self.label_4.setObjectName(u"label_4")
-
-        self.horizontalLayout_5.addWidget(self.label_4)
-
-        self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
-
-        self.horizontalLayout_5.addItem(self.horizontalSpacer)
-
-
-        self.verticalLayout_2.addLayout(self.horizontalLayout_5)
-
         self.horizontalLayout_6 = QHBoxLayout()
         self.horizontalLayout_6.setObjectName(u"horizontalLayout_6")
-        self.qtOddTradeRadioButton = QRadioButton(self.groupBox)
-        self.qtOddTradeRadioButton.setObjectName(u"qtOddTradeRadioButton")
-        self.qtOddTradeRadioButton.setChecked(True)
+        self.label_12 = QLabel(self.groupBox)
+        self.label_12.setObjectName(u"label_12")
 
-        self.horizontalLayout_6.addWidget(self.qtOddTradeRadioButton)
+        self.horizontalLayout_6.addWidget(self.label_12)
 
         self.qtOddTradeCountSpinBox = QSpinBox(self.groupBox)
         self.qtOddTradeCountSpinBox.setObjectName(u"qtOddTradeCountSpinBox")
-        self.qtOddTradeCountSpinBox.setEnabled(False)
+        self.qtOddTradeCountSpinBox.setEnabled(True)
         self.qtOddTradeCountSpinBox.setMinimumSize(QSize(75, 0))
         self.qtOddTradeCountSpinBox.setMaximum(99999)
 
@@ -257,27 +267,6 @@ class Ui_Dialog(object):
 
         self.verticalLayout.addLayout(self.horizontalLayout_7)
 
-        self.horizontalLayout_8 = QHBoxLayout()
-        self.horizontalLayout_8.setObjectName(u"horizontalLayout_8")
-        self.label_7 = QLabel(Dialog)
-        self.label_7.setObjectName(u"label_7")
-        self.label_7.setMinimumSize(QSize(50, 0))
-
-        self.horizontalLayout_8.addWidget(self.label_7)
-
-        self.qtTaxLineEdit = QLineEdit(Dialog)
-        self.qtTaxLineEdit.setObjectName(u"qtTaxLineEdit")
-        self.qtTaxLineEdit.setEnabled(False)
-
-        self.horizontalLayout_8.addWidget(self.qtTaxLineEdit)
-
-        self.horizontalSpacer_7 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
-
-        self.horizontalLayout_8.addItem(self.horizontalSpacer_7)
-
-
-        self.verticalLayout.addLayout(self.horizontalLayout_8)
-
         self.horizontalLayout_10 = QHBoxLayout()
         self.horizontalLayout_10.setObjectName(u"horizontalLayout_10")
         self.label_9 = QLabel(Dialog)
@@ -319,23 +308,21 @@ class Ui_Dialog(object):
         self.qtStockNumberLabel.setText(QCoreApplication.translate("Dialog", u"TextLabel", None))
         self.qtStockNameLabel.setText(QCoreApplication.translate("Dialog", u"TextLabel", None))
         self.label.setText(QCoreApplication.translate("Dialog", u"\u65e5\u671f", None))
-        self.qtBuyRadioButton.setText(QCoreApplication.translate("Dialog", u"\u8cb7", None))
-        self.radioButton.setText(QCoreApplication.translate("Dialog", u"RadioButton", None))
+        self.qtVariableFeeRadioButton.setText(QCoreApplication.translate("Dialog", u"\u8b8a\u52d5\u624b\u7e8c\u8cbb", None))
         self.qtDiscountCheckBox.setText(QCoreApplication.translate("Dialog", u"\u624b\u7e8c\u8cbb\u6298\u6263", None))
         self.label_10.setText(QCoreApplication.translate("Dialog", u"\u6298", None))
-        self.radioButton_2.setText(QCoreApplication.translate("Dialog", u"RadioButton", None))
+        self.label_8.setText(QCoreApplication.translate("Dialog", u"\u624b\u7e8c\u8cbb\u6700\u4f4e", None))
+        self.label_11.setText(QCoreApplication.translate("Dialog", u"\u5143", None))
+        self.qtConstantFeeRadioButton.setText(QCoreApplication.translate("Dialog", u"\u56fa\u5b9a\u624b\u7e8c\u8cbb", None))
+        self.label_4.setText(QCoreApplication.translate("Dialog", u"\u5143", None))
         self.label_2.setText(QCoreApplication.translate("Dialog", u"\u4ea4\u6613\u50f9\u683c", None))
         self.groupBox.setTitle("")
-        self.qtCommonTradeRadioButton.setText(QCoreApplication.translate("Dialog", u"\u6574\u5f35\u4ea4\u6613", None))
-        self.label_4.setText(QCoreApplication.translate("Dialog", u"\u5f35", None))
-        self.qtOddTradeRadioButton.setText(QCoreApplication.translate("Dialog", u"\u96f6\u80a1\u4ea4\u6613", None))
+        self.label_12.setText(QCoreApplication.translate("Dialog", u"\u8cfc\u8cb7\u80a1\u6578", None))
         self.label_5.setText(QCoreApplication.translate("Dialog", u"\u80a1", None))
         self.label_3.setText(QCoreApplication.translate("Dialog", u"\u91d1\u984d", None))
         self.qtTradingValueLineEdit.setText(QCoreApplication.translate("Dialog", u"0", None))
         self.label_6.setText(QCoreApplication.translate("Dialog", u"\u624b\u7e8c\u8cbb", None))
         self.qtFeeLineEdit.setText(QCoreApplication.translate("Dialog", u"0", None))
-        self.label_7.setText(QCoreApplication.translate("Dialog", u"\u4ea4\u6613\u7a05", None))
-        self.qtTaxLineEdit.setText(QCoreApplication.translate("Dialog", u"0", None))
         self.label_9.setText(QCoreApplication.translate("Dialog", u"\u7e3d\u984d", None))
         self.qtTotalCostLineEdit.setText(QCoreApplication.translate("Dialog", u"0", None))
     # retranslateUi

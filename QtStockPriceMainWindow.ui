@@ -236,8 +236,11 @@
        </item>
        <item>
         <widget class="QPushButton" name="qtAddRegularTradingDataPushButton">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
-          <string>新增定期定額交易紀錄</string>
+          <string>新增定期定額交易紀錄(E)</string>
          </property>
         </widget>
        </item>

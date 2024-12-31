@@ -163,30 +163,37 @@ class TradingType( IntEnum ):
     DIVIDEND = 5
     CAPITAL_REDUCTION = 6
 
+class TradingFeeType( Enum ):
+    VARIABLE = 0
+    CONSTANT = 1
+
 class TradingData( Enum ):
     TRADING_DATE = 0
     TRADING_TYPE = 1 # 0:賣出, 1:買進, 2:股利, 3:減資
     TRADING_PRICE = 2
     TRADING_COUNT = 3
-    TRADING_FEE_DISCOUNT = 4
-    STOCK_DIVIDEND_PER_SHARE = 5
-    CASH_DIVIDEND_PER_SHARE = 6
-    CAPITAL_REDUCTION_PER_SHARE = 7
-    USE_AUTO_DIVIDEND_DATA = 8
-    SORTED_INDEX_NON_SAVE = 9 #不會記錄
-    TRADING_VALUE_NON_SAVE = 10 #不會記錄
-    TRADING_FEE_NON_SAVE = 11 #不會記錄
-    TRADING_TAX_NON_SAVE = 12 #不會記錄
-    TRADING_COST_NON_SAVE = 13 #不會記錄
-    STOCK_DIVIDEND_GAIN_NON_SAVE = 14 #不會記錄
-    CASH_DIVIDEND_GAIN_NON_SAVE = 15 #不會記錄
-    EXTRA_INSURANCE_FEE_NON_SAVE = 16 #不會記錄
-    ACCUMULATED_COST_NON_SAVE = 17 #不會記錄
-    ACCUMULATED_INVENTORY_NON_SAVE = 18 #不會記錄
-    AVERAGE_COST_NON_SAVE = 19 #不會記錄
-    IS_AUTO_DIVIDEND_DATA_NON_SAVE = 20 #不會記錄
-    ALL_STOCK_DIVIDEND_GAIN_NON_SAVE = 21 #不會記錄
-    ALL_CASH_DIVIDEND_GAIN_NON_SAVE = 22 #不會記錄
+    TRADING_FEE_TYPE = 4 # 0:固定, 1:變動
+    TRADING_FEE_DISCOUNT = 5
+    TRADING_FEE_MINIMUM = 6
+    TRADING_FEE_CONSTANT = 7
+    STOCK_DIVIDEND_PER_SHARE = 8
+    CASH_DIVIDEND_PER_SHARE = 9
+    CAPITAL_REDUCTION_PER_SHARE = 10
+    USE_AUTO_DIVIDEND_DATA = 11
+    SORTED_INDEX_NON_SAVE = 12 #不會記錄
+    TRADING_VALUE_NON_SAVE = 13 #不會記錄
+    TRADING_FEE_NON_SAVE = 14 #不會記錄
+    TRADING_TAX_NON_SAVE = 15 #不會記錄
+    TRADING_COST_NON_SAVE = 16 #不會記錄
+    STOCK_DIVIDEND_GAIN_NON_SAVE = 17 #不會記錄
+    CASH_DIVIDEND_GAIN_NON_SAVE = 18 #不會記錄
+    EXTRA_INSURANCE_FEE_NON_SAVE = 19 #不會記錄
+    ACCUMULATED_COST_NON_SAVE = 20 #不會記錄
+    ACCUMULATED_INVENTORY_NON_SAVE = 21 #不會記錄
+    AVERAGE_COST_NON_SAVE = 22 #不會記錄
+    IS_AUTO_DIVIDEND_DATA_NON_SAVE = 23 #不會記錄
+    ALL_STOCK_DIVIDEND_GAIN_NON_SAVE = 24 #不會記錄
+    ALL_CASH_DIVIDEND_GAIN_NON_SAVE = 25 #不會記錄
 
 class TradingCost( Enum ):
     TRADING_VALUE = 0
@@ -238,7 +245,10 @@ class Utility():
                                e_trading_type,              #交易種類
                                f_trading_price,             #交易價格
                                n_trading_count,             #交易股數
+                               e_trading_fee_type,          #手續費種類
                                f_trading_fee_discount,      #手續費折扣
+                               n_trading_fee_minimum,       #手續費最低金額
+                               n_trading_fee_constant,      #手續費固定金額
                                f_stock_dividend_per_share,  #每股股票股利
                                f_cash_dividend_per_share,   #每股現金股利
                                f_capital_reduction_per_share ): #每股減資金額
@@ -247,7 +257,10 @@ class Utility():
         dict_trading_data[ TradingData.TRADING_TYPE ] = e_trading_type
         dict_trading_data[ TradingData.TRADING_PRICE ] = f_trading_price
         dict_trading_data[ TradingData.TRADING_COUNT ] = n_trading_count
+        dict_trading_data[ TradingData.TRADING_FEE_TYPE ] = e_trading_fee_type
         dict_trading_data[ TradingData.TRADING_FEE_DISCOUNT ] = f_trading_fee_discount
+        dict_trading_data[ TradingData.TRADING_FEE_MINIMUM ] = n_trading_fee_minimum
+        dict_trading_data[ TradingData.TRADING_FEE_CONSTANT ] = n_trading_fee_constant
         dict_trading_data[ TradingData.STOCK_DIVIDEND_PER_SHARE ] = f_stock_dividend_per_share
         dict_trading_data[ TradingData.CASH_DIVIDEND_PER_SHARE ] = f_cash_dividend_per_share
         dict_trading_data[ TradingData.CAPITAL_REDUCTION_PER_SHARE ] = f_capital_reduction_per_share
@@ -330,7 +343,10 @@ class StockCapitalReductionEditDialog( QDialog ):
                                                                     TradingType.CAPITAL_REDUCTION,                      #交易種類
                                                                     0,                                                  #交易價格                         
                                                                     0,                                                  #交易股數
-                                                                    1,                                                  #手續費折扣                                   
+                                                                    TradingFeeType.VARIABLE,                            #手續費種類
+                                                                    1,                                                  #手續費折扣
+                                                                    0,                                                  #手續費最低金額
+                                                                    0,                                                  #手續費固定金額
                                                                     0,                                                  #每股股票股利
                                                                     0,                                                  #每股現金股利
                                                                     f_stock_capital_reduction_per_share )               #每股減資金額           
@@ -377,7 +393,10 @@ class StockDividendEditDialog( QDialog ):
                                                                     TradingType.DIVIDEND,                               #交易種類
                                                                     0,                                                  #交易價格                         
                                                                     0,                                                  #交易股數
-                                                                    1,                                                  #手續費折扣                                   
+                                                                    TradingFeeType.VARIABLE,                            #手續費種類
+                                                                    1,                                                  #手續費折扣
+                                                                    0,                                                  #手續費最低金額
+                                                                    0,                                                  #手續費固定金額
                                                                     f_stock_dividend_per_share,                         #每股股票股利
                                                                     f_cash_dividend_per_share,                          #每股現金股利
                                                                     0 )                                                 #每股減資金額
@@ -480,7 +499,10 @@ class StockTradingEditDialog( QDialog ):
                                                                     self.get_trading_type(),                            #交易種類
                                                                     self.ui.qtPriceDoubleSpinBox.value(),               #交易價格
                                                                     self.get_trading_count(),                           #交易股數
+                                                                    TradingFeeType.VARIABLE,                            #手續費種類
                                                                     self.get_trading_fee_discount(),                    #手續費折扣
+                                                                    0,                                                  #手續費最低金額
+                                                                    0,                                                  #手續費固定金額
                                                                     0,                                                  #每股股票股利
                                                                     0,                                                  #每股現金股利
                                                                     0 )                                                 #每股減資金額
@@ -537,7 +559,7 @@ class StockTradingEditDialog( QDialog ):
         self.ui.qtTaxLineEdit.setText( format( dict_result[ TradingCost.TRADING_TAX ], ',' ) )
 
 class StockRegularTradingEditDialog( QDialog ):
-    def __init__( self, str_stock_number, str_stock_name, b_etf, b_discount, f_discount_value, parent = None ):
+    def __init__( self, str_stock_number, str_stock_name, e_trading_fee_type, b_discount, f_discount_value, n_trading_fee_minimum, n_trading_fee_constant, parent = None ):
         super().__init__( parent )
 
         self.ui = Ui_StockRegularTradingDialog()
@@ -551,24 +573,33 @@ class StockRegularTradingEditDialog( QDialog ):
         obj_current_date = datetime.datetime.today()
         self.ui.qtDateEdit.setDate( obj_current_date.date() )
         self.ui.qtDateEdit.setCalendarPopup( True )
+
+
+        self.setup_trading_fee_type( e_trading_fee_type )
+        self.ui.qtDiscountRateDoubleSpinBox.setEnabled( b_discount )
         self.ui.qtDiscountCheckBox.setChecked( b_discount )
         self.ui.qtDiscountRateDoubleSpinBox.setValue( f_discount_value * 10 )
-        self.ui.qtDiscountRateDoubleSpinBox.setEnabled( b_discount )
 
-        self.ui.qtDiscountCheckBox.stateChanged.connect( self.on_discount_check_box_state_changed )
+        self.setup_trading_fee_minimum( n_trading_fee_minimum )
+        self.setup_trading_fee_constant( n_trading_fee_constant )
+
+        button_group_1 = QButtonGroup( self )
+        button_group_1.addButton( self.ui.qtVariableFeeRadioButton )
+        button_group_1.addButton( self.ui.qtConstantFeeRadioButton )
+
+        self.ui.qtVariableFeeRadioButton.toggled.connect( self.update_ui )
+        self.ui.qtConstantFeeRadioButton.toggled.connect( self.update_ui )
+        self.ui.qtDiscountCheckBox.stateChanged.connect( self.update_ui )
         self.ui.qtDiscountRateDoubleSpinBox.valueChanged.connect( self.compute_cost )
-        self.ui.qtBuyRadioButton.toggled.connect( self.compute_cost )
-        self.ui.qtSellRadioButton.toggled.connect( self.compute_cost )
-        self.ui.qtCommonTradeRadioButton.toggled.connect( self.on_trading_type_changed )
-        self.ui.qtOddTradeRadioButton.toggled.connect( self.on_trading_type_changed )
+        self.ui.qtTradingFeeMinimumSpinBox.valueChanged.connect( self.compute_cost )
+        self.ui.qtTradingFeeConstantSpinBox.valueChanged.connect( self.compute_cost )
         self.ui.qtPriceDoubleSpinBox.valueChanged.connect( self.compute_cost )
-        self.ui.qtCommonTradeCountSpinBox.valueChanged.connect( self.compute_cost )
         self.ui.qtOddTradeCountSpinBox.valueChanged.connect( self.compute_cost )
         self.ui.qtOkButtonBox.accepted.connect( self.accept_data )
         self.ui.qtOkButtonBox.rejected.connect( self.cancel )
-        self.b_etf = b_etf
         # self.load_stylesheet("style.css")
         self.dict_trading_data = {}
+        self.update_ui()
 
     def load_stylesheet( self, file_path ):
         try:
@@ -580,22 +611,52 @@ class StockRegularTradingEditDialog( QDialog ):
         except Exception as e:
             print(f"讀取 CSS 檔案時發生錯誤: {e}")
 
-    def on_discount_check_box_state_changed( self, state ):
-        if state == 2:
-            self.ui.qtDiscountRateDoubleSpinBox.setEnabled( True )
-        else:
-            self.ui.qtDiscountRateDoubleSpinBox.setEnabled( False )
+    def update_ui( self ):
+        with ( QSignalBlocker( self.ui.qtVariableFeeRadioButton ),
+               QSignalBlocker( self.ui.qtConstantFeeRadioButton ),
+               QSignalBlocker( self.ui.qtDiscountCheckBox ),
+               QSignalBlocker( self.ui.qtDiscountRateDoubleSpinBox ),
+               QSignalBlocker( self.ui.qtTradingFeeMinimumSpinBox ),
+               QSignalBlocker( self.ui.qtTradingFeeConstantSpinBox ) ):
 
-        self.compute_cost()
+            if self.ui.qtVariableFeeRadioButton.isChecked():
+                self.ui.qtDiscountCheckBox.setEnabled( True )
+
+                if self.ui.qtDiscountCheckBox.isChecked():
+                    self.ui.qtDiscountRateDoubleSpinBox.setEnabled( True )
+                    self.ui.label_10.setEnabled( True )
+                else:
+                    self.ui.qtDiscountRateDoubleSpinBox.setEnabled( False )
+                    self.ui.label_10.setEnabled( False )
+
+                self.ui.label_8.setEnabled( True )
+                self.ui.qtTradingFeeMinimumSpinBox.setEnabled( True )
+                self.ui.label_11.setEnabled( True )
+
+                self.ui.qtTradingFeeConstantSpinBox.setEnabled( False )
+                self.ui.label_4.setEnabled( False )
+            else:
+                self.ui.qtDiscountCheckBox.setEnabled( False )
+                self.ui.qtDiscountRateDoubleSpinBox.setEnabled( False )
+                self.ui.label_10.setEnabled( False )
+                self.ui.label_8.setEnabled( False )
+                self.ui.qtTradingFeeMinimumSpinBox.setEnabled( False )
+                self.ui.label_11.setEnabled( False )
+                self.ui.qtTradingFeeConstantSpinBox.setEnabled( True )
+                self.ui.label_4.setEnabled( True )
+
+            self.compute_cost()
 
     def setup_trading_date( self, str_date ):
         self.ui.qtDateEdit.setDate( datetime.datetime.strptime( str_date, "%Y-%m-%d" ).date() )
 
-    def setup_trading_type( self, e_trading_type ):
-        if e_trading_type == TradingType.BUY:
-            self.ui.qtBuyRadioButton.setChecked( True )
+    def setup_trading_fee_type( self, e_trading_fee_type ):
+        if e_trading_fee_type == TradingFeeType.VARIABLE:
+            self.ui.qtVariableFeeRadioButton.setChecked( True )
         else:
-            self.ui.qtSellRadioButton.setChecked( True )
+            self.ui.qtConstantFeeRadioButton.setChecked( True )
+
+        self.update_ui()
 
     def setup_trading_discount( self, f_discount_value ):
         if f_discount_value != 1:
@@ -607,28 +668,31 @@ class StockRegularTradingEditDialog( QDialog ):
             self.ui.qtDiscountRateDoubleSpinBox.setValue( 6 )
             self.ui.qtDiscountRateDoubleSpinBox.setEnabled( False )
 
+        self.update_ui()
+
+    def setup_trading_fee_minimum( self, n_trading_fee_minimum ):
+        self.ui.qtTradingFeeMinimumSpinBox.setValue( n_trading_fee_minimum )
+
+    def setup_trading_fee_constant( self, n_trading_fee_constant ):
+        self.ui.qtTradingFeeConstantSpinBox.setValue( n_trading_fee_constant )
+
     def setup_trading_price( self, f_price ):
         self.ui.qtPriceDoubleSpinBox.setValue( f_price )
 
-    def setup_trading_count( self, f_count ):
-        if f_count % 1000 == 0:
-            self.ui.qtCommonTradeRadioButton.setChecked( True )
-            self.ui.qtCommonTradeCountSpinBox.setValue( f_count / 1000 )
-            self.ui.qtOddTradeCountSpinBox.setValue( 0 )
-        else:
-            self.ui.qtOddTradeRadioButton.setChecked( True )
-            self.ui.qtCommonTradeCountSpinBox.setValue( 0 )
-            self.ui.qtOddTradeCountSpinBox.setValue( f_count )
+    def setup_trading_count( self, n_count ):
+        self.ui.qtOddTradeCountSpinBox.setValue( n_count )
 
     def accept_data( self ):
 
         if float( self.ui.qtTotalCostLineEdit.text().replace( ',', '' ) ) != 0:
-            
             self.dict_trading_data = Utility.generate_trading_data( self.ui.qtDateEdit.date().toString( "yyyy-MM-dd" ), #交易日期
-                                                                    self.get_trading_type(),                            #交易種類
+                                                                    TradingType.REGULAR_BUY,                            #交易種類
                                                                     self.ui.qtPriceDoubleSpinBox.value(),               #交易價格
-                                                                    self.get_trading_count(),                           #交易股數
+                                                                    self.ui.qtOddTradeCountSpinBox.value(),             #交易股數
+                                                                    self.get_trading_fee_type(),                        #手續費種類
                                                                     self.get_trading_fee_discount(),                    #手續費折扣
+                                                                    self.ui.qtTradingFeeMinimumSpinBox.value(),         #手續費最低金額
+                                                                    self.ui.qtTradingFeeConstantSpinBox.value(),        #手續費固定金額
                                                                     0,                                                  #每股股票股利
                                                                     0,                                                  #每股現金股利
                                                                     0 )                                                 #每股減資金額
@@ -639,28 +703,12 @@ class StockRegularTradingEditDialog( QDialog ):
     def cancel( self ):
         self.reject()
 
-    def on_trading_type_changed( self ):
-        if self.ui.qtCommonTradeRadioButton.isChecked():
-            self.ui.qtCommonTradeCountSpinBox.setEnabled( True )
-            self.ui.qtOddTradeCountSpinBox.setEnabled( False )
+    def get_trading_fee_type( self ):
+        if self.ui.qtVariableFeeRadioButton.isChecked():
+            return TradingFeeType.VARIABLE
         else:
-            self.ui.qtCommonTradeCountSpinBox.setEnabled( False )
-            self.ui.qtOddTradeCountSpinBox.setEnabled( True )
+            return TradingFeeType.CONSTANT
 
-        self.compute_cost()
-
-    def get_trading_type( self ):
-        if self.ui.qtBuyRadioButton.isChecked():
-            return TradingType.BUY
-        else:
-            return TradingType.SELL
-
-    def get_trading_count( self ):
-        if self.ui.qtCommonTradeRadioButton.isChecked():
-            return self.ui.qtCommonTradeCountSpinBox.value() * 1000
-        else:
-            return self.ui.qtOddTradeCountSpinBox.value()
-        
     def get_trading_fee_discount( self ):
         if self.ui.qtDiscountCheckBox.isChecked():
             return self.ui.qtDiscountRateDoubleSpinBox.value() / 10
@@ -668,22 +716,28 @@ class StockRegularTradingEditDialog( QDialog ):
             return 1
 
     def compute_cost( self ):
-        e_trading_type = self.get_trading_type()
-        f_trading_price = self.ui.qtPriceDoubleSpinBox.value()
-        n_trading_count = self.get_trading_count()
-        f_trading_fee_discount = self.get_trading_fee_discount() 
+        e_trading_fee_type = self.get_trading_fee_type()
+        f_trading_price = Decimal( str( self.ui.qtPriceDoubleSpinBox.value() ) )
+        n_trading_count = int( self.ui.qtOddTradeCountSpinBox.value() ) 
+        f_trading_fee_discount = Decimal( str( self.get_trading_fee_discount() ) )
+        n_trading_fee_minimum = int( self.ui.qtTradingFeeMinimumSpinBox.value() ) 
+        n_trading_fee_constant = int( self.ui.qtTradingFeeConstantSpinBox.value() )
         
-        dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, self.b_etf, False )
+        n_trading_value = int( f_trading_price * n_trading_count )
+        if e_trading_fee_type == TradingFeeType.VARIABLE:
+            n_trading_fee = int( n_trading_value * Decimal( '0.001425' ) * f_trading_fee_discount )
+            n_trading_fee = max( n_trading_fee_minimum, n_trading_fee )
+        else:
+            n_trading_fee = int( n_trading_fee_constant )
 
-        if e_trading_type == TradingType.BUY:
-            self.ui.qtTradingValueLineEdit.setText( format( dict_result[ TradingCost.TRADING_VALUE ], ',' ) )
-            self.ui.qtTotalCostLineEdit.setText( format( dict_result[ TradingCost.TRADING_TOTAL_COST ], ',' ) )
-        elif e_trading_type == TradingType.SELL:
-            self.ui.qtTradingValueLineEdit.setText( format( -dict_result[ TradingCost.TRADING_VALUE ], ',' ) )
-            self.ui.qtTotalCostLineEdit.setText( format( -dict_result[ TradingCost.TRADING_TOTAL_COST ], ',' ) )
-        self.ui.qtFeeLineEdit.setText( format( dict_result[ TradingCost.TRADING_FEE ], ',' ) )
-        self.ui.qtTaxLineEdit.setText( format( dict_result[ TradingCost.TRADING_TAX ], ',' ) )
+        if n_trading_value == 0:
+            n_trading_fee = 0
 
+        n_trading_total_cost = n_trading_value + n_trading_fee
+
+        self.ui.qtTradingValueLineEdit.setText( format( n_trading_value, ',' ) )
+        self.ui.qtFeeLineEdit.setText( format( n_trading_fee, ',' ) )
+        self.ui.qtTotalCostLineEdit.setText( format( n_trading_total_cost, ',' ) )
 
 class StockCapitalIncreaseEditDialog( QDialog ):
     def __init__( self, str_stock_number, str_stock_name, parent = None ):
@@ -721,7 +775,10 @@ class StockCapitalIncreaseEditDialog( QDialog ):
                                                                     TradingType.CAPITAL_INCREASE,                       #交易種類
                                                                     self.ui.qtPriceDoubleSpinBox.value(),               #交易價格
                                                                     self.ui.qtOddTradeCountSpinBox.value(),             #交易股數
+                                                                    TradingFeeType.VARIABLE,                            #手續費種類
                                                                     1,                                                  #手續費折扣
+                                                                    0,                                                  #手續費最低金額
+                                                                    0,                                                  #手續費固定金額
                                                                     0,                                                  #每股股票股利
                                                                     0,                                                  #每股現金股利
                                                                     0 )                                                 #每股減資金額
@@ -843,6 +900,7 @@ class MainWindow( QMainWindow ):
         self.ui.qtADYearRadioButton.toggled.connect( self.on_change_display_mode )
 
         self.ui.qtAddTradingDataPushButton.clicked.connect( self.on_add_trading_data_push_button_clicked )
+        self.ui.qtAddRegularTradingDataPushButton.clicked.connect( self.on_add_regular_trading_data_push_button_clicked )
         self.ui.qtAddDividendDataPushButton.clicked.connect( self.on_add_dividend_data_push_button_clicked )
         self.ui.qtAddLimitBuyingDataPushButton.clicked.connect( self.on_add_limit_buying_data_push_button_clicked )
         self.ui.qtAddCapitalReductionDataPushButton.clicked.connect( self.on_add_capital_reduction_data_push_button_clicked )
@@ -979,6 +1037,9 @@ class MainWindow( QMainWindow ):
         if key == Qt.Key_T:
             if self.ui.qtAddTradingDataPushButton.isEnabled():
                 self.on_add_trading_data_push_button_clicked()
+        elif key == Qt.Key_E:
+            if self.ui.qtAddRegularTradingDataPushButton.isEnabled():
+                self.on_add_regular_trading_data_push_button_clicked()
         elif key == Qt.Key_D:
             if self.ui.qtAddDividendDataPushButton.isEnabled():
                 self.on_add_dividend_data_push_button_clicked()
@@ -1220,14 +1281,17 @@ class MainWindow( QMainWindow ):
                 return
         
         if str_first_four_chars not in dict_per_account_all_stock_trading_data:
-            dict_trading_data = Utility.generate_trading_data( "0001-01-01",         #交易日期
-                                                               TradingType.TEMPLATE, #交易種類
-                                                               0,                    #交易價格
-                                                               0,                    #交易股數
-                                                               1,                    #手續費折扣
-                                                               0,                    #每股股票股利
-                                                               0,                    #每股現金股利
-                                                               0 )                   #每股減資金額
+            dict_trading_data = Utility.generate_trading_data( "0001-01-01",              #交易日期
+                                                               TradingType.TEMPLATE,      #交易種類
+                                                               0,                         #交易價格
+                                                               0,                         #交易股數
+                                                               TradingFeeType.VARIABLE,   #手續費種類
+                                                               1,                         #手續費折扣
+                                                               0,                         #手續費最低金額
+                                                               0,                         #手續費固定金額
+                                                               0,                         #每股股票股利
+                                                               0,                         #每股現金股利
+                                                               0 )                        #每股減資金額
             dict_trading_data[ TradingData.USE_AUTO_DIVIDEND_DATA ] = True
             dict_per_account_all_stock_trading_data[ str_first_four_chars ] = [ dict_trading_data ]
             sorted_list = self.process_single_trading_data( str_tab_widget_name, str_first_four_chars )
@@ -1385,6 +1449,39 @@ class MainWindow( QMainWindow ):
             self.refresh_trading_data_table( sorted_list )
             self.auto_save_trading_data()
 
+    def on_add_regular_trading_data_push_button_clicked( self ):
+        if self.str_picked_stock_number is None:
+            return
+
+        str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
+        dict_per_account_all_stock_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ]
+        b_discount = self.dict_all_account_ui_state[ str_tab_widget_name ][ "discount_checkbox"]
+        f_discount_value = self.dict_all_account_ui_state[ str_tab_widget_name ][ "discount_value"]
+
+        str_stock_number = self.str_picked_stock_number
+        list_stock_name_and_type = self.dict_all_company_number_to_name_and_type[ str_stock_number ]
+        str_stock_name = list_stock_name_and_type[ 0 ]
+        e_trading_fee_type = TradingFeeType.VARIABLE
+        n_trading_fee_minimum = 1
+        n_trading_fee_constant = 0
+        dialog = StockRegularTradingEditDialog( str_stock_number, str_stock_name, e_trading_fee_type, b_discount, f_discount_value, n_trading_fee_minimum, n_trading_fee_constant, self )
+
+        if dialog.exec():
+            dict_trading_data = dialog.dict_trading_data
+            # if dict_trading_data[ TradingData.TRADING_FEE_DISCOUNT ] == 1:
+            #     self.dict_all_account_ui_state[ str_tab_widget_name ][ "discount_checkbox"] = False
+            #     self.dict_all_account_ui_state[ str_tab_widget_name ][ "discount_value"] = 0.6
+            # else:
+            #     self.dict_all_account_ui_state[ str_tab_widget_name ][ "discount_checkbox"] = True
+            #     self.dict_all_account_ui_state[ str_tab_widget_name ][ "discount_value"] = dict_trading_data[ TradingData.TRADING_FEE_DISCOUNT ]
+
+
+            dict_per_account_all_stock_trading_data[ str_stock_number ].append( dict_trading_data )
+            sorted_list = self.process_single_trading_data( str_tab_widget_name, str_stock_number )
+            self.refresh_stock_list_table()
+            self.refresh_trading_data_table( sorted_list )
+            self.auto_save_trading_data()
+
     def on_add_dividend_data_push_button_clicked( self ): 
         if self.str_picked_stock_number is None:
             return
@@ -1483,6 +1580,15 @@ class MainWindow( QMainWindow ):
                         dialog.setup_trading_date( dict_selected_data[ TradingData.TRADING_DATE ] )
                         dialog.setup_trading_type( dict_selected_data[ TradingData.TRADING_TYPE ] )
                         dialog.setup_trading_discount( dict_selected_data[ TradingData.TRADING_FEE_DISCOUNT ] )
+                        dialog.setup_trading_price( dict_selected_data[ TradingData.TRADING_PRICE ] )
+                        dialog.setup_trading_count( dict_selected_data[ TradingData.TRADING_COUNT ] )
+                    elif dict_selected_data[ TradingData.TRADING_TYPE ] == TradingType.REGULAR_BUY:
+                        dialog = StockRegularTradingEditDialog( str_stock_number, str_stock_name, TradingFeeType.VARIABLE, True, 0, 0, 0, self )
+                        dialog.setup_trading_date( dict_selected_data[ TradingData.TRADING_DATE ] )
+                        dialog.setup_trading_fee_type( dict_selected_data[ TradingData.TRADING_FEE_TYPE ] )
+                        dialog.setup_trading_discount( dict_selected_data[ TradingData.TRADING_FEE_DISCOUNT ] )
+                        dialog.setup_trading_fee_minimum( dict_selected_data[ TradingData.TRADING_FEE_MINIMUM ] )
+                        dialog.setup_trading_fee_constant( dict_selected_data[ TradingData.TRADING_FEE_CONSTANT ] )
                         dialog.setup_trading_price( dict_selected_data[ TradingData.TRADING_PRICE ] )
                         dialog.setup_trading_count( dict_selected_data[ TradingData.TRADING_COUNT ] )
                     elif dict_selected_data[ TradingData.TRADING_TYPE ] == TradingType.DIVIDEND:
@@ -1979,7 +2085,10 @@ class MainWindow( QMainWindow ):
                                                                                        e_trading_type,                                      #交易種類
                                                                                        item_trading_data[ "trading_price" ],                #交易價格
                                                                                        item_trading_data[ "trading_count" ],                #交易股數
+                                                                                       TradingFeeType.VARIABLE,                           #手續費種類
                                                                                        item_trading_data[ "trading_fee_discount" ],         #手續費折扣
+                                                                                       0,                                                   #手續費最低金額
+                                                                                       0,                                                   #手續費固定金額
                                                                                        item_trading_data[ "stock_dividend_per_share" ],     #每股股票股利
                                                                                        item_trading_data[ "cash_dividend_per_share" ],      #每股現金股利
                                                                                        item_trading_data[ "capital_reduction_per_share" ] ) #每股減資金額     
@@ -2021,11 +2130,15 @@ class MainWindow( QMainWindow ):
                                  "capital_reduction_per_share" in item_trading_data ):
                                 
                                 e_trading_type = TradingType( item_trading_data[ "trading_type" ] )
+                                e_trading_fee_type = TradingFeeType( item_trading_data[ "trading_fee_type" ] )
                                 dict_per_trading_data = Utility.generate_trading_data( item_trading_data[ "trading_date" ],                 #交易日期
                                                                                        e_trading_type,                                      #交易種類
                                                                                        item_trading_data[ "trading_price" ],                #交易價格
                                                                                        item_trading_data[ "trading_count" ],                #交易股數
+                                                                                       e_trading_fee_type,                                  #手續費種類
                                                                                        item_trading_data[ "trading_fee_discount" ],         #手續費折扣
+                                                                                       item_trading_data[ "trading_fee_minimum" ],          #手續費最低金額
+                                                                                       item_trading_data[ "trading_fee_constant" ],         #手續費固定金額
                                                                                        item_trading_data[ "stock_dividend_per_share" ],     #每股股票股利
                                                                                        item_trading_data[ "cash_dividend_per_share" ],      #每股現金股利
                                                                                        item_trading_data[ "capital_reduction_per_share" ] ) #每股減資金額     
@@ -2076,7 +2189,10 @@ class MainWindow( QMainWindow ):
                     else:
                         dict_per_trading_data[ "trading_price" ] = item[ TradingData.TRADING_PRICE ]
                         dict_per_trading_data[ "trading_count" ] = item[ TradingData.TRADING_COUNT ]
+                    dict_per_trading_data[ "trading_fee_type" ] = int( item[ TradingData.TRADING_FEE_TYPE ].value )
                     dict_per_trading_data[ "trading_fee_discount" ] = item[ TradingData.TRADING_FEE_DISCOUNT ]
+                    dict_per_trading_data[ "trading_fee_minimum" ] = item[ TradingData.TRADING_FEE_MINIMUM ]
+                    dict_per_trading_data[ "trading_fee_constant" ] = item[ TradingData.TRADING_FEE_CONSTANT ]
                     dict_per_trading_data[ "stock_dividend_per_share" ] = item[ TradingData.STOCK_DIVIDEND_PER_SHARE ]
                     dict_per_trading_data[ "cash_dividend_per_share" ] = item[ TradingData.CASH_DIVIDEND_PER_SHARE ]
                     dict_per_trading_data[ "capital_reduction_per_share" ] = item[ TradingData.CAPITAL_REDUCTION_PER_SHARE ]
@@ -2220,6 +2336,36 @@ class MainWindow( QMainWindow ):
                 else:
                     str_last_buying_date = str_buying_date
                     n_last_buying_count = n_trading_count
+                list_calibration_data.append( item )
+            elif e_trading_type == TradingType.REGULAR_BUY:
+                f_trading_price = item[ TradingData.TRADING_PRICE ]
+                n_trading_count = item[ TradingData.TRADING_COUNT ]
+                e_trading_fee_type = item[ TradingData.TRADING_FEE_TYPE ]
+                f_trading_fee_discount = Decimal( str( item[ TradingData.TRADING_FEE_DISCOUNT ] ) )
+                n_trading_fee_minimum = item[ TradingData.TRADING_FEE_MINIMUM ]
+                n_trading_fee_constant = item[ TradingData.TRADING_FEE_CONSTANT ]
+                n_trading_value = int( f_trading_price * n_trading_count )
+                if e_trading_fee_type == TradingFeeType.VARIABLE:
+                    n_trading_fee = int( n_trading_value * Decimal( '0.001425' ) * f_trading_fee_discount )
+                    n_trading_fee = max( n_trading_fee_minimum, n_trading_fee )
+                else:
+                    n_trading_fee = int( n_trading_fee_constant )
+
+                if n_trading_value == 0:
+                    n_trading_fee = 0
+
+                n_trading_total_cost = n_trading_value + n_trading_fee
+
+                item[ TradingData.TRADING_VALUE_NON_SAVE ] = n_trading_value
+                item[ TradingData.TRADING_FEE_NON_SAVE ] = n_trading_fee
+                item[ TradingData.TRADING_TAX_NON_SAVE ] = 0
+                item[ TradingData.EXTRA_INSURANCE_FEE_NON_SAVE ] = 0 
+                item[ TradingData.TRADING_COST_NON_SAVE ] = n_trading_total_cost
+                n_accumulated_inventory += n_trading_count
+                n_accumulated_cost += n_trading_total_cost
+
+                item[ TradingData.STOCK_DIVIDEND_GAIN_NON_SAVE ] = 0
+                item[ TradingData.CASH_DIVIDEND_GAIN_NON_SAVE ] = 0
                 list_calibration_data.append( item )
             elif e_trading_type == TradingType.SELL:
                 str_selling_date = item[ TradingData.TRADING_DATE ]
@@ -2511,6 +2657,8 @@ class MainWindow( QMainWindow ):
                 standard_item = QStandardItem( data )
                 if data == "買進":
                     standard_item.setBackground( QBrush( '#DA9694' ) )
+                elif data == "定期定額買進":
+                    standard_item.setBackground( QBrush( '#FF99FF' ) )
                 elif data == "賣出":
                     standard_item.setBackground( QBrush( '#76933C' ) )
                 elif data == "股利分配":
@@ -2639,6 +2787,12 @@ class MainWindow( QMainWindow ):
             str_extra_insurance_fee = "N/A"
             str_stock_dividend = "N/A"
             str_cash_dividend = "N/A"
+        elif e_trading_type == TradingType.REGULAR_BUY:
+            str_trading_type = "定期定額買進"
+            str_trading_tax = "N/A"
+            str_extra_insurance_fee = "N/A"
+            str_stock_dividend = "N/A"
+            str_cash_dividend = "N/A"
         elif e_trading_type == TradingType.SELL:
             n_trading_value = -n_trading_value
             str_trading_value = format( n_trading_value, "," )
@@ -2691,12 +2845,14 @@ class MainWindow( QMainWindow ):
     def update_button_enable_disable_status( self ): 
         if self.str_picked_stock_number is None or self.ui.qtTabWidget.currentWidget().objectName() not in self.dict_all_account_all_stock_trading_data:
             self.ui.qtAddTradingDataPushButton.setEnabled( False )
+            self.ui.qtAddRegularTradingDataPushButton.setEnabled( False )
             self.ui.qtAddDividendDataPushButton.setEnabled( False )
             self.ui.qtAddLimitBuyingDataPushButton.setEnabled( False )
             self.ui.qtAddCapitalReductionDataPushButton.setEnabled( False )
             self.ui.qtExportSelectedStockTradingDataPushButton.setEnabled( False )
         else:
             self.ui.qtAddTradingDataPushButton.setEnabled( True )
+            self.ui.qtAddRegularTradingDataPushButton.setEnabled( True )
             self.ui.qtAddLimitBuyingDataPushButton.setEnabled( True )
             self.ui.qtAddCapitalReductionDataPushButton.setEnabled( True )
             self.ui.qtExportSelectedStockTradingDataPushButton.setEnabled( True )
@@ -3366,7 +3522,10 @@ class MainWindow( QMainWindow ):
                                                                             TradingType.DIVIDEND,       #交易種類
                                                                             0,                          #交易價格                         
                                                                             0,                          #交易股數
-                                                                            1,                          #手續費折扣                                   
+                                                                            TradingFeeType.VARIABLE,    #手續費種類
+                                                                            1,                          #手續費折扣
+                                                                            0,                          #手續費最低金額
+                                                                            0,                          #手續費固定金額                        
                                                                             f_stock_dividend_per_share, #每股股票股利
                                                                             f_cash_dividend_per_share,  #每股現金股利
                                                                             0 )                         #每股減資金額
@@ -3494,14 +3653,17 @@ class MainWindow( QMainWindow ):
                                 str_year_month_date = f"{taiwan_year}-{taiwan_date_str.split('年')[1].replace('月', '-').replace('日', '')}"
 
                                 f_cash_dividend_per_share = Decimal( item[ 5 ] )
-                                dict_dividend_data = Utility.generate_trading_data( str_year_month_date,        #交易日期
-                                                                                    TradingType.DIVIDEND,       #交易種類
-                                                                                    0,                          #交易價格                         
-                                                                                    0,                          #交易股數
-                                                                                    1,                          #手續費折扣                                   
-                                                                                    0,                          #每股股票股利
-                                                                                    f_cash_dividend_per_share,  #每股現金股利
-                                                                                    0 )                         #每股減資金額
+                                dict_dividend_data = Utility.generate_trading_data( str_year_month_date,       #交易日期
+                                                                                    TradingType.DIVIDEND,      #交易種類
+                                                                                    0,                         #交易價格                         
+                                                                                    0,                         #交易股數
+                                                                                    TradingFeeType.VARIABLE,   #手續費種類
+                                                                                    1,                         #手續費折扣
+                                                                                    0,                         #手續費最低金額
+                                                                                    0,                         #手續費固定金額                                   
+                                                                                    0,                         #每股股票股利
+                                                                                    f_cash_dividend_per_share, #每股現金股利
+                                                                                    0 )                        #每股減資金額
                                 
                                 dict_dividend_data[ TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE ] = True
                                 if str_stock_number in dict_stock_yearly_dividned:
@@ -3669,14 +3831,17 @@ class MainWindow( QMainWindow ):
 
                                 str_cash_dividend = item[ 13 ].strip()
                                 f_cash_dividend_per_share = Decimal( str_cash_dividend )
-                                dict_dividend_data = Utility.generate_trading_data( str_year_month_date,        #交易日期
-                                                                                    TradingType.DIVIDEND,       #交易種類
-                                                                                    0,                          #交易價格                         
-                                                                                    0,                          #交易股數
-                                                                                    1,                          #手續費折扣                                   
-                                                                                    0,                          #每股股票股利
-                                                                                    f_cash_dividend_per_share,  #每股現金股利
-                                                                                    0 )                         #每股減資金額
+                                dict_dividend_data = Utility.generate_trading_data( str_year_month_date,       #交易日期
+                                                                                    TradingType.DIVIDEND,      #交易種類
+                                                                                    0,                         #交易價格                         
+                                                                                    0,                         #交易股數
+                                                                                    TradingFeeType.VARIABLE, #手續費種類
+                                                                                    1,                         #手續費折扣
+                                                                                    0,                         #手續費最低金額
+                                                                                    0,                         #手續費固定金額                                   
+                                                                                    0,                         #每股股票股利
+                                                                                    f_cash_dividend_per_share, #每股現金股利
+                                                                                    0 )                        #每股減資金額
                                 
                                 dict_dividend_data[ TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE ] = True
                                 if str_stock_number in dict_stock_yearly_dividned:
