@@ -1200,7 +1200,7 @@ class MainWindow( QMainWindow ):
         if index == n_tab_count - 1:
             str_tab_name = self.add_new_tab_and_table()
             self.dict_all_account_all_stock_trading_data[ str_tab_name ] = {}
-            self.dict_all_account_ui_state[ str_tab_name ] = { "discount_checkbox": True, "discount_value": 0.6, "insurance_checkbox": False }
+            self.dict_all_account_ui_state[ str_tab_name ] = { "discount_checkbox": True, "discount_value": 0.6, "insurance_checkbox": False, "trading_fee_type": TradingFeeType.VARIABLE, "trading_fee_minimum": 1, "trading_fee_constant": 1 }
         else:
             current_title = self.ui.qtTabWidget.tabText( index )
             dialog = EditTabTitleDialog( current_title, self )
@@ -1457,23 +1457,27 @@ class MainWindow( QMainWindow ):
         dict_per_account_all_stock_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ]
         b_discount = self.dict_all_account_ui_state[ str_tab_widget_name ][ "discount_checkbox"]
         f_discount_value = self.dict_all_account_ui_state[ str_tab_widget_name ][ "discount_value"]
+        e_trading_fee_type = self.dict_all_account_ui_state[ str_tab_widget_name ][ "trading_fee_type"]
+        n_trading_fee_minimum = self.dict_all_account_ui_state[ str_tab_widget_name ][ "trading_fee_minimum"]
+        n_trading_fee_constant = self.dict_all_account_ui_state[ str_tab_widget_name ][ "trading_fee_constant"]
 
         str_stock_number = self.str_picked_stock_number
         list_stock_name_and_type = self.dict_all_company_number_to_name_and_type[ str_stock_number ]
         str_stock_name = list_stock_name_and_type[ 0 ]
-        e_trading_fee_type = TradingFeeType.VARIABLE
-        n_trading_fee_minimum = 1
-        n_trading_fee_constant = 0
         dialog = StockRegularTradingEditDialog( str_stock_number, str_stock_name, e_trading_fee_type, b_discount, f_discount_value, n_trading_fee_minimum, n_trading_fee_constant, self )
 
         if dialog.exec():
             dict_trading_data = dialog.dict_trading_data
-            # if dict_trading_data[ TradingData.TRADING_FEE_DISCOUNT ] == 1:
-            #     self.dict_all_account_ui_state[ str_tab_widget_name ][ "discount_checkbox"] = False
-            #     self.dict_all_account_ui_state[ str_tab_widget_name ][ "discount_value"] = 0.6
-            # else:
-            #     self.dict_all_account_ui_state[ str_tab_widget_name ][ "discount_checkbox"] = True
-            #     self.dict_all_account_ui_state[ str_tab_widget_name ][ "discount_value"] = dict_trading_data[ TradingData.TRADING_FEE_DISCOUNT ]
+            if dict_trading_data[ TradingData.TRADING_FEE_DISCOUNT ] == 1:
+                self.dict_all_account_ui_state[ str_tab_widget_name ][ "discount_checkbox"] = False
+                self.dict_all_account_ui_state[ str_tab_widget_name ][ "discount_value"] = 0.6
+            else:
+                self.dict_all_account_ui_state[ str_tab_widget_name ][ "discount_checkbox"] = True
+                self.dict_all_account_ui_state[ str_tab_widget_name ][ "discount_value"] = dict_trading_data[ TradingData.TRADING_FEE_DISCOUNT ]
+
+            self.dict_all_account_ui_state[ str_tab_widget_name ][ "trading_fee_type"] = dict_trading_data[ TradingData.TRADING_FEE_TYPE ]
+            self.dict_all_account_ui_state[ str_tab_widget_name ][ "trading_fee_minimum"] = dict_trading_data[ TradingData.TRADING_FEE_MINIMUM ]
+            self.dict_all_account_ui_state[ str_tab_widget_name ][ "trading_fee_constant"] = dict_trading_data[ TradingData.TRADING_FEE_CONSTANT ]
 
 
             dict_per_account_all_stock_trading_data[ str_stock_number ].append( dict_trading_data )
@@ -1827,7 +1831,7 @@ class MainWindow( QMainWindow ):
         self.dict_all_account_ui_state = {}
         str_tab_name = self.add_new_tab_and_table()
         self.dict_all_account_all_stock_trading_data[ str_tab_name ] = {}
-        self.dict_all_account_ui_state[ str_tab_name ] = { "discount_checkbox": True, "discount_value": 0.6, "insurance_checkbox": False }
+        self.dict_all_account_ui_state[ str_tab_name ] = { "discount_checkbox": True, "discount_value": 0.6, "insurance_checkbox": False, "trading_fee_type": TradingFeeType.VARIABLE, "trading_fee_minimum": 1, "trading_fee_constant": 1 }
         self.ui.qtTabWidget.setCurrentIndex( 0 )
         self.str_picked_stock_number = None
         self.refresh_stock_list_table()
@@ -1876,7 +1880,7 @@ class MainWindow( QMainWindow ):
             if len( self.dict_all_account_all_stock_trading_data ) == 0:
                 str_tab_name = self.add_new_tab_and_table()
                 self.dict_all_account_all_stock_trading_data[ str_tab_name ] = {}
-                self.dict_all_account_ui_state[ str_tab_name ] = { "discount_checkbox": True, "discount_value": 0.6, "insurance_checkbox": False }
+                self.dict_all_account_ui_state[ str_tab_name ] = { "discount_checkbox": True, "discount_value": 0.6, "insurance_checkbox": False, "trading_fee_type": TradingFeeType.VARIABLE, "trading_fee_minimum": 1, "trading_fee_constant": 1 }
             self.ui.qtTabWidget.setCurrentIndex( 0 )
 
             self.process_all_trading_data()
@@ -2033,7 +2037,7 @@ class MainWindow( QMainWindow ):
             if len( self.dict_all_account_all_stock_trading_data ) == 0:
                 str_tab_name = self.add_new_tab_and_table()
                 self.dict_all_account_all_stock_trading_data[ str_tab_name ] = {}
-                self.dict_all_account_ui_state[ str_tab_name ] = { "discount_checkbox": True, "discount_value": 0.6, "insurance_checkbox": False }
+                self.dict_all_account_ui_state[ str_tab_name ] = { "discount_checkbox": True, "discount_value": 0.6, "insurance_checkbox": False, "trading_fee_type": TradingFeeType.VARIABLE, "trading_fee_minimum": 1, "trading_fee_constant": 1 }
             self.dict_all_account_all_stock_trading_data_INITIAL = self.dict_all_account_all_stock_trading_data.copy()
             self.ui.qtTabWidget.setCurrentIndex( 0 )
             self.process_all_trading_data()
@@ -2059,6 +2063,9 @@ class MainWindow( QMainWindow ):
                     dict_ui_state[ "discount_checkbox" ] = item_account[ "discount_checkbox" ]
                     dict_ui_state[ "discount_value" ] = item_account[ "discount_value" ]
                     dict_ui_state[ "insurance_checkbox" ] = item_account[ "insurance_checkbox" ]
+                    dict_ui_state[ "trading_fee_type" ] = TradingFeeType.VARIABLE
+                    dict_ui_state[ "trading_fee_minimum" ] = 1
+                    dict_ui_state[ "trading_fee_constant" ] = 1
 
                     dict_per_stock_trading_data = {} 
                     for key_stock_number, value_list_trading_data  in dict_per_account_all_stock_trading_data.items():
@@ -2109,12 +2116,18 @@ class MainWindow( QMainWindow ):
                    "trading_data" in item_account and \
                    "discount_checkbox" in item_account and \
                    "discount_value" in item_account and \
-                   "insurance_checkbox" in item_account:
+                   "insurance_checkbox" in item_account and \
+                    "trading_fee_type" in item_account and \
+                    "trading_fee_minimum" in item_account and \
+                    "trading_fee_constant" in item_account:
                     dict_per_account_all_stock_trading_data = item_account[ "trading_data" ]
                     dict_ui_state = {}
                     dict_ui_state[ "discount_checkbox" ] = item_account[ "discount_checkbox" ]
                     dict_ui_state[ "discount_value" ] = item_account[ "discount_value" ]
                     dict_ui_state[ "insurance_checkbox" ] = item_account[ "insurance_checkbox" ]
+                    dict_ui_state[ "trading_fee_type" ] = TradingFeeType( item_account[ "trading_fee_type" ] )
+                    dict_ui_state[ "trading_fee_minimum" ] = item_account[ "trading_fee_minimum" ]
+                    dict_ui_state[ "trading_fee_constant" ] = item_account[ "trading_fee_constant" ]
 
                     dict_per_stock_trading_data = {} 
                     for key_stock_number, value_list_trading_data  in dict_per_account_all_stock_trading_data.items():
@@ -2206,6 +2219,9 @@ class MainWindow( QMainWindow ):
             export_dict_per_account_all_info[ "discount_checkbox" ] = self.dict_all_account_ui_state[ str_tab_widget_name ][ "discount_checkbox"]
             export_dict_per_account_all_info[ "discount_value" ] = self.dict_all_account_ui_state[ str_tab_widget_name ][ "discount_value"]
             export_dict_per_account_all_info[ "insurance_checkbox" ] = qt_insurance_check_box.isChecked()
+            export_dict_per_account_all_info[ "trading_fee_type" ] = int( self.dict_all_account_ui_state[ str_tab_widget_name ][ "trading_fee_type"].value )
+            export_dict_per_account_all_info[ "trading_fee_minimum" ] = self.dict_all_account_ui_state[ str_tab_widget_name ][ "trading_fee_minimum"]
+            export_dict_per_account_all_info[ "trading_fee_constant" ] = self.dict_all_account_ui_state[ str_tab_widget_name ][ "trading_fee_constant"]
 
 
             export_list_all_account_all_stock_trading_data.append( export_dict_per_account_all_info )
