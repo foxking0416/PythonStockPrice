@@ -949,22 +949,28 @@ class MainWindow( QMainWindow ):
         else:
             self.start_loading_stock_data()
 
-    def initialize( self, update_progress_callback = None ):
-        self.setEnabled( False ) # 資料下載前先Disable整個視窗
-        obj_current_date = datetime.datetime.today() - datetime.timedelta( days = 1 )
-        str_date = obj_current_date.strftime('%Y%m%d')
+    def download_all_required_data( self, str_date, update_progress_callback ):
 
         self.set_progress_value( update_progress_callback, 0 )
-        self.dict_all_company_number_to_name_and_type = self.download_all_company_stock_number( str_date )
+        self.download_all_company_stock_number( str_date )
         self.set_progress_value( update_progress_callback, 10 )
-        self.dict_all_company_number_to_price_info = self.download_day_stock_price( str_date )
+        self.download_day_stock_price( str_date )
         self.set_progress_value( update_progress_callback, 20 )
         self.download_general_company_all_yearly_dividend_data( 2010, str_date )
         self.set_progress_value( update_progress_callback, 50 )
         self.download_listed_etf_all_yearly_dividend_data( 2010, str_date )
         self.set_progress_value( update_progress_callback, 80 )
         self.download_OTC_etf_all_yearly_dividend_data( 2010, str_date )
+
+    def initialize( self, update_progress_callback = None ):
+        self.setEnabled( False ) # 資料下載前先Disable整個視窗
+        obj_current_date = datetime.datetime.today() - datetime.timedelta( days = 1 )
+        str_date = obj_current_date.strftime('%Y%m%d')
+
+        self.download_all_required_data( str_date, update_progress_callback )
         
+        self.dict_all_company_number_to_name_and_type = self.load_all_company_stock_number()
+        self.dict_all_company_number_to_price_info = self.load_day_stock_price()
         self.dict_auto_stock_yearly_dividned = self.load_general_company_all_yearly_dividend_data( 2010 )
         self.dict_auto_stock_listed_etf_yearly_dividned = self.load_listed_etf_all_yearly_dividend_data( 2010 )
         self.dict_auto_stock_OTC_etf_yearly_dividned = self.load_OTC_etf_all_yearly_dividend_data( 2010 )
@@ -3021,8 +3027,6 @@ class MainWindow( QMainWindow ):
         raise Exception("Max retries exceeded. Failed to get a successful response.")
 
     def download_all_company_stock_number( self, str_date ): 
-        dict_company_number_to_name = {}
-
         b_need_to_download = False
         if os.path.exists( self.stock_number_file_path ):
             with open( self.stock_number_file_path, 'r', encoding='utf-8' ) as f:
@@ -3038,8 +3042,6 @@ class MainWindow( QMainWindow ):
                         if len( ele ) == 2:
                             b_need_to_download = True
                             break
-                        else:
-                            dict_company_number_to_name[ ele[ 0 ] ] = [ ele[ 1 ], ele[ 2 ] ]
         else:
             b_need_to_download = True
 
@@ -3131,12 +3133,21 @@ class MainWindow( QMainWindow ):
                 f.write( str_date + '\n' )
                 for row in tds:
                     f.write( str( row[ 0 ] ) + ',' + str( row[ 1 ] ) + ',' + str( row[ 2 ] ) + '\n' )
-                    dict_company_number_to_name[ row[ 0 ] ] = [ row[ 1 ], row[ 2 ] ]
-
-        return dict_company_number_to_name
     
+    def load_all_company_stock_number( self ):
+        dict_company_number_to_name = {}
+        if os.path.exists( self.stock_number_file_path ):
+            with open( self.stock_number_file_path, 'r', encoding='utf-8' ) as f:
+                data = f.readlines()
+                for i, row in enumerate( data ):
+                    if i == 0:
+                        continue
+                    else:
+                        ele = row.strip().split( ',' )
+                        dict_company_number_to_name[ ele[ 0 ] ] = [ ele[ 1 ], ele[ 2 ] ]
+        return dict_company_number_to_name
+        
     def download_day_stock_price( self, str_date ):
-        dict_company_number_to_price_info = {}
         b_need_to_download = False
         if os.path.exists( self.stock_price_file_path ):
             with open( self.stock_price_file_path, 'r', encoding='utf-8' ) as f:
@@ -3148,7 +3159,6 @@ class MainWindow( QMainWindow ):
                                 b_need_to_download = True
                     else:
                         ele = row.strip().split( ',' )
-                        dict_company_number_to_price_info[ ele[ 0 ] ] = ele[ 2 ]
         else:
             b_need_to_download = True
 
@@ -3232,7 +3242,7 @@ class MainWindow( QMainWindow ):
 
             if len( all_stock_price ) == 0:
                 print( "no data" )
-                return dict_company_number_to_price_info
+                return 
             
             # 確保目錄存在，若不存在則遞歸創建
             os.makedirs( os.path.dirname( self.stock_price_file_path ), exist_ok = True )
@@ -3240,10 +3250,20 @@ class MainWindow( QMainWindow ):
                 f.write( str_date + '\n' )
                 for row in all_stock_price:
                     f.write( str( row[ 0 ] ) + ',' + str( row[ 1 ] ) + ',' + str( row[ 2 ] ) + '\n' )
-                    dict_company_number_to_price_info[ row[ 0 ] ] = str( row[ 2 ] )
-
-        return dict_company_number_to_price_info
     
+    def load_day_stock_price( self ):
+        dict_company_number_to_price_info = {}
+        if os.path.exists( self.stock_price_file_path ):
+            with open( self.stock_price_file_path, 'r', encoding='utf-8' ) as f:
+                data = f.readlines()
+                for i, row in enumerate( data ):
+                    if i == 0:
+                        continue
+                    else:
+                        ele = row.strip().split( ',' )
+                        dict_company_number_to_price_info[ ele[ 0 ] ] = ele[ 2 ]
+        return dict_company_number_to_price_info
+
     def process_output_file_path( self, str_output_path, list_file_exist, str_folder_name, str_file_name, n_year, n_season, b_overwrite ):
         str_season = ''
         if n_season == 1 or n_season == 2 or n_season == 3 or n_season == 4:
