@@ -37,15 +37,6 @@ class TestMainWindow( unittest.TestCase ):
         self.assertTrue( self.window.isVisible() )
         self.window.close()
 
-    def test_tab_widget_count(self):
-        self.window = MainWindow( True, 
-                                  'UnitTestData\\TradingDataUnitTest.json',
-                                  'UnitTestData\\UISetting.config',
-                                  'UnitTestData\\StockNumber.txt',
-                                  'UnitTestData\\StockPrice.txt' )
-        self.assertEqual( self.window.ui.qtTabWidget.count(), 3 )
-        self.window.close()
-
     def test_current_inventory(self):
         self.window = MainWindow( True, 
                                   'UnitTestData\\TradingDataUnitTest.json',

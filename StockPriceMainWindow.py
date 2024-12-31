@@ -834,7 +834,7 @@ class Worker( QObject ):
 
     def run( self ):
         # Perform the time-consuming operation (e.g. loading stock data)
-        self.main_window.initialize( self.update_progress )
+        self.main_window.initialize( False, self.update_progress )
         self.finished.emit({})  # Emit the result when done
 
     def update_progress( self, value ):
@@ -944,13 +944,12 @@ class MainWindow( QMainWindow ):
         self.str_current_save_file_path = None
         # self.load_stylesheet("style.css")
         if b_unit_test:
-            self.initialize( None )
+            self.initialize( True, None )
             self.load_initialize_data()
         else:
             self.start_loading_stock_data()
 
     def download_all_required_data( self, str_date, update_progress_callback ):
-
         self.set_progress_value( update_progress_callback, 0 )
         self.download_all_company_stock_number( str_date )
         self.set_progress_value( update_progress_callback, 10 )
@@ -962,18 +961,19 @@ class MainWindow( QMainWindow ):
         self.set_progress_value( update_progress_callback, 80 )
         self.download_OTC_etf_all_yearly_dividend_data( 2010, str_date )
 
-    def initialize( self, update_progress_callback = None ):
+    def initialize( self, b_unit_test, update_progress_callback ):
         self.setEnabled( False ) # 資料下載前先Disable整個視窗
         obj_current_date = datetime.datetime.today() - datetime.timedelta( days = 1 )
         str_date = obj_current_date.strftime('%Y%m%d')
-
-        self.download_all_required_data( str_date, update_progress_callback )
+        
+        if not b_unit_test:
+            self.download_all_required_data( str_date, update_progress_callback )
         
         self.dict_all_company_number_to_name_and_type = self.load_all_company_stock_number()
         self.dict_all_company_number_to_price_info = self.load_day_stock_price()
-        self.dict_auto_stock_yearly_dividned = self.load_general_company_all_yearly_dividend_data( 2010 )
-        self.dict_auto_stock_listed_etf_yearly_dividned = self.load_listed_etf_all_yearly_dividend_data( 2010 )
-        self.dict_auto_stock_OTC_etf_yearly_dividned = self.load_OTC_etf_all_yearly_dividend_data( 2010 )
+        self.dict_auto_stock_yearly_dividned = self.load_general_company_all_yearly_dividend_data( 2010, b_unit_test )
+        self.dict_auto_stock_listed_etf_yearly_dividned = self.load_listed_etf_all_yearly_dividend_data( 2010, b_unit_test )
+        self.dict_auto_stock_OTC_etf_yearly_dividned = self.load_OTC_etf_all_yearly_dividend_data( 2010, b_unit_test )
 
         # common_keys = set(self.dict_auto_stock_yearly_dividned.keys()) & set(self.dict_auto_stock_listed_etf_yearly_dividned.keys())
         self.dict_auto_stock_yearly_dividned.update( self.dict_auto_stock_listed_etf_yearly_dividned )
@@ -989,7 +989,8 @@ class MainWindow( QMainWindow ):
             if n_weekday == 5 or n_weekday == 6:
                 continue
             str_date = obj_current_date.strftime('%Y%m%d')
-            self.dict_all_company_number_to_price_info = self.download_day_stock_price( str_date )
+            self.download_day_stock_price( str_date )
+            self.dict_all_company_number_to_price_info = self.load_day_stock_price()
             n_retry += 1
             if n_retry > 30:
                 break
@@ -3264,12 +3265,15 @@ class MainWindow( QMainWindow ):
                         dict_company_number_to_price_info[ ele[ 0 ] ] = ele[ 2 ]
         return dict_company_number_to_price_info
 
-    def process_output_file_path( self, str_output_path, list_file_exist, str_folder_name, str_file_name, n_year, n_season, b_overwrite ):
+    def process_output_file_path( self, str_output_path, list_file_exist, str_folder_name, str_file_name, n_year, n_season, b_overwrite, b_unit_test ):
         str_season = ''
         if n_season == 1 or n_season == 2 or n_season == 3 or n_season == 4:
             str_season = '_Q' + str( n_season )
         if str_output_path == None:
-            str_output_path = os.path.join( g_data_dir, 'StockInventory', str_folder_name, str_file_name + str( n_year ) + str_season + '.txt' )
+            if b_unit_test:
+                str_output_path = os.path.join( g_data_dir, 'StockInventory', 'UnitTestData', str_file_name + str( n_year ) + str_season + '.txt' )
+            else:
+                str_output_path = os.path.join( g_data_dir, 'StockInventory', str_folder_name, str_file_name + str( n_year ) + str_season + '.txt' )
         # 確保目錄存在，若不存在則遞歸創建
         os.makedirs( os.path.dirname( str_output_path ), exist_ok = True )
         if b_overwrite or not os.path.exists( str_output_path ):
@@ -3291,7 +3295,7 @@ class MainWindow( QMainWindow ):
 
             b_overwrite = False
             file_exist = [ True ]
-            str_output_path = self.process_output_file_path( None, file_exist, 'Dividend', 'GeneralCompanyDividend_', n_year, 0, b_overwrite )
+            str_output_path = self.process_output_file_path( None, file_exist, 'Dividend', 'GeneralCompanyDividend_', n_year, 0, b_overwrite, False )
             if not file_exist[0] or n_year == n_current_year:
                 self.download_general_company_yearly_dividend_data( n_year, str_date, str_output_path, True )
                 print(f"Finish {n_year} yearly dividend " )
@@ -3304,7 +3308,7 @@ class MainWindow( QMainWindow ):
             n_year -= 1911
 
         file_exist = [ True ]
-        str_output_path = self.process_output_file_path( str_output_path, file_exist, 'Dividend', 'GeneralCompanyDividend_', n_year, 0, b_overwrite )
+        str_output_path = self.process_output_file_path( str_output_path, file_exist, 'Dividend', 'GeneralCompanyDividend_', n_year, 0, b_overwrite, False )
         if file_exist[0]:
             print("dividend file exists")
             return
@@ -3508,7 +3512,7 @@ class MainWindow( QMainWindow ):
                             f.write( ',' + str( ele ) )
                     f.write( '\n')  # 用逗號分隔每個元素，並換行
 
-    def load_general_company_all_yearly_dividend_data( self, n_dividend_data_start_year ):
+    def load_general_company_all_yearly_dividend_data( self, n_dividend_data_start_year, b_unit_test ):
         current_date = datetime.datetime.today()
         n_current_year = current_date.year
         dict_stock_yearly_dividned = {}
@@ -3518,7 +3522,7 @@ class MainWindow( QMainWindow ):
                 n_current_year -= 1911
             if n_year > 1990:
                 n_year -= 1911
-            list_yearly_dividend = self.read_general_company_yearly_dividend_raw_data( n_year )
+            list_yearly_dividend = self.read_general_company_yearly_dividend_raw_data( n_year, b_unit_test )
             if list_yearly_dividend != None:
                 for index, item in enumerate( list_yearly_dividend ):
                     f_stock_dividend_per_share = self.get_value_from_string( item[4] ) + self.get_value_from_string( item[5] )
@@ -3578,11 +3582,11 @@ class MainWindow( QMainWindow ):
 
         return dict_stock_yearly_dividned
 
-    def read_general_company_yearly_dividend_raw_data( self, n_year ):
+    def read_general_company_yearly_dividend_raw_data( self, n_year, b_unit_test ):
         if n_year > 1990:
             n_year -= 1911
         file_exist = [ True ]
-        file_path = self.process_output_file_path( None, file_exist, 'Dividend', 'GeneralCompanyDividend_', n_year, 0, False )
+        file_path = self.process_output_file_path( None, file_exist, 'Dividend', 'GeneralCompanyDividend_', n_year, 0, False, b_unit_test )
         if not os.path.exists( file_path ):
             return None
         
@@ -3618,7 +3622,7 @@ class MainWindow( QMainWindow ):
 
             b_overwrite = False
             file_exist = [ True ]
-            str_output_path = self.process_output_file_path( None, file_exist, 'Dividend', 'ListedETFDividend_', n_year, 0, b_overwrite )
+            str_output_path = self.process_output_file_path( None, file_exist, 'Dividend', 'ListedETFDividend_', n_year, 0, b_overwrite, False )
             if not file_exist[0] or n_year == n_current_year:
                 self.download_listed_etf_yearly_dividend_data( n_year, str_date, str_output_path, True )
                 print(f"Finish Listed etf {n_year} yearly dividend " )
@@ -3631,7 +3635,7 @@ class MainWindow( QMainWindow ):
             n_year -= 1911
 
         file_exist = [ True ]
-        str_output_path = self.process_output_file_path( str_output_path, file_exist, 'Dividend', 'ListedETFDividend_', n_year, 0, b_overwrite )
+        str_output_path = self.process_output_file_path( str_output_path, file_exist, 'Dividend', 'ListedETFDividend_', n_year, 0, b_overwrite, False )
         if file_exist[0]:
             print("dividend file exists")
             return
@@ -3669,7 +3673,7 @@ class MainWindow( QMainWindow ):
                 print(f"Final error: {e}")
             pass
 
-    def load_listed_etf_all_yearly_dividend_data( self, n_dividend_data_start_year ):
+    def load_listed_etf_all_yearly_dividend_data( self, n_dividend_data_start_year, b_unit_test ):
         current_date = datetime.datetime.today()
         n_current_year = current_date.year
         dict_stock_yearly_dividned = {}
@@ -3679,7 +3683,7 @@ class MainWindow( QMainWindow ):
                 n_current_year -= 1911
             if n_year > 1990:
                 n_year -= 1911
-            list_yearly_dividend = self.read_listed_etf_yearly_dividend_raw_data( n_year )
+            list_yearly_dividend = self.read_listed_etf_yearly_dividend_raw_data( n_year, b_unit_test )
             if list_yearly_dividend != None:
                 for index, item in enumerate( list_yearly_dividend ):
                     if item[5] != None:
@@ -3717,11 +3721,11 @@ class MainWindow( QMainWindow ):
 
         return dict_stock_yearly_dividned
 
-    def read_listed_etf_yearly_dividend_raw_data( self, n_year ):
+    def read_listed_etf_yearly_dividend_raw_data( self, n_year, b_unit_test ):
         if n_year > 1990:
             n_year -= 1911
         file_exist = [ True ]
-        file_path = self.process_output_file_path( None, file_exist, 'Dividend', 'ListedETFDividend_', n_year, 0, False )
+        file_path = self.process_output_file_path( None, file_exist, 'Dividend', 'ListedETFDividend_', n_year, 0, False, b_unit_test )
         if not os.path.exists( file_path ):
             return None
         
@@ -3746,7 +3750,7 @@ class MainWindow( QMainWindow ):
 
             b_overwrite = False
             file_exist = [ True ]
-            str_output_path = self.process_output_file_path( None, file_exist, 'Dividend', 'OTCETFDividend_', n_year, 0, b_overwrite )
+            str_output_path = self.process_output_file_path( None, file_exist, 'Dividend', 'OTCETFDividend_', n_year, 0, b_overwrite, False )
             if not file_exist[0] or n_year == n_current_year:
                 self.download_OTC_etf_yearly_dividend_data( n_year, str_date, str_output_path, True )
                 print(f"Finish OTC etf {n_year} yearly dividend " )
@@ -3759,7 +3763,7 @@ class MainWindow( QMainWindow ):
             n_year -= 1911
 
         file_exist = [ True ]
-        str_output_path = self.process_output_file_path( str_output_path, file_exist, 'Dividend', 'OTCETFDividend_', n_year, 0, b_overwrite )
+        str_output_path = self.process_output_file_path( str_output_path, file_exist, 'Dividend', 'OTCETFDividend_', n_year, 0, b_overwrite, False )
         if file_exist[0]:
             print("dividend file exists")
             return
@@ -3845,7 +3849,7 @@ class MainWindow( QMainWindow ):
                 print(f"Final error: {e}")
         pass
 
-    def load_OTC_etf_all_yearly_dividend_data( self, n_dividend_data_start_year ):
+    def load_OTC_etf_all_yearly_dividend_data( self, n_dividend_data_start_year, b_unit_test ):
         current_date = datetime.datetime.today()
         n_current_year = current_date.year
         dict_stock_yearly_dividned = {}
@@ -3855,7 +3859,7 @@ class MainWindow( QMainWindow ):
                 n_current_year -= 1911
             if n_year > 1990:
                 n_year -= 1911
-            list_yearly_dividend = self.read_OTC_etf_yearly_dividend_raw_data( n_year )
+            list_yearly_dividend = self.read_OTC_etf_yearly_dividend_raw_data( n_year, b_unit_test )
             if list_yearly_dividend != None:
                 for index, item in enumerate( list_yearly_dividend ):
                     if item[13] != None:
@@ -3895,11 +3899,11 @@ class MainWindow( QMainWindow ):
 
         return dict_stock_yearly_dividned
     
-    def read_OTC_etf_yearly_dividend_raw_data( self, n_year ):
+    def read_OTC_etf_yearly_dividend_raw_data( self, n_year, b_unit_test ):
         if n_year > 1990:
             n_year -= 1911
         file_exist = [ True ]
-        file_path = self.process_output_file_path( None, file_exist, 'Dividend', 'OTCETFDividend_', n_year, 0, False )
+        file_path = self.process_output_file_path( None, file_exist, 'Dividend', 'OTCETFDividend_', n_year, 0, False, b_unit_test )
         if not os.path.exists( file_path ):
             return None
         
