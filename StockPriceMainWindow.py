@@ -841,14 +841,18 @@ class Worker( QObject ):
         self.progress.emit( value )  # Emit progress updates
 
 class MainWindow( QMainWindow ):
-    def __init__( self, b_multi_thread = True, str_initial_data_file = 'TradingData.json' ):
+    def __init__( self, b_unit_test = False, 
+                  str_initial_data_file = 'TradingData.json', 
+                  str_UI_setting_file = 'UISetting.config', 
+                  str_stock_number_file = 'StockNumber.txt',
+                  str_stock_price_file = 'StockPrice.txt'  ):
         super( MainWindow, self ).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi( self )  # 設置 UI
         window_icon = QIcon( window_icon_file_path ) 
         self.setWindowIcon( window_icon )
         
-        if b_multi_thread:
+        if not b_unit_test:
             self.progress_bar = QProgressBar( self )
             self.progress_bar.setGeometry( 400, 350, 300, 25 )  # Adjust position and size as needed
             self.progress_bar.setMaximum( 100 )
@@ -923,9 +927,9 @@ class MainWindow( QMainWindow ):
         self.ui.qtActionImportSingleStock.triggered.connect( self.on_import_single_stock_action_triggered )
         
         self.trading_data_json_file_path = os.path.join( g_data_dir, 'StockInventory', str_initial_data_file )
-        self.UISetting_file_path = os.path.join( g_data_dir, 'StockInventory', 'UISetting.config' )
-        self.stock_number_file_path = os.path.join( g_data_dir, 'StockInventory', 'StockNumber.txt' )
-        self.stock_price_file_path = os.path.join( g_data_dir, 'StockInventory', 'StockPrice.txt' )
+        self.UISetting_file_path = os.path.join( g_data_dir, 'StockInventory', str_UI_setting_file )
+        self.stock_number_file_path = os.path.join( g_data_dir, 'StockInventory', str_stock_number_file )
+        self.stock_price_file_path = os.path.join( g_data_dir, 'StockInventory', str_stock_price_file )
 
         self.list_stock_list_table_horizontal_header = [ '自動帶入股利', '總成本', '庫存股數', '平均成本', ' 收盤價', '淨值', '總手續費', '總交易稅', '損益', '股利所得', '匯出', '刪除' ]
         self.str_picked_stock_number = None
@@ -939,11 +943,11 @@ class MainWindow( QMainWindow ):
         self.n_tab_index = 0
         self.str_current_save_file_path = None
         # self.load_stylesheet("style.css")
-        if b_multi_thread:
-            self.start_loading_stock_data()
-        else:
+        if b_unit_test:
             self.initialize( None )
             self.load_initialize_data()
+        else:
+            self.start_loading_stock_data()
 
     def initialize( self, update_progress_callback = None ):
         self.setEnabled( False ) # 資料下載前先Disable整個視窗
@@ -3890,7 +3894,12 @@ class MainWindow( QMainWindow ):
 def run_app():
     app = QApplication( sys.argv )
     app.setStyle('Fusion')
-    window = MainWindow( True, 'TradingData.json' )
+    window = MainWindow( False, 
+                        'TradingData.json',
+                        'UISetting.config',
+                        'StockNumber.txt',
+                        'StockPrice.txt' )
+
     window.show()
     return app.exec()
 
