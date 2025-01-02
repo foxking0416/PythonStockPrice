@@ -1070,9 +1070,9 @@ class MainWindow( QMainWindow ):
         increased_tab = QWidget()
         increased_tab.setObjectName( str_tab_name )
                
-        uiqt_vertical_layout_main_2nd = QVBoxLayout( increased_tab )
-        uiqt_vertical_layout_main_2nd.setSpacing(0)
-        uiqt_vertical_layout_main_2nd.setContentsMargins(-1, 0, -1, 0)
+        uiqt_vertical_layout_main = QVBoxLayout( increased_tab )
+        uiqt_vertical_layout_main.setSpacing(0)
+        uiqt_vertical_layout_main.setContentsMargins(-1, 0, -1, 0)
 
         uiqt_stock_inventory_and_cash_transfer_tab_widget = QTabWidget( increased_tab )
         uiqt_stock_inventory_and_cash_transfer_tab_widget.setObjectName(u"qtStockInventoryAndCashTransferTabWidget")
@@ -1085,12 +1085,12 @@ class MainWindow( QMainWindow ):
         uiqt_stock_inventory_and_cash_transfer_tab_widget.insertTab( 0, stock_inventory_tab, "庫存總覽" )
         uiqt_stock_inventory_and_cash_transfer_tab_widget.insertTab( 1, cash_transfer_tab, "銀行" )
         
-        uiqt_vertical_layout_main_2nd.addWidget( uiqt_stock_inventory_and_cash_transfer_tab_widget )
+        uiqt_vertical_layout_main.addWidget( uiqt_stock_inventory_and_cash_transfer_tab_widget )
 
-
-        uiqt_vertical_layout_main = QVBoxLayout( stock_inventory_tab )
-        uiqt_vertical_layout_main.setSpacing(0)
-        uiqt_vertical_layout_main.setContentsMargins(-1, 0, -1, 0)
+        # stock inventory tab
+        uiqt_stock_inventory_tab_vertical_layout = QVBoxLayout( stock_inventory_tab )
+        uiqt_stock_inventory_tab_vertical_layout.setSpacing(0)
+        uiqt_stock_inventory_tab_vertical_layout.setContentsMargins(-1, 0, -1, 0)
         uiqt_horizontal_layout_1 = QHBoxLayout()
         uiqt_stock_input_line_edit = QLineEdit( stock_inventory_tab)
         sizePolicy = QSizePolicy( QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Fixed )
@@ -1157,7 +1157,7 @@ class MainWindow( QMainWindow ):
         uiqt_horizontal_spacer_1_5 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
         uiqt_horizontal_layout_1.addItem( uiqt_horizontal_spacer_1_5 )
 
-        uiqt_vertical_layout_main.addLayout( uiqt_horizontal_layout_1 )
+        uiqt_stock_inventory_tab_vertical_layout.addLayout( uiqt_horizontal_layout_1 )
 
         uiqt_horizontal_layout_2 = QHBoxLayout()
         uiqt_horizontal_layout_2.setSpacing( 0 )
@@ -1170,7 +1170,7 @@ class MainWindow( QMainWindow ):
         uiqt_horizontal_spacer_2_1 = QSpacerItem( 40, 0, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum )
         uiqt_horizontal_layout_2.addItem( uiqt_horizontal_spacer_2_1 )
 
-        uiqt_vertical_layout_main.addLayout( uiqt_horizontal_layout_2 )
+        uiqt_stock_inventory_tab_vertical_layout.addLayout( uiqt_horizontal_layout_2 )
 
         uiqt_horizontal_layout_3 = QHBoxLayout()
 
@@ -1179,7 +1179,7 @@ class MainWindow( QMainWindow ):
         uiqt_stock_list_table_view.setObjectName( "StockListTableView" )
         uiqt_horizontal_layout_3.addWidget( uiqt_stock_list_table_view )
 
-        uiqt_vertical_layout_main.addLayout( uiqt_horizontal_layout_3 )
+        uiqt_stock_inventory_tab_vertical_layout.addLayout( uiqt_horizontal_layout_3 )
 
         delegate = CenterIconDelegate()
         stock_list_model = QStandardItemModel( 0, 0 )
