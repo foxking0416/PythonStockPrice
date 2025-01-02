@@ -17,7 +17,7 @@ from QtDuplicateOptionDialog import Ui_Dialog as Ui_DuplicateOptionDialog
 from QtSaveCheckDialog import Ui_Dialog as Ui_SaveCheckDialog
 from PySide6.QtWidgets import QApplication, QMainWindow, QDialog, QButtonGroup, QMessageBox, QStyledItemDelegate, QFileDialog, QHeaderView, QVBoxLayout, QHBoxLayout, \
                               QLabel, QLineEdit, QDialogButtonBox, QTabBar, QWidget, QTableView, QComboBox, QPushButton, QSizePolicy, QSpacerItem, QCheckBox, QDoubleSpinBox, \
-                              QProgressBar
+                              QProgressBar, QTabWidget
 from PySide6.QtGui import QStandardItemModel, QStandardItem, QIcon, QBrush
 from PySide6.QtCore import Qt, QModelIndex, QRect, QSignalBlocker, QSize, QThread, QObject, Signal
 from openpyxl import Workbook
@@ -1070,11 +1070,29 @@ class MainWindow( QMainWindow ):
         increased_tab = QWidget()
         increased_tab.setObjectName( str_tab_name )
                
-        uiqt_vertical_layout_main = QVBoxLayout( increased_tab )
+        uiqt_vertical_layout_main_2nd = QVBoxLayout( increased_tab )
+        uiqt_vertical_layout_main_2nd.setSpacing(0)
+        uiqt_vertical_layout_main_2nd.setContentsMargins(-1, 0, -1, 0)
+
+        uiqt_stock_inventory_and_cash_transfer_tab_widget = QTabWidget( increased_tab )
+        uiqt_stock_inventory_and_cash_transfer_tab_widget.setObjectName(u"qtStockInventoryAndCashTransferTabWidget")
+        uiqt_stock_inventory_and_cash_transfer_tab_widget.setTabPosition( QTabWidget.West )
+
+        stock_inventory_tab = QWidget()
+        stock_inventory_tab.setObjectName( str_tab_name + "StockInventoryTab" )
+        cash_transfer_tab = QWidget()
+        cash_transfer_tab.setObjectName( str_tab_name + "CashTransferTab" )
+        uiqt_stock_inventory_and_cash_transfer_tab_widget.insertTab( 0, stock_inventory_tab, "庫存總覽" )
+        uiqt_stock_inventory_and_cash_transfer_tab_widget.insertTab( 1, cash_transfer_tab, "銀行" )
+        
+        uiqt_vertical_layout_main_2nd.addWidget( uiqt_stock_inventory_and_cash_transfer_tab_widget )
+
+
+        uiqt_vertical_layout_main = QVBoxLayout( stock_inventory_tab )
         uiqt_vertical_layout_main.setSpacing(0)
         uiqt_vertical_layout_main.setContentsMargins(-1, 0, -1, 0)
         uiqt_horizontal_layout_1 = QHBoxLayout()
-        uiqt_stock_input_line_edit = QLineEdit( increased_tab)
+        uiqt_stock_input_line_edit = QLineEdit( stock_inventory_tab)
         sizePolicy = QSizePolicy( QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Fixed )
         sizePolicy.setHorizontalStretch( 0 )
         sizePolicy.setVerticalStretch( 0 )
@@ -1086,7 +1104,7 @@ class MainWindow( QMainWindow ):
         uiqt_stock_input_line_edit.setObjectName( "StockInputLineEdit" )
         uiqt_horizontal_layout_1.addWidget( uiqt_stock_input_line_edit )
 
-        uiqt_add_stock_push_button = QPushButton(increased_tab)
+        uiqt_add_stock_push_button = QPushButton( stock_inventory_tab )
         uiqt_add_stock_push_button.setMaximumSize( QSize( 100, 16777215 ) )
         uiqt_add_stock_push_button.setText( "新增股票" )
         uiqt_add_stock_push_button.setObjectName( "AddStockPushButton" )
@@ -1095,7 +1113,7 @@ class MainWindow( QMainWindow ):
         uiqt_horizontal_spacer_1_1 = QSpacerItem( 40, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum )
         uiqt_horizontal_layout_1.addItem( uiqt_horizontal_spacer_1_1 )
 
-        uiqt_extra_insurance_fee_check_box = QCheckBox( increased_tab )
+        uiqt_extra_insurance_fee_check_box = QCheckBox( stock_inventory_tab )
         uiqt_extra_insurance_fee_check_box.setText( "補充保費" )
         uiqt_extra_insurance_fee_check_box.setObjectName( "ExtraInsuranceFeeCheckBox" )
         uiqt_horizontal_layout_1.addWidget( uiqt_extra_insurance_fee_check_box )
@@ -1103,7 +1121,7 @@ class MainWindow( QMainWindow ):
         uiqt_horizontal_spacer_1_2 = QSpacerItem( 40, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum )
         uiqt_horizontal_layout_1.addItem( uiqt_horizontal_spacer_1_2 )
 
-        uiqt_display_type_combobox = QComboBox( increased_tab )
+        uiqt_display_type_combobox = QComboBox( stock_inventory_tab )
         uiqt_display_type_combobox.addItem( "顯示所有交易" )
         uiqt_display_type_combobox.addItem( "僅顯示目前庫存" )
         uiqt_display_type_combobox.addItem( "僅顯示已無庫存" )
@@ -1113,10 +1131,10 @@ class MainWindow( QMainWindow ):
         uiqt_horizontal_spacer_1_3 = QSpacerItem( 40, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum )
         uiqt_horizontal_layout_1.addItem( uiqt_horizontal_spacer_1_3 )
 
-        uiqt_total_inventory_label = QLabel( increased_tab )
+        uiqt_total_inventory_label = QLabel( stock_inventory_tab )
         uiqt_total_inventory_label.setText( "總庫存: " )
         uiqt_total_inventory_label.setObjectName( "TotalInventoryLabel" )
-        uiqt_total_inventory_value_label = QLabel( increased_tab )
+        uiqt_total_inventory_value_label = QLabel( stock_inventory_tab )
         uiqt_total_inventory_value_label.setText( "" )
         uiqt_total_inventory_value_label.setObjectName( "TotalInventoryValueLabel" )
         
@@ -1126,10 +1144,10 @@ class MainWindow( QMainWindow ):
         uiqt_horizontal_spacer_1_4 = QSpacerItem( 40, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum )
         uiqt_horizontal_layout_1.addItem( uiqt_horizontal_spacer_1_4 )
 
-        uiqt_total_profit_label = QLabel( increased_tab )
+        uiqt_total_profit_label = QLabel( stock_inventory_tab )
         uiqt_total_profit_label.setText( "總損益: " )
         uiqt_total_profit_label.setObjectName( "TotalProfitLabel" )
-        uiqt_total_profit_value_label = QLabel( increased_tab )
+        uiqt_total_profit_value_label = QLabel( stock_inventory_tab )
         uiqt_total_profit_value_label.setText( "" )
         uiqt_total_profit_value_label.setObjectName( "TotalProfitValueLabel" )
         
@@ -1144,7 +1162,7 @@ class MainWindow( QMainWindow ):
         uiqt_horizontal_layout_2 = QHBoxLayout()
         uiqt_horizontal_layout_2.setSpacing( 0 )
 
-        uiqt_stock_select_combo_box = QComboBox( increased_tab )
+        uiqt_stock_select_combo_box = QComboBox( stock_inventory_tab )
         uiqt_stock_select_combo_box.setMinimumSize( QSize( 200, 0 ) )
         uiqt_stock_select_combo_box.setObjectName( "StockSelectComboBox" )
         uiqt_horizontal_layout_2.addWidget( uiqt_stock_select_combo_box )
@@ -1156,7 +1174,7 @@ class MainWindow( QMainWindow ):
 
         uiqt_horizontal_layout_3 = QHBoxLayout()
 
-        uiqt_stock_list_table_view = QTableView( increased_tab )
+        uiqt_stock_list_table_view = QTableView( stock_inventory_tab )
         uiqt_stock_list_table_view.setMinimumSize( QSize( 0, 100 ) )
         uiqt_stock_list_table_view.setObjectName( "StockListTableView" )
         uiqt_horizontal_layout_3.addWidget( uiqt_stock_list_table_view )
