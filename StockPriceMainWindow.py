@@ -1856,8 +1856,8 @@ class MainWindow( QMainWindow ):
             for index in range( self.ui.qtTabWidget.count() - 2, -1, -1 ):
                 self.ui.qtTabWidget.removeTab( index )
 
-        self.dict_all_account_all_stock_trading_data = {}
-        self.dict_all_account_ui_state = {}
+        self.dict_all_account_all_stock_trading_data.clear()
+        self.dict_all_account_ui_state.clear()
         str_tab_name = self.add_new_tab_and_table()
         self.dict_all_account_all_stock_trading_data[ str_tab_name ] = {}
         self.dict_all_account_ui_state[ str_tab_name ] = { "discount_checkbox": True, "discount_value": 0.6, "insurance_checkbox": False, "trading_fee_type": TradingFeeType.VARIABLE, "trading_fee_minimum": 1, "trading_fee_constant": 1 }
@@ -1903,8 +1903,8 @@ class MainWindow( QMainWindow ):
                     self.ui.qtTabWidget.removeTab( index )
 
 
-            self.dict_all_account_all_stock_trading_data = {}
-            self.dict_all_account_ui_state = {}
+            self.dict_all_account_all_stock_trading_data.clear()
+            self.dict_all_account_ui_state.clear()
             self.load_trading_data_and_create_tab( file_path, self.dict_all_account_all_stock_trading_data, self.dict_all_account_ui_state, True )
             if len( self.dict_all_account_all_stock_trading_data ) == 0:
                 str_tab_name = self.add_new_tab_and_table()
