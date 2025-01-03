@@ -13,6 +13,7 @@ from QtStockTradingEditDialog import Ui_Dialog as Ui_StockTradingDialog
 from QtStockRegularTradingEditDialog import Ui_Dialog as Ui_StockRegularTradingDialog
 from QtStockDividendEditDialog import Ui_Dialog as Ui_StockDividendDialog
 from QtStockCapitalReductionEditDialog import Ui_Dialog as Ui_StockCapitalReductionDialog
+from QtCashTransferEditDialog import Ui_Dialog as Ui_CashTransferDialog
 from QtDuplicateOptionDialog import Ui_Dialog as Ui_DuplicateOptionDialog
 from QtSaveCheckDialog import Ui_Dialog as Ui_SaveCheckDialog
 from PySide6.QtWidgets import QApplication, QMainWindow, QDialog, QButtonGroup, QMessageBox, QStyledItemDelegate, QFileDialog, QHeaderView, QVBoxLayout, QHBoxLayout, \
@@ -46,6 +47,7 @@ from decimal import Decimal
 # pyside6-uic QtStockCapitalReductionEditDialog.ui -o QtStockCapitalReductionEditDialog.py
 # pyside6-uic QtStockCapitalIncreaseEditDialog.ui -o QtStockCapitalIncreaseEditDialog.py
 # pyside6-uic QtDuplicateOptionDialog.ui -o QtDuplicateOptionDialog.py
+# pyside6-uic QtCashTransferEditDialog.ui -o QtCashTransferEditDialog.py
 # pyside6-uic QtSaveCheckDialog.ui -o QtSaveCheckDialog.py
 
 # 以下兩個網站都可以下載"上市"ETF的股利
@@ -200,6 +202,17 @@ class TradingCost( Enum ):
     TRADING_FEE = 1
     TRADING_TAX = 2
     TRADING_TOTAL_COST = 3
+
+class TransferType( Enum ):
+    TRANSFER_IN = 0
+    TRANSFER_OUT = 1
+
+class TransferData( Enum ):
+    TRANSFER_DATE = 0
+    TRANSFER_TYPE = 1 # 0:入金, 1:出金
+    TRANSFER_VALUE = 2
+    SORTED_INDEX_NON_SAVE = 3 #不會記錄
+    TOTAL_VALUE_NON_SAVE = 4 #不會記錄
 
 class Utility():
     def compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, b_etf, b_daying_trading ):
@@ -357,6 +370,49 @@ class StockCapitalReductionEditDialog( QDialog ):
     def cancel( self ):
         self.reject()
 
+class CashTransferEditDialog( QDialog ):
+    def __init__( self, str_account_name, parent = None ):
+        super().__init__( parent )
+
+        self.ui = Ui_CashTransferDialog()
+        self.ui.setupUi( self )
+        window_icon = QIcon( window_icon_file_path ) 
+        self.setWindowIcon( window_icon )
+
+        self.ui.qtAccountNameLabel.setText( str_account_name )
+        obj_current_date = datetime.datetime.today()
+        self.ui.qtDateEdit.setDate( obj_current_date.date() )
+        self.ui.qtDateEdit.setCalendarPopup( True )
+        self.ui.qtOkButtonBox.accepted.connect( self.accept_data )
+        self.ui.qtOkButtonBox.rejected.connect( self.cancel )
+        self.dict_cash_transfer_data = {}
+
+    def setup_transfer_date( self, str_date ):
+        self.ui.qtDateEdit.setDate( datetime.datetime.strptime( str_date, "%Y-%m-%d" ).date() )
+
+    def setup_transfer_type( self, e_transfer_type ):
+        if e_transfer_type == TransferType.TRANSFER_IN:
+            self.ui.qtTransferInRadioButton.setChecked( True )
+        else:
+            self.ui.qtTransferOutRadioButton.setChecked( True )
+
+    def setup_transfer_value( self, n_transfer_value ):
+        self.ui.qtCashDividendSpinBox.setValue( n_transfer_value )
+
+    def accept_data( self ):
+        n_transfer_value = self.ui.qtCashDividendSpinBox.value()
+        if n_transfer_value != 0:
+            self.dict_cash_transfer_data[ TransferData.TRANSFER_DATE ] = self.ui.qtDateEdit.date().toString( "yyyy-MM-dd" )
+            self.dict_cash_transfer_data[ TransferData.TRANSFER_TYPE ] = TransferType.TRANSFER_IN if self.ui.qtTransferInRadioButton.isChecked() else TransferType.TRANSFER_OUT
+            self.dict_cash_transfer_data[ TransferData.TRANSFER_VALUE ] = n_transfer_value
+    
+            self.accept()
+        else:
+            self.reject()
+    
+    def cancel( self ):
+        self.reject()
+
 class StockDividendEditDialog( QDialog ):
     def __init__( self, str_stock_number, str_stock_name, parent = None ):
         super().__init__( parent )
@@ -382,11 +438,11 @@ class StockDividendEditDialog( QDialog ):
         self.ui.qtStockDividendDoubleSpinBox.setValue( f_stock_dividend_per_share )
 
     def setup_cash_dividend( self, f_cash_dividend_per_share ):
-        self.ui.qtCashDividendDoubleSpinBox.setValue( f_cash_dividend_per_share )
+        self.ui.qtCashDividendSpinBox.setValue( f_cash_dividend_per_share )
 
     def accept_data( self ):
         f_stock_dividend_per_share = self.ui.qtStockDividendDoubleSpinBox.value()
-        f_cash_dividend_per_share = self.ui.qtCashDividendDoubleSpinBox.value()
+        f_cash_dividend_per_share = self.ui.qtCashDividendSpinBox.value()
         if f_stock_dividend_per_share != 0 or f_cash_dividend_per_share != 0:
 
             self.dict_trading_data = Utility.generate_trading_data( self.ui.qtDateEdit.date().toString( "yyyy-MM-dd" ), #交易日期
@@ -934,6 +990,7 @@ class MainWindow( QMainWindow ):
         self.list_stock_list_table_horizontal_header = [ '總成本', '庫存股數', '平均成本', ' 收盤價', '淨值', '總手續費', '總交易稅', '損益', '股利所得', '自動帶入股利', '匯出', '刪除' ]
         self.str_picked_stock_number = None
         self.dict_all_account_ui_state = {}
+        self.dict_all_account_cash_transfer_data = {}
         self.dict_all_account_all_stock_trading_data = {}
         self.dict_all_account_all_stock_trading_data_INITIAL = {}
         self.list_stock_list_column_width = [ 85 ] * len( self.list_stock_list_table_horizontal_header )
@@ -1089,10 +1146,10 @@ class MainWindow( QMainWindow ):
 
         # stock inventory tab
         uiqt_stock_inventory_tab_vertical_layout = QVBoxLayout( stock_inventory_tab )
-        uiqt_stock_inventory_tab_vertical_layout.setSpacing(0)
-        uiqt_stock_inventory_tab_vertical_layout.setContentsMargins(-1, 0, -1, 0)
+        uiqt_stock_inventory_tab_vertical_layout.setSpacing( 0 )
+        uiqt_stock_inventory_tab_vertical_layout.setContentsMargins( -1, 0, -1, 0 )
         uiqt_horizontal_layout_1 = QHBoxLayout()
-        uiqt_stock_input_line_edit = QLineEdit( stock_inventory_tab)
+        uiqt_stock_input_line_edit = QLineEdit( stock_inventory_tab )
         sizePolicy = QSizePolicy( QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Fixed )
         sizePolicy.setHorizontalStretch( 0 )
         sizePolicy.setVerticalStretch( 0 )
@@ -1203,6 +1260,43 @@ class MainWindow( QMainWindow ):
         uiqt_add_stock_push_button.clicked.connect( self.on_add_stock_push_button_clicked )
         uiqt_extra_insurance_fee_check_box.stateChanged.connect( self.on_extra_insurance_fee_check_box_state_changed )
         uiqt_display_type_combobox.activated.connect( self.on_display_type_combo_box_current_index_changed )
+        
+        # Cash Transfer Tab
+        uiqt_cash_transfer_tab_vertical_layout = QVBoxLayout( cash_transfer_tab )
+        uiqt_cash_transfer_tab_vertical_layout.setSpacing( 0 )
+        uiqt_cash_transfer_tab_vertical_layout.setContentsMargins( -1, 0, -1, 0 )
+
+
+        uiqt_horizontal_layout_4 = QHBoxLayout()
+        uiqt_horizontal_layout_4.setSpacing( 0 )
+
+        uiqt_add_cash_transfer_push_button = QPushButton( cash_transfer_tab )
+        uiqt_add_cash_transfer_push_button.setMaximumSize( QSize( 100, 16777215 ) )
+        uiqt_add_cash_transfer_push_button.setText( "新增入金/出金資料" )
+        uiqt_add_cash_transfer_push_button.setObjectName( "AddCashTransferPushButton" )
+        uiqt_add_cash_transfer_push_button.clicked.connect( self.on_add_cash_transfer_push_button_clicked )
+        uiqt_horizontal_layout_4.addWidget( uiqt_add_cash_transfer_push_button )
+
+        uiqt_horizontal_layout_5 = QHBoxLayout()
+        uiqt_horizontal_layout_5.setSpacing( 0 )
+
+        uiqt_cash_transfer_table_view = QTableView( cash_transfer_tab )
+        uiqt_cash_transfer_table_view.setMinimumSize( QSize( 0, 100 ) )
+        uiqt_cash_transfer_table_view.setObjectName( "CashTransferTableView" )
+        uiqt_horizontal_layout_5.addWidget( uiqt_cash_transfer_table_view )
+
+        uiqt_cash_transfer_tab_vertical_layout.addLayout( uiqt_horizontal_layout_4 )
+        uiqt_cash_transfer_tab_vertical_layout.addLayout( uiqt_horizontal_layout_5 )
+
+        cash_transfer_model = QStandardItemModel( 0, 0 )
+        cash_transfer_model.setVerticalHeaderLabels( self.get_cash_transfer_header() )
+        uiqt_cash_transfer_table_view.verticalHeader().setSectionResizeMode( QHeaderView.Fixed )
+        uiqt_cash_transfer_table_view.horizontalHeader().setSectionResizeMode( QHeaderView.Fixed )
+        uiqt_cash_transfer_table_view.setModel( cash_transfer_model )
+        uiqt_cash_transfer_table_view.setItemDelegate( delegate )
+        uiqt_cash_transfer_table_view.horizontalHeader().hide()
+        uiqt_cash_transfer_table_view.clicked.connect( lambda index: self.on_cash_transfer_table_item_clicked( index, cash_transfer_model ) )
+
 
         if not str_tab_title:
             str_tab_title = "新群組"
@@ -1221,6 +1315,8 @@ class MainWindow( QMainWindow ):
             self.n_current_tab = index
             self.str_picked_stock_number = None
             self.refresh_stock_list_table()
+            self.refresh_transfer_data_table()
+
             self.clear_per_stock_trading_table()
             self.update_button_enable_disable_status()
 
@@ -1230,6 +1326,7 @@ class MainWindow( QMainWindow ):
             str_tab_name = self.add_new_tab_and_table()
             self.dict_all_account_all_stock_trading_data[ str_tab_name ] = {}
             self.dict_all_account_ui_state[ str_tab_name ] = { "discount_checkbox": True, "discount_value": 0.6, "insurance_checkbox": False, "trading_fee_type": TradingFeeType.VARIABLE, "trading_fee_minimum": 1, "trading_fee_constant": 1 }
+            self.dict_all_account_cash_transfer_data[ str_tab_name ] = {}
         else:
             current_title = self.ui.qtTabWidget.tabText( index )
             dialog = EditTabTitleDialog( current_title, self )
@@ -1437,6 +1534,66 @@ class MainWindow( QMainWindow ):
                     self.refresh_trading_data_table( list_trading_data )
 
         self.update_button_enable_disable_status()
+
+    def on_add_cash_transfer_push_button_clicked( self ):
+        str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
+        if str_tab_widget_name == 'tab_add':
+            return
+
+        list_per_account_all_cash_trasfer_data = self.dict_all_account_cash_transfer_data[ str_tab_widget_name ]
+
+        n_current_index = self.ui.qtTabWidget.currentIndex()
+        current_title = self.ui.qtTabWidget.tabText( n_current_index )
+
+        dialog = CashTransferEditDialog( current_title, self )
+
+        if dialog.exec():
+            dict_transfer_data = dialog.dict_cash_transfer_data
+            list_per_account_all_cash_trasfer_data.append( dict_transfer_data )
+            sorted_list = self.process_single_transfer_data( str_tab_widget_name )
+            self.refresh_transfer_data_table()
+            self.auto_save_trading_data()
+
+    def on_cash_transfer_table_item_clicked( self, index: QModelIndex, table_model ):
+        item = table_model.itemFromIndex( index )
+        if item is not None:
+            n_row = index.row()  # 獲取行索引
+            str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
+            list_per_account_cash_transfer_data = self.dict_all_account_cash_transfer_data[ str_tab_widget_name ]
+
+            hidden_data = table_model.data( index, Qt.UserRole )
+            n_findindex = -1
+            for index, dict_selected_data in enumerate( list_per_account_cash_transfer_data ):
+                if dict_selected_data[ TransferData.SORTED_INDEX_NON_SAVE ] == hidden_data:
+                    n_findindex = index
+                    break
+            if n_findindex == -1:
+                return
+            dict_selected_data = list_per_account_cash_transfer_data[ n_findindex ]
+
+            if n_row == len( self.get_cash_transfer_header() ) - 2: #編輯
+
+                n_current_index = self.ui.qtTabWidget.currentIndex()
+                current_title = self.ui.qtTabWidget.tabText( n_current_index )
+                dialog = CashTransferEditDialog( current_title, self )
+                dialog.setup_transfer_date( dict_selected_data[ TransferData.TRANSFER_DATE ] )
+                dialog.setup_transfer_type( dict_selected_data[ TransferData.TRANSFER_TYPE ] )
+                dialog.setup_transfer_value( dict_selected_data[ TransferData.TRANSFER_VALUE ] )
+
+                if dialog.exec():
+                    dict_transfer_data = dialog.dict_cash_transfer_data
+                    list_per_account_cash_transfer_data[ n_findindex ] = dict_transfer_data
+                    sorted_list = self.process_single_transfer_data( str_tab_widget_name )
+                    self.refresh_transfer_data_table()
+                    self.auto_save_trading_data()
+
+            elif n_row == len( self.get_cash_transfer_header() ) - 1: #刪除
+                result = self.show_warning_message_box_with_ok_cancel_button( "警告", f"確定要刪掉這筆匯款資料嗎?" )
+                if result:
+                    del list_per_account_cash_transfer_data[ n_findindex ]
+                    sorted_list = self.process_single_transfer_data( str_tab_widget_name )
+                    self.refresh_transfer_data_table()
+                    self.auto_save_trading_data()
 
     def on_change_display_mode( self ): 
         if self.str_picked_stock_number != None:
@@ -1864,6 +2021,7 @@ class MainWindow( QMainWindow ):
         self.ui.qtTabWidget.setCurrentIndex( 0 )
         self.str_picked_stock_number = None
         self.refresh_stock_list_table()
+        self.refresh_transfer_data_table()
         self.clear_per_stock_trading_table()
         self.update_button_enable_disable_status()
         self.auto_save_trading_data()
@@ -1905,7 +2063,11 @@ class MainWindow( QMainWindow ):
 
             self.dict_all_account_all_stock_trading_data.clear()
             self.dict_all_account_ui_state.clear()
-            self.load_trading_data_and_create_tab( file_path, self.dict_all_account_all_stock_trading_data, self.dict_all_account_ui_state, True )
+            self.load_trading_data_and_create_tab( file_path, 
+                                                   self.dict_all_account_all_stock_trading_data, 
+                                                   self.dict_all_account_ui_state, 
+                                                   self.dict_all_account_cash_transfer_data,
+                                                   True )
             if len( self.dict_all_account_all_stock_trading_data ) == 0:
                 str_tab_name = self.add_new_tab_and_table()
                 self.dict_all_account_all_stock_trading_data[ str_tab_name ] = {}
@@ -1915,6 +2077,7 @@ class MainWindow( QMainWindow ):
             self.process_all_trading_data()
             self.str_picked_stock_number = None
             self.refresh_stock_list_table()
+            self.refresh_transfer_data_table()
             self.clear_per_stock_trading_table()
             self.update_button_enable_disable_status()
             self.auto_save_trading_data()
@@ -1954,7 +2117,12 @@ class MainWindow( QMainWindow ):
 
             dict_all_account_all_stock_trading_data_LOAD = {}
             dict_all_account_ui_state_LOAD = {}
-            self.load_trading_data_and_create_tab( file_path, dict_all_account_all_stock_trading_data_LOAD, dict_all_account_ui_state_LOAD, False )
+            dict_all_account_cash_transfer_data_LOAD = {}
+            self.load_trading_data_and_create_tab( file_path, 
+                                                   dict_all_account_all_stock_trading_data_LOAD, 
+                                                   dict_all_account_ui_state_LOAD, 
+                                                   dict_all_account_cash_transfer_data_LOAD, 
+                                                   False )
             b_duplicate = False
             for str_account_name, dict_per_account_all_stock_trading_data_LOAD in dict_all_account_all_stock_trading_data_LOAD.items():
                 if str_account_name in dict_account_to_tab_widget_name:
@@ -2008,6 +2176,7 @@ class MainWindow( QMainWindow ):
             self.process_all_trading_data()
             self.str_picked_stock_number = None
             self.refresh_stock_list_table()
+            self.refresh_transfer_data_table()
             self.clear_per_stock_trading_table()
             self.update_button_enable_disable_status()
             self.auto_save_trading_data()
@@ -2017,7 +2186,12 @@ class MainWindow( QMainWindow ):
         if file_path:
             dict_all_account_all_stock_trading_data_LOAD = {}
             dict_all_account_ui_state_LOAD = {}
-            self.load_trading_data_and_create_tab( file_path, dict_all_account_all_stock_trading_data_LOAD, dict_all_account_ui_state_LOAD, False )
+            dict_all_account_cash_transfer_data_LOAD = {}
+            self.load_trading_data_and_create_tab( file_path, 
+                                                   dict_all_account_all_stock_trading_data_LOAD, 
+                                                   dict_all_account_ui_state_LOAD, 
+                                                   dict_all_account_cash_transfer_data_LOAD, 
+                                                   False )
             if len( dict_all_account_all_stock_trading_data_LOAD ) == 0:
                 return
             elif len( dict_all_account_all_stock_trading_data_LOAD ) > 1:
@@ -2061,18 +2235,29 @@ class MainWindow( QMainWindow ):
 
     def load_initialize_data( self ): 
         with QSignalBlocker( self.ui.qtTabWidget ):
-            self.load_trading_data_and_create_tab( self.trading_data_json_file_path, self.dict_all_account_all_stock_trading_data, self.dict_all_account_ui_state, True )
+            self.load_trading_data_and_create_tab( self.trading_data_json_file_path, 
+                                                   self.dict_all_account_all_stock_trading_data, 
+                                                   self.dict_all_account_ui_state, 
+                                                   self.dict_all_account_cash_transfer_data, 
+                                                   True )
             self.load_share_UI_state()
             if len( self.dict_all_account_all_stock_trading_data ) == 0:
                 str_tab_name = self.add_new_tab_and_table()
                 self.dict_all_account_all_stock_trading_data[ str_tab_name ] = {}
                 self.dict_all_account_ui_state[ str_tab_name ] = { "discount_checkbox": True, "discount_value": 0.6, "insurance_checkbox": False, "trading_fee_type": TradingFeeType.VARIABLE, "trading_fee_minimum": 1, "trading_fee_constant": 1 }
+                self.dict_all_account_cash_transfer_data[ str_tab_name ] = []
             self.dict_all_account_all_stock_trading_data_INITIAL = self.dict_all_account_all_stock_trading_data.copy()
             self.ui.qtTabWidget.setCurrentIndex( 0 )
             self.process_all_trading_data()
             self.refresh_stock_list_table()
+            self.process_all_transfer_data()
+            self.refresh_transfer_data_table()
 
-    def load_trading_data_and_create_tab( self, file_path, dict_all_account_all_stock_trading_data, dict_all_account_ui_state, b_create_tab ): 
+    def load_trading_data_and_create_tab( self, file_path, 
+                                                dict_all_account_all_stock_trading_data, 
+                                                dict_all_account_ui_state, 
+                                                dict_all_account_cash_transfer, 
+                                                b_create_tab ): 
         if not os.path.exists( file_path ):
             return
 
@@ -2136,9 +2321,11 @@ class MainWindow( QMainWindow ):
                         str_tab_name = self.add_new_tab_and_table( item_account[ "account_name" ] )
                         dict_all_account_ui_state[ str_tab_name ] = dict_ui_state
                         dict_all_account_all_stock_trading_data[ str_tab_name ] = dict_per_stock_trading_data
+                        dict_all_account_cash_transfer[ str_tab_name ] = []
                     else:
                         dict_all_account_ui_state[ item_account[ "account_name" ] ] = dict_ui_state
                         dict_all_account_all_stock_trading_data[ item_account[ "account_name" ] ] = dict_per_stock_trading_data
+                        dict_all_account_cash_transfer[ item_account[ "account_name" ] ] = []
         else:
             for item_account in data:
                 if "account_name" in item_account and \
@@ -2188,13 +2375,28 @@ class MainWindow( QMainWindow ):
                                     dict_per_trading_data[ TradingData.USE_AUTO_DIVIDEND_DATA ] = item_trading_data[ "use_auto_dividend_data" ]       
                                 list_trading_data.append( dict_per_trading_data )
                         dict_per_stock_trading_data[ key_stock_number ] = list_trading_data
+
+                    list_transfer_data = item_account[ "transfer_data" ]
+                    list_per_account_cash_transfer_data = []
+                    for item_transfer_data in list_transfer_data:
+                        if ( "transfer_date" in item_transfer_data and
+                             "transfer_type" in item_transfer_data and
+                             "transfer_value" in item_transfer_data ):
+                            dict_per_transfer_data = {}
+                            dict_per_transfer_data[ TransferData.TRANSFER_DATE ] = item_transfer_data[ "transfer_date" ]
+                            dict_per_transfer_data[ TransferData.TRANSFER_TYPE ] = TransferType( item_transfer_data[ "transfer_type" ] )
+                            dict_per_transfer_data[ TransferData.TRANSFER_VALUE ] = item_transfer_data[ "transfer_value" ]
+                            list_per_account_cash_transfer_data.append( dict_per_transfer_data )
+
                     if b_create_tab:
                         str_tab_name = self.add_new_tab_and_table( item_account[ "account_name" ] )
                         dict_all_account_ui_state[ str_tab_name ] = dict_ui_state
                         dict_all_account_all_stock_trading_data[ str_tab_name ] = dict_per_stock_trading_data
+                        dict_all_account_cash_transfer[ str_tab_name ] = list_per_account_cash_transfer_data
                     else:
                         dict_all_account_ui_state[ item_account[ "account_name" ] ] = dict_ui_state
                         dict_all_account_all_stock_trading_data[ item_account[ "account_name" ] ] = dict_per_stock_trading_data
+                        dict_all_account_cash_transfer[ item_account[ "account_name" ] ] = list_per_account_cash_transfer_data
 
     def auto_save_trading_data( self ): 
         list_save_tab_widget = list( range( self.ui.qtTabWidget.count() - 1 ) )
@@ -2243,6 +2445,16 @@ class MainWindow( QMainWindow ):
 
                     export_data.append( dict_per_trading_data )
                 export_dict_per_account_all_stock_trading_data[ key_stock ] = export_data
+
+            list_transfer_data = []
+            value_dict_per_account_all_cash_transfer_data = self.dict_all_account_cash_transfer_data[ str_tab_widget_name ]
+            for dict_cash_transfer_data in value_dict_per_account_all_cash_transfer_data:
+                dict_per_transfer_data = {}
+                dict_per_transfer_data[ "transfer_date" ] = dict_cash_transfer_data[ TransferData.TRANSFER_DATE ]
+                dict_per_transfer_data[ "transfer_type" ] = int( dict_cash_transfer_data[ TransferData.TRANSFER_TYPE ].value )
+                dict_per_transfer_data[ "transfer_value" ] = dict_cash_transfer_data[ TransferData.TRANSFER_VALUE ]
+                list_transfer_data.append( dict_per_transfer_data )
+
             export_dict_per_account_all_info[ "account_name" ] = str_tab_title
             export_dict_per_account_all_info[ "trading_data" ] = export_dict_per_account_all_stock_trading_data
             export_dict_per_account_all_info[ "discount_checkbox" ] = self.dict_all_account_ui_state[ str_tab_widget_name ][ "discount_checkbox"]
@@ -2251,6 +2463,7 @@ class MainWindow( QMainWindow ):
             export_dict_per_account_all_info[ "trading_fee_type" ] = int( self.dict_all_account_ui_state[ str_tab_widget_name ][ "trading_fee_type"].value )
             export_dict_per_account_all_info[ "trading_fee_minimum" ] = self.dict_all_account_ui_state[ str_tab_widget_name ][ "trading_fee_minimum"]
             export_dict_per_account_all_info[ "trading_fee_constant" ] = self.dict_all_account_ui_state[ str_tab_widget_name ][ "trading_fee_constant"]
+            export_dict_per_account_all_info[ "transfer_data" ] = list_transfer_data
 
 
             export_list_all_account_all_stock_trading_data.append( export_dict_per_account_all_info )
@@ -2543,6 +2756,29 @@ class MainWindow( QMainWindow ):
         self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ][ str_stock_number ] = list_calibration_data
         return list_calibration_data
     
+    def process_all_transfer_data( self ): 
+        for key_account_name, value_dict_per_company_transfer_data in self.dict_all_account_cash_transfer_data.items():
+            self.process_single_transfer_data( key_account_name )
+
+    def process_single_transfer_data( self, str_tab_widget_name ):
+        list_transfer_data = self.dict_all_account_cash_transfer_data[ str_tab_widget_name ]
+        if len( list_transfer_data ) == 0:
+            return
+        sorted_list = sorted( list_transfer_data, key=lambda x: ( datetime.datetime.strptime( x[ TransferData.TRANSFER_DATE ], "%Y-%m-%d") ) )
+
+        n_total_value = 0
+        for index, item in enumerate( sorted_list ):
+            item[ TransferData.SORTED_INDEX_NON_SAVE ] = index
+            e_transfer_type = item[ TransferData.TRANSFER_TYPE ]
+            if e_transfer_type == TransferType.TRANSFER_IN:
+                n_total_value += item[ TransferData.TRANSFER_VALUE ]
+            elif e_transfer_type == TransferType.TRANSFER_OUT:
+                n_total_value -= item[ TransferData.TRANSFER_VALUE ]
+            
+            item[ TransferData.TOTAL_VALUE_NON_SAVE ] = n_total_value
+
+        self.dict_all_account_cash_transfer_data[ str_tab_widget_name ] = sorted_list
+
     def refresh_stock_list_table( self ): 
         str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
         dict_per_account_all_stock_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ]
@@ -2666,6 +2902,60 @@ class MainWindow( QMainWindow ):
         total_inventory_value_label = self.ui.qtTabWidget.currentWidget().findChild( QLabel, "TotalInventoryValueLabel")
         total_inventory_value_label.setText( format( n_total_inventory, "," ) )
     
+    def refresh_transfer_data_table( self ):
+        str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
+        list_per_account_all_cash_transfer_data = self.dict_all_account_cash_transfer_data[ str_tab_widget_name ]
+
+        table_view = self.ui.qtTabWidget.currentWidget().findChild( QTableView, "CashTransferTableView" )
+        if table_view:
+            table_model = table_view.model()
+            table_model.clear()
+            table_model.setVerticalHeaderLabels( self.get_cash_transfer_header() )
+
+            for column, item in enumerate( list_per_account_all_cash_transfer_data ):
+                str_date = item[ TransferData.TRANSFER_DATE ]
+                str_total_value = format( item[ TransferData.TOTAL_VALUE_NON_SAVE ], "," )
+
+                e_transfer_type = item[ TransferData.TRANSFER_TYPE ]
+                if e_transfer_type == TransferType.TRANSFER_IN:
+                    str_color = QBrush( '#FF0000' )
+                    str_transfer_value = format( item[ TransferData.TRANSFER_VALUE ], "," )
+                elif e_transfer_type == TransferType.TRANSFER_OUT:
+                    str_color = QBrush( '#00AA00' )
+                    str_transfer_value = format( -item[ TransferData.TRANSFER_VALUE ], "," )
+
+                date_standard_item = QStandardItem( str_date )
+                date_standard_item.setTextAlignment( Qt.AlignHCenter | Qt.AlignVCenter )
+                date_standard_item.setFlags( date_standard_item.flags() & ~Qt.ItemIsEditable )
+                table_model.setItem( 0, column, date_standard_item )
+
+                transfer_value_standard_item = QStandardItem( str_transfer_value )
+                transfer_value_standard_item.setTextAlignment( Qt.AlignHCenter | Qt.AlignVCenter )
+                transfer_value_standard_item.setFlags( transfer_value_standard_item.flags() & ~Qt.ItemIsEditable )
+                transfer_value_standard_item.setForeground( QBrush( str_color ) )
+                table_model.setItem( 1, column, transfer_value_standard_item )
+
+                total_value_standard_item = QStandardItem( str_total_value )
+                total_value_standard_item.setTextAlignment( Qt.AlignHCenter | Qt.AlignVCenter )
+                total_value_standard_item.setFlags( total_value_standard_item.flags() & ~Qt.ItemIsEditable )
+                table_model.setItem( 2, column, total_value_standard_item )
+
+                edit_icon_item = QStandardItem("")
+                edit_icon_item.setIcon( edit_icon )
+                edit_icon_item.setFlags( edit_icon_item.flags() & ~Qt.ItemIsEditable )
+                edit_icon_item.setData( item[ TransferData.SORTED_INDEX_NON_SAVE ], Qt.UserRole )
+                delete_icon_item = QStandardItem("")
+                delete_icon_item.setIcon( delete_icon )
+                delete_icon_item.setFlags( delete_icon_item.flags() & ~Qt.ItemIsEditable )
+                delete_icon_item.setData( item[ TransferData.SORTED_INDEX_NON_SAVE ], Qt.UserRole )
+
+                table_model.setItem( 3, column, edit_icon_item )
+                table_model.setItem( 4, column, delete_icon_item )
+
+    def clear_per_account_transfer_table( self ):
+        self.per_stock_trading_data_model.clear()
+        self.per_stock_trading_data_model.setVerticalHeaderLabels( self.get_trading_data_header() )
+
     def refresh_trading_data_table( self, sorted_list ):
         self.clear_per_stock_trading_table()
         self.per_stock_trading_data_model.setVerticalHeaderLabels( self.get_trading_data_header() )
@@ -2743,6 +3033,9 @@ class MainWindow( QMainWindow ):
                 self.ui.qtTradingDataTableView.setRowHeight( row, 40 )
             else:
                 self.ui.qtTradingDataTableView.setRowHeight( row, 25 )
+
+    def get_cash_transfer_header( self ):
+        return [ '日期', '入金/出金', '餘額', '編輯', '刪除' ]
 
     def get_trading_data_header( self ):
         if self.ui.qtShow1StockRadioButton.isChecked():
