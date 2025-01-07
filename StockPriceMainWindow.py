@@ -851,7 +851,7 @@ class StockCapitalIncreaseEditDialog( QDialog ):
     def compute_cost( self ):
         f_trading_price = self.ui.qtPriceDoubleSpinBox.value()
         n_trading_count = self.get_trading_count()
-        self.ui.qtTotalCostLineEdit.setText( format( f_trading_price * n_trading_count, ',' ) )
+        self.ui.qtTotalCostLineEdit.setText( format( int( f_trading_price * n_trading_count ), ',' ) )
 
 class SaveCheckDialog( QDialog ):
     def __init__( self, str_title = '', parent = None ):
