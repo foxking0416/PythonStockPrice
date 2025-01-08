@@ -1256,9 +1256,11 @@ class MainWindow( QMainWindow ):
         uiqt_stock_list_table_view.verticalHeader().sectionClicked.connect( self.on_stock_list_table_vertical_section_clicked )
         uiqt_stock_list_table_view.verticalHeader().setSectionResizeMode( QHeaderView.Fixed )
         uiqt_stock_list_table_view.horizontalHeader().sectionResized.connect( self.on_stock_list_table_horizontal_section_resized )
+        uiqt_stock_list_table_view.setSortingEnabled( True )
         uiqt_stock_list_table_view.setModel( stock_list_model )
         uiqt_stock_list_table_view.setItemDelegate( delegate )
         uiqt_stock_list_table_view.clicked.connect( lambda index: self.on_stock_list_table_item_clicked( index, stock_list_model ) )
+        uiqt_stock_list_table_view.horizontalHeader().sortIndicatorChanged.connect( self.update_stock_list_vertical_header )
 
         uiqt_stock_input_line_edit.textChanged.connect( self.on_stock_input_text_changed ) 
 
@@ -1463,7 +1465,7 @@ class MainWindow( QMainWindow ):
 
     def on_stock_list_table_vertical_header_section_moved( self, n_logical_index, n_old_visual_index, n_new_visual_index ): 
         str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
-        dict_per_account_all_stock_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ]
+        dict_per_account_all_stock_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ].copy()
         list_stock_number = []
         for index_row,( key_stock_number, value ) in enumerate( dict_per_account_all_stock_trading_data.items() ):
             list_stock_number.append( key_stock_number )
@@ -1544,6 +1546,30 @@ class MainWindow( QMainWindow ):
                     self.refresh_trading_data_table( list_trading_data )
 
         self.update_button_enable_disable_status()
+
+    def update_stock_list_vertical_header( self ):
+        table_view = self.ui.qtTabWidget.currentWidget().findChild( QTableView, "StockListTableView" )
+        if table_view:
+            table_model = table_view.model()
+            dict_stock_name = {}
+            for row in range( table_model.rowCount() ):
+                header_text = table_model.verticalHeaderItem( row ).text()
+                str_stock_number = header_text.split(" ")[0]
+                dict_stock_name[ str_stock_number ] = header_text
+
+            str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
+            dict_per_account_all_stock_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ].copy()
+
+            dict_all_stock_trading_data_new = {}
+
+            for row in range( table_model.rowCount() ):
+                index = table_model.index( row, 0 )
+                hidden_data = table_model.data( index, Qt.UserRole )
+                table_model.setHeaderData( row, Qt.Vertical, dict_stock_name[ str( hidden_data ) ] )
+                dict_all_stock_trading_data_new[ str( hidden_data ) ] = dict_per_account_all_stock_trading_data[ str( hidden_data ) ]
+
+            self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ] = dict_all_stock_trading_data_new
+            self.auto_save_trading_data()
 
     def on_add_cash_transfer_push_button_clicked( self ):
         str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
@@ -2963,6 +2989,7 @@ class MainWindow( QMainWindow ):
                         standard_item = QStandardItem( data )
                         standard_item.setTextAlignment( Qt.AlignHCenter | Qt.AlignVCenter )
                         standard_item.setFlags( standard_item.flags() & ~Qt.ItemIsEditable )
+                        standard_item.setData( key_stock_number, Qt.UserRole )
                         if column == len( list_data ) - 2:
                             standard_item.setForeground( QBrush( str_color ) )
                         table_model.setItem( index_row, column, standard_item ) 
