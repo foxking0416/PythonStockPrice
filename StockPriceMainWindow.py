@@ -2544,10 +2544,12 @@ class MainWindow( QMainWindow ):
         #先拔掉所有的AUTO_DIVIDEND_DATA，下面有需要再重新插入，避免重複插入
         list_trading_data = [item for item in list_trading_data if TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE not in item or not item[TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE]]
 
-        b_extra_insurance_fee = self.dict_all_account_ui_state[ str_tab_widget_name ][ "insurance_checkbox"]
-
         str_stock_name = self.dict_all_company_number_to_name_and_type[ str_stock_number ][ 0 ]
         b_bond = True if '債' in str_stock_name else False
+        b_KY = True if 'KY' in str_stock_name else False
+        b_extra_insurance_fee = self.dict_all_account_ui_state[ str_tab_widget_name ][ "insurance_checkbox"]
+        if b_KY:
+            b_extra_insurance_fee = False
 
         str_b_etf = self.dict_all_company_number_to_name_and_type[ str_stock_number ][ 1 ]
         b_etf = True if str_b_etf == "True" else False
@@ -2726,7 +2728,7 @@ class MainWindow( QMainWindow ):
                     
                     n_extra_insurance_fee_for_cash_dividend = 0
                     n_extra_insurance_fee_for_stock_dividend = 0
-                    if b_extra_insurance_fee and n_stock_dividend_value_gain + n_stock_dividend_share_gain > 20000:
+                    if b_extra_insurance_fee and n_cash_dividend_gain + n_stock_dividend_value_gain > 20000:
                         obj_dividend_date = datetime.datetime.strptime( item[ TradingData.TRADING_DATE ], "%Y-%m-%d")
                         if obj_dividend_date.year >= 2013 and obj_dividend_date.year < 2021:
                             n_extra_insurance_fee_for_cash_dividend = int( math.ceil( Decimal( str( n_cash_dividend_gain ) ) * Decimal( str( '0.0191' ) ) ) )
