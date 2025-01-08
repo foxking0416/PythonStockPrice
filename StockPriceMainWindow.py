@@ -944,29 +944,25 @@ class MainWindow( QMainWindow ):
             else:
                 self.ui.qtTradingDataTableView.setRowHeight( row, 25 )
 
-        button_group_1 = QButtonGroup(self)
-        button_group_1.addButton( self.ui.qtFromNewToOldRadioButton )
-        button_group_1.addButton( self.ui.qtFromOldToNewRadioButton )
-        self.ui.qtFromNewToOldRadioButton.setChecked( True )
-        self.ui.qtFromNewToOldRadioButton.toggled.connect( self.on_change_display_mode )
+        self.ui.qtFromNewToOldAction.setChecked( True )
+        self.ui.qtFromOldToNewAction.setChecked( False )
+        self.ui.qtFromNewToOldAction.triggered.connect( self.on_trigger_from_new_to_old )
+        self.ui.qtFromOldToNewAction.triggered.connect( self.on_trigger_from_old_to_new )
 
-        button_group_2 = QButtonGroup(self)
-        button_group_2.addButton( self.ui.qtShowAllRadioButton )
-        button_group_2.addButton( self.ui.qtShow10RadioButton )
-        self.ui.qtShowAllRadioButton.setChecked( True )
-        self.ui.qtShowAllRadioButton.toggled.connect( self.on_change_display_mode )
+        self.ui.qtShowAllAction.setChecked( True )
+        self.ui.qtShow10Action.setChecked( False )
+        self.ui.qtShowAllAction.triggered.connect( self.on_trigger_show_all )
+        self.ui.qtShow10Action.triggered.connect( self.on_trigger_show_10 )
 
-        button_group_3 = QButtonGroup(self)
-        button_group_3.addButton( self.ui.qtShow1StockRadioButton )
-        button_group_3.addButton( self.ui.qtShow1000StockRadioButton )
-        self.ui.qtShow1StockRadioButton.setChecked( True )
-        self.ui.qtShow1StockRadioButton.toggled.connect( self.on_change_display_mode )
+        self.ui.qtUse1ShareUnitAction.setChecked( True )
+        self.ui.qtUse1000ShareUnitAction.setChecked( False )
+        self.ui.qtUse1ShareUnitAction.triggered.connect( self.on_trigger_use_1_share_unit )
+        self.ui.qtUse1000ShareUnitAction.triggered.connect( self.on_trigger_use_1000_share_unit )
 
-        button_group_4 = QButtonGroup(self)
-        button_group_4.addButton( self.ui.qtADYearRadioButton )
-        button_group_4.addButton( self.ui.qtROCYearRadioButton )
-        self.ui.qtADYearRadioButton.setChecked( True )
-        self.ui.qtADYearRadioButton.toggled.connect( self.on_change_display_mode )
+        self.ui.qtADYearAction.setChecked( True )
+        self.ui.qtROCYearAction.setChecked( False )
+        self.ui.qtADYearAction.triggered.connect( self.on_trigger_AD_year )
+        self.ui.qtROCYearAction.triggered.connect( self.on_trigger_ROC_year )
 
         self.ui.qtHideTradingDataTableToolButton.clicked.connect( self.on_hide_trading_data_table_tool_button_clicked )
 
@@ -1607,6 +1603,62 @@ class MainWindow( QMainWindow ):
                     self.process_single_transfer_data( str_tab_widget_name )
                     self.refresh_transfer_data_table()
                     self.auto_save_trading_data()
+
+    def on_trigger_from_new_to_old( self ):
+        with ( QSignalBlocker( self.ui.qtFromNewToOldAction ),
+               QSignalBlocker( self.ui.qtFromOldToNewAction ) ):
+                self.ui.qtFromNewToOldAction.setChecked( True )
+                self.ui.qtFromOldToNewAction.setChecked( False )
+                self.on_change_display_mode()
+
+    def on_trigger_from_old_to_new( self ):
+        with ( QSignalBlocker( self.ui.qtFromNewToOldAction ),
+               QSignalBlocker( self.ui.qtFromOldToNewAction ) ):
+                self.ui.qtFromNewToOldAction.setChecked( False )
+                self.ui.qtFromOldToNewAction.setChecked( True )
+                self.on_change_display_mode()
+
+    def on_trigger_show_all( self ):
+        with ( QSignalBlocker( self.ui.qtShowAllAction ),
+               QSignalBlocker( self.ui.qtShow10Action ) ):
+                self.ui.qtShowAllAction.setChecked( True )
+                self.ui.qtShow10Action.setChecked( False )
+                self.on_change_display_mode()
+
+    def on_trigger_show_10( self ):
+        with ( QSignalBlocker( self.ui.qtShowAllAction ),
+               QSignalBlocker( self.ui.qtShow10Action ) ):
+                self.ui.qtShowAllAction.setChecked( False )
+                self.ui.qtShow10Action.setChecked( True )
+                self.on_change_display_mode()
+
+    def on_trigger_use_1_share_unit( self ):
+        with ( QSignalBlocker( self.ui.qtUse1ShareUnitAction ),
+               QSignalBlocker( self.ui.qtUse1000ShareUnitAction ) ):
+                self.ui.qtUse1ShareUnitAction.setChecked( True )
+                self.ui.qtUse1000ShareUnitAction.setChecked( False )
+                self.on_change_display_mode()
+
+    def on_trigger_use_1000_share_unit( self ):
+        with ( QSignalBlocker( self.ui.qtUse1ShareUnitAction ),
+               QSignalBlocker( self.ui.qtUse1000ShareUnitAction ) ):
+                self.ui.qtUse1ShareUnitAction.setChecked( False )
+                self.ui.qtUse1000ShareUnitAction.setChecked( True )
+                self.on_change_display_mode()
+
+    def on_trigger_AD_year( self ):
+        with ( QSignalBlocker( self.ui.qtADYearAction ),
+               QSignalBlocker( self.ui.qtROCYearAction ) ):
+                self.ui.qtADYearAction.setChecked( True )
+                self.ui.qtROCYearAction.setChecked( False )
+                self.on_change_display_mode()
+
+    def on_trigger_ROC_year( self ):
+        with ( QSignalBlocker( self.ui.qtADYearAction ),
+               QSignalBlocker( self.ui.qtROCYearAction ) ):
+                self.ui.qtADYearAction.setChecked( False )
+                self.ui.qtROCYearAction.setChecked( True )
+                self.on_change_display_mode()
 
     def on_change_display_mode( self ): 
         if self.str_picked_stock_number != None:
@@ -2499,24 +2551,25 @@ class MainWindow( QMainWindow ):
 
         with open( self.UISetting_file_path, 'w', encoding='utf-8' ) as f:
             f.write( "版本," + 'v1.0.0' + '\n' )
-            f.write( "顯示排序," + str( self.ui.qtFromNewToOldRadioButton.isChecked() ) + '\n' )
-            f.write( "顯示數量," + str( self.ui.qtShowAllRadioButton.isChecked() ) + '\n' )
-            f.write( "顯示單位," + str( self.ui.qtShow1StockRadioButton.isChecked() ) + '\n' )
-            f.write( "年度顯示," + str( self.ui.qtADYearRadioButton.isChecked() ) + '\n' )
+            f.write( "顯示排序," + str( self.ui.qtFromNewToOldAction.isChecked() ) + '\n' )
+            f.write( "顯示數量," + str( self.ui.qtShowAllAction.isChecked() ) + '\n' )
+            f.write( "顯示單位," + str( self.ui.qtUse1ShareUnitAction.isChecked() ) + '\n' )
+            f.write( "年度顯示," + str( self.ui.qtADYearAction.isChecked() ) + '\n' )
             f.write( "欄寬" )
             for i in range( len( self.list_stock_list_column_width ) ):
                 f.write( f",{ self.list_stock_list_column_width[ i ] }" )
             f.write( "\n" )
 
     def load_share_UI_state( self ): 
-        with ( QSignalBlocker( self.ui.qtFromNewToOldRadioButton ),
-               QSignalBlocker( self.ui.qtFromOldToNewRadioButton ), 
-               QSignalBlocker( self.ui.qtShowAllRadioButton ), 
-               QSignalBlocker( self.ui.qtShow10RadioButton ),
-               QSignalBlocker( self.ui.qtShow1StockRadioButton ), 
-               QSignalBlocker( self.ui.qtShow1000StockRadioButton ),
-               QSignalBlocker( self.ui.qtADYearRadioButton ), 
-               QSignalBlocker( self.ui.qtROCYearRadioButton ) ):
+        with ( QSignalBlocker( self.ui.qtFromNewToOldAction ),
+               QSignalBlocker( self.ui.qtFromOldToNewAction ), 
+               QSignalBlocker( self.ui.qtShowAllAction ), 
+               QSignalBlocker( self.ui.qtShow10Action ),
+               QSignalBlocker( self.ui.qtUse1ShareUnitAction ), 
+               QSignalBlocker( self.ui.qtUse1000ShareUnitAction ),
+               QSignalBlocker( self.ui.qtADYearAction ), 
+               QSignalBlocker( self.ui.qtROCYearAction ) 
+               ):
 
             if os.path.exists( self.UISetting_file_path ):
                 with open( self.UISetting_file_path, 'r', encoding='utf-8' ) as f:
@@ -2527,24 +2580,32 @@ class MainWindow( QMainWindow ):
                             continue
                         elif row[0] == "顯示排序":
                             if row[ 1 ] == 'True':
-                                self.ui.qtFromNewToOldRadioButton.setChecked( True )
+                                self.ui.qtFromNewToOldAction.setChecked( True )
+                                self.ui.qtFromOldToNewAction.setChecked( False )
                             else:
-                                self.ui.qtFromOldToNewRadioButton.setChecked( True )
+                                self.ui.qtFromNewToOldAction.setChecked( False )
+                                self.ui.qtFromOldToNewAction.setChecked( True )
                         elif row[0] == "顯示數量":
                             if row[ 1 ] == 'True':
-                                self.ui.qtShowAllRadioButton.setChecked( True )
+                                self.ui.qtShowAllAction.setChecked( True )
+                                self.ui.qtShow10Action.setChecked( False )
                             else:
-                                self.ui.qtShow10RadioButton.setChecked( True )
+                                self.ui.qtShowAllAction.setChecked( False )
+                                self.ui.qtShow10Action.setChecked( True )
                         elif row[0] == "顯示單位":
                             if row[ 1 ] == 'True':
-                                self.ui.qtShow1StockRadioButton.setChecked( True )
+                                self.ui.qtUse1ShareUnitAction.setChecked( True )
+                                self.ui.qtUse1000ShareUnitAction.setChecked( False )
                             else:
-                                self.ui.qtShow1000StockRadioButton.setChecked( True )
+                                self.ui.qtUse1ShareUnitAction.setChecked( False )
+                                self.ui.qtUse1000ShareUnitAction.setChecked( True )
                         elif row[0] == "年度顯示":
                             if row[ 1 ] == 'True':
-                                self.ui.qtADYearRadioButton.setChecked( True )
+                                self.ui.qtADYearAction.setChecked( True )
+                                self.ui.qtROCYearAction.setChecked( False )
                             else:
-                                self.ui.qtROCYearRadioButton.setChecked( True )
+                                self.ui.qtADYearAction.setChecked( False )
+                                self.ui.qtROCYearAction.setChecked( True )
                         elif row[0] == '欄寬':
                             self.list_stock_list_column_width = []
                             for i in range( 1, len( row ) ):
@@ -2995,13 +3056,13 @@ class MainWindow( QMainWindow ):
         self.per_stock_trading_data_model.setVerticalHeaderLabels( self.get_trading_data_header() )
         self.ui.qtTradingDataTableView.horizontalHeader().hide()
 
-        if self.ui.qtFromNewToOldRadioButton.isChecked():
+        if self.ui.qtFromNewToOldAction.isChecked():
             loop_list = sorted_list[::-1]
-            if self.ui.qtShow10RadioButton.isChecked():
+            if self.ui.qtShow10Action.isChecked():
                 loop_list = loop_list[:10]
         else:
             loop_list = sorted_list
-            if self.ui.qtShow10RadioButton.isChecked():
+            if self.ui.qtShow10Action.isChecked():
                 loop_list = loop_list[:11]
 
         b_use_auto_dividend = sorted_list[ 0 ][ TradingData.USE_AUTO_DIVIDEND_DATA ]
@@ -3072,7 +3133,7 @@ class MainWindow( QMainWindow ):
         return [ '日期', '入金/出金', '餘額', '編輯', '刪除' ]
 
     def get_trading_data_header( self ):
-        if self.ui.qtShow1StockRadioButton.isChecked():
+        if self.ui.qtUse1ShareUnitAction.isChecked():
             return ['年度', '日期', '交易種類', '交易價格', '交易股數', '交易金額', '手續費', '交易稅', '補充保費', '單筆總成本', '全部股票股利 /\n每股股票股利', '全部現金股利 /\n每股現金股利',
                     '累計總成本', '庫存股數', '平均成本', '編輯', '刪除' ]
         else:
@@ -3085,7 +3146,7 @@ class MainWindow( QMainWindow ):
             return []
         str_date = dict_per_trading_data[ TradingData.TRADING_DATE ]
         str_year = str_date.split( '-' )[ 0 ]
-        if self.ui.qtROCYearRadioButton.isChecked():
+        if self.ui.qtROCYearAction.isChecked():
             str_year = str( int( str_year ) - 1911 )
 
         str_month_date = str_date[ 5: ].replace( '-', '/' )
@@ -3119,7 +3180,7 @@ class MainWindow( QMainWindow ):
         n_accumulated_cost = dict_per_trading_data[ TradingData.ACCUMULATED_COST_NON_SAVE ]
         n_accumulated_inventory = dict_per_trading_data[ TradingData.ACCUMULATED_INVENTORY_NON_SAVE ]
         f_average_cost = round( dict_per_trading_data[ TradingData.AVERAGE_COST_NON_SAVE ], 3 )
-        if self.ui.qtShow1StockRadioButton.isChecked():
+        if self.ui.qtUse1ShareUnitAction.isChecked():
             str_trading_count = format( n_trading_count, "," )
             str_stock_dividend_gain = format( n_stock_dividend_gain, "," )
             str_accumulated_inventory = format( n_accumulated_inventory, "," )

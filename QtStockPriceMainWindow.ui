@@ -58,158 +58,6 @@
       </widget>
      </item>
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_4">
-       <item>
-        <layout class="QVBoxLayout" name="verticalLayout_4">
-         <item>
-          <widget class="QRadioButton" name="qtFromNewToOldRadioButton">
-           <property name="text">
-            <string>由新到舊</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QRadioButton" name="qtFromOldToNewRadioButton">
-           <property name="text">
-            <string>由舊到新</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <spacer name="horizontalSpacer_4">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeType">
-          <enum>QSizePolicy::Minimum</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>50</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
-        <layout class="QVBoxLayout" name="verticalLayout_3">
-         <item>
-          <widget class="QRadioButton" name="qtShowAllRadioButton">
-           <property name="text">
-            <string>顯示全部交易紀錄</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QRadioButton" name="qtShow10RadioButton">
-           <property name="text">
-            <string>顯示10筆交易紀錄</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <spacer name="horizontalSpacer_7">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeType">
-          <enum>QSizePolicy::Minimum</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>50</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
-        <layout class="QVBoxLayout" name="verticalLayout_2">
-         <item>
-          <widget class="QRadioButton" name="qtShow1StockRadioButton">
-           <property name="text">
-            <string>以一股為單位</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QRadioButton" name="qtShow1000StockRadioButton">
-           <property name="enabled">
-            <bool>true</bool>
-           </property>
-           <property name="text">
-            <string>以一張為單位</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <spacer name="horizontalSpacer_8">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeType">
-          <enum>QSizePolicy::Minimum</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>50</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
-        <layout class="QVBoxLayout" name="verticalLayout_5">
-         <item>
-          <widget class="QRadioButton" name="qtADYearRadioButton">
-           <property name="text">
-            <string>以西元顯示</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QRadioButton" name="qtROCYearRadioButton">
-           <property name="text">
-            <string>以民國顯示</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <spacer name="horizontalSpacer_3">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-      </layout>
-     </item>
-     <item>
       <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
         <widget class="QLabel" name="qtCurrentSelectCompanyLabel">
@@ -344,7 +192,24 @@
     <addaction name="qtActionImportFull"/>
     <addaction name="qtActionImportSingleStock"/>
    </widget>
+   <widget class="QMenu" name="menu_2">
+    <property name="title">
+     <string>顯示</string>
+    </property>
+    <addaction name="qtFromNewToOldAction"/>
+    <addaction name="qtFromOldToNewAction"/>
+    <addaction name="separator"/>
+    <addaction name="qtShowAllAction"/>
+    <addaction name="qtShow10Action"/>
+    <addaction name="separator"/>
+    <addaction name="qtUse1ShareUnitAction"/>
+    <addaction name="qtUse1000ShareUnitAction"/>
+    <addaction name="separator"/>
+    <addaction name="qtADYearAction"/>
+    <addaction name="qtROCYearAction"/>
+   </widget>
    <addaction name="menu"/>
+   <addaction name="menu_2"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="qtActionNew">
@@ -380,6 +245,70 @@
   <action name="qtActionImportSingleStock">
    <property name="text">
     <string>匯入單支股票到當前群組</string>
+   </property>
+  </action>
+  <action name="qtFromNewToOldAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>由新到舊</string>
+   </property>
+  </action>
+  <action name="qtFromOldToNewAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>由舊到新</string>
+   </property>
+  </action>
+  <action name="qtShowAllAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>顯示全部交易紀錄</string>
+   </property>
+  </action>
+  <action name="qtShow10Action">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>顯示10筆交易紀錄</string>
+   </property>
+  </action>
+  <action name="qtUse1ShareUnitAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>以一股為單位</string>
+   </property>
+  </action>
+  <action name="qtUse1000ShareUnitAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>以一張為單位</string>
+   </property>
+  </action>
+  <action name="qtADYearAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>以西元顯示</string>
+   </property>
+  </action>
+  <action name="qtROCYearAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>以民國顯示</string>
    </property>
   </action>
  </widget>

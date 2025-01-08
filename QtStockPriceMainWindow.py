@@ -18,9 +18,8 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
     QTransform)
 from PySide6.QtWidgets import (QApplication, QHBoxLayout, QHeaderView, QLabel,
     QMainWindow, QMenu, QMenuBar, QPushButton,
-    QRadioButton, QScrollArea, QSizePolicy, QSpacerItem,
-    QStatusBar, QTabWidget, QTableView, QToolButton,
-    QVBoxLayout, QWidget)
+    QScrollArea, QSizePolicy, QStatusBar, QTabWidget,
+    QTableView, QToolButton, QVBoxLayout, QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -41,6 +40,30 @@ class Ui_MainWindow(object):
         self.qtActionImportFull.setObjectName(u"qtActionImportFull")
         self.qtActionImportSingleStock = QAction(MainWindow)
         self.qtActionImportSingleStock.setObjectName(u"qtActionImportSingleStock")
+        self.qtFromNewToOldAction = QAction(MainWindow)
+        self.qtFromNewToOldAction.setObjectName(u"qtFromNewToOldAction")
+        self.qtFromNewToOldAction.setCheckable(True)
+        self.qtFromOldToNewAction = QAction(MainWindow)
+        self.qtFromOldToNewAction.setObjectName(u"qtFromOldToNewAction")
+        self.qtFromOldToNewAction.setCheckable(True)
+        self.qtShowAllAction = QAction(MainWindow)
+        self.qtShowAllAction.setObjectName(u"qtShowAllAction")
+        self.qtShowAllAction.setCheckable(True)
+        self.qtShow10Action = QAction(MainWindow)
+        self.qtShow10Action.setObjectName(u"qtShow10Action")
+        self.qtShow10Action.setCheckable(True)
+        self.qtUse1ShareUnitAction = QAction(MainWindow)
+        self.qtUse1ShareUnitAction.setObjectName(u"qtUse1ShareUnitAction")
+        self.qtUse1ShareUnitAction.setCheckable(True)
+        self.qtUse1000ShareUnitAction = QAction(MainWindow)
+        self.qtUse1000ShareUnitAction.setObjectName(u"qtUse1000ShareUnitAction")
+        self.qtUse1000ShareUnitAction.setCheckable(True)
+        self.qtADYearAction = QAction(MainWindow)
+        self.qtADYearAction.setObjectName(u"qtADYearAction")
+        self.qtADYearAction.setCheckable(True)
+        self.qtROCYearAction = QAction(MainWindow)
+        self.qtROCYearAction.setObjectName(u"qtROCYearAction")
+        self.qtROCYearAction.setCheckable(True)
         self.scrollArea = QScrollArea(MainWindow)
         self.scrollArea.setObjectName(u"scrollArea")
         self.scrollArea.setWidgetResizable(True)
@@ -60,92 +83,6 @@ class Ui_MainWindow(object):
         self.qtTabWidget.addTab(self.tab_add, "")
 
         self.verticalLayout.addWidget(self.qtTabWidget)
-
-        self.horizontalLayout_4 = QHBoxLayout()
-        self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
-        self.verticalLayout_4 = QVBoxLayout()
-        self.verticalLayout_4.setObjectName(u"verticalLayout_4")
-        self.qtFromNewToOldRadioButton = QRadioButton(self.scrollAreaWidgetContents)
-        self.qtFromNewToOldRadioButton.setObjectName(u"qtFromNewToOldRadioButton")
-        self.qtFromNewToOldRadioButton.setChecked(True)
-
-        self.verticalLayout_4.addWidget(self.qtFromNewToOldRadioButton)
-
-        self.qtFromOldToNewRadioButton = QRadioButton(self.scrollAreaWidgetContents)
-        self.qtFromOldToNewRadioButton.setObjectName(u"qtFromOldToNewRadioButton")
-
-        self.verticalLayout_4.addWidget(self.qtFromOldToNewRadioButton)
-
-
-        self.horizontalLayout_4.addLayout(self.verticalLayout_4)
-
-        self.horizontalSpacer_4 = QSpacerItem(50, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
-
-        self.horizontalLayout_4.addItem(self.horizontalSpacer_4)
-
-        self.verticalLayout_3 = QVBoxLayout()
-        self.verticalLayout_3.setObjectName(u"verticalLayout_3")
-        self.qtShowAllRadioButton = QRadioButton(self.scrollAreaWidgetContents)
-        self.qtShowAllRadioButton.setObjectName(u"qtShowAllRadioButton")
-        self.qtShowAllRadioButton.setChecked(True)
-
-        self.verticalLayout_3.addWidget(self.qtShowAllRadioButton)
-
-        self.qtShow10RadioButton = QRadioButton(self.scrollAreaWidgetContents)
-        self.qtShow10RadioButton.setObjectName(u"qtShow10RadioButton")
-
-        self.verticalLayout_3.addWidget(self.qtShow10RadioButton)
-
-
-        self.horizontalLayout_4.addLayout(self.verticalLayout_3)
-
-        self.horizontalSpacer_7 = QSpacerItem(50, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
-
-        self.horizontalLayout_4.addItem(self.horizontalSpacer_7)
-
-        self.verticalLayout_2 = QVBoxLayout()
-        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
-        self.qtShow1StockRadioButton = QRadioButton(self.scrollAreaWidgetContents)
-        self.qtShow1StockRadioButton.setObjectName(u"qtShow1StockRadioButton")
-        self.qtShow1StockRadioButton.setChecked(True)
-
-        self.verticalLayout_2.addWidget(self.qtShow1StockRadioButton)
-
-        self.qtShow1000StockRadioButton = QRadioButton(self.scrollAreaWidgetContents)
-        self.qtShow1000StockRadioButton.setObjectName(u"qtShow1000StockRadioButton")
-        self.qtShow1000StockRadioButton.setEnabled(True)
-
-        self.verticalLayout_2.addWidget(self.qtShow1000StockRadioButton)
-
-
-        self.horizontalLayout_4.addLayout(self.verticalLayout_2)
-
-        self.horizontalSpacer_8 = QSpacerItem(50, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
-
-        self.horizontalLayout_4.addItem(self.horizontalSpacer_8)
-
-        self.verticalLayout_5 = QVBoxLayout()
-        self.verticalLayout_5.setObjectName(u"verticalLayout_5")
-        self.qtADYearRadioButton = QRadioButton(self.scrollAreaWidgetContents)
-        self.qtADYearRadioButton.setObjectName(u"qtADYearRadioButton")
-        self.qtADYearRadioButton.setChecked(True)
-
-        self.verticalLayout_5.addWidget(self.qtADYearRadioButton)
-
-        self.qtROCYearRadioButton = QRadioButton(self.scrollAreaWidgetContents)
-        self.qtROCYearRadioButton.setObjectName(u"qtROCYearRadioButton")
-
-        self.verticalLayout_5.addWidget(self.qtROCYearRadioButton)
-
-
-        self.horizontalLayout_4.addLayout(self.verticalLayout_5)
-
-        self.horizontalSpacer_3 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
-
-        self.horizontalLayout_4.addItem(self.horizontalSpacer_3)
-
-
-        self.verticalLayout.addLayout(self.horizontalLayout_4)
 
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName(u"horizontalLayout")
@@ -228,12 +165,15 @@ class Ui_MainWindow(object):
         self.menubar.setGeometry(QRect(0, 0, 1131, 21))
         self.menu = QMenu(self.menubar)
         self.menu.setObjectName(u"menu")
+        self.menu_2 = QMenu(self.menubar)
+        self.menu_2.setObjectName(u"menu_2")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QStatusBar(MainWindow)
         self.statusbar.setObjectName(u"statusbar")
         MainWindow.setStatusBar(self.statusbar)
 
         self.menubar.addAction(self.menu.menuAction())
+        self.menubar.addAction(self.menu_2.menuAction())
         self.menu.addAction(self.qtActionNew)
         self.menu.addAction(self.qtActionOpen)
         self.menu.addSeparator()
@@ -243,6 +183,17 @@ class Ui_MainWindow(object):
         self.menu.addAction(self.qtActionExportCurrentGroup)
         self.menu.addAction(self.qtActionImportFull)
         self.menu.addAction(self.qtActionImportSingleStock)
+        self.menu_2.addAction(self.qtFromNewToOldAction)
+        self.menu_2.addAction(self.qtFromOldToNewAction)
+        self.menu_2.addSeparator()
+        self.menu_2.addAction(self.qtShowAllAction)
+        self.menu_2.addAction(self.qtShow10Action)
+        self.menu_2.addSeparator()
+        self.menu_2.addAction(self.qtUse1ShareUnitAction)
+        self.menu_2.addAction(self.qtUse1000ShareUnitAction)
+        self.menu_2.addSeparator()
+        self.menu_2.addAction(self.qtADYearAction)
+        self.menu_2.addAction(self.qtROCYearAction)
 
         self.retranslateUi(MainWindow)
 
@@ -261,15 +212,15 @@ class Ui_MainWindow(object):
         self.qtActionExportCurrentGroup.setText(QCoreApplication.translate("MainWindow", u"\u532f\u51fa\u76ee\u524d\u7fa4\u7d44", None))
         self.qtActionImportFull.setText(QCoreApplication.translate("MainWindow", u"\u532f\u5165\u6240\u6709\u7fa4\u7d44\u8cc7\u6599", None))
         self.qtActionImportSingleStock.setText(QCoreApplication.translate("MainWindow", u"\u532f\u5165\u55ae\u652f\u80a1\u7968\u5230\u7576\u524d\u7fa4\u7d44", None))
+        self.qtFromNewToOldAction.setText(QCoreApplication.translate("MainWindow", u"\u7531\u65b0\u5230\u820a", None))
+        self.qtFromOldToNewAction.setText(QCoreApplication.translate("MainWindow", u"\u7531\u820a\u5230\u65b0", None))
+        self.qtShowAllAction.setText(QCoreApplication.translate("MainWindow", u"\u986f\u793a\u5168\u90e8\u4ea4\u6613\u7d00\u9304", None))
+        self.qtShow10Action.setText(QCoreApplication.translate("MainWindow", u"\u986f\u793a10\u7b46\u4ea4\u6613\u7d00\u9304", None))
+        self.qtUse1ShareUnitAction.setText(QCoreApplication.translate("MainWindow", u"\u4ee5\u4e00\u80a1\u70ba\u55ae\u4f4d", None))
+        self.qtUse1000ShareUnitAction.setText(QCoreApplication.translate("MainWindow", u"\u4ee5\u4e00\u5f35\u70ba\u55ae\u4f4d", None))
+        self.qtADYearAction.setText(QCoreApplication.translate("MainWindow", u"\u4ee5\u897f\u5143\u986f\u793a", None))
+        self.qtROCYearAction.setText(QCoreApplication.translate("MainWindow", u"\u4ee5\u6c11\u570b\u986f\u793a", None))
         self.qtTabWidget.setTabText(self.qtTabWidget.indexOf(self.tab_add), QCoreApplication.translate("MainWindow", u"+", None))
-        self.qtFromNewToOldRadioButton.setText(QCoreApplication.translate("MainWindow", u"\u7531\u65b0\u5230\u820a", None))
-        self.qtFromOldToNewRadioButton.setText(QCoreApplication.translate("MainWindow", u"\u7531\u820a\u5230\u65b0", None))
-        self.qtShowAllRadioButton.setText(QCoreApplication.translate("MainWindow", u"\u986f\u793a\u5168\u90e8\u4ea4\u6613\u7d00\u9304", None))
-        self.qtShow10RadioButton.setText(QCoreApplication.translate("MainWindow", u"\u986f\u793a10\u7b46\u4ea4\u6613\u7d00\u9304", None))
-        self.qtShow1StockRadioButton.setText(QCoreApplication.translate("MainWindow", u"\u4ee5\u4e00\u80a1\u70ba\u55ae\u4f4d", None))
-        self.qtShow1000StockRadioButton.setText(QCoreApplication.translate("MainWindow", u"\u4ee5\u4e00\u5f35\u70ba\u55ae\u4f4d", None))
-        self.qtADYearRadioButton.setText(QCoreApplication.translate("MainWindow", u"\u4ee5\u897f\u5143\u986f\u793a", None))
-        self.qtROCYearRadioButton.setText(QCoreApplication.translate("MainWindow", u"\u4ee5\u6c11\u570b\u986f\u793a", None))
         self.qtCurrentSelectCompanyLabel.setText("")
         self.qtHideTradingDataTableToolButton.setText(QCoreApplication.translate("MainWindow", u"...", None))
         self.qtAddTradingDataPushButton.setText(QCoreApplication.translate("MainWindow", u"\u65b0\u589e\u73fe\u80a1\u4ea4\u6613\u7d00\u9304(T)", None))
@@ -280,5 +231,6 @@ class Ui_MainWindow(object):
         self.qtExportAllStockTradingDataPushButton.setText(QCoreApplication.translate("MainWindow", u"\u8f38\u51fa\u6240\u6709\u80a1\u7968\u4ea4\u6613\u7d00\u9304", None))
         self.qtExportSelectedStockTradingDataPushButton.setText(QCoreApplication.translate("MainWindow", u"\u8f38\u51fa\u55ae\u652f\u80a1\u7968\u4ea4\u6613\u7d00\u9304", None))
         self.menu.setTitle(QCoreApplication.translate("MainWindow", u"\u6a94\u6848", None))
+        self.menu_2.setTitle(QCoreApplication.translate("MainWindow", u"\u986f\u793a", None))
     # retranslateUi
 
