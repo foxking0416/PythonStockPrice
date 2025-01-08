@@ -993,7 +993,7 @@ class MainWindow( QMainWindow ):
         self.stock_price_file_path = os.path.join( g_data_dir, 'StockInventory', str_stock_price_file )
 
         self.list_stock_list_table_horizontal_header = [ '總成本', '庫存股數', '平均成本', ' 收盤價', '淨值', '總手續費', '總交易稅', '損益', '股利所得', '自動帶入股利', '匯出', '刪除' ]
-        self.str_picked_stock_number = None
+        self.pick_up_stock( None )
         self.dict_all_account_ui_state = {}
         self.dict_all_account_cash_transfer_data = {}
         self.dict_all_account_all_stock_trading_data = {}
@@ -1318,7 +1318,7 @@ class MainWindow( QMainWindow ):
             self.ui.qtTabWidget.setCurrentIndex( self.n_current_tab )
         else:
             self.n_current_tab = index
-            self.str_picked_stock_number = None
+            self.pick_up_stock( None )
             self.refresh_stock_list_table()
             self.refresh_transfer_data_table()
 
@@ -1451,7 +1451,7 @@ class MainWindow( QMainWindow ):
         self.auto_save_trading_data()
 
     def on_display_type_combo_box_current_index_changed( self, index ):
-        self.str_picked_stock_number = None
+        self.pick_up_stock( None )
         self.refresh_stock_list_table()
         self.clear_per_stock_trading_table()
         self.update_button_enable_disable_status()
@@ -1487,7 +1487,7 @@ class MainWindow( QMainWindow ):
 
             if str_stock_number in dict_per_account_all_stock_trading_data:
                 if str_stock_number != self.str_picked_stock_number:
-                    self.str_picked_stock_number = str_stock_number
+                    self.pick_up_stock( str_stock_number )
                     list_trading_data = dict_per_account_all_stock_trading_data[ str_stock_number ]
                     self.refresh_trading_data_table( list_trading_data )
             self.update_button_enable_disable_status()
@@ -1509,7 +1509,7 @@ class MainWindow( QMainWindow ):
             if n_column == len( self.list_stock_list_table_horizontal_header ) - 3:#自動帶入股利按鈕
                 list_trading_data = dict_per_account_all_stock_trading_data[ str_stock_number ]
                 list_trading_data[ 0 ][ TradingData.USE_AUTO_DIVIDEND_DATA ] = not list_trading_data[ 0 ][ TradingData.USE_AUTO_DIVIDEND_DATA ]
-                self.str_picked_stock_number = str_stock_number
+                self.pick_up_stock( str_stock_number )
                 sorted_list = self.process_single_trading_data( str_tab_widget_name, str_stock_number )
                 self.refresh_stock_list_table()
                 self.refresh_trading_data_table( sorted_list )
@@ -1521,20 +1521,20 @@ class MainWindow( QMainWindow ):
                     self.manual_save_trading_data( list_save_tab_widget, file_path, str_stock_number )
                 
                 if str_stock_number != self.str_picked_stock_number:
-                    self.str_picked_stock_number = str_stock_number
+                    self.pick_up_stock( str_stock_number )
                     list_trading_data = dict_per_account_all_stock_trading_data[ str_stock_number ]
                     self.refresh_trading_data_table( list_trading_data )
             elif n_column == len( self.list_stock_list_table_horizontal_header ) - 1:#刪除按鈕
                 result = self.show_warning_message_box_with_ok_cancel_button( "警告", f"確定要刪掉『{header_text}』的所有資料嗎?" )
                 if result:
                     del dict_per_account_all_stock_trading_data[ str_stock_number ]
-                    self.str_picked_stock_number = None
+                    self.pick_up_stock( None )
                     self.refresh_stock_list_table()
                     self.clear_per_stock_trading_table()
                     self.auto_save_trading_data()
             elif str_stock_number in dict_per_account_all_stock_trading_data:
                 if str_stock_number != self.str_picked_stock_number:
-                    self.str_picked_stock_number = str_stock_number
+                    self.pick_up_stock( str_stock_number )
                     list_trading_data = dict_per_account_all_stock_trading_data[ str_stock_number ]
                     self.refresh_trading_data_table( list_trading_data )
 
@@ -2024,7 +2024,7 @@ class MainWindow( QMainWindow ):
         self.dict_all_account_all_stock_trading_data[ str_tab_name ] = {}
         self.dict_all_account_ui_state[ str_tab_name ] = { "discount_checkbox": True, "discount_value": 0.6, "insurance_checkbox": False, "trading_fee_type": TradingFeeType.VARIABLE, "trading_fee_minimum": 1, "trading_fee_constant": 1 }
         self.ui.qtTabWidget.setCurrentIndex( 0 )
-        self.str_picked_stock_number = None
+        self.pick_up_stock( None )
         self.refresh_stock_list_table()
         self.refresh_transfer_data_table()
         self.clear_per_stock_trading_table()
@@ -2080,7 +2080,7 @@ class MainWindow( QMainWindow ):
             self.ui.qtTabWidget.setCurrentIndex( 0 )
 
             self.process_all_trading_data()
-            self.str_picked_stock_number = None
+            self.pick_up_stock( None )
             self.refresh_stock_list_table()
             self.refresh_transfer_data_table()
             self.clear_per_stock_trading_table()
@@ -2179,7 +2179,7 @@ class MainWindow( QMainWindow ):
                         self.dict_all_account_ui_state[ str_tab_widget_name ] = dict_per_account_ui_state_LOAD
 
             self.process_all_trading_data()
-            self.str_picked_stock_number = None
+            self.pick_up_stock( None )
             self.refresh_stock_list_table()
             self.refresh_transfer_data_table()
             self.clear_per_stock_trading_table()
@@ -2232,7 +2232,7 @@ class MainWindow( QMainWindow ):
                 self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ][ str_stock_number ] = list_trading_data
 
             self.process_all_trading_data()
-            self.str_picked_stock_number = None
+            self.pick_up_stock( None )
             self.refresh_stock_list_table()
             self.clear_per_stock_trading_table()
             self.update_button_enable_disable_status()
@@ -3296,6 +3296,15 @@ class MainWindow( QMainWindow ):
             return data1 == data2
         else:
             return False
+
+    def pick_up_stock( self, str_stock_number ):
+        self.str_picked_stock_number = str_stock_number
+        if str_stock_number is not None:
+            str_stock_name = self.dict_all_company_number_to_name_and_type[ str_stock_number ][ 0 ]
+            self.ui.qtCurrentSelectCompanyLabel.setText( f"目前選擇公司：{ str_stock_number } { str_stock_name }" )
+            self.ui.qtCurrentSelectCompanyLabel.setStyleSheet("color: yellow; ")
+        else:
+            self.ui.qtCurrentSelectCompanyLabel.setText( "" )
 
     #region 從網上下載資料
     def check_internet_via_http( self, url="https://www.google.com", timeout=3):

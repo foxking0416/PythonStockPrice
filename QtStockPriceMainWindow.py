@@ -16,10 +16,11 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
     QIcon, QImage, QKeySequence, QLinearGradient,
     QPainter, QPalette, QPixmap, QRadialGradient,
     QTransform)
-from PySide6.QtWidgets import (QApplication, QHBoxLayout, QHeaderView, QMainWindow,
-    QMenu, QMenuBar, QPushButton, QRadioButton,
-    QScrollArea, QSizePolicy, QSpacerItem, QStatusBar,
-    QTabWidget, QTableView, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QApplication, QHBoxLayout, QHeaderView, QLabel,
+    QMainWindow, QMenu, QMenuBar, QPushButton,
+    QRadioButton, QScrollArea, QSizePolicy, QSpacerItem,
+    QStatusBar, QTabWidget, QTableView, QToolButton,
+    QVBoxLayout, QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -146,6 +147,21 @@ class Ui_MainWindow(object):
 
         self.verticalLayout.addLayout(self.horizontalLayout_4)
 
+        self.horizontalLayout = QHBoxLayout()
+        self.horizontalLayout.setObjectName(u"horizontalLayout")
+        self.qtCurrentSelectCompanyLabel = QLabel(self.scrollAreaWidgetContents)
+        self.qtCurrentSelectCompanyLabel.setObjectName(u"qtCurrentSelectCompanyLabel")
+
+        self.horizontalLayout.addWidget(self.qtCurrentSelectCompanyLabel)
+
+        self.toolButton = QToolButton(self.scrollAreaWidgetContents)
+        self.toolButton.setObjectName(u"toolButton")
+
+        self.horizontalLayout.addWidget(self.toolButton)
+
+
+        self.verticalLayout.addLayout(self.horizontalLayout)
+
         self.qtTradingDataTableView = QTableView(self.scrollAreaWidgetContents)
         self.qtTradingDataTableView.setObjectName(u"qtTradingDataTableView")
         self.qtTradingDataTableView.setMinimumSize(QSize(0, 470))
@@ -254,6 +270,8 @@ class Ui_MainWindow(object):
         self.qtShow1000StockRadioButton.setText(QCoreApplication.translate("MainWindow", u"\u4ee5\u4e00\u5f35\u70ba\u55ae\u4f4d", None))
         self.qtADYearRadioButton.setText(QCoreApplication.translate("MainWindow", u"\u4ee5\u897f\u5143\u986f\u793a", None))
         self.qtROCYearRadioButton.setText(QCoreApplication.translate("MainWindow", u"\u4ee5\u6c11\u570b\u986f\u793a", None))
+        self.qtCurrentSelectCompanyLabel.setText("")
+        self.toolButton.setText(QCoreApplication.translate("MainWindow", u"...", None))
         self.qtAddTradingDataPushButton.setText(QCoreApplication.translate("MainWindow", u"\u65b0\u589e\u73fe\u80a1\u4ea4\u6613\u7d00\u9304(T)", None))
         self.qtAddRegularTradingDataPushButton.setText(QCoreApplication.translate("MainWindow", u"\u65b0\u589e\u5b9a\u671f\u5b9a\u984d\u4ea4\u6613\u7d00\u9304(E)", None))
         self.qtAddDividendDataPushButton.setText(QCoreApplication.translate("MainWindow", u"\u65b0\u589e\u914d\u80a1\u914d\u606f\u7d00\u9304(D)", None))
