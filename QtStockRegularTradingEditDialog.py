@@ -16,10 +16,9 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QAbstractButton, QApplication, QCheckBox, QDateEdit,
-    QDialog, QDialogButtonBox, QDoubleSpinBox, QGroupBox,
-    QHBoxLayout, QLabel, QLineEdit, QRadioButton,
-    QSizePolicy, QSpacerItem, QSpinBox, QVBoxLayout,
-    QWidget)
+    QDialog, QDialogButtonBox, QDoubleSpinBox, QHBoxLayout,
+    QLabel, QLineEdit, QRadioButton, QSizePolicy,
+    QSpacerItem, QSpinBox, QVBoxLayout, QWidget)
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
@@ -70,6 +69,55 @@ class Ui_Dialog(object):
 
 
         self.verticalLayout.addLayout(self.horizontalLayout)
+
+        self.horizontalLayout_3 = QHBoxLayout()
+        self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
+        self.label_2 = QLabel(Dialog)
+        self.label_2.setObjectName(u"label_2")
+
+        self.horizontalLayout_3.addWidget(self.label_2)
+
+        self.qtPriceDoubleSpinBox = QDoubleSpinBox(Dialog)
+        self.qtPriceDoubleSpinBox.setObjectName(u"qtPriceDoubleSpinBox")
+        self.qtPriceDoubleSpinBox.setMinimumSize(QSize(75, 0))
+        self.qtPriceDoubleSpinBox.setMaximum(9999.989999999999782)
+        self.qtPriceDoubleSpinBox.setValue(10.000000000000000)
+
+        self.horizontalLayout_3.addWidget(self.qtPriceDoubleSpinBox)
+
+        self.horizontalSpacer_4 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout_3.addItem(self.horizontalSpacer_4)
+
+
+        self.verticalLayout.addLayout(self.horizontalLayout_3)
+
+        self.horizontalLayout_6 = QHBoxLayout()
+        self.horizontalLayout_6.setObjectName(u"horizontalLayout_6")
+        self.label_12 = QLabel(Dialog)
+        self.label_12.setObjectName(u"label_12")
+
+        self.horizontalLayout_6.addWidget(self.label_12)
+
+        self.qtOddTradeCountSpinBox = QSpinBox(Dialog)
+        self.qtOddTradeCountSpinBox.setObjectName(u"qtOddTradeCountSpinBox")
+        self.qtOddTradeCountSpinBox.setEnabled(True)
+        self.qtOddTradeCountSpinBox.setMinimumSize(QSize(75, 0))
+        self.qtOddTradeCountSpinBox.setMaximum(99999)
+
+        self.horizontalLayout_6.addWidget(self.qtOddTradeCountSpinBox)
+
+        self.label_5 = QLabel(Dialog)
+        self.label_5.setObjectName(u"label_5")
+
+        self.horizontalLayout_6.addWidget(self.label_5)
+
+        self.horizontalSpacer_2 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout_6.addItem(self.horizontalSpacer_2)
+
+
+        self.verticalLayout.addLayout(self.horizontalLayout_6)
 
         self.verticalLayout_4 = QVBoxLayout()
         self.verticalLayout_4.setObjectName(u"verticalLayout_4")
@@ -167,64 +215,6 @@ class Ui_Dialog(object):
 
         self.verticalLayout.addLayout(self.horizontalLayout_9)
 
-        self.horizontalLayout_3 = QHBoxLayout()
-        self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
-        self.label_2 = QLabel(Dialog)
-        self.label_2.setObjectName(u"label_2")
-
-        self.horizontalLayout_3.addWidget(self.label_2)
-
-        self.qtPriceDoubleSpinBox = QDoubleSpinBox(Dialog)
-        self.qtPriceDoubleSpinBox.setObjectName(u"qtPriceDoubleSpinBox")
-        self.qtPriceDoubleSpinBox.setMinimumSize(QSize(75, 0))
-        self.qtPriceDoubleSpinBox.setMaximum(9999.989999999999782)
-        self.qtPriceDoubleSpinBox.setValue(10.000000000000000)
-
-        self.horizontalLayout_3.addWidget(self.qtPriceDoubleSpinBox)
-
-        self.horizontalSpacer_4 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
-
-        self.horizontalLayout_3.addItem(self.horizontalSpacer_4)
-
-
-        self.verticalLayout.addLayout(self.horizontalLayout_3)
-
-        self.groupBox = QGroupBox(Dialog)
-        self.groupBox.setObjectName(u"groupBox")
-        self.verticalLayout_2 = QVBoxLayout(self.groupBox)
-        self.verticalLayout_2.setSpacing(0)
-        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
-        self.verticalLayout_2.setContentsMargins(0, 0, 0, 0)
-        self.horizontalLayout_6 = QHBoxLayout()
-        self.horizontalLayout_6.setObjectName(u"horizontalLayout_6")
-        self.label_12 = QLabel(self.groupBox)
-        self.label_12.setObjectName(u"label_12")
-
-        self.horizontalLayout_6.addWidget(self.label_12)
-
-        self.qtOddTradeCountSpinBox = QSpinBox(self.groupBox)
-        self.qtOddTradeCountSpinBox.setObjectName(u"qtOddTradeCountSpinBox")
-        self.qtOddTradeCountSpinBox.setEnabled(True)
-        self.qtOddTradeCountSpinBox.setMinimumSize(QSize(75, 0))
-        self.qtOddTradeCountSpinBox.setMaximum(99999)
-
-        self.horizontalLayout_6.addWidget(self.qtOddTradeCountSpinBox)
-
-        self.label_5 = QLabel(self.groupBox)
-        self.label_5.setObjectName(u"label_5")
-
-        self.horizontalLayout_6.addWidget(self.label_5)
-
-        self.horizontalSpacer_2 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
-
-        self.horizontalLayout_6.addItem(self.horizontalSpacer_2)
-
-
-        self.verticalLayout_2.addLayout(self.horizontalLayout_6)
-
-
-        self.verticalLayout.addWidget(self.groupBox)
-
         self.horizontalLayout_4 = QHBoxLayout()
         self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
         self.label_3 = QLabel(Dialog)
@@ -308,6 +298,9 @@ class Ui_Dialog(object):
         self.qtStockNumberLabel.setText(QCoreApplication.translate("Dialog", u"TextLabel", None))
         self.qtStockNameLabel.setText(QCoreApplication.translate("Dialog", u"TextLabel", None))
         self.label.setText(QCoreApplication.translate("Dialog", u"\u65e5\u671f", None))
+        self.label_2.setText(QCoreApplication.translate("Dialog", u"\u4ea4\u6613\u50f9\u683c", None))
+        self.label_12.setText(QCoreApplication.translate("Dialog", u"\u8cfc\u8cb7\u80a1\u6578", None))
+        self.label_5.setText(QCoreApplication.translate("Dialog", u"\u80a1", None))
         self.qtVariableFeeRadioButton.setText(QCoreApplication.translate("Dialog", u"\u8b8a\u52d5\u624b\u7e8c\u8cbb", None))
         self.qtDiscountCheckBox.setText(QCoreApplication.translate("Dialog", u"\u624b\u7e8c\u8cbb\u6298\u6263", None))
         self.label_10.setText(QCoreApplication.translate("Dialog", u"\u6298", None))
@@ -315,10 +308,6 @@ class Ui_Dialog(object):
         self.label_11.setText(QCoreApplication.translate("Dialog", u"\u5143", None))
         self.qtConstantFeeRadioButton.setText(QCoreApplication.translate("Dialog", u"\u56fa\u5b9a\u624b\u7e8c\u8cbb", None))
         self.label_4.setText(QCoreApplication.translate("Dialog", u"\u5143", None))
-        self.label_2.setText(QCoreApplication.translate("Dialog", u"\u4ea4\u6613\u50f9\u683c", None))
-        self.groupBox.setTitle("")
-        self.label_12.setText(QCoreApplication.translate("Dialog", u"\u8cfc\u8cb7\u80a1\u6578", None))
-        self.label_5.setText(QCoreApplication.translate("Dialog", u"\u80a1", None))
         self.label_3.setText(QCoreApplication.translate("Dialog", u"\u91d1\u984d", None))
         self.qtTradingValueLineEdit.setText(QCoreApplication.translate("Dialog", u"0", None))
         self.label_6.setText(QCoreApplication.translate("Dialog", u"\u624b\u7e8c\u8cbb", None))
