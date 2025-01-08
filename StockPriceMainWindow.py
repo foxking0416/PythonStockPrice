@@ -134,6 +134,10 @@ check_icon_file_path = os.path.join( g_exe_root_dir, 'icon\\CheckOn.svg' )
 check_icon = QIcon( check_icon_file_path )
 uncheck_icon_file_path = os.path.join( g_exe_root_dir, 'icon\\CheckOff.svg' ) 
 uncheck_icon = QIcon( uncheck_icon_file_path )
+down_icon_file_path = os.path.join( g_exe_root_dir, 'icon\\MoveDown.svg' ) 
+down_icon = QIcon( down_icon_file_path )
+up_icon_file_path = os.path.join( g_exe_root_dir, 'icon\\MoveUp.svg' ) 
+up_icon = QIcon( up_icon_file_path )
 
 
 class CenterIconDelegate( QStyledItemDelegate ):
@@ -964,6 +968,8 @@ class MainWindow( QMainWindow ):
         self.ui.qtADYearRadioButton.setChecked( True )
         self.ui.qtADYearRadioButton.toggled.connect( self.on_change_display_mode )
 
+        self.ui.qtHideTradingDataTableToolButton.clicked.connect( self.on_hide_trading_data_table_tool_button_clicked )
+
         self.ui.qtAddTradingDataPushButton.clicked.connect( self.on_add_trading_data_push_button_clicked )
         self.ui.qtAddRegularTradingDataPushButton.clicked.connect( self.on_add_regular_trading_data_push_button_clicked )
         self.ui.qtAddDividendDataPushButton.clicked.connect( self.on_add_dividend_data_push_button_clicked )
@@ -971,6 +977,8 @@ class MainWindow( QMainWindow ):
         self.ui.qtAddCapitalReductionDataPushButton.clicked.connect( self.on_add_capital_reduction_data_push_button_clicked )
         self.ui.qtExportAllStockTradingDataPushButton.clicked.connect( self.on_export_all_to_excell_button_clicked )
         self.ui.qtExportSelectedStockTradingDataPushButton.clicked.connect( self.on_export_selected_to_excell_button_clicked )
+
+        self.ui.qtHideTradingDataTableToolButton.setIcon( down_icon )
 
         self.ui.qtActionNew.setShortcut( "Ctrl+N" )
         self.ui.qtActionNew.triggered.connect( self.on_new_file_action_triggered )
@@ -1607,6 +1615,14 @@ class MainWindow( QMainWindow ):
             self.refresh_trading_data_table( dict_per_account_all_stock_trading_data[ self.str_picked_stock_number ] )
 
         self.save_share_UI_state()
+
+    def on_hide_trading_data_table_tool_button_clicked( self ):
+        if self.ui.qtTradingDataTableView.isVisible():
+            self.ui.qtHideTradingDataTableToolButton.setIcon( up_icon )
+            self.ui.qtTradingDataTableView.setHidden( True )
+        else:
+            self.ui.qtHideTradingDataTableToolButton.setIcon( down_icon )
+            self.ui.qtTradingDataTableView.setHidden( False )
 
     def on_add_trading_data_push_button_clicked( self ): 
         if self.str_picked_stock_number is None:

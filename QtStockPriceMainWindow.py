@@ -154,10 +154,10 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout.addWidget(self.qtCurrentSelectCompanyLabel)
 
-        self.toolButton = QToolButton(self.scrollAreaWidgetContents)
-        self.toolButton.setObjectName(u"toolButton")
+        self.qtHideTradingDataTableToolButton = QToolButton(self.scrollAreaWidgetContents)
+        self.qtHideTradingDataTableToolButton.setObjectName(u"qtHideTradingDataTableToolButton")
 
-        self.horizontalLayout.addWidget(self.toolButton)
+        self.horizontalLayout.addWidget(self.qtHideTradingDataTableToolButton)
 
 
         self.verticalLayout.addLayout(self.horizontalLayout)
@@ -271,7 +271,7 @@ class Ui_MainWindow(object):
         self.qtADYearRadioButton.setText(QCoreApplication.translate("MainWindow", u"\u4ee5\u897f\u5143\u986f\u793a", None))
         self.qtROCYearRadioButton.setText(QCoreApplication.translate("MainWindow", u"\u4ee5\u6c11\u570b\u986f\u793a", None))
         self.qtCurrentSelectCompanyLabel.setText("")
-        self.toolButton.setText(QCoreApplication.translate("MainWindow", u"...", None))
+        self.qtHideTradingDataTableToolButton.setText(QCoreApplication.translate("MainWindow", u"...", None))
         self.qtAddTradingDataPushButton.setText(QCoreApplication.translate("MainWindow", u"\u65b0\u589e\u73fe\u80a1\u4ea4\u6613\u7d00\u9304(T)", None))
         self.qtAddRegularTradingDataPushButton.setText(QCoreApplication.translate("MainWindow", u"\u65b0\u589e\u5b9a\u671f\u5b9a\u984d\u4ea4\u6613\u7d00\u9304(E)", None))
         self.qtAddDividendDataPushButton.setText(QCoreApplication.translate("MainWindow", u"\u65b0\u589e\u914d\u80a1\u914d\u606f\u7d00\u9304(D)", None))
