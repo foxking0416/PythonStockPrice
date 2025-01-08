@@ -102,7 +102,7 @@
         </size>
        </property>
        <property name="decimals">
-        <number>3</number>
+        <number>9</number>
        </property>
        <property name="maximum">
         <double>999.990000000000009</double>
@@ -142,7 +142,7 @@
         </size>
        </property>
        <property name="decimals">
-        <number>3</number>
+        <number>9</number>
        </property>
        <property name="maximum">
         <double>999.990000000000009</double>

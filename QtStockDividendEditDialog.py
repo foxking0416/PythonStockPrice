@@ -80,7 +80,7 @@ class Ui_Dialog(object):
         self.qtStockDividendDoubleSpinBox = QDoubleSpinBox(Dialog)
         self.qtStockDividendDoubleSpinBox.setObjectName(u"qtStockDividendDoubleSpinBox")
         self.qtStockDividendDoubleSpinBox.setMinimumSize(QSize(75, 0))
-        self.qtStockDividendDoubleSpinBox.setDecimals(3)
+        self.qtStockDividendDoubleSpinBox.setDecimals(9)
         self.qtStockDividendDoubleSpinBox.setMaximum(999.990000000000009)
 
         self.horizontalLayout_3.addWidget(self.qtStockDividendDoubleSpinBox)
@@ -102,7 +102,7 @@ class Ui_Dialog(object):
         self.qtCashDividendDoubleSpinBox = QDoubleSpinBox(Dialog)
         self.qtCashDividendDoubleSpinBox.setObjectName(u"qtCashDividendDoubleSpinBox")
         self.qtCashDividendDoubleSpinBox.setMinimumSize(QSize(75, 0))
-        self.qtCashDividendDoubleSpinBox.setDecimals(3)
+        self.qtCashDividendDoubleSpinBox.setDecimals(9)
         self.qtCashDividendDoubleSpinBox.setMaximum(999.990000000000009)
 
         self.horizontalLayout_4.addWidget(self.qtCashDividendDoubleSpinBox)

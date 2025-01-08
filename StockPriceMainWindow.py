@@ -439,11 +439,11 @@ class StockDividendEditDialog( QDialog ):
         self.ui.qtStockDividendDoubleSpinBox.setValue( f_stock_dividend_per_share )
 
     def setup_cash_dividend( self, f_cash_dividend_per_share ):
-        self.ui.qtCashDividendSpinBox.setValue( f_cash_dividend_per_share )
+        self.ui.qtCashDividendDoubleSpinBox.setValue( f_cash_dividend_per_share )
 
     def accept_data( self ):
         f_stock_dividend_per_share = self.ui.qtStockDividendDoubleSpinBox.value()
-        f_cash_dividend_per_share = self.ui.qtCashDividendSpinBox.value()
+        f_cash_dividend_per_share = self.ui.qtCashDividendDoubleSpinBox.value()
         if f_stock_dividend_per_share != 0 or f_cash_dividend_per_share != 0:
 
             self.dict_trading_data = Utility.generate_trading_data( self.ui.qtDateEdit.date().toString( "yyyy-MM-dd" ), #交易日期
@@ -1551,7 +1551,7 @@ class MainWindow( QMainWindow ):
         if dialog.exec():
             dict_transfer_data = dialog.dict_cash_transfer_data
             list_per_account_all_cash_trasfer_data.append( dict_transfer_data )
-            sorted_list = self.process_single_transfer_data( str_tab_widget_name )
+            self.process_single_transfer_data( str_tab_widget_name )
             self.refresh_transfer_data_table()
             self.auto_save_trading_data()
 
@@ -1584,7 +1584,7 @@ class MainWindow( QMainWindow ):
                 if dialog.exec():
                     dict_transfer_data = dialog.dict_cash_transfer_data
                     list_per_account_cash_transfer_data[ n_findindex ] = dict_transfer_data
-                    sorted_list = self.process_single_transfer_data( str_tab_widget_name )
+                    self.process_single_transfer_data( str_tab_widget_name )
                     self.refresh_transfer_data_table()
                     self.auto_save_trading_data()
 
@@ -1592,7 +1592,7 @@ class MainWindow( QMainWindow ):
                 result = self.show_warning_message_box_with_ok_cancel_button( "警告", f"確定要刪掉這筆匯款資料嗎?" )
                 if result:
                     del list_per_account_cash_transfer_data[ n_findindex ]
-                    sorted_list = self.process_single_transfer_data( str_tab_widget_name )
+                    self.process_single_transfer_data( str_tab_widget_name )
                     self.refresh_transfer_data_table()
                     self.auto_save_trading_data()
 
@@ -2929,7 +2929,7 @@ class MainWindow( QMainWindow ):
                 if e_transfer_type == TransferType.TRANSFER_IN:
                     str_color = QBrush( '#FF0000' )
                     str_transfer_value = format( item[ TransferData.TRANSFER_VALUE ], "," )
-                elif e_transfer_type == TransferType.TRANSFER_OUT:
+                else:
                     str_color = QBrush( '#00AA00' )
                     str_transfer_value = format( -item[ TransferData.TRANSFER_VALUE ], "," )
 
