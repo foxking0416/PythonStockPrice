@@ -3491,6 +3491,7 @@ class MainWindow( QMainWindow ):
         raise Exception("Max retries exceeded. Failed to get a successful response.")
 
     def download_all_company_stock_number( self, str_date ): 
+        dict_company_number_to_name = {}
         b_need_to_download = False
         if os.path.exists( self.stock_number_file_path ):
             with open( self.stock_number_file_path, 'r', encoding='utf-8' ) as f:
@@ -3500,12 +3501,15 @@ class MainWindow( QMainWindow ):
                         if row.strip() != str_date:
                             if self.check_internet_via_http(): #日期不一樣，且又有網路時才重新下載，不然就用舊的
                                 b_need_to_download = True
-                                break
+                        else:
+                            break
                     else:
                         ele = row.strip().split( ',' )
                         if len( ele ) == 2:
                             b_need_to_download = True
                             break
+
+                        dict_company_number_to_name[ ele[ 0 ] ] = [ ele[ 1 ], ele[ 2 ] ]
         else:
             b_need_to_download = True
 
@@ -3597,7 +3601,12 @@ class MainWindow( QMainWindow ):
                 f.write( str_date + '\n' )
                 for row in tds:
                     f.write( str( row[ 0 ] ) + ',' + str( row[ 1 ] ) + ',' + str( row[ 2 ] ) + '\n' )
+                    dict_company_number_to_name.pop( row[ 0 ], None )
     
+                for key_number, value_name_and_etf in dict_company_number_to_name.items():
+                    f.write( str( key_number ) + ',' + str( value_name_and_etf[ 0 ] ) + ',' + str( value_name_and_etf[ 1 ] ) + '\n' )
+
+
     def load_all_company_stock_number( self ):
         dict_company_number_to_name = {}
         if os.path.exists( self.stock_number_file_path ):
