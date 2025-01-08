@@ -6,6 +6,7 @@ import sys
 import datetime
 import time
 import math
+import copy
 from logging.handlers import TimedRotatingFileHandler
 from QtStockPriceMainWindow import Ui_MainWindow  # 導入轉換後的 UI 類
 import logging
@@ -2618,7 +2619,7 @@ class MainWindow( QMainWindow ):
                 self.process_single_trading_data( key_account_name, key_stock_name )
     
     def process_single_trading_data( self, str_tab_widget_name, str_stock_number ): 
-        list_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ][ str_stock_number ]
+        list_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ][ str_stock_number ].copy()
         #先拔掉所有的AUTO_DIVIDEND_DATA，下面有需要再重新插入，避免重複插入
         list_trading_data = [item for item in list_trading_data if TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE not in item or not item[TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE]]
 
@@ -2637,7 +2638,7 @@ class MainWindow( QMainWindow ):
         b_use_auto_dividend = sorted_list[ 0 ][ TradingData.USE_AUTO_DIVIDEND_DATA ]
         if b_use_auto_dividend:
             if str_stock_number in self.dict_auto_stock_yearly_dividned:
-                auto_list_dividend = self.dict_auto_stock_yearly_dividned[ str_stock_number ]
+                auto_list_dividend = copy.deepcopy( self.dict_auto_stock_yearly_dividned[ str_stock_number ] ) 
                 auto_list_dividend = sorted( auto_list_dividend, key=lambda x: ( datetime.datetime.strptime( x[ TradingData.TRADING_DATE ], "%Y-%m-%d") ) )
                 if len( sorted_list ) > 1:
                     first_data = sorted_list[ 1 ]
@@ -2661,6 +2662,7 @@ class MainWindow( QMainWindow ):
             
             if e_trading_type == TradingType.TEMPLATE:
                 list_calibration_data.append( item )
+                continue
             elif e_trading_type == TradingType.BUY:
                 f_trading_price = item[ TradingData.TRADING_PRICE ]
                 n_trading_count = item[ TradingData.TRADING_COUNT ]
@@ -2682,7 +2684,6 @@ class MainWindow( QMainWindow ):
                 else:
                     str_last_buying_date = str_buying_date
                     n_last_buying_count = n_trading_count
-                list_calibration_data.append( item )
             elif e_trading_type == TradingType.REGULAR_BUY:
                 f_trading_price = item[ TradingData.TRADING_PRICE ]
                 n_trading_count = item[ TradingData.TRADING_COUNT ]
@@ -2712,7 +2713,6 @@ class MainWindow( QMainWindow ):
 
                 item[ TradingData.STOCK_DIVIDEND_GAIN_NON_SAVE ] = 0
                 item[ TradingData.CASH_DIVIDEND_GAIN_NON_SAVE ] = 0
-                list_calibration_data.append( item )
             elif e_trading_type == TradingType.SELL:
                 str_selling_date = item[ TradingData.TRADING_DATE ]
                 f_trading_price = item[ TradingData.TRADING_PRICE ]
@@ -2764,7 +2764,6 @@ class MainWindow( QMainWindow ):
                 item[ TradingData.EXTRA_INSURANCE_FEE_NON_SAVE ] = 0
                 item[ TradingData.STOCK_DIVIDEND_GAIN_NON_SAVE ] = 0
                 item[ TradingData.CASH_DIVIDEND_GAIN_NON_SAVE ] = 0
-                list_calibration_data.append( item )
             elif e_trading_type == TradingType.CAPITAL_INCREASE:
                 f_trading_price = item[ TradingData.TRADING_PRICE ]
                 n_trading_count = item[ TradingData.TRADING_COUNT ]
@@ -2781,75 +2780,78 @@ class MainWindow( QMainWindow ):
                 item[ TradingData.STOCK_DIVIDEND_GAIN_NON_SAVE ] = 0
                 item[ TradingData.CASH_DIVIDEND_GAIN_NON_SAVE ] = 0
                 str_buying_date = item[ TradingData.TRADING_DATE ]
-                list_calibration_data.append( item )
             elif e_trading_type == TradingType.DIVIDEND:
-                if n_accumulated_inventory > 0: #沒有庫存就不用算股利了
-                    n_stock_dividend_value_gain = int( Decimal( str( item[ TradingData.STOCK_DIVIDEND_PER_SHARE ] ) ) * Decimal( str( n_accumulated_inventory ) ) ) # n_stock_dividend_value_gain單位為元
-                    n_stock_dividend_share_gain = int( Decimal( str( item[ TradingData.STOCK_DIVIDEND_PER_SHARE ] ) ) * Decimal( str( n_accumulated_inventory ) ) / Decimal( '10' ) ) # n_stock_dividend_share_gain單位為股 除以10是因為票面額10元
-                    n_cash_dividend_gain = int( Decimal( str(item[ TradingData.CASH_DIVIDEND_PER_SHARE ] ) ) * Decimal( str( n_accumulated_inventory ) ) )
+                if n_accumulated_inventory == 0: #沒有庫存就不用算股利了
+                    continue
+                n_stock_dividend_value_gain = int( Decimal( str( item[ TradingData.STOCK_DIVIDEND_PER_SHARE ] ) ) * Decimal( str( n_accumulated_inventory ) ) ) # n_stock_dividend_value_gain單位為元
+                n_stock_dividend_share_gain = int( Decimal( str( item[ TradingData.STOCK_DIVIDEND_PER_SHARE ] ) ) * Decimal( str( n_accumulated_inventory ) ) / Decimal( '10' ) ) # n_stock_dividend_share_gain單位為股 除以10是因為票面額10元
+                n_cash_dividend_gain = int( Decimal( str(item[ TradingData.CASH_DIVIDEND_PER_SHARE ] ) ) * Decimal( str( n_accumulated_inventory ) ) )
 
-                    if b_use_auto_dividend:
-                        if TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE not in item or not item[TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE]:
-                            n_stock_dividend_share_gain = 0
-                            n_cash_dividend_gain = 0
-                    else:
-                        if TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE in item and item[TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE]:
-                            n_stock_dividend_share_gain = 0
-                            n_cash_dividend_gain = 0
+                if b_use_auto_dividend:
+                    if TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE not in item or not item[TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE]:
+                        n_stock_dividend_share_gain = 0
+                        n_stock_dividend_value_gain = 0
+                        n_cash_dividend_gain = 0
+                else:
+                    if TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE in item and item[TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE]:
+                        n_stock_dividend_share_gain = 0
+                        n_stock_dividend_value_gain = 0
+                        n_cash_dividend_gain = 0
 
-                    item[ TradingData.TRADING_VALUE_NON_SAVE ] = 0
-                    item[ TradingData.TRADING_TAX_NON_SAVE ] = 0
-                    item[ TradingData.TRADING_COST_NON_SAVE ] = 0
+                item[ TradingData.TRADING_VALUE_NON_SAVE ] = 0
+                item[ TradingData.TRADING_TAX_NON_SAVE ] = 0
+                item[ TradingData.TRADING_COST_NON_SAVE ] = 0
 
-                    item[ TradingData.STOCK_DIVIDEND_GAIN_NON_SAVE ] = n_stock_dividend_share_gain
-                    n_accumulated_inventory += n_stock_dividend_share_gain
-                    
-                    n_extra_insurance_fee_for_cash_dividend = 0
-                    n_extra_insurance_fee_for_stock_dividend = 0
-                    if b_extra_insurance_fee and n_cash_dividend_gain + n_stock_dividend_value_gain > 20000:
-                        obj_dividend_date = datetime.datetime.strptime( item[ TradingData.TRADING_DATE ], "%Y-%m-%d")
-                        if obj_dividend_date.year >= 2013 and obj_dividend_date.year < 2021:
-                            n_extra_insurance_fee_for_cash_dividend = int( math.ceil( Decimal( str( n_cash_dividend_gain ) ) * Decimal( str( '0.0191' ) ) ) )
-                            n_extra_insurance_fee_for_stock_dividend = int( math.ceil( Decimal( str( n_stock_dividend_value_gain ) ) * Decimal( str( '0.0191' ) ) ) )
-                        elif obj_dividend_date.year >= 2021:
-                            n_extra_insurance_fee_for_cash_dividend = int( math.ceil( Decimal( str( n_cash_dividend_gain ) ) * Decimal( str( '0.0211' ) ) ) )
-                            n_extra_insurance_fee_for_stock_dividend = int( math.ceil( Decimal( str( n_stock_dividend_value_gain ) ) * Decimal( str( '0.0211' ) ) ) )
+                item[ TradingData.STOCK_DIVIDEND_GAIN_NON_SAVE ] = n_stock_dividend_share_gain
+                n_accumulated_inventory += n_stock_dividend_share_gain
+                
+                n_extra_insurance_fee_for_cash_dividend = 0
+                n_extra_insurance_fee_for_stock_dividend = 0
+                if b_extra_insurance_fee and n_cash_dividend_gain + n_stock_dividend_value_gain > 20000:
+                    obj_dividend_date = datetime.datetime.strptime( item[ TradingData.TRADING_DATE ], "%Y-%m-%d")
+                    if obj_dividend_date.year >= 2013 and obj_dividend_date.year < 2021:
+                        n_extra_insurance_fee_for_cash_dividend = int( math.ceil( Decimal( str( n_cash_dividend_gain ) ) * Decimal( str( '0.0191' ) ) ) )
+                        n_extra_insurance_fee_for_stock_dividend = int( math.ceil( Decimal( str( n_stock_dividend_value_gain ) ) * Decimal( str( '0.0191' ) ) ) )
+                    elif obj_dividend_date.year >= 2021:
+                        n_extra_insurance_fee_for_cash_dividend = int( math.ceil( Decimal( str( n_cash_dividend_gain ) ) * Decimal( str( '0.0211' ) ) ) )
+                        n_extra_insurance_fee_for_stock_dividend = int( math.ceil( Decimal( str( n_stock_dividend_value_gain ) ) * Decimal( str( '0.0211' ) ) ) )
 
-                    if n_cash_dividend_gain > 10:
-                        item[ TradingData.CASH_DIVIDEND_GAIN_NON_SAVE ] = n_cash_dividend_gain
-                        item[ TradingData.TRADING_FEE_NON_SAVE ] = 10
+                if n_cash_dividend_gain > 10:
+                    item[ TradingData.CASH_DIVIDEND_GAIN_NON_SAVE ] = n_cash_dividend_gain
+                    item[ TradingData.TRADING_FEE_NON_SAVE ] = 10
 
-                        item[ TradingData.EXTRA_INSURANCE_FEE_NON_SAVE ] = n_extra_insurance_fee_for_cash_dividend + n_extra_insurance_fee_for_stock_dividend
-                        n_accumulated_cost = n_accumulated_cost - n_cash_dividend_gain + 10 + n_extra_insurance_fee_for_cash_dividend + n_extra_insurance_fee_for_stock_dividend
-                        n_accumulated_cash_dividend = n_accumulated_cash_dividend + n_cash_dividend_gain - 10 - n_extra_insurance_fee_for_cash_dividend - n_extra_insurance_fee_for_stock_dividend #要想一下要不要扣掉手續費
-                    else:
-                        item[ TradingData.CASH_DIVIDEND_GAIN_NON_SAVE ] = 0
-                        item[ TradingData.TRADING_FEE_NON_SAVE ] = 0
-                        item[ TradingData.EXTRA_INSURANCE_FEE_NON_SAVE ] = 0 
-                    n_accumulated_stock_dividend += n_stock_dividend_share_gain
-
-                    list_calibration_data.append( item )
-            elif e_trading_type == TradingType.CAPITAL_REDUCTION:
-                if n_accumulated_inventory > 0: #沒有庫存就不用算減資了
-                    item[ TradingData.TRADING_PRICE ] = -item[ TradingData.CAPITAL_REDUCTION_PER_SHARE ]
-                    item[ TradingData.TRADING_COUNT ] = n_accumulated_inventory
-                    item[ TradingData.TRADING_VALUE_NON_SAVE ] = -int( n_accumulated_inventory * item[ TradingData.CAPITAL_REDUCTION_PER_SHARE ] )
-                    item[ TradingData.TRADING_FEE_NON_SAVE ] = 0
-                    item[ TradingData.TRADING_TAX_NON_SAVE ] = 0
-                    item[ TradingData.EXTRA_INSURANCE_FEE_NON_SAVE ] = 0 
-                    item[ TradingData.TRADING_COST_NON_SAVE ] = 0
-                    item[ TradingData.STOCK_DIVIDEND_GAIN_NON_SAVE ] = 0
+                    item[ TradingData.EXTRA_INSURANCE_FEE_NON_SAVE ] = n_extra_insurance_fee_for_cash_dividend + n_extra_insurance_fee_for_stock_dividend
+                    n_accumulated_cost = n_accumulated_cost - n_cash_dividend_gain + 10 + n_extra_insurance_fee_for_cash_dividend + n_extra_insurance_fee_for_stock_dividend
+                    n_accumulated_cash_dividend = n_accumulated_cash_dividend + n_cash_dividend_gain - 10 - n_extra_insurance_fee_for_cash_dividend - n_extra_insurance_fee_for_stock_dividend #要想一下要不要扣掉手續費
+                else:
                     item[ TradingData.CASH_DIVIDEND_GAIN_NON_SAVE ] = 0
-                    n_accumulated_cost = n_accumulated_cost - int( Decimal( str( n_accumulated_inventory ) ) * Decimal( str( item[ TradingData.CAPITAL_REDUCTION_PER_SHARE ] ) ) )
-                    n_accumulated_inventory = int( Decimal( str( n_accumulated_inventory ) ) * ( Decimal( str( '10' ) ) - Decimal( str( item[ TradingData.CAPITAL_REDUCTION_PER_SHARE ] ) ) ) / Decimal( str( '10' ) ) )
-                    list_calibration_data.append( item )
+                    item[ TradingData.TRADING_FEE_NON_SAVE ] = 0
+                    item[ TradingData.EXTRA_INSURANCE_FEE_NON_SAVE ] = 0 
+                n_accumulated_stock_dividend += n_stock_dividend_share_gain
+
+            elif e_trading_type == TradingType.CAPITAL_REDUCTION:
+                if n_accumulated_inventory == 0: #沒有庫存就不用算減資了
+                    continue
+                item[ TradingData.TRADING_PRICE ] = -item[ TradingData.CAPITAL_REDUCTION_PER_SHARE ]
+                item[ TradingData.TRADING_COUNT ] = n_accumulated_inventory
+                item[ TradingData.TRADING_VALUE_NON_SAVE ] = -int( n_accumulated_inventory * item[ TradingData.CAPITAL_REDUCTION_PER_SHARE ] )
+                item[ TradingData.TRADING_FEE_NON_SAVE ] = 0
+                item[ TradingData.TRADING_TAX_NON_SAVE ] = 0
+                item[ TradingData.EXTRA_INSURANCE_FEE_NON_SAVE ] = 0 
+                item[ TradingData.TRADING_COST_NON_SAVE ] = 0
+                item[ TradingData.STOCK_DIVIDEND_GAIN_NON_SAVE ] = 0
+                item[ TradingData.CASH_DIVIDEND_GAIN_NON_SAVE ] = 0
+                n_accumulated_cost = n_accumulated_cost - int( Decimal( str( n_accumulated_inventory ) ) * Decimal( str( item[ TradingData.CAPITAL_REDUCTION_PER_SHARE ] ) ) )
+                n_accumulated_inventory = int( Decimal( str( n_accumulated_inventory ) ) * ( Decimal( str( '10' ) ) - Decimal( str( item[ TradingData.CAPITAL_REDUCTION_PER_SHARE ] ) ) ) / Decimal( str( '10' ) ) )
+
             item[ TradingData.ACCUMULATED_COST_NON_SAVE ] = n_accumulated_cost
             item[ TradingData.ACCUMULATED_INVENTORY_NON_SAVE ] = n_accumulated_inventory
             item[ TradingData.AVERAGE_COST_NON_SAVE ] = n_accumulated_cost / n_accumulated_inventory if n_accumulated_inventory != 0 else 0
             item[ TradingData.ALL_STOCK_DIVIDEND_GAIN_NON_SAVE ] = n_accumulated_stock_dividend
             item[ TradingData.ALL_CASH_DIVIDEND_GAIN_NON_SAVE ] = n_accumulated_cash_dividend
+            list_calibration_data.append( item )
 
-        self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ][ str_stock_number ] = list_calibration_data
+        self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ][ str_stock_number ] = list_calibration_data.copy()
         return list_calibration_data
     
     def process_all_transfer_data( self ): 
