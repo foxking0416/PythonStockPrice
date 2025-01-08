@@ -1666,6 +1666,7 @@ class MainWindow( QMainWindow ):
             dict_per_account_all_stock_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ]
             self.refresh_trading_data_table( dict_per_account_all_stock_trading_data[ self.str_picked_stock_number ] )
 
+        self.refresh_transfer_data_table()
         self.save_share_UI_state()
 
     def on_hide_trading_data_table_tool_button_clicked( self ):
@@ -3007,8 +3008,25 @@ class MainWindow( QMainWindow ):
             table_model.clear()
             table_model.setVerticalHeaderLabels( self.get_cash_transfer_header() )
 
-            for column, item in enumerate( list_per_account_all_cash_transfer_data ):
+            if self.ui.qtFromNewToOldAction.isChecked():
+                loop_list = list_per_account_all_cash_transfer_data[::-1]
+                if self.ui.qtShow10Action.isChecked():
+                    loop_list = loop_list[:10]
+            else:
+                loop_list = list_per_account_all_cash_transfer_data
+                if self.ui.qtShow10Action.isChecked():
+                    loop_list = loop_list[:10]
+
+            for column, item in enumerate( loop_list ):
                 str_date = item[ TransferData.TRANSFER_DATE ]
+                str_year = str_date.split( '-' )[ 0 ]
+                if self.ui.qtROCYearAction.isChecked():
+                    str_year = str( int( str_year ) - 1911 )
+
+                str_month_date = str_date[ 5: ].replace( '-', '/' )
+                str_date = f"{str_year}/{str_month_date}"
+
+
                 str_total_value = format( item[ TransferData.TOTAL_VALUE_NON_SAVE ], "," )
 
                 e_transfer_type = item[ TransferData.TRANSFER_TYPE ]
@@ -3063,7 +3081,7 @@ class MainWindow( QMainWindow ):
         else:
             loop_list = sorted_list
             if self.ui.qtShow10Action.isChecked():
-                loop_list = loop_list[:11]
+                loop_list = loop_list[:11]#因為會有一筆是template，所以要多一筆
 
         b_use_auto_dividend = sorted_list[ 0 ][ TradingData.USE_AUTO_DIVIDEND_DATA ]
         column = 0
