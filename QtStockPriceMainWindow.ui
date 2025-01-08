@@ -182,15 +182,15 @@
     <property name="title">
      <string>檔案</string>
     </property>
-    <addaction name="qtActionNew"/>
-    <addaction name="qtActionOpen"/>
+    <addaction name="qtNewFileAction"/>
+    <addaction name="qtOpenFileAction"/>
     <addaction name="separator"/>
-    <addaction name="qtActionSaveAs"/>
-    <addaction name="qtActionSave"/>
+    <addaction name="qtSaveAsAction"/>
+    <addaction name="qtSaveAction"/>
     <addaction name="separator"/>
-    <addaction name="qtActionExportCurrentGroup"/>
-    <addaction name="qtActionImportFull"/>
-    <addaction name="qtActionImportSingleStock"/>
+    <addaction name="qtExportCurrentGroupAction"/>
+    <addaction name="qtImportFullAction"/>
+    <addaction name="qtImportSingleStockAction"/>
    </widget>
    <widget class="QMenu" name="menu_2">
     <property name="title">
@@ -212,37 +212,37 @@
    <addaction name="menu_2"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <action name="qtActionNew">
+  <action name="qtNewFileAction">
    <property name="text">
     <string>開新檔案</string>
    </property>
   </action>
-  <action name="qtActionSaveAs">
+  <action name="qtSaveAsAction">
    <property name="text">
     <string>另存新檔</string>
    </property>
   </action>
-  <action name="qtActionSave">
+  <action name="qtSaveAction">
    <property name="text">
     <string>儲存</string>
    </property>
   </action>
-  <action name="qtActionOpen">
+  <action name="qtOpenFileAction">
    <property name="text">
     <string>開啟舊檔</string>
    </property>
   </action>
-  <action name="qtActionExportCurrentGroup">
+  <action name="qtExportCurrentGroupAction">
    <property name="text">
     <string>匯出目前群組</string>
    </property>
   </action>
-  <action name="qtActionImportFull">
+  <action name="qtImportFullAction">
    <property name="text">
     <string>匯入所有群組資料</string>
    </property>
   </action>
-  <action name="qtActionImportSingleStock">
+  <action name="qtImportSingleStockAction">
    <property name="text">
     <string>匯入單支股票到當前群組</string>
    </property>

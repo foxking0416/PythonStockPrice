@@ -945,6 +945,35 @@ class MainWindow( QMainWindow ):
             else:
                 self.ui.qtTradingDataTableView.setRowHeight( row, 25 )
 
+
+
+        self.ui.qtHideTradingDataTableToolButton.clicked.connect( self.on_hide_trading_data_table_tool_button_clicked )
+
+        self.ui.qtAddTradingDataPushButton.clicked.connect( self.on_add_trading_data_push_button_clicked )
+        self.ui.qtAddRegularTradingDataPushButton.clicked.connect( self.on_add_regular_trading_data_push_button_clicked )
+        self.ui.qtAddDividendDataPushButton.clicked.connect( self.on_add_dividend_data_push_button_clicked )
+        self.ui.qtAddLimitBuyingDataPushButton.clicked.connect( self.on_add_limit_buying_data_push_button_clicked )
+        self.ui.qtAddCapitalReductionDataPushButton.clicked.connect( self.on_add_capital_reduction_data_push_button_clicked )
+        self.ui.qtExportAllStockTradingDataPushButton.clicked.connect( self.on_export_all_to_excell_button_clicked )
+        self.ui.qtExportSelectedStockTradingDataPushButton.clicked.connect( self.on_export_selected_to_excell_button_clicked )
+
+        self.ui.qtHideTradingDataTableToolButton.setIcon( down_icon )
+
+        self.ui.qtNewFileAction.setShortcut( "Ctrl+N" )
+        self.ui.qtNewFileAction.triggered.connect( self.on_new_file_action_triggered )
+        self.ui.qtOpenFileAction.setShortcut( "Ctrl+O" )
+        self.ui.qtOpenFileAction.triggered.connect( self.on_open_file_action_triggered )
+        self.ui.qtSaveAsAction.setShortcut( "Ctrl+A" )
+        self.ui.qtSaveAsAction.triggered.connect( self.on_save_as_action_triggered )
+        self.ui.qtSaveAction.setShortcut( "Ctrl+S" )
+        self.ui.qtSaveAction.triggered.connect( self.on_save_action_triggered )
+        self.ui.qtExportCurrentGroupAction.setShortcut( "Ctrl+E" )
+        self.ui.qtExportCurrentGroupAction.triggered.connect( self.on_export_current_group_action_triggered )
+        self.ui.qtImportFullAction.setShortcut( "Ctrl+U" )
+        self.ui.qtImportFullAction.triggered.connect( self.on_import_full_action_triggered )
+        self.ui.qtImportSingleStockAction.setShortcut( "Ctrl+I" )
+        self.ui.qtImportSingleStockAction.triggered.connect( self.on_import_single_stock_action_triggered )
+
         self.ui.qtFromNewToOldAction.setChecked( True )
         self.ui.qtFromOldToNewAction.setChecked( False )
         self.ui.qtFromNewToOldAction.triggered.connect( self.on_trigger_from_new_to_old )
@@ -964,33 +993,6 @@ class MainWindow( QMainWindow ):
         self.ui.qtROCYearAction.setChecked( False )
         self.ui.qtADYearAction.triggered.connect( self.on_trigger_AD_year )
         self.ui.qtROCYearAction.triggered.connect( self.on_trigger_ROC_year )
-
-        self.ui.qtHideTradingDataTableToolButton.clicked.connect( self.on_hide_trading_data_table_tool_button_clicked )
-
-        self.ui.qtAddTradingDataPushButton.clicked.connect( self.on_add_trading_data_push_button_clicked )
-        self.ui.qtAddRegularTradingDataPushButton.clicked.connect( self.on_add_regular_trading_data_push_button_clicked )
-        self.ui.qtAddDividendDataPushButton.clicked.connect( self.on_add_dividend_data_push_button_clicked )
-        self.ui.qtAddLimitBuyingDataPushButton.clicked.connect( self.on_add_limit_buying_data_push_button_clicked )
-        self.ui.qtAddCapitalReductionDataPushButton.clicked.connect( self.on_add_capital_reduction_data_push_button_clicked )
-        self.ui.qtExportAllStockTradingDataPushButton.clicked.connect( self.on_export_all_to_excell_button_clicked )
-        self.ui.qtExportSelectedStockTradingDataPushButton.clicked.connect( self.on_export_selected_to_excell_button_clicked )
-
-        self.ui.qtHideTradingDataTableToolButton.setIcon( down_icon )
-
-        self.ui.qtActionNew.setShortcut( "Ctrl+N" )
-        self.ui.qtActionNew.triggered.connect( self.on_new_file_action_triggered )
-        self.ui.qtActionOpen.setShortcut( "Ctrl+O" )
-        self.ui.qtActionOpen.triggered.connect( self.on_open_file_action_triggered )
-        self.ui.qtActionSaveAs.setShortcut( "Ctrl+A" )
-        self.ui.qtActionSaveAs.triggered.connect( self.on_save_as_action_triggered )
-        self.ui.qtActionSave.setShortcut( "Ctrl+S" )
-        self.ui.qtActionSave.triggered.connect( self.on_save_action_triggered )
-        self.ui.qtActionExportCurrentGroup.setShortcut( "Ctrl+E" )
-        self.ui.qtActionExportCurrentGroup.triggered.connect( self.on_export_current_group_action_triggered )
-        self.ui.qtActionImportFull.setShortcut( "Ctrl+U" )
-        self.ui.qtActionImportFull.triggered.connect( self.on_import_full_action_triggered )
-        self.ui.qtActionImportSingleStock.setShortcut( "Ctrl+I" )
-        self.ui.qtActionImportSingleStock.triggered.connect( self.on_import_single_stock_action_triggered )
         
         self.trading_data_json_file_path = os.path.join( g_data_dir, 'StockInventory', str_initial_data_file )
         self.UISetting_file_path = os.path.join( g_data_dir, 'StockInventory', str_UI_setting_file )
