@@ -216,7 +216,7 @@ class TransferData( Enum ):
     TOTAL_VALUE_NON_SAVE = 4 #不會記錄
 
 class Utility():
-    def compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, b_etf, b_daying_trading ):
+    def compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, b_etf, b_daying_trading, b_bond ):
         f_trading_price = Decimal( str( f_trading_price ) )#原本10.45 * 100000 = 1044999.999999999 然後取 int 就變成1044999，所以改用Decimal
         n_trading_count = Decimal( str( n_trading_count ) )
         f_trading_fee_discount = Decimal( str( f_trading_fee_discount ) )
@@ -233,7 +233,10 @@ class Utility():
             
             if e_trading_type == TradingType.SELL:
                 if b_etf:
-                    n_trading_tax = int( n_trading_value * Decimal( '0.001' ) )
+                    if b_bond:
+                         n_trading_tax = 0
+                    else:
+                        n_trading_tax = int( n_trading_value * Decimal( '0.001' ) )
                 elif b_daying_trading:
                     n_trading_tax = int( n_trading_value * Decimal( '0.0015' ) )
                 else:
@@ -495,6 +498,7 @@ class StockTradingEditDialog( QDialog ):
         self.ui.qtOkButtonBox.accepted.connect( self.accept_data )
         self.ui.qtOkButtonBox.rejected.connect( self.cancel )
         self.b_etf = b_etf
+        self.str_stock_name = str_stock_name
         # self.load_stylesheet("style.css")
         self.dict_trading_data = {}
 
@@ -603,8 +607,8 @@ class StockTradingEditDialog( QDialog ):
         f_trading_price = self.ui.qtPriceDoubleSpinBox.value()
         n_trading_count = self.get_trading_count()
         f_trading_fee_discount = self.get_trading_fee_discount() 
-        
-        dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, self.b_etf, False )
+        b_bond = True if '債' in self.str_stock_name else False
+        dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, self.b_etf, False, b_bond )
 
         if e_trading_type == TradingType.BUY:
             self.ui.qtTradingValueLineEdit.setText( format( dict_result[ TradingCost.TRADING_VALUE ], ',' ) )
@@ -2542,6 +2546,9 @@ class MainWindow( QMainWindow ):
 
         b_extra_insurance_fee = self.dict_all_account_ui_state[ str_tab_widget_name ][ "insurance_checkbox"]
 
+        str_stock_name = self.dict_all_company_number_to_name_and_type[ str_stock_number ][ 0 ]
+        b_bond = True if '債' in str_stock_name else False
+
         str_b_etf = self.dict_all_company_number_to_name_and_type[ str_stock_number ][ 1 ]
         b_etf = True if str_b_etf == "True" else False
         sorted_list = sorted( list_trading_data, key=lambda x: ( datetime.datetime.strptime( x[ TradingData.TRADING_DATE ], "%Y-%m-%d"), -x[ TradingData.TRADING_TYPE ] ) )
@@ -2578,7 +2585,7 @@ class MainWindow( QMainWindow ):
                 f_trading_price = item[ TradingData.TRADING_PRICE ]
                 n_trading_count = item[ TradingData.TRADING_COUNT ]
                 f_trading_fee_discount = item[ TradingData.TRADING_FEE_DISCOUNT ]
-                dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, b_etf, False )
+                dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, b_etf, False, b_bond )
                 item[ TradingData.TRADING_VALUE_NON_SAVE ] = dict_result[ TradingCost.TRADING_VALUE ]
                 item[ TradingData.TRADING_FEE_NON_SAVE ] = dict_result[ TradingCost.TRADING_FEE ]
                 item[ TradingData.TRADING_TAX_NON_SAVE ] = dict_result[ TradingCost.TRADING_TAX ]
@@ -2634,7 +2641,7 @@ class MainWindow( QMainWindow ):
 
                 if str_selling_date == str_last_buying_date: #賣出與買入同一天屬於當沖
                     if n_trading_count <= n_last_buying_count: #賣出數量小於或等於買入數量，表示全部賣出數量都可視為當沖
-                        dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, b_etf, True )
+                        dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, b_etf, True, b_bond )
                         item[ TradingData.TRADING_VALUE_NON_SAVE ] = dict_result[ TradingCost.TRADING_VALUE ]
                         item[ TradingData.TRADING_FEE_NON_SAVE ] = dict_result[ TradingCost.TRADING_FEE ]
                         item[ TradingData.TRADING_TAX_NON_SAVE ] = dict_result[ TradingCost.TRADING_TAX ]
@@ -2644,14 +2651,14 @@ class MainWindow( QMainWindow ):
                         n_last_buying_count -= n_trading_count
                     else: #賣出數量大於買入數量，表示只有部分數量都可視為當沖
                         n_trading_count_1 = n_last_buying_count
-                        dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count_1, f_trading_fee_discount, b_etf, True )#這部分是當沖
+                        dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count_1, f_trading_fee_discount, b_etf, True, b_bond )#這部分是當沖
                         n_trading_value_1 = dict_result[ TradingCost.TRADING_VALUE ]
                         n_trading_fee_1 = dict_result[ TradingCost.TRADING_FEE ]
                         n_trading_tax_1 = dict_result[ TradingCost.TRADING_TAX ]
                         n_trading_total_cost_1 = dict_result[ TradingCost.TRADING_TOTAL_COST ]
 
                         n_trading_count_2 = n_trading_count - n_last_buying_count
-                        dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count_2, f_trading_fee_discount, b_etf, False )#這部分不是當沖
+                        dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count_2, f_trading_fee_discount, b_etf, False, b_bond )#這部分不是當沖
                         n_trading_value_2 = dict_result[ TradingCost.TRADING_VALUE ]
                         n_trading_fee_2 = dict_result[ TradingCost.TRADING_FEE ]
                         n_trading_tax_2 = dict_result[ TradingCost.TRADING_TAX ]
@@ -2666,7 +2673,7 @@ class MainWindow( QMainWindow ):
 
                         n_last_buying_count = 0
                 else:
-                    dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, b_etf, False )
+                    dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, b_etf, False, b_bond )
                     item[ TradingData.TRADING_VALUE_NON_SAVE ] = dict_result[ TradingCost.TRADING_VALUE ]
                     item[ TradingData.TRADING_FEE_NON_SAVE ] = dict_result[ TradingCost.TRADING_FEE ]
                     item[ TradingData.TRADING_TAX_NON_SAVE ] = dict_result[ TradingCost.TRADING_TAX ]
