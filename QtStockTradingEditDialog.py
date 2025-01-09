@@ -84,6 +84,11 @@ class Ui_Dialog(object):
 
         self.horizontalLayout_2.addWidget(self.qtSellRadioButton)
 
+        self.qtDayingTradingCheckBox = QCheckBox(Dialog)
+        self.qtDayingTradingCheckBox.setObjectName(u"qtDayingTradingCheckBox")
+
+        self.horizontalLayout_2.addWidget(self.qtDayingTradingCheckBox)
+
 
         self.verticalLayout.addLayout(self.horizontalLayout_2)
 
@@ -185,7 +190,7 @@ class Ui_Dialog(object):
         self.qtOddTradeCountSpinBox.setObjectName(u"qtOddTradeCountSpinBox")
         self.qtOddTradeCountSpinBox.setEnabled(False)
         self.qtOddTradeCountSpinBox.setMinimumSize(QSize(75, 0))
-        self.qtOddTradeCountSpinBox.setMaximum(999)
+        self.qtOddTradeCountSpinBox.setMaximum(9999999)
 
         self.horizontalLayout_6.addWidget(self.qtOddTradeCountSpinBox)
 
@@ -310,6 +315,7 @@ class Ui_Dialog(object):
         self.label.setText(QCoreApplication.translate("Dialog", u"\u65e5\u671f", None))
         self.qtBuyRadioButton.setText(QCoreApplication.translate("Dialog", u"\u8cb7", None))
         self.qtSellRadioButton.setText(QCoreApplication.translate("Dialog", u"\u8ce3", None))
+        self.qtDayingTradingCheckBox.setText(QCoreApplication.translate("Dialog", u"\u7576\u6c96\u4ea4\u6613", None))
         self.qtDiscountCheckBox.setText(QCoreApplication.translate("Dialog", u"\u624b\u7e8c\u8cbb\u6298\u6263", None))
         self.label_10.setText(QCoreApplication.translate("Dialog", u"\u6298", None))
         self.label_2.setText(QCoreApplication.translate("Dialog", u"\u4ea4\u6613\u50f9\u683c", None))

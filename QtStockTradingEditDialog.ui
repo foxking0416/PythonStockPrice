@@ -97,6 +97,13 @@
        </property>
       </widget>
      </item>
+     <item>
+      <widget class="QCheckBox" name="qtDayingTradingCheckBox">
+       <property name="text">
+        <string>當沖交易</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
    <item>

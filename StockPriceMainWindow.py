@@ -188,20 +188,22 @@ class TradingData( Enum ):
     CASH_DIVIDEND_PER_SHARE = 9
     CAPITAL_REDUCTION_PER_SHARE = 10
     USE_AUTO_DIVIDEND_DATA = 11
-    SORTED_INDEX_NON_SAVE = 12 #不會記錄
-    TRADING_VALUE_NON_SAVE = 13 #不會記錄
-    TRADING_FEE_NON_SAVE = 14 #不會記錄
-    TRADING_TAX_NON_SAVE = 15 #不會記錄
-    TRADING_COST_NON_SAVE = 16 #不會記錄
-    STOCK_DIVIDEND_GAIN_NON_SAVE = 17 #不會記錄
-    CASH_DIVIDEND_GAIN_NON_SAVE = 18 #不會記錄
-    EXTRA_INSURANCE_FEE_NON_SAVE = 19 #不會記錄
-    ACCUMULATED_COST_NON_SAVE = 20 #不會記錄
-    ACCUMULATED_INVENTORY_NON_SAVE = 21 #不會記錄
-    AVERAGE_COST_NON_SAVE = 22 #不會記錄
-    IS_AUTO_DIVIDEND_DATA_NON_SAVE = 23 #不會記錄
-    ALL_STOCK_DIVIDEND_GAIN_NON_SAVE = 24 #不會記錄
-    ALL_CASH_DIVIDEND_GAIN_NON_SAVE = 25 #不會記錄
+    DAYING_TRADING = 12
+    SORTED_INDEX_NON_SAVE = 13 #不會記錄
+    TRADING_VALUE_NON_SAVE = 14 #不會記錄
+    TRADING_FEE_NON_SAVE = 15 #不會記錄
+    TRADING_TAX_NON_SAVE = 16 #不會記錄
+    TRADING_COST_NON_SAVE = 17 #不會記錄
+    STOCK_DIVIDEND_GAIN_NON_SAVE = 18 #不會記錄
+    CASH_DIVIDEND_GAIN_NON_SAVE = 19 #不會記錄
+    EXTRA_INSURANCE_FEE_NON_SAVE = 20 #不會記錄
+    ACCUMULATED_COST_NON_SAVE = 21 #不會記錄
+    ACCUMULATED_INVENTORY_NON_SAVE = 22 #不會記錄
+    AVERAGE_COST_NON_SAVE = 23 #不會記錄
+    IS_AUTO_DIVIDEND_DATA_NON_SAVE = 24 #不會記錄
+    ALL_STOCK_DIVIDEND_GAIN_NON_SAVE = 25 #不會記錄
+    ALL_CASH_DIVIDEND_GAIN_NON_SAVE = 26 #不會記錄
+    IS_REALLY_DAYING_TRADING_NON_SAVE = 27 #不會記錄
 
 class TradingCost( Enum ):
     TRADING_VALUE = 0
@@ -273,7 +275,8 @@ class Utility():
                                n_trading_fee_constant,      #手續費固定金額
                                f_stock_dividend_per_share,  #每股股票股利
                                f_cash_dividend_per_share,   #每股現金股利
-                               f_capital_reduction_per_share ): #每股減資金額
+                               f_capital_reduction_per_share, #每股減資金額
+                               b_daying_trading  ):         #是否為當沖交易
         dict_trading_data = {}
         dict_trading_data[ TradingData.TRADING_DATE ] = str_trading_date
         dict_trading_data[ TradingData.TRADING_TYPE ] = e_trading_type
@@ -286,6 +289,7 @@ class Utility():
         dict_trading_data[ TradingData.STOCK_DIVIDEND_PER_SHARE ] = f_stock_dividend_per_share
         dict_trading_data[ TradingData.CASH_DIVIDEND_PER_SHARE ] = f_cash_dividend_per_share
         dict_trading_data[ TradingData.CAPITAL_REDUCTION_PER_SHARE ] = f_capital_reduction_per_share
+        dict_trading_data[ TradingData.DAYING_TRADING ] = b_daying_trading
         return dict_trading_data
 
 class EditTabTitleDialog( QDialog ):
@@ -371,7 +375,8 @@ class StockCapitalReductionEditDialog( QDialog ):
                                                                     0,                                                  #手續費固定金額
                                                                     0,                                                  #每股股票股利
                                                                     0,                                                  #每股現金股利
-                                                                    f_stock_capital_reduction_per_share )               #每股減資金額           
+                                                                    f_stock_capital_reduction_per_share,                #每股減資金額
+                                                                    False )                                             #是否為當沖交易
             self.accept()
         else:
             self.reject()
@@ -464,7 +469,8 @@ class StockDividendEditDialog( QDialog ):
                                                                     0,                                                  #手續費固定金額
                                                                     f_stock_dividend_per_share,                         #每股股票股利
                                                                     f_cash_dividend_per_share,                          #每股現金股利
-                                                                    0 )                                                 #每股減資金額
+                                                                    0,                                                  #每股減資金額
+                                                                    False )                                             #是否為當沖交易
             self.accept()
         else:
             self.reject()
@@ -557,6 +563,12 @@ class StockTradingEditDialog( QDialog ):
             self.ui.qtCommonTradeCountSpinBox.setValue( 0 )
             self.ui.qtOddTradeCountSpinBox.setValue( f_count )
 
+    def setup_daying_trading( self, b_daying_trading ):
+        if b_daying_trading:
+            self.ui.qtDayingTradingCheckBox.setChecked( True )
+        else:
+            self.ui.qtDayingTradingCheckBox.setChecked( False )
+
     def accept_data( self ):
 
         if float( self.ui.qtTotalCostLineEdit.text().replace( ',', '' ) ) != 0:
@@ -571,7 +583,8 @@ class StockTradingEditDialog( QDialog ):
                                                                     0,                                                  #手續費固定金額
                                                                     0,                                                  #每股股票股利
                                                                     0,                                                  #每股現金股利
-                                                                    0 )                                                 #每股減資金額
+                                                                    0,                                                  #每股減資金額
+                                                                    self.ui.qtDayingTradingCheckBox.isChecked() )       #是否為當沖交易                                          
             self.accept()
         else:
             self.reject()
@@ -761,7 +774,8 @@ class StockRegularTradingEditDialog( QDialog ):
                                                                     self.ui.qtTradingFeeConstantSpinBox.value(),        #手續費固定金額
                                                                     0,                                                  #每股股票股利
                                                                     0,                                                  #每股現金股利
-                                                                    0 )                                                 #每股減資金額
+                                                                    0,                                                  #每股減資金額
+                                                                    False )                                             #是否為當沖交易
             self.accept()
         else:
             self.reject()
@@ -847,7 +861,8 @@ class StockCapitalIncreaseEditDialog( QDialog ):
                                                                     0,                                                  #手續費固定金額
                                                                     0,                                                  #每股股票股利
                                                                     0,                                                  #每股現金股利
-                                                                    0 )                                                 #每股減資金額
+                                                                    0,                                                  #每股減資金額
+                                                                    False )                                             #是否為當沖交易
             self.accept()
         else:
             self.reject()
@@ -1431,7 +1446,8 @@ class MainWindow( QMainWindow ):
                                                                0,                         #手續費固定金額
                                                                0,                         #每股股票股利
                                                                0,                         #每股現金股利
-                                                               0 )                        #每股減資金額
+                                                               0,                         #每股減資金額
+                                                               False )                    #是否為當沖交易
             dict_trading_data[ TradingData.USE_AUTO_DIVIDEND_DATA ] = True
             dict_per_account_all_stock_trading_data[ str_first_four_chars ] = [ dict_trading_data ]
             sorted_list = self.process_single_trading_data( str_tab_widget_name, str_first_four_chars )
@@ -1875,6 +1891,7 @@ class MainWindow( QMainWindow ):
                         dialog.setup_trading_discount( dict_selected_data[ TradingData.TRADING_FEE_DISCOUNT ] )
                         dialog.setup_trading_price( dict_selected_data[ TradingData.TRADING_PRICE ] )
                         dialog.setup_trading_count( dict_selected_data[ TradingData.TRADING_COUNT ] )
+                        dialog.setup_daying_trading( dict_selected_data[ TradingData.DAYING_TRADING ] )
                     elif dict_selected_data[ TradingData.TRADING_TYPE ] == TradingType.REGULAR_BUY:
                         dialog = StockRegularTradingEditDialog( str_stock_number, str_stock_name, TradingFeeType.VARIABLE, True, 0, 0, 0, self )
                         dialog.setup_trading_date( dict_selected_data[ TradingData.TRADING_DATE ] )
@@ -2409,13 +2426,14 @@ class MainWindow( QMainWindow ):
                                                                                        e_trading_type,                                      #交易種類
                                                                                        item_trading_data[ "trading_price" ],                #交易價格
                                                                                        item_trading_data[ "trading_count" ],                #交易股數
-                                                                                       TradingFeeType.VARIABLE,                           #手續費種類
+                                                                                       TradingFeeType.VARIABLE,                             #手續費種類
                                                                                        item_trading_data[ "trading_fee_discount" ],         #手續費折扣
                                                                                        0,                                                   #手續費最低金額
                                                                                        0,                                                   #手續費固定金額
                                                                                        item_trading_data[ "stock_dividend_per_share" ],     #每股股票股利
                                                                                        item_trading_data[ "cash_dividend_per_share" ],      #每股現金股利
-                                                                                       item_trading_data[ "capital_reduction_per_share" ] ) #每股減資金額     
+                                                                                       item_trading_data[ "capital_reduction_per_share" ],  #每股減資金額 
+                                                                                       False )                                              #是否為當沖交易  
                                 if item_trading_data[ "trading_date" ] == '0001-01-01':
                                     dict_per_trading_data[ TradingData.USE_AUTO_DIVIDEND_DATA ] = item_trading_data[ "use_auto_dividend_data" ]       
                                 list_trading_data.append( dict_per_trading_data )
@@ -2473,7 +2491,8 @@ class MainWindow( QMainWindow ):
                                                                                        item_trading_data[ "trading_fee_constant" ],         #手續費固定金額
                                                                                        item_trading_data[ "stock_dividend_per_share" ],     #每股股票股利
                                                                                        item_trading_data[ "cash_dividend_per_share" ],      #每股現金股利
-                                                                                       item_trading_data[ "capital_reduction_per_share" ] ) #每股減資金額     
+                                                                                       item_trading_data[ "capital_reduction_per_share" ],  #每股減資金額     
+                                                                                       item_trading_data[ "daying_trading" ] )              #是否為當沖交易
                                 if item_trading_data[ "trading_date" ] == '0001-01-01':
                                     dict_per_trading_data[ TradingData.USE_AUTO_DIVIDEND_DATA ] = item_trading_data[ "use_auto_dividend_data" ]       
                                 list_trading_data.append( dict_per_trading_data )
@@ -2545,6 +2564,7 @@ class MainWindow( QMainWindow ):
                     dict_per_trading_data[ "capital_reduction_per_share" ] = item[ TradingData.CAPITAL_REDUCTION_PER_SHARE ]
                     if dict_per_trading_data[ "trading_date" ] == '0001-01-01':
                         dict_per_trading_data[ "use_auto_dividend_data" ] = item[ TradingData.USE_AUTO_DIVIDEND_DATA ]
+                    dict_per_trading_data[ "daying_trading" ] = item[ TradingData.DAYING_TRADING ]
 
                     export_data.append( dict_per_trading_data )
                 export_dict_per_account_all_stock_trading_data[ key_stock ] = export_data
@@ -2708,10 +2728,12 @@ class MainWindow( QMainWindow ):
                 item[ TradingData.CASH_DIVIDEND_GAIN_NON_SAVE ] = 0
                 str_buying_date = item[ TradingData.TRADING_DATE ]
                 if str_last_buying_date == str_buying_date:
-                    n_last_buying_count += n_trading_count
+                    if item[ TradingData.DAYING_TRADING ] == True:
+                        n_last_buying_count += n_trading_count
                 else:
-                    str_last_buying_date = str_buying_date
-                    n_last_buying_count = n_trading_count
+                    if item[ TradingData.DAYING_TRADING ] == True:
+                        str_last_buying_date = str_buying_date
+                        n_last_buying_count = n_trading_count
             elif e_trading_type == TradingType.REGULAR_BUY:
                 f_trading_price = item[ TradingData.TRADING_PRICE ]
                 n_trading_count = item[ TradingData.TRADING_COUNT ]
@@ -2743,11 +2765,15 @@ class MainWindow( QMainWindow ):
                 item[ TradingData.CASH_DIVIDEND_GAIN_NON_SAVE ] = 0
             elif e_trading_type == TradingType.SELL:
                 str_selling_date = item[ TradingData.TRADING_DATE ]
+                obj_selling_date = datetime.datetime.strptime( str_selling_date, "%Y-%m-%d")
                 f_trading_price = item[ TradingData.TRADING_PRICE ]
                 f_trading_fee_discount = item[ TradingData.TRADING_FEE_DISCOUNT ]
                 n_trading_count = item[ TradingData.TRADING_COUNT ]
 
-                if str_selling_date == str_last_buying_date: #賣出與買入同一天屬於當沖
+                if ( str_selling_date == str_last_buying_date and    #賣出與買入同一天
+                     item[ TradingData.DAYING_TRADING ] == True and  #有勾選是當沖交易
+                     obj_selling_date >= datetime.datetime.strptime( '2017-04-28', "%Y-%m-%d" ) ): #交易日期在2017-04-28之後。因為在這之後才通過當沖交易稅減半
+                    item[ TradingData.IS_REALLY_DAYING_TRADING_NON_SAVE ] = True
                     if n_trading_count <= n_last_buying_count: #賣出數量小於或等於買入數量，表示全部賣出數量都可視為當沖
                         dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, b_etf, True, b_bond )
                         item[ TradingData.TRADING_VALUE_NON_SAVE ] = dict_result[ TradingCost.TRADING_VALUE ]
@@ -2781,6 +2807,7 @@ class MainWindow( QMainWindow ):
 
                         n_last_buying_count = 0
                 else:
+                    item[ TradingData.IS_REALLY_DAYING_TRADING_NON_SAVE ] = False
                     dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, b_etf, False, b_bond )
                     item[ TradingData.TRADING_VALUE_NON_SAVE ] = dict_result[ TradingCost.TRADING_VALUE ]
                     item[ TradingData.TRADING_FEE_NON_SAVE ] = dict_result[ TradingCost.TRADING_FEE ]
@@ -3131,13 +3158,17 @@ class MainWindow( QMainWindow ):
 
             list_data = self.get_per_trading_data_text_list( dict_per_trading_data )
 
+            if TradingData.IS_REALLY_DAYING_TRADING_NON_SAVE in dict_per_trading_data:
+                if dict_per_trading_data[ TradingData.IS_REALLY_DAYING_TRADING_NON_SAVE ]:
+                    list_data[ 2 ] = "當沖賣"
+
             for row, data in enumerate( list_data ):
                 standard_item = QStandardItem( data )
                 if data == "買進":
                     standard_item.setBackground( QBrush( '#DA9694' ) )
                 elif data == "定期定額買進":
                     standard_item.setBackground( QBrush( '#FF99FF' ) )
-                elif data == "賣出":
+                elif data == "賣出" or data == "當沖賣":
                     standard_item.setBackground( QBrush( '#76933C' ) )
                 elif data == "股利分配":
                     standard_item.setBackground( QBrush( '#8DB4E2' ) )
@@ -4044,7 +4075,8 @@ class MainWindow( QMainWindow ):
                                                                             0,                          #手續費固定金額                        
                                                                             f_stock_dividend_per_share, #每股股票股利
                                                                             f_cash_dividend_per_share,  #每股現金股利
-                                                                            0 )                         #每股減資金額
+                                                                            0,                          #每股減資金額
+                                                                            False )                     #是否為當沖交易
                         dict_dividend_data[ TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE ] = True
 
                         if item[0] in dict_stock_yearly_dividned:
@@ -4179,7 +4211,8 @@ class MainWindow( QMainWindow ):
                                                                                     0,                         #手續費固定金額                                   
                                                                                     0,                         #每股股票股利
                                                                                     f_cash_dividend_per_share, #每股現金股利
-                                                                                    0 )                        #每股減資金額
+                                                                                    0,                         #每股減資金額
+                                                                                    False )                    #是否為當沖交易
                                 
                                 dict_dividend_data[ TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE ] = True
                                 if str_stock_number in dict_stock_yearly_dividned:
@@ -4351,13 +4384,14 @@ class MainWindow( QMainWindow ):
                                                                                     TradingType.DIVIDEND,      #交易種類
                                                                                     0,                         #交易價格                         
                                                                                     0,                         #交易股數
-                                                                                    TradingFeeType.VARIABLE, #手續費種類
+                                                                                    TradingFeeType.VARIABLE,   #手續費種類
                                                                                     1,                         #手續費折扣
                                                                                     0,                         #手續費最低金額
                                                                                     0,                         #手續費固定金額                                   
                                                                                     0,                         #每股股票股利
                                                                                     f_cash_dividend_per_share, #每股現金股利
-                                                                                    0 )                        #每股減資金額
+                                                                                    0,                         #每股減資金額
+                                                                                    False )                    #是否為當沖交易
                                 
                                 dict_dividend_data[ TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE ] = True
                                 if str_stock_number in dict_stock_yearly_dividned:
