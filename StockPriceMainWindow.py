@@ -1014,7 +1014,7 @@ class MainWindow( QMainWindow ):
         self.stock_number_file_path = os.path.join( g_data_dir, 'StockInventory', str_stock_number_file )
         self.stock_price_file_path = os.path.join( g_data_dir, 'StockInventory', str_stock_price_file )
 
-        self.list_stock_list_table_horizontal_header = [ '總成本', '庫存股數', '平均成本', ' 收盤價', '淨值', '總手續費', '總交易稅', '損益', '股利所得', '自動帶入股利', '匯出', '刪除' ]
+        self.list_stock_list_table_horizontal_header = [ '總成本', '庫存股數', '平均成本', ' 收盤價', '現值', '總手續費', '總交易稅', '損益', '股利所得', '自動帶入股利', '匯出', '刪除' ]
         self.pick_up_stock( None )
         self.dict_all_account_ui_state = {}
         self.dict_all_account_cash_transfer_data = {}
@@ -1079,7 +1079,7 @@ class MainWindow( QMainWindow ):
             if n_retry > 30:
                 break
         str_valid_month_date = obj_current_date.strftime('%m/%d')
-        self.list_stock_list_table_horizontal_header[ 4 ] = str_valid_month_date + ' 收盤價'
+        self.list_stock_list_table_horizontal_header[ 3 ] = str_valid_month_date + ' 收盤價'
         self.set_progress_value( update_progress_callback, 100 )
         # self.load_initialize_data()
         self.setEnabled( True ) # 資料下載完後就會Enable
