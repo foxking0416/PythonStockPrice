@@ -921,6 +921,41 @@ class Worker( QObject ):
     def update_progress( self, value ):
         self.progress.emit( value )  # Emit progress updates
 
+class CustomSortModel( QStandardItemModel ):
+    def sort(self, column, order):
+
+        numeric_data = []
+        for row in range(self.rowCount()):
+            item = self.item(row, column)
+            try:
+                # 嘗試轉換為整數，去掉逗號
+                value = float(item.text().replace(",", ""))
+            except ( ValueError, AttributeError ):
+                # 如果轉換失敗，跳過此項目
+                value = float('-inf') if order.value == 1 else float('inf')
+            numeric_data.append(( value, row ) )
+
+        numeric_data.sort(
+            key = lambda x: x[ 0 ],
+            reverse = ( order.value == 1 )
+        )
+
+        # 保存整個行的 QStandardItem 物件
+        data = [
+            [self.item( row, col ).clone() for col in range( self.columnCount() ) ]
+            for row in range(self.rowCount())
+        ]
+        list_header = []
+        for row in range( self.rowCount() ):
+            header_text = self.verticalHeaderItem( row ).text()
+            list_header.append( header_text )
+
+        self.setRowCount( 0 )
+        for row_data in numeric_data:
+            self.appendRow( data[ row_data[1] ] )
+
+        self.setVerticalHeaderLabels( list_header )
+
 class MainWindow( QMainWindow ):
     def __init__( self, b_unit_test = False, 
                   str_initial_data_file = 'TradingData.json', 
@@ -1266,7 +1301,7 @@ class MainWindow( QMainWindow ):
         uiqt_stock_inventory_tab_vertical_layout.addLayout( uiqt_horizontal_layout_3 )
 
         delegate = CenterIconDelegate()
-        stock_list_model = QStandardItemModel( 0, 0 )
+        stock_list_model = CustomSortModel( 0, 0 )
         stock_list_model.setHorizontalHeaderLabels( self.list_stock_list_table_horizontal_header )
         uiqt_stock_list_table_view.verticalHeader().setSectionsMovable( True )
         uiqt_stock_list_table_view.verticalHeader().sectionMoved.connect( self.on_stock_list_table_vertical_header_section_moved )
