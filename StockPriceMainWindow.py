@@ -2512,6 +2512,13 @@ class MainWindow( QMainWindow ):
 
                     if b_create_tab:
                         str_tab_name = self.add_new_tab_and_table( item_account[ "account_name" ] )
+                        for index in range( self.ui.qtTabWidget.count() - 1 ):
+                            tab_widget = self.ui.qtTabWidget.widget( index )
+                            if tab_widget.objectName() == str_tab_name:
+                                qt_insurance_check_box = tab_widget.findChild( QCheckBox, "ExtraInsuranceFeeCheckBox" )
+                                with QSignalBlocker( qt_insurance_check_box ):
+                                    qt_insurance_check_box.setChecked( item_account[ "insurance_checkbox" ] )
+                                    break
                         dict_all_account_ui_state[ str_tab_name ] = dict_ui_state
                         dict_all_account_all_stock_trading_data[ str_tab_name ] = dict_per_stock_trading_data
                         dict_all_account_cash_transfer[ str_tab_name ] = list_per_account_cash_transfer_data
@@ -2883,7 +2890,6 @@ class MainWindow( QMainWindow ):
                     item[ TradingData.TRADING_FEE_NON_SAVE ] = 0
                     item[ TradingData.EXTRA_INSURANCE_FEE_NON_SAVE ] = 0 
                 n_accumulated_stock_dividend += n_stock_dividend_share_gain
-
             elif e_trading_type == TradingType.CAPITAL_REDUCTION:
                 if n_accumulated_inventory == 0: #沒有庫存就不用算減資了
                     continue

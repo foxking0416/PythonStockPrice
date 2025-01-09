@@ -16724,7 +16724,7 @@ v1.0.1
         },
         "discount_checkbox": true,
         "discount_value": 0.6,
-        "insurance_checkbox": false,
+        "insurance_checkbox": true,
         "trading_fee_type": 1,
         "trading_fee_minimum": 1,
         "trading_fee_constant": 1,
