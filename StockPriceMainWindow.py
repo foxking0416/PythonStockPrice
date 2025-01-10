@@ -36,9 +36,9 @@ from scipy.optimize import newton
 
 #打包指令
 # cd D:\_2.code\PythonStockPrice   
-# pyinstaller --hidden-import "babel.numbers" --add-data "icon;./icon" --onefile --noconsole StockPriceMainWindow.py
-# pyinstaller --hidden-import "babel.numbers" --add-data "icon;./icon" --onefile --console StockPriceMainWindow.py
-# pyinstaller --hidden-import "babel.numbers" --add-data "icon;./icon" --console StockPriceMainWindow.py
+# pyinstaller --hidden-import "babel.numbers" --add-data "resources;./resources" --onefile --noconsole StockPriceMainWindow.py
+# pyinstaller --hidden-import "babel.numbers" --add-data "resources;./resources" --onefile --console StockPriceMainWindow.py
+# pyinstaller --hidden-import "babel.numbers" --add-data "resources;./resources" --console StockPriceMainWindow.py
 
 # 要把.ui檔變成.py
 # cd D:\_2.code\PythonStockPrice
@@ -125,21 +125,22 @@ else:
     g_exe_root_dir = os.path.dirname( os.path.abspath(__file__) )
     g_data_dir = g_exe_root_dir
 
-window_icon_file_path = os.path.join( g_exe_root_dir, 'icon\\FoxInfo.png' ) 
-edit_icon_file_path = os.path.join( g_exe_root_dir, 'icon\\Edit.svg' ) 
+window_icon_file_path = os.path.join( g_exe_root_dir, 'resources\\FoxInfo.png' ) 
+edit_icon_file_path = os.path.join( g_exe_root_dir, 'resources\\Edit.svg' ) 
 edit_icon = QIcon( edit_icon_file_path ) 
-delete_icon_file_path = os.path.join( g_exe_root_dir, 'icon\\Delete.svg' ) 
+delete_icon_file_path = os.path.join( g_exe_root_dir, 'resources\\Delete.svg' ) 
 delete_icon = QIcon( delete_icon_file_path ) 
-export_icon_file_path = os.path.join( g_exe_root_dir, 'icon\\Export.svg' ) 
+export_icon_file_path = os.path.join( g_exe_root_dir, 'resources\\Export.svg' ) 
 export_icon = QIcon( export_icon_file_path )
-check_icon_file_path = os.path.join( g_exe_root_dir, 'icon\\CheckOn.svg' ) 
+check_icon_file_path = os.path.join( g_exe_root_dir, 'resources\\CheckOn.svg' ) 
 check_icon = QIcon( check_icon_file_path )
-uncheck_icon_file_path = os.path.join( g_exe_root_dir, 'icon\\CheckOff.svg' ) 
+uncheck_icon_file_path = os.path.join( g_exe_root_dir, 'resources\\CheckOff.svg' ) 
 uncheck_icon = QIcon( uncheck_icon_file_path )
-down_icon_file_path = os.path.join( g_exe_root_dir, 'icon\\MoveDown.svg' ) 
+down_icon_file_path = os.path.join( g_exe_root_dir, 'resources\\MoveDown.svg' ) 
 down_icon = QIcon( down_icon_file_path )
-up_icon_file_path = os.path.join( g_exe_root_dir, 'icon\\MoveUp.svg' ) 
+up_icon_file_path = os.path.join( g_exe_root_dir, 'resources\\MoveUp.svg' ) 
 up_icon = QIcon( up_icon_file_path )
+styles_css_path = os.path.join( g_exe_root_dir, 'resources\\styles.css' ) 
 
 
 class CenterIconDelegate( QStyledItemDelegate ):
@@ -1079,7 +1080,7 @@ class MainWindow( QMainWindow ):
         self.n_current_tab = 0
         self.n_tab_index = 0
         self.str_current_save_file_path = None
-        # self.load_stylesheet("style.css")
+        self.load_stylesheet( styles_css_path )
         if b_unit_test:
             self.initialize( True, None )
             self.load_initialize_data()
@@ -1236,13 +1237,17 @@ class MainWindow( QMainWindow ):
         sizePolicy.setHeightForWidth( uiqt_stock_input_line_edit.sizePolicy().hasHeightForWidth() )
 
         uiqt_stock_input_line_edit.setSizePolicy( sizePolicy )
-        uiqt_stock_input_line_edit.setMinimumSize( QSize( 200, 0 ) )
-        uiqt_stock_input_line_edit.setMaximumSize( QSize( 200, 16777215 ) )
+        uiqt_stock_input_line_edit.setMinimumSize( QSize( 150, 0 ) )
+        uiqt_stock_input_line_edit.setMaximumSize( QSize( 150, 16777215 ) )
         uiqt_stock_input_line_edit.setObjectName( "StockInputLineEdit" )
         uiqt_horizontal_layout_1.addWidget( uiqt_stock_input_line_edit )
 
+        uiqt_horizontal_spacer_1_0 = QSpacerItem( 10, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum )
+        uiqt_horizontal_layout_1.addItem( uiqt_horizontal_spacer_1_0 )
+
         uiqt_add_stock_push_button = QPushButton( stock_inventory_tab )
-        uiqt_add_stock_push_button.setMaximumSize( QSize( 100, 16777215 ) )
+        uiqt_add_stock_push_button.setMinimumSize( QSize( 75, 0 ) )
+        uiqt_add_stock_push_button.setMaximumSize( QSize( 75, 16777215 ) )
         uiqt_add_stock_push_button.setText( "新增股票" )
         uiqt_add_stock_push_button.setObjectName( "AddStockPushButton" )
         uiqt_horizontal_layout_1.addWidget( uiqt_add_stock_push_button )
