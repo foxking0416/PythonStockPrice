@@ -2291,6 +2291,7 @@ class MainWindow( QMainWindow ):
         self.dict_all_account_all_stock_trading_data[ str_tab_name ] = {}
         self.dict_all_account_cash_transfer_data[ str_tab_name ] = {}
         self.dict_all_account_ui_state[ str_tab_name ] = { "discount_checkbox": True, "discount_value": 0.6, "insurance_checkbox": False, "trading_fee_type": TradingFeeType.VARIABLE, "trading_fee_minimum": 1, "trading_fee_constant": 1 }
+        self.dict_all_account_all_stock_trading_data_INITIAL = copy.deepcopy( self.dict_all_account_all_stock_trading_data )
         self.ui.qtTabWidget.setCurrentIndex( 0 )
         self.pick_up_stock( None )
         self.refresh_stock_list_table()
@@ -3658,7 +3659,7 @@ class MainWindow( QMainWindow ):
         if str_stock_number is not None:
             str_stock_name = self.dict_all_company_number_to_name_and_type[ str_stock_number ][ 0 ]
             self.ui.qtCurrentSelectCompanyLabel.setText( f"目前選擇公司：{ str_stock_number } { str_stock_name }" )
-            self.ui.qtCurrentSelectCompanyLabel.setStyleSheet("color: yellow; ")
+            # self.ui.qtCurrentSelectCompanyLabel.setStyleSheet("color: yellow; ")
         else:
             self.ui.qtCurrentSelectCompanyLabel.setText( "" )
 
