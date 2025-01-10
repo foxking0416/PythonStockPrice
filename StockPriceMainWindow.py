@@ -1015,8 +1015,6 @@ class MainWindow( QMainWindow ):
             else:
                 self.ui.qtTradingDataTableView.setRowHeight( row, 25 )
 
-
-
         self.ui.qtHideTradingDataTableToolButton.clicked.connect( self.on_hide_trading_data_table_tool_button_clicked )
 
         self.ui.qtAddTradingDataPushButton.clicked.connect( self.on_add_trading_data_push_button_clicked )
@@ -1367,12 +1365,18 @@ class MainWindow( QMainWindow ):
         uiqt_horizontal_layout_4 = QHBoxLayout()
         uiqt_horizontal_layout_4.setSpacing( 0 )
 
+        uiqt_horizontal_spacer_4_1 = QSpacerItem(100, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
+        uiqt_horizontal_layout_4.addItem( uiqt_horizontal_spacer_4_1 )
+
         uiqt_add_cash_transfer_push_button = QPushButton( cash_transfer_tab )
-        uiqt_add_cash_transfer_push_button.setMaximumSize( QSize( 100, 16777215 ) )
+        uiqt_add_cash_transfer_push_button.setMaximumSize( QSize( 150, 16777215 ) )
         uiqt_add_cash_transfer_push_button.setText( "新增入金/出金資料" )
         uiqt_add_cash_transfer_push_button.setObjectName( "AddCashTransferPushButton" )
         uiqt_add_cash_transfer_push_button.clicked.connect( self.on_add_cash_transfer_push_button_clicked )
         uiqt_horizontal_layout_4.addWidget( uiqt_add_cash_transfer_push_button )
+
+        uiqt_horizontal_spacer_4_2 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+        uiqt_horizontal_layout_4.addItem( uiqt_horizontal_spacer_4_2 )
 
         uiqt_horizontal_layout_5 = QHBoxLayout()
         uiqt_horizontal_layout_5.setSpacing( 0 )
