@@ -2281,9 +2281,11 @@ class MainWindow( QMainWindow ):
                 self.ui.qtTabWidget.removeTab( index )
 
         self.dict_all_account_all_stock_trading_data.clear()
+        self.dict_all_account_cash_transfer_data.clear()
         self.dict_all_account_ui_state.clear()
         str_tab_name = self.add_new_tab_and_table()
         self.dict_all_account_all_stock_trading_data[ str_tab_name ] = {}
+        self.dict_all_account_cash_transfer_data[ str_tab_name ] = {}
         self.dict_all_account_ui_state[ str_tab_name ] = { "discount_checkbox": True, "discount_value": 0.6, "insurance_checkbox": False, "trading_fee_type": TradingFeeType.VARIABLE, "trading_fee_minimum": 1, "trading_fee_constant": 1 }
         self.ui.qtTabWidget.setCurrentIndex( 0 )
         self.pick_up_stock( None )
@@ -2328,22 +2330,25 @@ class MainWindow( QMainWindow ):
                     self.ui.qtTabWidget.removeTab( index )
 
 
-            self.dict_all_account_all_stock_trading_data.clear()
-            self.dict_all_account_ui_state.clear()
-            self.load_trading_data_and_create_tab( file_path, 
-                                                   self.dict_all_account_all_stock_trading_data, 
-                                                   self.dict_all_account_ui_state, 
-                                                   self.dict_all_account_cash_transfer_data,
-                                                   True )
-            if len( self.dict_all_account_all_stock_trading_data ) == 0:
-                str_tab_name = self.add_new_tab_and_table()
-                self.dict_all_account_all_stock_trading_data[ str_tab_name ] = {}
-                self.dict_all_account_ui_state[ str_tab_name ] = { "discount_checkbox": True, "discount_value": 0.6, "insurance_checkbox": False, "trading_fee_type": TradingFeeType.VARIABLE, "trading_fee_minimum": 1, "trading_fee_constant": 1 }
-            self.ui.qtTabWidget.setCurrentIndex( 0 )
+                self.dict_all_account_all_stock_trading_data.clear()
+                self.dict_all_account_cash_transfer_data.clear()
+                self.dict_all_account_ui_state.clear()
+                self.load_trading_data_and_create_tab( file_path, 
+                                                    self.dict_all_account_all_stock_trading_data, 
+                                                    self.dict_all_account_ui_state, 
+                                                    self.dict_all_account_cash_transfer_data,
+                                                    True )
+                if len( self.dict_all_account_all_stock_trading_data ) == 0:
+                    str_tab_name = self.add_new_tab_and_table()
+                    self.dict_all_account_all_stock_trading_data[ str_tab_name ] = {}
+                    self.dict_all_account_cash_transfer_data[ str_tab_name ] = {}
+                    self.dict_all_account_ui_state[ str_tab_name ] = { "discount_checkbox": True, "discount_value": 0.6, "insurance_checkbox": False, "trading_fee_type": TradingFeeType.VARIABLE, "trading_fee_minimum": 1, "trading_fee_constant": 1 }
+                self.ui.qtTabWidget.setCurrentIndex( 0 )
 
             self.process_all_trading_data()
             self.pick_up_stock( None )
             self.refresh_stock_list_table()
+            self.process_all_transfer_data()
             self.refresh_transfer_data_table()
             self.clear_per_stock_trading_table()
             self.update_button_enable_disable_status()
@@ -3241,10 +3246,10 @@ class MainWindow( QMainWindow ):
         list_total_trading_flows.append( n_total_inventory )
         obj_current_date = datetime.datetime.today()
         list_total_trading_date.append( obj_current_date )
-        xirr_result = Utility.xirr( list_total_trading_flows, list_total_trading_date )
-        xirr_value_label = self.ui.qtTabWidget.currentWidget().findChild( QLabel, "XIRRValueLabel")
-        xirr_value_label.setText( f"{xirr_result:.3%}" )
-        
+        if len( list_total_trading_flows ) > 1:
+            xirr_result = Utility.xirr( list_total_trading_flows, list_total_trading_date )
+            xirr_value_label = self.ui.qtTabWidget.currentWidget().findChild( QLabel, "XIRRValueLabel")
+            xirr_value_label.setText( f"{xirr_result:.3%}" )
     
     def refresh_transfer_data_table( self ):
         str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
