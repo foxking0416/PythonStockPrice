@@ -28,6 +28,7 @@ from openpyxl.utils import get_column_letter
 from openpyxl.styles import Alignment, PatternFill, Font, Border, Side
 from enum import Enum, IntEnum
 from decimal import Decimal
+from scipy.optimize import newton
 
 #有考慮當沖交易稅減半
 #有考慮 ETF 交易稅減少
@@ -291,6 +292,25 @@ class Utility():
         dict_trading_data[ TradingData.CAPITAL_REDUCTION_PER_SHARE ] = f_capital_reduction_per_share
         dict_trading_data[ TradingData.DAYING_TRADING ] = b_daying_trading
         return dict_trading_data
+
+    def xirr(cash_flows, dates):
+        """
+        計算 XIRR (年化報酬率)
+        :param cash_flows: list of cash flows (現金流金額，正數為收入，負數為支出)
+        :param dates: list of datetime objects (對應的日期)
+        :return: 年化報酬率
+        """
+        def xnpv(rate):
+            """
+            計算 XNPV
+            """
+            return sum(cf / ((1 + rate) ** ((d - dates[0]).days / 365.0)) for cf, d in zip(cash_flows, dates))
+
+        # 初始猜測的 XIRR 值
+        try:
+            return newton(lambda r: xnpv(r), 0.1)
+        except RuntimeError:
+            raise ValueError("無法找到解，請檢查輸入的現金流和日期。")
 
 class EditTabTitleDialog( QDialog ):
     """一個小對話框用於編輯 Tab 標題"""
@@ -1273,8 +1293,21 @@ class MainWindow( QMainWindow ):
         uiqt_horizontal_layout_1.addWidget( uiqt_total_profit_label )
         uiqt_horizontal_layout_1.addWidget( uiqt_total_profit_value_label )
 
-        uiqt_horizontal_spacer_1_5 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+        uiqt_horizontal_spacer_1_5 = QSpacerItem( 40, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum )
         uiqt_horizontal_layout_1.addItem( uiqt_horizontal_spacer_1_5 )
+
+        uiqt_xirr_label = QLabel( stock_inventory_tab )
+        uiqt_xirr_label.setText( "年化報酬率: " )
+        uiqt_xirr_label.setObjectName( "XIRRLabel" )
+        uiqt_xirr_value_label = QLabel( stock_inventory_tab )
+        uiqt_xirr_value_label.setText( "" )
+        uiqt_xirr_value_label.setObjectName( "XIRRValueLabel" )
+
+        uiqt_horizontal_layout_1.addWidget( uiqt_xirr_label )
+        uiqt_horizontal_layout_1.addWidget( uiqt_xirr_value_label )
+
+        uiqt_horizontal_spacer_1_6 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+        uiqt_horizontal_layout_1.addItem( uiqt_horizontal_spacer_1_6 )
 
         uiqt_stock_inventory_tab_vertical_layout.addLayout( uiqt_horizontal_layout_1 )
 
@@ -2173,6 +2206,48 @@ class MainWindow( QMainWindow ):
                     worksheet.page_margins.footer = 0.3  # 頁腳邊界
                 self.export_trading_data_to_excel( worksheet, key_stock_number, str_stock_name, value_list_trading_data )
             workbook.save( file_path )
+
+    def on_compute_xirr_button_clicked( self ):
+        str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
+        dict_per_account_all_stock_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ]
+        list_total_trading_date = []
+        list_total_trading_flows = []
+        n_total_inventory = 0
+        for key_stock_number, value_list_trading_data in dict_per_account_all_stock_trading_data.items():
+            dict_trading_data_last = value_list_trading_data[ len( value_list_trading_data ) - 1 ] #取最後一筆交易資料，因為最後一筆交易資料的庫存等內容才是所有累計的結果
+            n_accumulated_inventory = dict_trading_data_last[ TradingData.ACCUMULATED_INVENTORY_NON_SAVE ]
+            if key_stock_number not in self.dict_all_company_number_to_price_info:
+                continue
+
+            f_stock_price = float( self.dict_all_company_number_to_price_info[ key_stock_number ] )
+            n_net_value = int( n_accumulated_inventory * f_stock_price )
+            n_total_inventory += n_net_value
+            for trading_data in value_list_trading_data:
+                e_trading_type = trading_data[ TradingData.TRADING_TYPE ]
+                if e_trading_type == TradingType.TEMPLATE:
+                    continue
+                if ( e_trading_type == TradingType.BUY or
+                     e_trading_type == TradingType.REGULAR_BUY or 
+                     e_trading_type == TradingType.CAPITAL_INCREASE ):
+                    n_cost = -trading_data[ TradingData.TRADING_COST_NON_SAVE ]
+                elif e_trading_type == TradingType.SELL:
+                    n_cost = trading_data[ TradingData.TRADING_COST_NON_SAVE ]
+                elif e_trading_type == TradingType.DIVIDEND:
+                    n_cost = trading_data[ TradingData.CASH_DIVIDEND_GAIN_NON_SAVE ] - trading_data[ TradingData.TRADING_FEE_NON_SAVE ] - trading_data[ TradingData.EXTRA_INSURANCE_FEE_NON_SAVE ] 
+                elif e_trading_type == TradingType.CAPITAL_REDUCTION:
+                    #trading_data[ TradingData.TRADING_VALUE_NON_SAVE ]本身是負值，但因為是退款，所以在算XIRR時應該要用正數，因此取負號
+                    n_cost = -trading_data[ TradingData.TRADING_VALUE_NON_SAVE ] 
+                list_total_trading_flows.append( n_cost )
+
+                str_trading_date = trading_data[ TradingData.TRADING_DATE ]
+                obj_trading_date = datetime.datetime.strptime( str_trading_date, "%Y-%m-%d" )
+                list_total_trading_date.append( obj_trading_date )
+
+        list_total_trading_flows.append( n_total_inventory )
+        obj_current_date = datetime.datetime.today()
+        list_total_trading_date.append( obj_trading_date )
+        result = Utility.xirr( list_total_trading_flows, list_total_trading_date )
+        print(f"XIRR: {result:.5%}")
 
     def on_new_file_action_triggered( self ): 
         b_need_save = False
@@ -3133,6 +3208,43 @@ class MainWindow( QMainWindow ):
         total_profit_value_label.setText( format( n_total_profit, "," ) )
         total_inventory_value_label = self.ui.qtTabWidget.currentWidget().findChild( QLabel, "TotalInventoryValueLabel")
         total_inventory_value_label.setText( format( n_total_inventory, "," ) )
+
+        #以下為計算年化報酬率
+        list_total_trading_date = []
+        list_total_trading_flows = []
+        for key_stock_number, value_list_trading_data in dict_per_account_all_stock_trading_data.items():
+            dict_trading_data_last = value_list_trading_data[ len( value_list_trading_data ) - 1 ] #取最後一筆交易資料，因為最後一筆交易資料的庫存等內容才是所有累計的結果
+            n_accumulated_inventory = dict_trading_data_last[ TradingData.ACCUMULATED_INVENTORY_NON_SAVE ]
+            if key_stock_number not in self.dict_all_company_number_to_price_info:
+                continue
+            for trading_data in value_list_trading_data:
+                e_trading_type = trading_data[ TradingData.TRADING_TYPE ]
+                if e_trading_type == TradingType.TEMPLATE:
+                    continue
+                if ( e_trading_type == TradingType.BUY or
+                     e_trading_type == TradingType.REGULAR_BUY or 
+                     e_trading_type == TradingType.CAPITAL_INCREASE ):
+                    n_cost = -trading_data[ TradingData.TRADING_COST_NON_SAVE ]
+                elif e_trading_type == TradingType.SELL:
+                    n_cost = trading_data[ TradingData.TRADING_COST_NON_SAVE ]
+                elif e_trading_type == TradingType.DIVIDEND:
+                    n_cost = trading_data[ TradingData.CASH_DIVIDEND_GAIN_NON_SAVE ] - trading_data[ TradingData.TRADING_FEE_NON_SAVE ] - trading_data[ TradingData.EXTRA_INSURANCE_FEE_NON_SAVE ] 
+                elif e_trading_type == TradingType.CAPITAL_REDUCTION:
+                    #trading_data[ TradingData.TRADING_VALUE_NON_SAVE ]本身是負值，但因為是退款，所以在算XIRR時應該要用正數，因此取負號
+                    n_cost = -trading_data[ TradingData.TRADING_VALUE_NON_SAVE ] 
+                list_total_trading_flows.append( n_cost )
+
+                str_trading_date = trading_data[ TradingData.TRADING_DATE ]
+                obj_trading_date = datetime.datetime.strptime( str_trading_date, "%Y-%m-%d" )
+                list_total_trading_date.append( obj_trading_date )
+
+        list_total_trading_flows.append( n_total_inventory )
+        obj_current_date = datetime.datetime.today()
+        list_total_trading_date.append( obj_current_date )
+        xirr_result = Utility.xirr( list_total_trading_flows, list_total_trading_date )
+        xirr_value_label = self.ui.qtTabWidget.currentWidget().findChild( QLabel, "XIRRValueLabel")
+        xirr_value_label.setText( f"{xirr_result:.3%}" )
+        
     
     def refresh_transfer_data_table( self ):
         str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
