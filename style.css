@@ -1,7 +1,9 @@
 QMainWindow {
-    background-color: #1E1E1E;  
-    color: white;              /* 文字顏色 */
+    background-color: #282828;  
+    color: c8c8c8;              /* 文字顏色 */
 }
+
+QWidget{background-color:#282828;color:#c8c8c8;font-size:12px;font-family:Arial, Helvetica, sans-serif;}
 
 QDialog {
     background-color: #1E1E1E;  
@@ -43,6 +45,8 @@ QTabBar::tab:selected { background-color:#505050;color:#c8c8c8; spacing: 5px;}
 QTableView {
     background-color: #2D2D2D;  /* 深藍灰色背景 */
     color: white;              /* 文字顏色 */
+	gridline-color: #505050; /* 格線顏色 */
+	border: 1px solid #f0f0f0; /* 表格的邊框 */
 }
 
 QHeaderView::section {
@@ -65,25 +69,13 @@ QRadioButton::indicator:checked:hover      { image: url(./icon/Elements/RadioOn_
 QRadioButton::indicator:checked:pressed    { image: url(./icon/Elements/RadioOn_hov.svg);}
 QRadioButton::indicator:checked:disabled   { image: url(./icon/Elements/RadioOn_dis.svg);}
 
-QCheckBox{
-	color: #FFFFFF;
-}
+QCheckBox{ color: #FFFFFF;}
 
-QLabel{
-	color: #FFFFFF;
-}
+QLabel{	color: #FFFFFF;}
 			
-QPushButton {
-	background: qlineargradient(
-    x1: 0, y1: 0, x2: 0, y2: 1,
-    stop: 0 #545454, stop: 1 #474747
-	);
-    border: 1px solid #686868; /* 邊框顏色 */
-	border-radius: 2px;       /* 圓角 */
-    color: #FFFFFF;           /* 按鈕文字顏色 */
-}
 
-QPushButton:hover {
-    background-color: #81A1C1; /* 滑鼠懸停時按鈕顏色 */
-}
 
+QPushButton{height: 24px;  text-align:center;color:#c8c8c8;background-color:#383838; border:1px solid #f0f0f0;border-radius: 3px }
+QPushButton:hover{color:#c8c8c8;background-color:#505050; }
+QPushButton:pressed{color:#000000;background-color:#c8c8c8; }
+QPushButton:disabled{color:#464646;background-color:#282828;border:1px solid #3c3c3c;}
