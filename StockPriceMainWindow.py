@@ -1366,6 +1366,9 @@ class MainWindow( QMainWindow ):
         uiqt_cash_transfer_tab_vertical_layout.setSpacing( 0 )
         uiqt_cash_transfer_tab_vertical_layout.setContentsMargins( -1, 0, -1, 0 )
 
+        uiqt_vertical_spacer_2_0 = QSpacerItem(20, 5, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
+        uiqt_cash_transfer_tab_vertical_layout.addItem( uiqt_vertical_spacer_2_0 )
+
         uiqt_horizontal_layout_4 = QHBoxLayout()
         uiqt_horizontal_layout_4.setSpacing( 0 )
 
@@ -1380,8 +1383,8 @@ class MainWindow( QMainWindow ):
         uiqt_horizontal_layout_5 = QHBoxLayout()
         uiqt_horizontal_layout_5.setSpacing( 0 )
 
-        uiqt_horizontal_spacer_5_1 = QSpacerItem(3, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
-        uiqt_horizontal_layout_5.addItem( uiqt_horizontal_spacer_5_1 )
+        # uiqt_horizontal_spacer_5_1 = QSpacerItem(3, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
+        # uiqt_horizontal_layout_5.addItem( uiqt_horizontal_spacer_5_1 )
 
         uiqt_add_cash_transfer_push_button = QPushButton( cash_transfer_tab )
         uiqt_add_cash_transfer_push_button.setMaximumSize( QSize( 16777215, 16777215 ) )
@@ -1394,8 +1397,12 @@ class MainWindow( QMainWindow ):
         uiqt_horizontal_spacer_5_2 = QSpacerItem(40, 20, QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.Minimum)
         uiqt_horizontal_layout_5.addItem( uiqt_horizontal_spacer_5_2 )
 
+        uiqt_vertical_spacer_2_1 = QSpacerItem(20, 5, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
+        uiqt_cash_transfer_tab_vertical_layout.addItem( uiqt_vertical_spacer_2_1 )
 
         uiqt_cash_transfer_tab_vertical_layout.addLayout( uiqt_horizontal_layout_5 )
+        uiqt_vertical_spacer_2_2 = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+        uiqt_cash_transfer_tab_vertical_layout.addItem( uiqt_vertical_spacer_2_2 )
 
         cash_transfer_model = QStandardItemModel( 0, 0 )
         cash_transfer_model.setVerticalHeaderLabels( self.get_cash_transfer_header() )
