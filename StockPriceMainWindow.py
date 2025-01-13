@@ -1366,32 +1366,35 @@ class MainWindow( QMainWindow ):
         uiqt_cash_transfer_tab_vertical_layout.setSpacing( 0 )
         uiqt_cash_transfer_tab_vertical_layout.setContentsMargins( -1, 0, -1, 0 )
 
-
         uiqt_horizontal_layout_4 = QHBoxLayout()
         uiqt_horizontal_layout_4.setSpacing( 0 )
 
-        uiqt_horizontal_spacer_4_1 = QSpacerItem(100, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
-        uiqt_horizontal_layout_4.addItem( uiqt_horizontal_spacer_4_1 )
+        uiqt_cash_transfer_table_view = QTableView( cash_transfer_tab )
+        uiqt_cash_transfer_table_view.setMinimumSize( QSize( 0, 166 ) )
+        uiqt_cash_transfer_table_view.setMaximumSize( QSize( 16777215, 166 ) )
+        uiqt_cash_transfer_table_view.setObjectName( "CashTransferTableView" )
+        uiqt_horizontal_layout_4.addWidget( uiqt_cash_transfer_table_view )
 
-        uiqt_add_cash_transfer_push_button = QPushButton( cash_transfer_tab )
-        uiqt_add_cash_transfer_push_button.setMaximumSize( QSize( 150, 16777215 ) )
-        uiqt_add_cash_transfer_push_button.setText( "新增入金/出金資料" )
-        uiqt_add_cash_transfer_push_button.setObjectName( "AddCashTransferPushButton" )
-        uiqt_add_cash_transfer_push_button.clicked.connect( self.on_add_cash_transfer_push_button_clicked )
-        uiqt_horizontal_layout_4.addWidget( uiqt_add_cash_transfer_push_button )
-
-        uiqt_horizontal_spacer_4_2 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
-        uiqt_horizontal_layout_4.addItem( uiqt_horizontal_spacer_4_2 )
+        uiqt_cash_transfer_tab_vertical_layout.addLayout( uiqt_horizontal_layout_4 )
 
         uiqt_horizontal_layout_5 = QHBoxLayout()
         uiqt_horizontal_layout_5.setSpacing( 0 )
 
-        uiqt_cash_transfer_table_view = QTableView( cash_transfer_tab )
-        uiqt_cash_transfer_table_view.setMinimumSize( QSize( 0, 100 ) )
-        uiqt_cash_transfer_table_view.setObjectName( "CashTransferTableView" )
-        uiqt_horizontal_layout_5.addWidget( uiqt_cash_transfer_table_view )
+        uiqt_horizontal_spacer_5_1 = QSpacerItem(3, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
+        uiqt_horizontal_layout_5.addItem( uiqt_horizontal_spacer_5_1 )
 
-        uiqt_cash_transfer_tab_vertical_layout.addLayout( uiqt_horizontal_layout_4 )
+        uiqt_add_cash_transfer_push_button = QPushButton( cash_transfer_tab )
+        uiqt_add_cash_transfer_push_button.setMaximumSize( QSize( 16777215, 16777215 ) )
+        uiqt_add_cash_transfer_push_button.setMinimumWidth( 200 )
+        uiqt_add_cash_transfer_push_button.setText( "新增入金/出金資料" )
+        uiqt_add_cash_transfer_push_button.setObjectName( "AddCashTransferPushButton" )
+        uiqt_add_cash_transfer_push_button.clicked.connect( self.on_add_cash_transfer_push_button_clicked )
+        uiqt_horizontal_layout_5.addWidget( uiqt_add_cash_transfer_push_button )
+
+        uiqt_horizontal_spacer_5_2 = QSpacerItem(40, 20, QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.Minimum)
+        uiqt_horizontal_layout_5.addItem( uiqt_horizontal_spacer_5_2 )
+
+
         uiqt_cash_transfer_tab_vertical_layout.addLayout( uiqt_horizontal_layout_5 )
 
         cash_transfer_model = QStandardItemModel( 0, 0 )
@@ -3664,7 +3667,7 @@ class MainWindow( QMainWindow ):
         if str_stock_number is not None:
             str_stock_name = self.dict_all_company_number_to_name_and_type[ str_stock_number ][ 0 ]
             self.ui.qtCurrentSelectCompanyLabel.setText( f"目前選擇公司：{ str_stock_number } { str_stock_name }" )
-            # self.ui.qtCurrentSelectCompanyLabel.setStyleSheet("color: yellow; ")
+            self.ui.qtCurrentSelectCompanyLabel.setStyleSheet("color: yellow; ")
         else:
             self.ui.qtCurrentSelectCompanyLabel.setText( "" )
 

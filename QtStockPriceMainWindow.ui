@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1131</width>
+    <width>1167</width>
     <height>893</height>
    </rect>
   </property>
@@ -22,7 +22,7 @@
      <rect>
       <x>0</x>
       <y>0</y>
-      <width>1129</width>
+      <width>1165</width>
       <height>850</height>
      </rect>
     </property>
@@ -51,6 +51,15 @@
         <bool>true</bool>
        </property>
        <widget class="QWidget" name="tab_add">
+        <property name="minimumSize">
+         <size>
+          <width>25</width>
+          <height>25</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>雙擊新增</string>
+        </property>
         <attribute name="title">
          <string>+</string>
         </attribute>
@@ -174,7 +183,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1131</width>
+     <width>1167</width>
      <height>21</height>
     </rect>
    </property>

@@ -31,6 +31,8 @@ class Ui_Dialog(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(Dialog.sizePolicy().hasHeightForWidth())
         Dialog.setSizePolicy(sizePolicy)
+        Dialog.setMinimumSize(QSize(255, 358))
+        Dialog.setMaximumSize(QSize(255, 358))
         self.verticalLayout = QVBoxLayout(Dialog)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.horizontalLayout_12 = QHBoxLayout()
