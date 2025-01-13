@@ -23,7 +23,7 @@
       <x>0</x>
       <y>0</y>
       <width>1165</width>
-      <height>850</height>
+      <height>855</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout">
@@ -135,7 +135,7 @@
           <bool>false</bool>
          </property>
          <property name="text">
-          <string>新增增資認購資料(A)</string>
+          <string>新增增資認購紀錄(A)</string>
          </property>
         </widget>
        </item>
@@ -184,7 +184,7 @@
      <x>0</x>
      <y>0</y>
      <width>1167</width>
-     <height>21</height>
+     <height>18</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu">

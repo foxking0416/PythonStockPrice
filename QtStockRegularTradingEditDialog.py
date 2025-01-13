@@ -15,21 +15,23 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QAbstractButton, QApplication, QCheckBox, QDateEdit,
-    QDialog, QDialogButtonBox, QDoubleSpinBox, QHBoxLayout,
-    QLabel, QLineEdit, QRadioButton, QSizePolicy,
-    QSpacerItem, QSpinBox, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QApplication, QCheckBox, QDateEdit, QDialog,
+    QDoubleSpinBox, QHBoxLayout, QLabel, QLineEdit,
+    QPushButton, QRadioButton, QSizePolicy, QSpacerItem,
+    QSpinBox, QVBoxLayout, QWidget)
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
         if not Dialog.objectName():
             Dialog.setObjectName(u"Dialog")
-        Dialog.resize(358, 358)
+        Dialog.resize(308, 358)
         sizePolicy = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(Dialog.sizePolicy().hasHeightForWidth())
         Dialog.setSizePolicy(sizePolicy)
+        Dialog.setMinimumSize(QSize(308, 358))
+        Dialog.setMaximumSize(QSize(308, 358))
         self.verticalLayout = QVBoxLayout(Dialog)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.horizontalLayout_12 = QHBoxLayout()
@@ -278,23 +280,29 @@ class Ui_Dialog(object):
 
         self.verticalLayout.addLayout(self.horizontalLayout_10)
 
-        self.qtOkButtonBox = QDialogButtonBox(Dialog)
-        self.qtOkButtonBox.setObjectName(u"qtOkButtonBox")
-        self.qtOkButtonBox.setOrientation(Qt.Horizontal)
-        self.qtOkButtonBox.setStandardButtons(QDialogButtonBox.Cancel|QDialogButtonBox.Ok)
+        self.horizontalLayout_2 = QHBoxLayout()
+        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
+        self.qtOkPushButton = QPushButton(Dialog)
+        self.qtOkPushButton.setObjectName(u"qtOkPushButton")
 
-        self.verticalLayout.addWidget(self.qtOkButtonBox)
+        self.horizontalLayout_2.addWidget(self.qtOkPushButton)
+
+        self.qtCancelPushButton = QPushButton(Dialog)
+        self.qtCancelPushButton.setObjectName(u"qtCancelPushButton")
+
+        self.horizontalLayout_2.addWidget(self.qtCancelPushButton)
+
+
+        self.verticalLayout.addLayout(self.horizontalLayout_2)
 
 
         self.retranslateUi(Dialog)
-        self.qtOkButtonBox.accepted.connect(Dialog.accept)
-        self.qtOkButtonBox.rejected.connect(Dialog.reject)
 
         QMetaObject.connectSlotsByName(Dialog)
     # setupUi
 
     def retranslateUi(self, Dialog):
-        Dialog.setWindowTitle(QCoreApplication.translate("Dialog", u"\u80a1\u7968\u4ea4\u6613", None))
+        Dialog.setWindowTitle(QCoreApplication.translate("Dialog", u"\u5b9a\u671f\u5b9a\u984d\u4ea4\u6613", None))
         self.qtStockNumberLabel.setText(QCoreApplication.translate("Dialog", u"TextLabel", None))
         self.qtStockNameLabel.setText(QCoreApplication.translate("Dialog", u"TextLabel", None))
         self.label.setText(QCoreApplication.translate("Dialog", u"\u65e5\u671f", None))
@@ -314,5 +322,7 @@ class Ui_Dialog(object):
         self.qtFeeLineEdit.setText(QCoreApplication.translate("Dialog", u"0", None))
         self.label_9.setText(QCoreApplication.translate("Dialog", u"\u7e3d\u984d", None))
         self.qtTotalCostLineEdit.setText(QCoreApplication.translate("Dialog", u"0", None))
+        self.qtOkPushButton.setText(QCoreApplication.translate("Dialog", u"\u78ba\u8a8d", None))
+        self.qtCancelPushButton.setText(QCoreApplication.translate("Dialog", u"\u53d6\u6d88", None))
     # retranslateUi
 

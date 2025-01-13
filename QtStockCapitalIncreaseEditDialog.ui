@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>255</width>
-    <height>201</height>
+    <width>192</width>
+    <height>175</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -16,8 +16,20 @@
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
+  <property name="minimumSize">
+   <size>
+    <width>192</width>
+    <height>175</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>192</width>
+    <height>175</height>
+   </size>
+  </property>
   <property name="windowTitle">
-   <string>股票認購</string>
+   <string>增資認購</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -223,50 +235,25 @@
     </layout>
    </item>
    <item>
-    <widget class="QDialogButtonBox" name="qtOkButtonBox">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-     </property>
-    </widget>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="QPushButton" name="qtOkPushButton">
+       <property name="text">
+        <string>確認</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="qtCancelPushButton">
+       <property name="text">
+        <string>取消</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
   </layout>
  </widget>
  <resources/>
- <connections>
-  <connection>
-   <sender>qtOkButtonBox</sender>
-   <signal>accepted()</signal>
-   <receiver>Dialog</receiver>
-   <slot>accept()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>248</x>
-     <y>254</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>157</x>
-     <y>274</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>qtOkButtonBox</sender>
-   <signal>rejected()</signal>
-   <receiver>Dialog</receiver>
-   <slot>reject()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>316</x>
-     <y>260</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>286</x>
-     <y>274</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>

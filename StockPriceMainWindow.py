@@ -372,8 +372,8 @@ class StockCapitalReductionEditDialog( QDialog ):
         obj_current_date = datetime.datetime.today()
         self.ui.qtDateEdit.setDate( obj_current_date.date() )
         self.ui.qtDateEdit.setCalendarPopup( True )
-        self.ui.qtOkButtonBox.accepted.connect( self.accept_data )
-        self.ui.qtOkButtonBox.rejected.connect( self.cancel )
+        self.ui.qtOkPushButton.clicked.connect( self.accept_data )
+        self.ui.qtCancelPushButton.clicked.connect( self.cancel )
         self.dict_trading_data = {}
 
     def setup_trading_date( self, str_date ):
@@ -418,8 +418,8 @@ class CashTransferEditDialog( QDialog ):
         obj_current_date = datetime.datetime.today()
         self.ui.qtDateEdit.setDate( obj_current_date.date() )
         self.ui.qtDateEdit.setCalendarPopup( True )
-        self.ui.qtOkButtonBox.accepted.connect( self.accept_data )
-        self.ui.qtOkButtonBox.rejected.connect( self.cancel )
+        self.ui.qtOkPushButton.clicked.connect( self.accept_data )
+        self.ui.qtCancelPushButton.clicked.connect( self.cancel )
         self.dict_cash_transfer_data = {}
 
     def setup_transfer_date( self, str_date ):
@@ -462,8 +462,8 @@ class StockDividendEditDialog( QDialog ):
         obj_current_date = datetime.datetime.today()
         self.ui.qtDateEdit.setDate( obj_current_date.date() )
         self.ui.qtDateEdit.setCalendarPopup( True )
-        self.ui.qtOkButtonBox.accepted.connect( self.accept_data )
-        self.ui.qtOkButtonBox.rejected.connect( self.cancel )
+        self.ui.qtOkPushButton.clicked.connect( self.accept_data )
+        self.ui.qtCancelPushButton.clicked.connect( self.cancel )
         self.dict_trading_data = {}
 
     def setup_trading_date( self, str_date ):
@@ -527,8 +527,8 @@ class StockTradingEditDialog( QDialog ):
         self.ui.qtPriceDoubleSpinBox.valueChanged.connect( self.compute_cost )
         self.ui.qtCommonTradeCountSpinBox.valueChanged.connect( self.compute_cost )
         self.ui.qtOddTradeCountSpinBox.valueChanged.connect( self.compute_cost )
-        self.ui.qtOkButtonBox.accepted.connect( self.accept_data )
-        self.ui.qtOkButtonBox.rejected.connect( self.cancel )
+        self.ui.qtOkPushButton.clicked.connect( self.accept_data )
+        self.ui.qtCancelPushButton.clicked.connect( self.cancel )
         self.b_etf = b_etf
         self.str_stock_name = str_stock_name
         # self.load_stylesheet("style.css")
@@ -695,8 +695,8 @@ class StockRegularTradingEditDialog( QDialog ):
         self.ui.qtTradingFeeConstantSpinBox.valueChanged.connect( self.compute_cost )
         self.ui.qtPriceDoubleSpinBox.valueChanged.connect( self.compute_cost )
         self.ui.qtOddTradeCountSpinBox.valueChanged.connect( self.compute_cost )
-        self.ui.qtOkButtonBox.accepted.connect( self.accept_data )
-        self.ui.qtOkButtonBox.rejected.connect( self.cancel )
+        self.ui.qtOkPushButton.clicked.connect( self.accept_data )
+        self.ui.qtCancelPushButton.clicked.connect( self.cancel )
         # self.load_stylesheet("style.css")
         self.dict_trading_data = {}
         self.update_ui()
@@ -857,8 +857,8 @@ class StockCapitalIncreaseEditDialog( QDialog ):
 
         self.ui.qtPriceDoubleSpinBox.valueChanged.connect( self.compute_cost )
         self.ui.qtOddTradeCountSpinBox.valueChanged.connect( self.compute_cost )
-        self.ui.qtOkButtonBox.accepted.connect( self.accept_data )
-        self.ui.qtOkButtonBox.rejected.connect( self.cancel )
+        self.ui.qtOkPushButton.clicked.connect( self.accept_data )
+        self.ui.qtCancelPushButton.clicked.connect( self.cancel )
         self.dict_trading_data = {}
 
     def setup_trading_date( self, str_date ):
