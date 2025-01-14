@@ -2249,48 +2249,6 @@ class MainWindow( QMainWindow ):
                 self.export_trading_data_to_excel( worksheet, key_stock_number, str_stock_name, value_list_trading_data )
             workbook.save( file_path )
 
-    def on_compute_xirr_button_clicked( self ):
-        str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
-        dict_per_account_all_stock_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ]
-        list_total_trading_date = []
-        list_total_trading_flows = []
-        n_total_inventory = 0
-        for key_stock_number, value_list_trading_data in dict_per_account_all_stock_trading_data.items():
-            dict_trading_data_last = value_list_trading_data[ len( value_list_trading_data ) - 1 ] #取最後一筆交易資料，因為最後一筆交易資料的庫存等內容才是所有累計的結果
-            n_accumulated_inventory = dict_trading_data_last[ TradingData.ACCUMULATED_INVENTORY_NON_SAVE ]
-            if key_stock_number not in self.dict_all_company_number_to_price_info:
-                continue
-
-            f_stock_price = float( self.dict_all_company_number_to_price_info[ key_stock_number ] )
-            n_net_value = int( n_accumulated_inventory * f_stock_price )
-            n_total_inventory += n_net_value
-            for trading_data in value_list_trading_data:
-                e_trading_type = trading_data[ TradingData.TRADING_TYPE ]
-                if e_trading_type == TradingType.TEMPLATE:
-                    continue
-                if ( e_trading_type == TradingType.BUY or
-                     e_trading_type == TradingType.REGULAR_BUY or 
-                     e_trading_type == TradingType.CAPITAL_INCREASE ):
-                    n_cost = -trading_data[ TradingData.TRADING_COST_NON_SAVE ]
-                elif e_trading_type == TradingType.SELL:
-                    n_cost = trading_data[ TradingData.TRADING_COST_NON_SAVE ]
-                elif e_trading_type == TradingType.DIVIDEND:
-                    n_cost = trading_data[ TradingData.CASH_DIVIDEND_GAIN_NON_SAVE ] - trading_data[ TradingData.TRADING_FEE_NON_SAVE ] - trading_data[ TradingData.EXTRA_INSURANCE_FEE_NON_SAVE ] 
-                elif e_trading_type == TradingType.CAPITAL_REDUCTION:
-                    #trading_data[ TradingData.TRADING_VALUE_NON_SAVE ]本身是負值，但因為是退款，所以在算XIRR時應該要用正數，因此取負號
-                    n_cost = -trading_data[ TradingData.TRADING_VALUE_NON_SAVE ] 
-                list_total_trading_flows.append( n_cost )
-
-                str_trading_date = trading_data[ TradingData.TRADING_DATE ]
-                obj_trading_date = datetime.datetime.strptime( str_trading_date, "%Y-%m-%d" )
-                list_total_trading_date.append( obj_trading_date )
-
-        list_total_trading_flows.append( n_total_inventory )
-        obj_current_date = datetime.datetime.today()
-        list_total_trading_date.append( obj_trading_date )
-        result = Utility.xirr( list_total_trading_flows, list_total_trading_date )
-        print(f"XIRR: {result:.5%}")
-
     def on_new_file_action_triggered( self ): 
         b_need_save = False
         if ( ( self.dict_all_account_all_stock_trading_data_INITIAL != self.dict_all_account_all_stock_trading_data ) and
@@ -3326,9 +3284,12 @@ class MainWindow( QMainWindow ):
         obj_current_date = datetime.datetime.today()
         list_total_trading_date.append( obj_current_date )
         if len( list_total_trading_flows ) > 1:
-            xirr_result = Utility.xirr( list_total_trading_flows, list_total_trading_date )
-            xirr_value_label = self.ui.qtTabWidget.currentWidget().findChild( QLabel, "XIRRValueLabel")
-            xirr_value_label.setText( f"{xirr_result:.3%}" )
+            try:
+                xirr_result = Utility.xirr( list_total_trading_flows, list_total_trading_date )
+                xirr_value_label = self.ui.qtTabWidget.currentWidget().findChild( QLabel, "XIRRValueLabel")
+                xirr_value_label.setText( f"{xirr_result:.3%}" )
+            except ValueError as e:
+                pass
     
     def refresh_transfer_data_table( self ):
         str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
