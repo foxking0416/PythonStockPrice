@@ -330,10 +330,19 @@ class EditTabTitleDialog( QDialog ):
         self.line_edit.selectAll()
         self.layout.addWidget( self.line_edit )
 
-        self.buttons = QDialogButtonBox( QDialogButtonBox.Ok | QDialogButtonBox.Cancel )
-        self.buttons.accepted.connect( self.accept )
-        self.buttons.rejected.connect( self.reject )
-        self.layout.addWidget( self.buttons )
+        self.horizontalLayout_4 = QHBoxLayout()
+        self.qtOkPushButton = QPushButton( self )
+        self.qtOkPushButton.setText( "確認" )
+        self.qtCancelPushButton = QPushButton( self )
+        self.qtCancelPushButton.setText( "取消" )
+
+        self.horizontalLayout_4.addWidget(self.qtOkPushButton)
+        self.horizontalLayout_4.addWidget(self.qtCancelPushButton)
+
+        self.qtOkPushButton.clicked.connect( self.accept )
+        self.qtCancelPushButton.clicked.connect( self.reject )
+
+        self.layout.addLayout( self.horizontalLayout_4 )
 
     def get_new_title(self):
         """返回用戶輸入的標題"""
