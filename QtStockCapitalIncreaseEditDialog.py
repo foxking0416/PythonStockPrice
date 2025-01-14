@@ -16,9 +16,9 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QDateEdit, QDialog, QDoubleSpinBox,
-    QGroupBox, QHBoxLayout, QLabel, QLineEdit,
-    QPushButton, QSizePolicy, QSpacerItem, QSpinBox,
-    QVBoxLayout, QWidget)
+    QHBoxLayout, QLabel, QLineEdit, QPushButton,
+    QSizePolicy, QSpacerItem, QSpinBox, QVBoxLayout,
+    QWidget)
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
@@ -94,15 +94,9 @@ class Ui_Dialog(object):
 
         self.verticalLayout.addLayout(self.horizontalLayout_3)
 
-        self.groupBox = QGroupBox(Dialog)
-        self.groupBox.setObjectName(u"groupBox")
-        self.verticalLayout_2 = QVBoxLayout(self.groupBox)
-        self.verticalLayout_2.setSpacing(0)
-        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
-        self.verticalLayout_2.setContentsMargins(0, 0, 0, 0)
         self.horizontalLayout_6 = QHBoxLayout()
         self.horizontalLayout_6.setObjectName(u"horizontalLayout_6")
-        self.qtOddTradeCountSpinBox = QSpinBox(self.groupBox)
+        self.qtOddTradeCountSpinBox = QSpinBox(Dialog)
         self.qtOddTradeCountSpinBox.setObjectName(u"qtOddTradeCountSpinBox")
         self.qtOddTradeCountSpinBox.setEnabled(True)
         self.qtOddTradeCountSpinBox.setMinimumSize(QSize(75, 0))
@@ -110,7 +104,7 @@ class Ui_Dialog(object):
 
         self.horizontalLayout_6.addWidget(self.qtOddTradeCountSpinBox)
 
-        self.label_5 = QLabel(self.groupBox)
+        self.label_5 = QLabel(Dialog)
         self.label_5.setObjectName(u"label_5")
 
         self.horizontalLayout_6.addWidget(self.label_5)
@@ -120,10 +114,7 @@ class Ui_Dialog(object):
         self.horizontalLayout_6.addItem(self.horizontalSpacer_2)
 
 
-        self.verticalLayout_2.addLayout(self.horizontalLayout_6)
-
-
-        self.verticalLayout.addWidget(self.groupBox)
+        self.verticalLayout.addLayout(self.horizontalLayout_6)
 
         self.horizontalLayout_10 = QHBoxLayout()
         self.horizontalLayout_10.setObjectName(u"horizontalLayout_10")
@@ -173,7 +164,6 @@ class Ui_Dialog(object):
         self.qtStockNameLabel.setText(QCoreApplication.translate("Dialog", u"TextLabel", None))
         self.label.setText(QCoreApplication.translate("Dialog", u"\u65e5\u671f", None))
         self.label_2.setText(QCoreApplication.translate("Dialog", u"\u4ea4\u6613\u50f9\u683c", None))
-        self.groupBox.setTitle("")
         self.label_5.setText(QCoreApplication.translate("Dialog", u"   \u80a1", None))
         self.label_9.setText(QCoreApplication.translate("Dialog", u"\u7e3d\u984d", None))
         self.qtTotalCostLineEdit.setText(QCoreApplication.translate("Dialog", u"0", None))
