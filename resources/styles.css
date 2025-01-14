@@ -42,14 +42,14 @@ QComboBox QAbstractItemView::item {
 }
 
 QCheckBox{ color: #FFFFFF;}
-QCheckBox::indicator:unchecked{image: url(./resources/CheckOff.svg); }
-QCheckBox::indicator:unchecked:hover{ image: url(./resources/CheckOff_hov.svg); }
-QCheckBox::indicator:unchecked:pressed{ image: url(./resources/CheckOff_hov.svg);}
+QCheckBox::indicator:unchecked         { image: url(./resources/CheckOff.svg); }
+QCheckBox::indicator:unchecked:hover   { image: url(./resources/CheckOff_hov.svg); }
+QCheckBox::indicator:unchecked:pressed { image: url(./resources/CheckOff_hov.svg);}
 QCheckBox::indicator:unchecked:disabled{ image: url(./resources/CheckOff_dis.svg);}
-QCheckBox::indicator:checked{image: url(./resources/CheckOn_sel.svg); }
-QCheckBox::indicator:checked:hover{image: url(./resources/CheckOn_hov.svg); }
-QCheckBox::indicator:checked:pressed{image: url(./resources/CheckOn_hov.svg); }
-QCheckBox::indicator:checked:disabled{image: url(./resources/CheckOn_dis.svg);}
+QCheckBox::indicator:checked           { image: url(./resources/CheckOn_sel.svg); }
+QCheckBox::indicator:checked:hover     { image: url(./resources/CheckOn_hov.svg); }
+QCheckBox::indicator:checked:pressed   { image: url(./resources/CheckOn_hov.svg); }
+QCheckBox::indicator:checked:disabled  { image: url(./resources/CheckOn_dis.svg);}
 
 QLineEdit{ border:1px solid #c8c8c8; background-color:#707070;}
 QLineEdit:disabled{ border:1px solid #3c3c3c; background-color:#707070;}
@@ -100,6 +100,7 @@ QDoubleSpinBox::down-arrow:hover {image: url(./resources/Elements/ArrowSpinner_B
 QDoubleSpinBox::down-arrow:pressed {image: url(./resources/Elements/ArrowSpinner_B_sel.svg); width:10px; height: 6px;border:1px solid #f0f0f0 }   
 QDoubleSpinBox::down-arrow:disabled { image:url(./resources/Elements/ArrowSpinner_B_dis.svg);border:1px solid #3c3c3c }   
 
-QMessageBox QPushButton {
-    min-width: 100px; /* 設定按鈕的最小寬度 */
-}
+QMessageBox QPushButton { min-width: 100px; }
+
+QDateEdit{ border:1px solid #f0f0f0; color:#ffffff; background-color:#707070; font-size:12px; font-family:Arial, Helvetica, sans-serif; }  
+QDateEdit:disabled{ border:1px solid #3c3c3c; color:#464646;}  

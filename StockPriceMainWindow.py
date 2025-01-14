@@ -121,7 +121,7 @@ if getattr( sys, 'frozen', False ):
     g_exe_root_dir = os.path.dirname(__file__) #C:\Users\foxki\AppData\Local\Temp\_MEI60962
     g_data_dir = os.path.join( g_user_dir, "AppData", "Local", "FoxInfo" ) #C:\Users\foxki\AppData\Local\FoxInfo
 else:
-    # 正常執行 Python 腳本時
+    # VSCode執行 Python 腳本時
     g_exe_root_dir = os.path.dirname( os.path.abspath(__file__) )
     g_data_dir = g_exe_root_dir
 
