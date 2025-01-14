@@ -59,90 +59,47 @@ QPushButton:hover{ color:#c8c8c8; background-color:#707070; }
 QPushButton:pressed{ color:#000000;background-color:#c8c8c8; }
 QPushButton:disabled{ border:1px solid #3c3c3c; color:#464646; background-color:#282828;}
 
-QSpinBox {
-    border: 1px solid #f0f0f0;
-    color: #c8c8c8;
-    background-color: #707070;
-    font-size: 12px;
-    font-family: Arial, Helvetica, sans-serif;
-}
-QSpinBox:disabled {
-    border: 1px solid #555555;
-    color: #666666;
-}
 
-QSpinBox::up-button, QSpinBox::down-button {
-    subcontrol-origin: border;
-    width: 13px;
-    height: 7px;
-    background-color: #282828;
-    border: 1px solid #707070;
-}
-QSpinBox::up-button:hover, QSpinBox::down-button:hover {
-    background-color: #707070;
-}
-QSpinBox::up-button:pressed, QSpinBox::down-button:pressed {
-    background-color: #c8c8c8;
-}
-QSpinBox::up-button:disabled, QSpinBox::down-button:disabled {
-    background-color: #282828;
-    border: 1px solid #3c3c3c;
-}
+QSpinBox{ border:1px solid #f0f0f0; color:#ffffff; background-color:#707070; font-size:12px; font-family:Arial, Helvetica, sans-serif; }  
+QSpinBox:disabled{ border:1px solid #3c3c3c; color:#464646;}  
+QSpinBox::up-button { subcontrol-origin:border; width: 13px; height:7px; background-color:#282828; border:1px solid #707070; }   
+QSpinBox::up-button:hover {background-color:#707070;}   
+QSpinBox::up-button:pressed {background-color:#c8c8c8;}   
+QSpinBox::up-button:disabled {background-color:#282828; border:1px solid #3c3c3c;}   
+QSpinBox::up-arrow { image: url(./resources/Elements/ArrowSpinner_T.svg); width:10px; height: 6px;border:1px solid #f0f0f0 }   
+QSpinBox::up-arrow:hover {image: url(./resources/Elements/ArrowSpinner_T.svg); width:10px; height: 6px;border:1px solid #f0f0f0 }   
+QSpinBox::up-arrow:pressed {image: url(./resources/Elements/ArrowSpinner_T_sel.svg); width:10px; height: 6px;border:1px solid #f0f0f0 }   
+QSpinBox::up-arrow:disabled { image:url(./resources/Elements/ArrowSpinner_T_dis.svg);border:1px solid #3c3c3c }   
 
-QSpinBox::up-arrow {
-    width: 10px;
-    height: 7px;
-    image: url(./resources/Elements/ArrowSpinner_T.svg);
+QSpinBox::down-button { subcontrol-origin:border; width: 13px; height:7px; background-color:#282828; border:1px solid #707070; }   
+QSpinBox::down-button:hover {background-color:#707070;}   
+QSpinBox::down-button:pressed {background-color:#c8c8c8;}   
+QSpinBox::down-button:disabled {background-color:#282828; border:1px solid #3c3c3c;}   
+QSpinBox::down-arrow { image: url(./resources/Elements/ArrowSpinner_B.svg); width:10px; height: 6px;border:1px solid #f0f0f0 }   
+QSpinBox::down-arrow:hover {image: url(./resources/Elements/ArrowSpinner_B.svg); width:10px; height: 6px;border:1px solid #f0f0f0 }   
+QSpinBox::down-arrow:pressed {image: url(./resources/Elements/ArrowSpinner_B_sel.svg); width:10px; height: 6px;border:1px solid #f0f0f0 }   
+QSpinBox::down-arrow:disabled { image:url(./resources/Elements/ArrowSpinner_B_dis.svg);border:1px solid #3c3c3c }   
+
+QDoubleSpinBox{ border:1px solid #f0f0f0; color:#ffffff; background-color:#707070; font-size:12px; font-family:Arial, Helvetica, sans-serif; }  
+QDoubleSpinBox:disabled{ border:1px solid #3c3c3c; color:#464646;}  
+QDoubleSpinBox::up-button { subcontrol-origin:border; width: 13px; height:7px; background-color:#282828; border:1px solid #707070; }   
+QDoubleSpinBox::up-button:hover {background-color:#707070;}   
+QDoubleSpinBox::up-button:pressed {background-color:#c8c8c8;}   
+QDoubleSpinBox::up-button:disabled {background-color:#282828; border:1px solid #3c3c3c;}   
+QDoubleSpinBox::up-arrow { image: url(./resources/Elements/ArrowSpinner_T.svg); width:10px; height: 6px;border:1px solid #f0f0f0 }   
+QDoubleSpinBox::up-arrow:hover {image: url(./resources/Elements/ArrowSpinner_T.svg); width:10px; height: 6px;border:1px solid #f0f0f0 }   
+QDoubleSpinBox::up-arrow:pressed {image: url(./resources/Elements/ArrowSpinner_T_sel.svg); width:10px; height: 6px;border:1px solid #f0f0f0 }   
+QDoubleSpinBox::up-arrow:disabled { image:url(./resources/Elements/ArrowSpinner_T_dis.svg);border:1px solid #3c3c3c }   
+
+QDoubleSpinBox::down-button { subcontrol-origin:border; width: 13px; height:7px; background-color:#282828; border:1px solid #707070; }   
+QDoubleSpinBox::down-button:hover {background-color:#707070;}   
+QDoubleSpinBox::down-button:pressed {background-color:#c8c8c8;}   
+QDoubleSpinBox::down-button:disabled {background-color:#282828; border:1px solid #3c3c3c;}   
+QDoubleSpinBox::down-arrow { image: url(./resources/Elements/ArrowSpinner_B.svg); width:10px; height: 6px;border:1px solid #f0f0f0 }   
+QDoubleSpinBox::down-arrow:hover {image: url(./resources/Elements/ArrowSpinner_B.svg); width:10px; height: 6px;border:1px solid #f0f0f0 }   
+QDoubleSpinBox::down-arrow:pressed {image: url(./resources/Elements/ArrowSpinner_B_sel.svg); width:10px; height: 6px;border:1px solid #f0f0f0 }   
+QDoubleSpinBox::down-arrow:disabled { image:url(./resources/Elements/ArrowSpinner_B_dis.svg);border:1px solid #3c3c3c }   
+
+QMessageBox QPushButton {
+    min-width: 100px; /* 設定按鈕的最小寬度 */
 }
-QSpinBox::up-arrow:pressed {
-    image: url(./resources/Elements/ArrowSpinner_T_sel.svg);
-}
-QSpinBox::up-arrow:disabled {
-    image: url(./resources/Elements/ArrowSpinner_T_dis.svg);
-}
-
-QSpinBox::down-arrow {
-    width: 10px;
-    height: 7px;
-    image: url(./resources/Elements/ArrowSpinner_B.svg);
-}
-QSpinBox::down-arrow:pressed {
-    image: url(./resources/Elements/ArrowSpinner_B_sel.svg);
-}
-QSpinBox::down-arrow:disabled {
-    image: url(./resources/Elements/ArrowSpinner_B_dis.svg);
-}
-
-/* QSpinBox{ border:1px solid #f0f0f0; color:#c8c8c8; background-color:#707070; font-size:12px; font-family:Arial, Helvetica, sans-serif; } */
-/* QSpinBox:disabled{ border:1px solid #3c3c3c; color:#464646;} */
-/* QSpinBox::up-button { subcontrol-origin:border; subcontrol-position: top right; width: 13px; height:7px; background-color:#282828; border:1px solid #707070; }  */
-/* QSpinBox::up-button:hover {background-color:#707070;}  */
-/* QSpinBox::up-button:pressed {background-color:#c8c8c8;}  */
-/* QSpinBox::up-button:disabled {background-color:#282828; border:1px solid #3c3c3c;}  */
-/* QSpinBox::up-arrow { image: url(./resources/Elements/ArrowSpinner_T.svg); width:10px; height: 7px; }  */
-/* QSpinBox::up-arrow:hover {image: url(./resources/Elements/ArrowSpinner_T.svg); width:10px; height: 7px; }  */
-/* QSpinBox::up-arrow:pressed {image: url(./resources/Elements/ArrowSpinner_T_sel.svg); width:10px; height: 7px; }  */
-/* QSpinBox::up-arrow:disabled, QSpinBox::up-arrow:off { image:url(./resources/Elements/ArrowSpinner_T_dis.svg); }  */
-
-/* QSpinBox::down-button { subcontrol-origin:border; subcontrol-position: bottom right; width: 13px; height:7px; background-color:#282828; border:1px solid #707070; }  */
-/* QSpinBox::down-button:hover {background-color:#707070;}  */
-/* QSpinBox::down-button:pressed {background-color:#c8c8c8;}  */
-/* QSpinBox::down-button:disabled {background-color:#282828; border:1px solid #3c3c3c;}  */
-/* QSpinBox::down-arrow { image: url(./resources/Elements/ArrowSpinner_T.svg); width:10px; height: 7px; }  */
-/* QSpinBox::down-arrow:hover {image: url(./resources/Elements/ArrowSpinner_T.svg); width:10px; height: 7px; }  */
-/* QSpinBox::down-arrow:pressed {image: url(./resources/Elements/ArrowSpinner_T_sel.svg); width:10px; height: 7px; }  */
-/* QSpinBox::down-arrow:disabled, QSpinBox::down-arrow:off { image:url(./resources/Elements/ArrowSpinner_T_dis.svg); }  */
-
-
-/* QSpinBox::down-button { subcontrol-origin: border; subcontrol-position:top right; width: 13px; height:7px; background-color:#282828; border:1px solid #707070; }   */
-/* QSpinBox::down-button:hover {background-color:#707070;}   */
-/* QSpinBox::down-button:pressed {background-color:#c8c8c8;}   */
-/* QSpinBox::down-button:disabled {background-color:#282828; border:1px solid #3c3c3c;}   */
-/* QSpinBox::down-arrow {qproperty-icon: none; image: url(./resources/Elements/ArrowSpinner_B.svg); width: 10px; height: 5px; }   */
-/* QSpinBox::down-arrow:hover{ image: url(./resources/Elements/ArrowSpinner_B.svg); width: 10px; height: 5px;}   */
-/* QSpinBox::down-arrow:pressed{ image: url(./resources/Elements/ArrowSpinner_B_sel.svg); width: 10px; height: 5px;}   */
-/* QSpinBox::down-arrow:disabled, QSpinBox::down-arrow:off {image: url(./resources/Elements/ArrowSpinner_B_dis.svg); }   */
-
-
-
-
