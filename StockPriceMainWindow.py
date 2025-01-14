@@ -1828,6 +1828,7 @@ class MainWindow( QMainWindow ):
                 self.ui.qtUse1ShareUnitAction.setChecked( True )
                 self.ui.qtUse1000ShareUnitAction.setChecked( False )
                 self.on_change_display_mode()
+                self.refresh_stock_list_table()
 
     def on_trigger_use_1000_share_unit( self ):
         with ( QSignalBlocker( self.ui.qtUse1ShareUnitAction ),
@@ -1835,6 +1836,7 @@ class MainWindow( QMainWindow ):
                 self.ui.qtUse1ShareUnitAction.setChecked( False )
                 self.ui.qtUse1000ShareUnitAction.setChecked( True )
                 self.on_change_display_mode()
+                self.refresh_stock_list_table()
 
     def on_trigger_AD_year( self ):
         with ( QSignalBlocker( self.ui.qtADYearAction ),
@@ -3141,6 +3143,11 @@ class MainWindow( QMainWindow ):
         if table_view:
             table_model = table_view.model()
             table_model.clear()
+
+            if self.ui.qtUse1ShareUnitAction.isChecked():
+                self.list_stock_list_table_horizontal_header[ 1 ] = "庫存股數"
+            else:
+                self.list_stock_list_table_horizontal_header[ 1 ] = "庫存張數"
             table_model.setHorizontalHeaderLabels( self.list_stock_list_table_horizontal_header )
             
             with QSignalBlocker( table_view.horizontalHeader() ):
@@ -3159,6 +3166,16 @@ class MainWindow( QMainWindow ):
                     elif display_type_combobox.currentIndex() == 2:
                         if n_accumulated_inventory != 0:
                             continue
+
+                    if self.ui.qtUse1ShareUnitAction.isChecked():
+                        str_accumulated_inventory = format( n_accumulated_inventory, "," )
+                    else:
+                        f_accumulated_inventory_1000_share = n_accumulated_inventory / 1000
+                        if f_accumulated_inventory_1000_share.is_integer():
+                            str_accumulated_inventory = format( int( f_accumulated_inventory_1000_share ), "," )
+                        else:
+                            str_accumulated_inventory = format( f_accumulated_inventory_1000_share, "," )
+
 
                     list_stock_name_and_type = self.dict_all_company_number_to_name_and_type[ key_stock_number ]
                     str_stock_name = list_stock_name_and_type[ 0 ]
@@ -3214,7 +3231,7 @@ class MainWindow( QMainWindow ):
                         str_color = QBrush( '#FFFFFF' )
 
                     list_data = [ format( n_accumulated_cost, "," ),      #總成本
-                                  format( n_accumulated_inventory, "," ), #庫存股數
+                                  str_accumulated_inventory,              #庫存股數
                                   format( f_average_cost, "," ),          #平均成本
                                   str_stock_price,                        #當前股價
                                   str_net_value,                          #淨值
