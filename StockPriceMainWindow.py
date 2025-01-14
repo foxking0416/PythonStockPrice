@@ -1546,6 +1546,18 @@ class MainWindow( QMainWindow ):
                 display_type_combobox.setCurrentIndex( 0 )
                 self.refresh_stock_list_table()
 
+        table_view = self.ui.qtTabWidget.currentWidget().findChild( QTableView, "StockListTableView" )
+        if table_view:
+            table_model = table_view.model()
+            for row in range( table_model.rowCount() ):
+                header_text = table_model.verticalHeaderItem( row ).text()
+                str_stock_number = header_text.split(" ")[0]
+                if str_stock_number == str_first_four_chars:
+                    index = table_model.index( row, 0 )
+                    table_view.scrollTo( index, QTableView.PositionAtTop )
+                    self.on_stock_list_table_item_clicked( index, table_model )
+                    break
+
     def on_extra_insurance_fee_check_box_state_changed( self, state ): 
         str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
         if state == 2:
