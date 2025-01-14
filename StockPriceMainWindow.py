@@ -1442,7 +1442,7 @@ class MainWindow( QMainWindow ):
             str_tab_name = self.add_new_tab_and_table()
             self.dict_all_account_all_stock_trading_data[ str_tab_name ] = {}
             self.dict_all_account_ui_state[ str_tab_name ] = { "discount_checkbox": True, "discount_value": 0.6, "insurance_checkbox": False, "trading_fee_type": TradingFeeType.VARIABLE, "trading_fee_minimum": 1, "trading_fee_constant": 1 }
-            self.dict_all_account_cash_transfer_data[ str_tab_name ] = {}
+            self.dict_all_account_cash_transfer_data[ str_tab_name ] = []
         else:
             current_title = self.ui.qtTabWidget.tabText( index )
             dialog = EditTabTitleDialog( current_title, self )
@@ -2316,7 +2316,7 @@ class MainWindow( QMainWindow ):
         self.dict_all_account_ui_state.clear()
         str_tab_name = self.add_new_tab_and_table()
         self.dict_all_account_all_stock_trading_data[ str_tab_name ] = {}
-        self.dict_all_account_cash_transfer_data[ str_tab_name ] = {}
+        self.dict_all_account_cash_transfer_data[ str_tab_name ] = []
         self.dict_all_account_ui_state[ str_tab_name ] = { "discount_checkbox": True, "discount_value": 0.6, "insurance_checkbox": False, "trading_fee_type": TradingFeeType.VARIABLE, "trading_fee_minimum": 1, "trading_fee_constant": 1 }
         self.dict_all_account_all_stock_trading_data_INITIAL = copy.deepcopy( self.dict_all_account_all_stock_trading_data )
         self.ui.qtTabWidget.setCurrentIndex( 0 )
@@ -2373,7 +2373,7 @@ class MainWindow( QMainWindow ):
                 if len( self.dict_all_account_all_stock_trading_data ) == 0:
                     str_tab_name = self.add_new_tab_and_table()
                     self.dict_all_account_all_stock_trading_data[ str_tab_name ] = {}
-                    self.dict_all_account_cash_transfer_data[ str_tab_name ] = {}
+                    self.dict_all_account_cash_transfer_data[ str_tab_name ] = []
                     self.dict_all_account_ui_state[ str_tab_name ] = { "discount_checkbox": True, "discount_value": 0.6, "insurance_checkbox": False, "trading_fee_type": TradingFeeType.VARIABLE, "trading_fee_minimum": 1, "trading_fee_constant": 1 }
                 self.ui.qtTabWidget.setCurrentIndex( 0 )
 
