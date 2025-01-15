@@ -2996,7 +2996,7 @@ class MainWindow( QMainWindow ):
                 item[ TradingData.CASH_DIVIDEND_GAIN_NON_SAVE ] = 0
                 str_buying_date = item[ TradingData.TRADING_DATE ]
             elif e_trading_type == TradingType.DIVIDEND:
-                if n_accumulated_inventory == 0: #沒有庫存就不用算股利了
+                if n_accumulated_inventory <= 0: #沒有庫存就不用算股利了
                     continue
                 n_stock_dividend_value_gain = int( Decimal( str( item[ TradingData.STOCK_DIVIDEND_PER_SHARE ] ) ) * Decimal( str( n_accumulated_inventory ) ) ) # n_stock_dividend_value_gain單位為元
                 n_stock_dividend_share_gain = int( Decimal( str( item[ TradingData.STOCK_DIVIDEND_PER_SHARE ] ) ) * Decimal( str( n_accumulated_inventory ) ) / Decimal( '10' ) ) # n_stock_dividend_share_gain單位為股 除以10是因為票面額10元
@@ -3303,12 +3303,8 @@ class MainWindow( QMainWindow ):
 
             if self.ui.qtFromNewToOldAction.isChecked():
                 loop_list = list_per_account_all_cash_transfer_data[::-1]
-                if self.ui.qtShow10Action.isChecked():
-                    loop_list = loop_list[:10]
             else:
                 loop_list = list_per_account_all_cash_transfer_data
-                if self.ui.qtShow10Action.isChecked():
-                    loop_list = loop_list[:10]
 
             for column, item in enumerate( loop_list ):
                 str_date = item[ TransferData.TRANSFER_DATE ]
@@ -3358,6 +3354,10 @@ class MainWindow( QMainWindow ):
                 table_model.setItem( 3, column, edit_icon_item )
                 table_model.setItem( 4, column, delete_icon_item )
 
+                if self.ui.qtShow10Action.isChecked():
+                    if column == 9:
+                        break
+
     def clear_per_account_transfer_table( self ):
         self.per_stock_trading_data_model.clear()
         self.per_stock_trading_data_model.setVerticalHeaderLabels( self.get_trading_data_header() )
@@ -3369,12 +3369,8 @@ class MainWindow( QMainWindow ):
 
         if self.ui.qtFromNewToOldAction.isChecked():
             loop_list = sorted_list[::-1]
-            if self.ui.qtShow10Action.isChecked():
-                loop_list = loop_list[:10]
         else:
             loop_list = sorted_list
-            if self.ui.qtShow10Action.isChecked():
-                loop_list = loop_list[:11]#因為會有一筆是template，所以要多一筆
 
         b_use_auto_dividend = sorted_list[ 0 ][ TradingData.USE_AUTO_DIVIDEND_DATA ]
         column = 0
@@ -3427,6 +3423,10 @@ class MainWindow( QMainWindow ):
 
                 self.per_stock_trading_data_model.setItem( len( list_data ), column, edit_icon_item )
                 self.per_stock_trading_data_model.setItem( len( list_data ) + 1, column, delete_icon_item )
+
+                if self.ui.qtShow10Action.isChecked():
+                    if column == 9:
+                        break
             column += 1
 
         for row in range( len( self.get_trading_data_header() ) ):
