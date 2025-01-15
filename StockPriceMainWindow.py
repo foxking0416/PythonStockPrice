@@ -2445,10 +2445,12 @@ class MainWindow( QMainWindow ):
                         self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ] = dict_per_account_all_stock_trading_data_LOAD
                         dict_per_account_ui_state_LOAD = dict_all_account_ui_state_LOAD[ str_account_name ]
                         self.dict_all_account_ui_state[ str_tab_widget_name ] = dict_per_account_ui_state_LOAD
+                    self.dict_all_account_cash_transfer_data[ str_tab_widget_name ] = dict_all_account_cash_transfer_data_LOAD[ str_account_name ]
 
             self.process_all_trading_data()
             self.pick_up_stock( None )
             self.refresh_stock_list_table()
+            self.process_all_transfer_data()
             self.refresh_transfer_data_table()
             self.clear_per_stock_trading_table()
             self.update_button_enable_disable_status()
