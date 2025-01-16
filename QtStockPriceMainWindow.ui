@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>股票交易紀錄</string>
   </property>
   <widget class="QScrollArea" name="scrollArea">
    <property name="widgetResizable">
@@ -23,7 +23,7 @@
       <x>0</x>
       <y>0</y>
       <width>1165</width>
-      <height>855</height>
+      <height>850</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout">
@@ -184,7 +184,7 @@
      <x>0</x>
      <y>0</y>
      <width>1167</width>
-     <height>18</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu">

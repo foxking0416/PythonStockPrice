@@ -69,7 +69,7 @@ class Ui_MainWindow(object):
         self.scrollArea.setWidgetResizable(True)
         self.scrollAreaWidgetContents = QWidget()
         self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 1165, 855))
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 1165, 850))
         self.verticalLayout = QVBoxLayout(self.scrollAreaWidgetContents)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.verticalLayout.setContentsMargins(-1, 0, -1, 0)
@@ -163,7 +163,7 @@ class Ui_MainWindow(object):
         MainWindow.setCentralWidget(self.scrollArea)
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
-        self.menubar.setGeometry(QRect(0, 0, 1167, 18))
+        self.menubar.setGeometry(QRect(0, 0, 1167, 21))
         self.menu = QMenu(self.menubar)
         self.menu.setObjectName(u"menu")
         self.menu_2 = QMenu(self.menubar)
@@ -205,7 +205,7 @@ class Ui_MainWindow(object):
     # setupUi
 
     def retranslateUi(self, MainWindow):
-        MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"MainWindow", None))
+        MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"\u80a1\u7968\u4ea4\u6613\u7d00\u9304", None))
         self.qtNewFileAction.setText(QCoreApplication.translate("MainWindow", u"\u958b\u65b0\u6a94\u6848", None))
         self.qtSaveAsAction.setText(QCoreApplication.translate("MainWindow", u"\u53e6\u5b58\u65b0\u6a94", None))
         self.qtSaveAction.setText(QCoreApplication.translate("MainWindow", u"\u5132\u5b58", None))

@@ -38,7 +38,7 @@ from scipy.optimize import newton
 # cd D:\_2.code\PythonStockPrice   
 # pyinstaller --hidden-import "babel.numbers" --add-data "resources;./resources" --onefile --noconsole StockPriceMainWindow.py
 # pyinstaller --hidden-import "babel.numbers" --add-data "resources;./resources" --onefile --console StockPriceMainWindow.py
-# pyinstaller --hidden-import "babel.numbers" --add-data "resources;./resources" --console StockPriceMainWindow.py
+# pyinstaller --hidden-import "babel.numbers" --add-data "resources;./resources" --noconsole StockPriceMainWindow.py
 
 # 要把.ui檔變成.py
 # cd D:\_2.code\PythonStockPrice
