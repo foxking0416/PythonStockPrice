@@ -1122,6 +1122,12 @@ class MainWindow( QMainWindow ):
         self.dict_auto_stock_listed_etf_yearly_dividned = self.load_listed_etf_all_yearly_dividend_data( 2010, b_unit_test )
         self.dict_auto_stock_OTC_etf_yearly_dividned = self.load_OTC_etf_all_yearly_dividend_data( 2010, b_unit_test )
 
+        for key_stock_number, value in self.dict_auto_stock_OTC_etf_yearly_dividned.items():
+            # 00687B 這支 ETF 應該是櫃買中心的資料，但是出現在證交所(重點是資料不完整)，所以要排除
+            # 為了避免有相同的問題，我們就直接把 self.dict_auto_stock_listed_etf_yearly_dividned 排除所有櫃買中心的 ETF
+            if key_stock_number in self.dict_auto_stock_listed_etf_yearly_dividned:
+                del self.dict_auto_stock_listed_etf_yearly_dividned[ key_stock_number ]
+
         # common_keys = set(self.dict_auto_stock_yearly_dividned.keys()) & set(self.dict_auto_stock_listed_etf_yearly_dividned.keys())
         self.dict_auto_stock_yearly_dividned.update( self.dict_auto_stock_listed_etf_yearly_dividned )
         for key, value in self.dict_auto_stock_OTC_etf_yearly_dividned.items():
@@ -3873,7 +3879,6 @@ class MainWindow( QMainWindow ):
     
                 for key_number, value_name_and_etf in dict_company_number_to_name.items():
                     f.write( str( key_number ) + ',' + str( value_name_and_etf[ 0 ] ) + ',' + str( value_name_and_etf[ 1 ] ) + '\n' )
-
 
     def load_all_company_stock_number( self ):
         dict_company_number_to_name = {}
