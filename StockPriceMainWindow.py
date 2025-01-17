@@ -2,14 +2,15 @@ import requests
 from bs4 import BeautifulSoup
 import json
 import os
+import shutil
 import sys
 import datetime
 import time
 import math
 import copy
 from logging.handlers import TimedRotatingFileHandler
-from QtStockPriceMainWindow import Ui_MainWindow  # 導入轉換後的 UI 類
 import logging
+from QtStockPriceMainWindow import Ui_MainWindow  # 導入轉換後的 UI 類
 from QtStockCapitalIncreaseEditDialog import Ui_Dialog as Ui_StockCapitalIncreaseDialog
 from QtStockTradingEditDialog import Ui_Dialog as Ui_StockTradingDialog
 from QtStockRegularTradingEditDialog import Ui_Dialog as Ui_StockRegularTradingDialog
@@ -39,6 +40,7 @@ from scipy.optimize import newton
 # pyinstaller --hidden-import "babel.numbers" --add-data "resources;./resources" --onefile --noconsole StockPriceMainWindow.py
 # pyinstaller --hidden-import "babel.numbers" --add-data "resources;./resources" --onefile --console StockPriceMainWindow.py
 # pyinstaller --hidden-import "babel.numbers" --add-data "resources;./resources" --noconsole StockPriceMainWindow.py
+# pyinstaller --hidden-import "babel.numbers" --add-data "resources;./resources" --add-data "StockInventory/Dividend;./StockInventory/Dividend" --noconsole StockPriceMainWindow.py
 
 # 要把.ui檔變成.py
 # cd D:\_2.code\PythonStockPrice
@@ -997,7 +999,7 @@ class MainWindow( QMainWindow ):
         self.ui.setupUi( self )  # 設置 UI
         window_icon = QIcon( window_icon_file_path ) 
         self.setWindowIcon( window_icon )
-        
+
         if not b_unit_test:
             self.progress_bar = QProgressBar( self )
             self.progress_bar.setGeometry( 400, 350, 300, 25 )  # Adjust position and size as needed
@@ -1094,7 +1096,25 @@ class MainWindow( QMainWindow ):
             self.initialize( True, None )
             self.load_initialize_data()
         else:
+            if getattr( sys, 'frozen', False ):
+                self.copy_required_data()
             self.start_loading_stock_data()
+
+    def copy_required_data( self ):
+        source_folder = os.path.join( g_exe_root_dir, 'StockInventory\\Dividend' ) 
+        g_data_dir = os.path.join( g_user_dir, "AppData", "Local", "FoxInfo" )
+        destination_folder = os.path.join( g_data_dir, 'StockInventory\\Dividend' ) 
+
+        os.makedirs( destination_folder, exist_ok = True )
+        file_extension = '.txt'
+        # 遍歷來源資料夾的檔案
+        for filename in os.listdir( source_folder ):
+            source_file = os.path.join( source_folder, filename )
+            destination_file = os.path.join( destination_folder, filename )
+            
+            # 檢查是否為檔案且符合條件
+            if os.path.isfile( source_file ) and filename.endswith( file_extension ):
+                shutil.copy2(source_file, destination_file )
 
     def download_all_required_data( self, str_date, update_progress_callback ):
         self.set_progress_value( update_progress_callback, 0 )
@@ -1102,11 +1122,11 @@ class MainWindow( QMainWindow ):
         self.set_progress_value( update_progress_callback, 10 )
         self.download_day_stock_price( str_date )
         self.set_progress_value( update_progress_callback, 20 )
-        self.download_general_company_all_yearly_dividend_data( 2010, str_date )
+        self.download_general_company_all_yearly_dividend_data( 2025, str_date )
         self.set_progress_value( update_progress_callback, 50 )
-        self.download_listed_etf_all_yearly_dividend_data( 2010, str_date )
+        self.download_listed_etf_all_yearly_dividend_data( 2025, str_date )
         self.set_progress_value( update_progress_callback, 80 )
-        self.download_OTC_etf_all_yearly_dividend_data( 2010, str_date )
+        self.download_OTC_etf_all_yearly_dividend_data( 2025, str_date )
 
     def initialize( self, b_unit_test, update_progress_callback ):
         self.setEnabled( False ) # 資料下載前先Disable整個視窗
