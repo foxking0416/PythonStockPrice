@@ -55,6 +55,9 @@ from scipy.optimize import newton
 # pyside6-uic QtCashTransferEditDialog.ui -o QtCashTransferEditDialog.py
 # pyside6-uic QtSaveCheckDialog.ui -o QtSaveCheckDialog.py
 
+# 下載上市櫃公司股利資料
+# https://mops.twse.com.tw/mops/web/t108sb27
+
 # 以下兩個網站都可以下載"上市"ETF的股利
 # https://www.twse.com.tw/zh/products/securities/etf/products/div.html
 # https://www.twse.com.tw/zh/ETFortune/dividendList
@@ -4104,12 +4107,13 @@ class MainWindow( QMainWindow ):
 
             all_company_dividend = []
             try:
-                for n_type in range( 2 ):
+                for n_type in range( 3 ):
                     if n_type == 0:
                         payload[ 'TYPEK' ] = 'sii'
-                    else:
+                    elif n_type == 1:
                         payload[ 'TYPEK' ] = 'otc'
-
+                    else:
+                        payload[ 'TYPEK' ] = 'rotc'
                     res = self.send_post_request( url, payload )
 
                     soup = BeautifulSoup( res.text, "lxml" )
