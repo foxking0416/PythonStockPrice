@@ -64,6 +64,12 @@ class Ui_MainWindow(object):
         self.qtROCYearAction = QAction(MainWindow)
         self.qtROCYearAction.setObjectName(u"qtROCYearAction")
         self.qtROCYearAction.setCheckable(True)
+        self.qtCostWithInDividendAction = QAction(MainWindow)
+        self.qtCostWithInDividendAction.setObjectName(u"qtCostWithInDividendAction")
+        self.qtCostWithInDividendAction.setCheckable(True)
+        self.qtCostWithOutDividendAction = QAction(MainWindow)
+        self.qtCostWithOutDividendAction.setObjectName(u"qtCostWithOutDividendAction")
+        self.qtCostWithOutDividendAction.setCheckable(True)
         self.scrollArea = QScrollArea(MainWindow)
         self.scrollArea.setObjectName(u"scrollArea")
         self.scrollArea.setWidgetResizable(True)
@@ -168,6 +174,8 @@ class Ui_MainWindow(object):
         self.menu.setObjectName(u"menu")
         self.menu_2 = QMenu(self.menubar)
         self.menu_2.setObjectName(u"menu_2")
+        self.menu_3 = QMenu(self.menubar)
+        self.menu_3.setObjectName(u"menu_3")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QStatusBar(MainWindow)
         self.statusbar.setObjectName(u"statusbar")
@@ -175,6 +183,7 @@ class Ui_MainWindow(object):
 
         self.menubar.addAction(self.menu.menuAction())
         self.menubar.addAction(self.menu_2.menuAction())
+        self.menubar.addAction(self.menu_3.menuAction())
         self.menu.addAction(self.qtNewFileAction)
         self.menu.addAction(self.qtOpenFileAction)
         self.menu.addSeparator()
@@ -195,6 +204,8 @@ class Ui_MainWindow(object):
         self.menu_2.addSeparator()
         self.menu_2.addAction(self.qtADYearAction)
         self.menu_2.addAction(self.qtROCYearAction)
+        self.menu_3.addAction(self.qtCostWithInDividendAction)
+        self.menu_3.addAction(self.qtCostWithOutDividendAction)
 
         self.retranslateUi(MainWindow)
 
@@ -221,6 +232,8 @@ class Ui_MainWindow(object):
         self.qtUse1000ShareUnitAction.setText(QCoreApplication.translate("MainWindow", u"\u4ee5\u4e00\u5f35\u70ba\u55ae\u4f4d", None))
         self.qtADYearAction.setText(QCoreApplication.translate("MainWindow", u"\u4ee5\u897f\u5143\u986f\u793a", None))
         self.qtROCYearAction.setText(QCoreApplication.translate("MainWindow", u"\u4ee5\u6c11\u570b\u986f\u793a", None))
+        self.qtCostWithInDividendAction.setText(QCoreApplication.translate("MainWindow", u"\u80a1\u5229\u6263\u9664\u6210\u672c", None))
+        self.qtCostWithOutDividendAction.setText(QCoreApplication.translate("MainWindow", u"\u80a1\u5229\u4e0d\u6263\u6210\u672c", None))
 #if QT_CONFIG(tooltip)
         self.tab_add.setToolTip(QCoreApplication.translate("MainWindow", u"\u96d9\u64ca\u65b0\u589e", None))
 #endif // QT_CONFIG(tooltip)
@@ -236,5 +249,6 @@ class Ui_MainWindow(object):
         self.qtExportSelectedStockTradingDataPushButton.setText(QCoreApplication.translate("MainWindow", u"\u8f38\u51fa\u55ae\u652f\u80a1\u7968\u4ea4\u6613\u7d00\u9304", None))
         self.menu.setTitle(QCoreApplication.translate("MainWindow", u"\u6a94\u6848", None))
         self.menu_2.setTitle(QCoreApplication.translate("MainWindow", u"\u986f\u793a", None))
+        self.menu_3.setTitle(QCoreApplication.translate("MainWindow", u"\u6a21\u5f0f", None))
     # retranslateUi
 
