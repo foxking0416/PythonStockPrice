@@ -65,10 +65,6 @@ class Ui_Dialog(object):
 
         self.horizontalLayout.addWidget(self.qtDateEdit)
 
-        self.horizontalSpacer_3 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
-
-        self.horizontalLayout.addItem(self.horizontalSpacer_3)
-
 
         self.verticalLayout.addLayout(self.horizontalLayout)
 
