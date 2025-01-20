@@ -21,9 +21,9 @@ from QtDuplicateOptionDialog import Ui_Dialog as Ui_DuplicateOptionDialog
 from QtSaveCheckDialog import Ui_Dialog as Ui_SaveCheckDialog
 from PySide6.QtWidgets import QApplication, QMainWindow, QDialog, QButtonGroup, QMessageBox, QStyledItemDelegate, QFileDialog, QHeaderView, QVBoxLayout, QHBoxLayout, \
                               QLabel, QLineEdit, QDialogButtonBox, QTabBar, QWidget, QTableView, QComboBox, QPushButton, QSizePolicy, QSpacerItem, QCheckBox, QDoubleSpinBox, \
-                              QProgressBar, QTabWidget, QDateEdit, QCalendarWidget, QSpinBox, QToolButton
+                              QProgressBar, QTabWidget
 from PySide6.QtGui import QStandardItemModel, QStandardItem, QIcon, QBrush
-from PySide6.QtCore import Qt, QModelIndex, QRect, QSignalBlocker, QSize, QThread, QObject, Signal, QDate
+from PySide6.QtCore import Qt, QModelIndex, QRect, QSignalBlocker, QSize, QThread, QObject, Signal
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import Alignment, PatternFill, Font, Border, Side
@@ -147,67 +147,6 @@ up_icon_file_path = os.path.join( g_exe_root_dir, 'resources\\MoveUp.svg' )
 up_icon = QIcon( up_icon_file_path )
 styles_css_path = os.path.join( g_exe_root_dir, 'resources\\styles.css' ) 
 
-class CustomCalendar(QCalendarWidget):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-
-        n_roc_year = QDate.currentDate().year() - 1911
-        year_button = self.findChild(QToolButton, "qt_calendar_yearbutton")
-        if year_button:
-            year_button.setText( str( n_roc_year ) )
-            year_button.clicked.connect(self._update_year_display)
-            
-
-        spinbox = self.findChild(QSpinBox, "qt_calendar_yearedit" )
-        if spinbox:
-            spinbox.setValue( n_roc_year )
-            spinbox.valueChanged.connect(self._on_spinbox_value_changed)
-
-    def _update_year_display(self):
-        """更新年份按鈕顯示"""
-        year_button = self.findChild(QToolButton, "qt_calendar_yearbutton")
-        if year_button:
-            n_roc_year = self.yearShown() - 1911
-            year_button.setText( str( n_roc_year ) )
-
-    def _on_spinbox_value_changed(self, value):
-        spinbox = self.findChild(QSpinBox, "qt_calendar_yearedit")
-        if spinbox:
-            spinbox.blockSignals(True)  # 防止遞迴觸發
-            spinbox.setValue( 110 )  
-            # spinbox.setPrefix (" 民國")
-            spinbox.blockSignals(False)
-            temp = self.yearShown()
-            pass
-            # self.setCurrentPage(value + 1911, self.monthShown())
-
-    def setCurrentPage(self, year, month):
-        """同步頁面年份，處理民國年轉換"""
-        super().setCurrentPage(year + 1911, month)
-
-
-class MinguoDateEdit(QDateEdit):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setCalendarPopup(True)
-        self.setDate(QDate.currentDate())  # 預設今天
-        self.setDisplayFormat("yy/MM/dd")
-
-        self.custom_calendar = CustomCalendar()
-        self.setCalendarWidget(self.custom_calendar)
-
-    def textFromDateTime(self, datetime):
-        date = datetime.date()
-        minguo_year = date.year() - 1911
-        return f"{minguo_year:02d}/{date.month():02d}/{date.day():02d}"
-
-    def dateTimeFromText(self, text):
-        try:
-            parts = text.replace("民國", "").replace("年", "").replace("月", "").replace("日", "").split()
-            minguo_year = int(parts[0]) + self.minguo_offset
-            return QDate(minguo_year, int(parts[1]), int(parts[2]))
-        except Exception:
-            return QDate.currentDate()
 
 class CenterIconDelegate( QStyledItemDelegate ):
     def paint( self, painter, option, index ):
@@ -584,10 +523,6 @@ class StockTradingEditDialog( QDialog ):
         window_icon = QIcon( window_icon_file_path ) 
         self.setWindowIcon( window_icon )
 
-        self.date_edit = MinguoDateEdit()
-        self.ui.horizontalLayout.addWidget(self.date_edit)
-        self.print_children(self.date_edit)
-
         self.ui.qtStockNumberLabel.setText( str_stock_number )
         self.ui.qtStockNameLabel.setText( str_stock_name )
         obj_current_date = datetime.datetime.today()
@@ -612,12 +547,6 @@ class StockTradingEditDialog( QDialog ):
         self.str_stock_name = str_stock_name
         # self.load_stylesheet("style.css")
         self.dict_trading_data = {}
-
-    def print_children( self, widget, depth=0):
-        """遞迴列出所有子部件及其類型"""
-        for child in widget.children():
-            print("  " * depth + f"{type(child).__name__}: {child.objectName()}")
-            self.print_children(child, depth + 1)
 
     def load_stylesheet( self, file_path ):
         try:
