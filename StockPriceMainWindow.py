@@ -1387,6 +1387,7 @@ class MainWindow( QMainWindow ):
         uiqt_stock_list_table_view.setItemDelegate( delegate )
         uiqt_stock_list_table_view.clicked.connect( lambda index: self.on_stock_list_table_item_clicked( index, stock_list_model ) )
         uiqt_stock_list_table_view.horizontalHeader().sortIndicatorChanged.connect( self.update_stock_list_vertical_header )
+        uiqt_stock_list_table_view.horizontalHeader().sectionDoubleClicked.connect( self.refresh_stock_list_table)
 
         uiqt_stock_input_line_edit.textChanged.connect( self.on_stock_input_text_changed ) 
 
@@ -1731,8 +1732,8 @@ class MainWindow( QMainWindow ):
             list_stock_number_all.append( key_stock_number )
 
         table_view = self.ui.qtTabWidget.currentWidget().findChild( QTableView, "StockListTableView" )
-        list_stock_number_visible = []
-        list_visible_stock_index_of_all = []
+        # list_stock_number_visible = []
+        # list_visible_stock_index_of_all = []
         if table_view:
             table_model = table_view.model()
             dict_stock_name = {}
@@ -1740,8 +1741,8 @@ class MainWindow( QMainWindow ):
                 header_text = table_model.verticalHeaderItem( row ).text()
                 str_stock_number = header_text.split(" ")[0]
                 dict_stock_name[ str_stock_number ] = header_text
-                if str_stock_number in list_stock_number_all:
-                    list_stock_number_visible.append( str_stock_number )
+                # if str_stock_number in list_stock_number_all:
+                #     list_stock_number_visible.append( str_stock_number )
 
 
             for row in range( table_model.rowCount() ):
@@ -1749,19 +1750,19 @@ class MainWindow( QMainWindow ):
                 hidden_data = table_model.data( index, Qt.UserRole )
                 str_stock_number_in_hidden_data = str( hidden_data )
                 table_model.setHeaderData( row, Qt.Vertical, dict_stock_name[ str_stock_number_in_hidden_data ] )
-                if str_stock_number_in_hidden_data in list_stock_number_all:
-                    list_visible_stock_index_of_all.append( list_stock_number_all.index( str_stock_number_in_hidden_data ) )
+            #     if str_stock_number_in_hidden_data in list_stock_number_all:
+            #         list_visible_stock_index_of_all.append( list_stock_number_all.index( str_stock_number_in_hidden_data ) )
 
-            for idx, val in zip( list_visible_stock_index_of_all, list_stock_number_visible ):
-                list_stock_number_all[ idx ] = val
+            # for idx, val in zip( list_visible_stock_index_of_all, list_stock_number_visible ):
+            #     list_stock_number_all[ idx ] = val
 
 
-            dict_all_stock_trading_data_new = {}
-            for index_row, str_stock_number in enumerate( list_stock_number_all ):
-                dict_all_stock_trading_data_new[ str_stock_number ] = dict_per_account_all_stock_trading_data[ str_stock_number ]
+            # dict_all_stock_trading_data_new = {}
+            # for index_row, str_stock_number in enumerate( list_stock_number_all ):
+            #     dict_all_stock_trading_data_new[ str_stock_number ] = dict_per_account_all_stock_trading_data[ str_stock_number ]
 
-            self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ] = dict_all_stock_trading_data_new
-            self.auto_save_trading_data()
+            # self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ] = dict_all_stock_trading_data_new
+            # self.auto_save_trading_data()
 
     def on_add_cash_transfer_push_button_clicked( self ):
         str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
