@@ -54,6 +54,7 @@ from scipy.optimize import newton
 # pyside6-uic QtDuplicateOptionDialog.ui -o QtDuplicateOptionDialog.py
 # pyside6-uic QtCashTransferEditDialog.ui -o QtCashTransferEditDialog.py
 # pyside6-uic QtSaveCheckDialog.ui -o QtSaveCheckDialog.py
+# pyside6-uic QtStockDividendTransferFeeEditDialog.ui -o QtStockDividendTransferFeeEditDialog.py
 
 # 下載上市櫃公司股利資料
 # https://mops.twse.com.tw/mops/web/t108sb27
