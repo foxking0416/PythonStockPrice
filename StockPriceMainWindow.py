@@ -8,6 +8,7 @@ import datetime
 import time
 import math
 import copy
+import re
 from logging.handlers import TimedRotatingFileHandler
 import logging
 from QtStockPriceMainWindow import Ui_MainWindow  # 導入轉換後的 UI 類
@@ -2256,7 +2257,7 @@ class MainWindow( QMainWindow ):
         if file_path:
             workbook = Workbook()
             worksheet = workbook.active
-            worksheet.title = str_stock_number + " " + str_stock_name
+            worksheet.title = str_stock_number + " " + re.sub( r'[^\w\u4e00-\u9fff]', '', str_stock_name ) 
             worksheet.page_setup.orientation = "landscape"
             worksheet.page_setup.paperSize = 9
             worksheet.page_margins.left = 0.7    # 左邊界
