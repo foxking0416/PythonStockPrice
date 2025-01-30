@@ -19,6 +19,7 @@ from QtStockDividendEditDialog import Ui_Dialog as Ui_StockDividendDialog
 from QtStockCapitalReductionEditDialog import Ui_Dialog as Ui_StockCapitalReductionDialog
 from QtCashTransferEditDialog import Ui_Dialog as Ui_CashTransferDialog
 from QtDuplicateOptionDialog import Ui_Dialog as Ui_DuplicateOptionDialog
+from QtStockDividendTransferFeeEditDialog import Ui_Dialog as Ui_StockDividendTransferFeeEditDialog
 from QtSaveCheckDialog import Ui_Dialog as Ui_SaveCheckDialog
 from PySide6.QtWidgets import QApplication, QMainWindow, QDialog, QButtonGroup, QMessageBox, QStyledItemDelegate, QFileDialog, QHeaderView, QVBoxLayout, QHBoxLayout, \
                               QLabel, QLineEdit, QDialogButtonBox, QTabBar, QWidget, QTableView, QComboBox, QPushButton, QSizePolicy, QSpacerItem, QCheckBox, QDoubleSpinBox, \
@@ -917,6 +918,25 @@ class StockCapitalIncreaseEditDialog( QDialog ):
         n_trading_count = self.get_trading_count()
         self.ui.qtTotalCostLineEdit.setText( format( int( f_trading_price * n_trading_count ), ',' ) )
 
+class StockDividendTransferFeeEditDialog( QDialog ):
+    def __init__( self, str_account_name, parent = None ):
+        super().__init__( parent )
+
+        self.ui = Ui_StockDividendTransferFeeEditDialog()
+        self.ui.setupUi( self )
+        window_icon = QIcon( window_icon_file_path ) 
+        self.setWindowIcon( window_icon )
+
+    def accept_data( self ):
+        n_transfer_value = 1
+        if n_transfer_value != 0:
+            self.accept()
+        else:
+            self.reject()
+    
+    def cancel( self ):
+        self.reject()
+
 class SaveCheckDialog( QDialog ):
     def __init__( self, str_title = '', parent = None ):
         super().__init__( parent )
@@ -1060,6 +1080,8 @@ class MainWindow( QMainWindow ):
         self.ui.qtImportFullAction.triggered.connect( self.on_import_full_action_triggered )
         self.ui.qtImportSingleStockAction.setShortcut( "Ctrl+I" )
         self.ui.qtImportSingleStockAction.triggered.connect( self.on_import_single_stock_action_triggered )
+
+        self.ui.qtEditDividendTransferFeeAction.triggered.connect( self.on_trigger_edit_stock_dividend_transfer_fee )
 
         self.ui.qtFromNewToOldAction.setChecked( True )
         self.ui.qtFromOldToNewAction.setChecked( False )
@@ -1832,6 +1854,12 @@ class MainWindow( QMainWindow ):
                     self.process_single_transfer_data( str_tab_widget_name )
                     self.refresh_transfer_data_table()
                     self.auto_save_trading_data()
+
+    def on_trigger_edit_stock_dividend_transfer_fee( self ):
+        dialog = StockDividendTransferFeeEditDialog( self )
+
+        if dialog.exec():
+            pass
 
     def on_trigger_from_new_to_old( self ):
         with ( QSignalBlocker( self.ui.qtFromNewToOldAction ),
