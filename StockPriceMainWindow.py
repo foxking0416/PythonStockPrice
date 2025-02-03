@@ -580,6 +580,9 @@ class StockTradingEditDialog( QDialog ):
         else:
             self.ui.qtSellRadioButton.setChecked( True )
 
+    def setup_trading_minimum_fee( self, n_trading_minimum_fee ):
+        self.ui.qtMinimumFeeSpinBox.setValue( n_trading_minimum_fee )
+
     def setup_trading_discount( self, f_discount_value ):
         if f_discount_value != 1:
             self.ui.qtDiscountCheckBox.setChecked( True )
