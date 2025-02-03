@@ -24,14 +24,14 @@ class Ui_Dialog(object):
     def setupUi(self, Dialog):
         if not Dialog.objectName():
             Dialog.setObjectName(u"Dialog")
-        Dialog.resize(255, 371)
+        Dialog.resize(255, 450)
         sizePolicy = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(Dialog.sizePolicy().hasHeightForWidth())
         Dialog.setSizePolicy(sizePolicy)
-        Dialog.setMinimumSize(QSize(255, 371))
-        Dialog.setMaximumSize(QSize(255, 371))
+        Dialog.setMinimumSize(QSize(255, 450))
+        Dialog.setMaximumSize(QSize(255, 450))
         self.verticalLayout = QVBoxLayout(Dialog)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.horizontalLayout_12 = QHBoxLayout()
@@ -192,7 +192,6 @@ class Ui_Dialog(object):
 
         self.qtDiscountRateDoubleSpinBox = QDoubleSpinBox(Dialog)
         self.qtDiscountRateDoubleSpinBox.setObjectName(u"qtDiscountRateDoubleSpinBox")
-        self.qtDiscountRateDoubleSpinBox.setMinimumSize(QSize(50, 0))
         self.qtDiscountRateDoubleSpinBox.setDecimals(1)
         self.qtDiscountRateDoubleSpinBox.setMaximum(10.000000000000000)
         self.qtDiscountRateDoubleSpinBox.setSingleStep(0.500000000000000)
@@ -213,7 +212,7 @@ class Ui_Dialog(object):
 
         self.horizontalLayout_13 = QHBoxLayout()
         self.horizontalLayout_13.setObjectName(u"horizontalLayout_13")
-        self.horizontalSpacer_8 = QSpacerItem(25, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
+        self.horizontalSpacer_8 = QSpacerItem(15, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
 
         self.horizontalLayout_13.addItem(self.horizontalSpacer_8)
 
