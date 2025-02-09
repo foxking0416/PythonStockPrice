@@ -190,10 +190,10 @@ class TradingData( Enum ):
     TRADING_TYPE = 1 # 0:賣出, 1:買進, 2:股利, 3:減資
     TRADING_PRICE = 2
     TRADING_COUNT = 3
-    TRADING_FEE_TYPE = 4 # 0:固定, 1:變動
-    TRADING_FEE_DISCOUNT = 5
-    TRADING_FEE_MINIMUM = 6
-    TRADING_FEE_CONSTANT = 7
+    TRADING_FEE_DISCOUNT = 4
+    REGULAR_BUY_TRADING_FEE_TYPE = 5 # 0:固定, 1:變動
+    REGULAR_BUY_TRADING_FEE_MINIMUM = 6
+    REGULAR_BUY_TRADING_FEE_CONSTANT = 7
     STOCK_DIVIDEND_PER_SHARE = 8
     CASH_DIVIDEND_PER_SHARE = 9
     CAPITAL_REDUCTION_PER_SHARE = 10
@@ -294,10 +294,10 @@ class Utility():
         dict_trading_data[ TradingData.TRADING_TYPE ] = e_trading_type
         dict_trading_data[ TradingData.TRADING_PRICE ] = f_trading_price
         dict_trading_data[ TradingData.TRADING_COUNT ] = n_trading_count
-        dict_trading_data[ TradingData.TRADING_FEE_TYPE ] = e_trading_fee_type
+        dict_trading_data[ TradingData.REGULAR_BUY_TRADING_FEE_TYPE ] = e_trading_fee_type
         dict_trading_data[ TradingData.TRADING_FEE_DISCOUNT ] = f_trading_fee_discount
-        dict_trading_data[ TradingData.TRADING_FEE_MINIMUM ] = n_trading_fee_minimum
-        dict_trading_data[ TradingData.TRADING_FEE_CONSTANT ] = n_trading_fee_constant
+        dict_trading_data[ TradingData.REGULAR_BUY_TRADING_FEE_MINIMUM ] = n_trading_fee_minimum
+        dict_trading_data[ TradingData.REGULAR_BUY_TRADING_FEE_CONSTANT ] = n_trading_fee_constant
         dict_trading_data[ TradingData.STOCK_DIVIDEND_PER_SHARE ] = f_stock_dividend_per_share
         dict_trading_data[ TradingData.CASH_DIVIDEND_PER_SHARE ] = f_cash_dividend_per_share
         dict_trading_data[ TradingData.CAPITAL_REDUCTION_PER_SHARE ] = f_capital_reduction_per_share
@@ -2010,9 +2010,9 @@ class MainWindow( QMainWindow ):
                 self.dict_all_account_ui_state[ str_tab_widget_name ][ "discount_checkbox"] = True
                 self.dict_all_account_ui_state[ str_tab_widget_name ][ "discount_value"] = dict_trading_data[ TradingData.TRADING_FEE_DISCOUNT ]
 
-            self.dict_all_account_ui_state[ str_tab_widget_name ][ "trading_fee_type"] = dict_trading_data[ TradingData.TRADING_FEE_TYPE ]
-            self.dict_all_account_ui_state[ str_tab_widget_name ][ "trading_fee_minimum"] = dict_trading_data[ TradingData.TRADING_FEE_MINIMUM ]
-            self.dict_all_account_ui_state[ str_tab_widget_name ][ "trading_fee_constant"] = dict_trading_data[ TradingData.TRADING_FEE_CONSTANT ]
+            self.dict_all_account_ui_state[ str_tab_widget_name ][ "trading_fee_type"] = dict_trading_data[ TradingData.REGULAR_BUY_TRADING_FEE_TYPE ]
+            self.dict_all_account_ui_state[ str_tab_widget_name ][ "trading_fee_minimum"] = dict_trading_data[ TradingData.REGULAR_BUY_TRADING_FEE_MINIMUM ]
+            self.dict_all_account_ui_state[ str_tab_widget_name ][ "trading_fee_constant"] = dict_trading_data[ TradingData.REGULAR_BUY_TRADING_FEE_CONSTANT ]
 
 
             dict_per_account_all_stock_trading_data[ str_stock_number ].append( dict_trading_data )
@@ -2125,10 +2125,10 @@ class MainWindow( QMainWindow ):
                     elif dict_selected_data[ TradingData.TRADING_TYPE ] == TradingType.REGULAR_BUY:
                         dialog = StockRegularTradingEditDialog( str_stock_number, str_stock_name, TradingFeeType.VARIABLE, True, 0, 0, 0, self )
                         dialog.setup_trading_date( dict_selected_data[ TradingData.TRADING_DATE ] )
-                        dialog.setup_trading_fee_type( dict_selected_data[ TradingData.TRADING_FEE_TYPE ] )
+                        dialog.setup_trading_fee_type( dict_selected_data[ TradingData.REGULAR_BUY_TRADING_FEE_TYPE ] )
                         dialog.setup_trading_discount( dict_selected_data[ TradingData.TRADING_FEE_DISCOUNT ] )
-                        dialog.setup_trading_fee_minimum( dict_selected_data[ TradingData.TRADING_FEE_MINIMUM ] )
-                        dialog.setup_trading_fee_constant( dict_selected_data[ TradingData.TRADING_FEE_CONSTANT ] )
+                        dialog.setup_trading_fee_minimum( dict_selected_data[ TradingData.REGULAR_BUY_TRADING_FEE_MINIMUM ] )
+                        dialog.setup_trading_fee_constant( dict_selected_data[ TradingData.REGULAR_BUY_TRADING_FEE_CONSTANT ] )
                         dialog.setup_trading_price( dict_selected_data[ TradingData.TRADING_PRICE ] )
                         dialog.setup_trading_count( dict_selected_data[ TradingData.TRADING_COUNT ] )
                     elif dict_selected_data[ TradingData.TRADING_TYPE ] == TradingType.DIVIDEND:
@@ -2994,10 +2994,10 @@ class MainWindow( QMainWindow ):
             elif e_trading_type == TradingType.REGULAR_BUY:
                 f_trading_price = item[ TradingData.TRADING_PRICE ]
                 n_trading_count = item[ TradingData.TRADING_COUNT ]
-                e_trading_fee_type = item[ TradingData.TRADING_FEE_TYPE ]
+                e_trading_fee_type = item[ TradingData.REGULAR_BUY_TRADING_FEE_TYPE ]
                 f_trading_fee_discount = Decimal( str( item[ TradingData.TRADING_FEE_DISCOUNT ] ) )
-                n_trading_fee_minimum = item[ TradingData.TRADING_FEE_MINIMUM ]
-                n_trading_fee_constant = item[ TradingData.TRADING_FEE_CONSTANT ]
+                n_trading_fee_minimum = item[ TradingData.REGULAR_BUY_TRADING_FEE_MINIMUM ]
+                n_trading_fee_constant = item[ TradingData.REGULAR_BUY_TRADING_FEE_CONSTANT ]
                 n_trading_value = int( f_trading_price * n_trading_count )
                 if e_trading_fee_type == TradingFeeType.VARIABLE:
                     n_trading_fee = int( n_trading_value * Decimal( '0.001425' ) * f_trading_fee_discount )
