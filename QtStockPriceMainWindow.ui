@@ -23,7 +23,7 @@
       <x>0</x>
       <y>0</y>
       <width>1165</width>
-      <height>842</height>
+      <height>850</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout">
@@ -184,7 +184,7 @@
      <x>0</x>
      <y>0</y>
      <width>1167</width>
-     <height>25</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu">
@@ -229,6 +229,7 @@
      <string>編輯</string>
     </property>
     <addaction name="qtEditDividendTransferFeeAction"/>
+    <addaction name="qtEditMinimumTradingFeeAction"/>
    </widget>
    <addaction name="menu"/>
    <addaction name="menu_4"/>
@@ -354,6 +355,11 @@
   <action name="qtEditDividendTransferFeeAction">
    <property name="text">
     <string>編輯股利匯費設定</string>
+   </property>
+  </action>
+  <action name="qtEditMinimumTradingFeeAction">
+   <property name="text">
+    <string>編輯現股交易最低手續費</string>
    </property>
   </action>
  </widget>
