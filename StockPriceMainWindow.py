@@ -4121,6 +4121,7 @@ class MainWindow( QMainWindow ):
                                               data[ 5 ] == 'CEOGMU' or
                                               data[ 5 ] == 'CEOJBU' or 
                                               data[ 5 ] == 'CEOJEU' or
+                                              data[ 5 ] == 'CEOJLU' or
                                               data[ 5 ] == 'CEOIBU' or
                                               data[ 5 ] == 'CEOIEU' or
                                               data[ 5 ] == 'CEOIRU' ): 
