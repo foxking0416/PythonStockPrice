@@ -16,16 +16,16 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QDateEdit, QDialog, QDoubleSpinBox,
-    QHBoxLayout, QLabel, QPushButton, QSizePolicy,
-    QSpacerItem, QVBoxLayout, QWidget)
+    QHBoxLayout, QLabel, QPushButton, QRadioButton,
+    QSizePolicy, QSpacerItem, QVBoxLayout, QWidget)
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
         if not Dialog.objectName():
             Dialog.setObjectName(u"Dialog")
-        Dialog.resize(192, 135)
-        Dialog.setMinimumSize(QSize(192, 135))
-        Dialog.setMaximumSize(QSize(192, 135))
+        Dialog.resize(192, 175)
+        Dialog.setMinimumSize(QSize(192, 175))
+        Dialog.setMaximumSize(QSize(192, 175))
         self.verticalLayout = QVBoxLayout(Dialog)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.horizontalLayout_2 = QHBoxLayout()
@@ -88,6 +88,22 @@ class Ui_Dialog(object):
 
         self.verticalLayout.addLayout(self.horizontalLayout)
 
+        self.horizontalLayout_5 = QHBoxLayout()
+        self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
+        self.qtCashReturnRadioButton = QRadioButton(Dialog)
+        self.qtCashReturnRadioButton.setObjectName(u"qtCashReturnRadioButton")
+        self.qtCashReturnRadioButton.setChecked(True)
+
+        self.horizontalLayout_5.addWidget(self.qtCashReturnRadioButton)
+
+        self.qtDeficitRadioButton = QRadioButton(Dialog)
+        self.qtDeficitRadioButton.setObjectName(u"qtDeficitRadioButton")
+
+        self.horizontalLayout_5.addWidget(self.qtDeficitRadioButton)
+
+
+        self.verticalLayout.addLayout(self.horizontalLayout_5)
+
         self.horizontalLayout_4 = QHBoxLayout()
         self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
         self.qtOkPushButton = QPushButton(Dialog)
@@ -115,6 +131,8 @@ class Ui_Dialog(object):
         self.qtStockNameLabel.setText(QCoreApplication.translate("Dialog", u"TextLabel", None))
         self.label_2.setText(QCoreApplication.translate("Dialog", u"\u65e5\u671f", None))
         self.label.setText(QCoreApplication.translate("Dialog", u"\u6bcf\u80a1\u6e1b\u8cc7", None))
+        self.qtCashReturnRadioButton.setText(QCoreApplication.translate("Dialog", u"\u73fe\u91d1\u6e1b\u8cc7", None))
+        self.qtDeficitRadioButton.setText(QCoreApplication.translate("Dialog", u"\u8667\u640d\u6e1b\u8cc7", None))
         self.qtOkPushButton.setText(QCoreApplication.translate("Dialog", u"\u78ba\u8a8d", None))
         self.qtCancelPushButton.setText(QCoreApplication.translate("Dialog", u"\u53d6\u6d88", None))
     # retranslateUi
