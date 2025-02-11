@@ -332,6 +332,9 @@ class Utility():
         except RuntimeError:
             raise ValueError("無法找到解，請檢查輸入的現金流和日期。")
 
+    def lowercase_english_uppercase( text ):
+        return re.sub(r'[A-Z]', lambda x: x.group( 0 ).lower(), text )
+
 class EditTabTitleDialog( QDialog ):
     """一個小對話框用於編輯 Tab 標題"""
     def __init__( self, current_title, parent = None ):
@@ -1600,6 +1603,7 @@ class MainWindow( QMainWindow ):
         with QSignalBlocker( qt_combo_box ), QSignalBlocker( qt_line_edit ):
             qt_combo_box.clear()
             str_stock_input = qt_line_edit.text()
+            str_stock_input = Utility.lowercase_english_uppercase( str_stock_input )
             if len( str_stock_input ) == 0:
                 qt_combo_box.setVisible( False )
                 return
@@ -1607,7 +1611,8 @@ class MainWindow( QMainWindow ):
 
             for stock_number, list_stock_name_and_type in self.dict_all_company_number_to_name_and_type.items():
                 str_stock_name = list_stock_name_and_type[ 0 ]
-                if str_stock_input in stock_number or str_stock_input in str_stock_name:
+                str_stock_name_lowercase = Utility.lowercase_english_uppercase( str_stock_name )
+                if str_stock_input in stock_number or str_stock_input in str_stock_name_lowercase:
                     qt_combo_box.addItem( f"{stock_number} {str_stock_name}" )
             # self.ui.qtStockSelectComboBox.showPopup() #showPopup的話，focus會被搶走
 
@@ -3021,7 +3026,7 @@ class MainWindow( QMainWindow ):
             export_dict_per_account_all_info[ "trading_data" ] = export_dict_per_account_all_stock_trading_data
             export_dict_per_account_all_info[ "discount_checkbox" ] = self.dict_all_account_ui_state[ str_tab_widget_name ][ "discount_checkbox"]
             export_dict_per_account_all_info[ "discount_value" ] = self.dict_all_account_ui_state[ str_tab_widget_name ][ "discount_value"]
-            export_dict_per_account_all_info[ "minimum_trading_fee" ] = self.dict_all_account_general_data[ str_tab_widget_name ][ "minimum_trading_fee" ]
+            export_dict_per_account_all_info[ "minimum_trading_fee" ] = self.dict_all_account_general_data[ str_tab_widget_name ][ "minimum_trading_fee" ]#現股交易最低手續費
             export_dict_per_account_all_info[ "insurance_checkbox" ] = qt_insurance_check_box.isChecked()
             export_dict_per_account_all_info[ "regular_buy_trading_fee_type" ] = int( self.dict_all_account_ui_state[ str_tab_widget_name ][ "regular_buy_trading_fee_type"].value )
             export_dict_per_account_all_info[ "regular_buy_trading_fee_minimum" ] = self.dict_all_account_ui_state[ str_tab_widget_name ][ "regular_buy_trading_fee_minimum"]
