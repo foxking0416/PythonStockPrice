@@ -949,20 +949,97 @@ class StockCapitalIncreaseEditDialog( QDialog ):
         self.ui.qtTotalCostLineEdit.setText( format( int( f_trading_price * n_trading_count ), ',' ) )
 
 class StockDividendTransferFeeEditDialog( QDialog ):
-    def __init__( self, str_account_name, parent = None ):
+    def __init__( self, str_account_name, dict_all_company_number_to_name_and_type, dict_company_number_to_transfer_fee, parent = None ):
         super().__init__( parent )
 
         self.ui = Ui_StockDividendTransferFeeEditDialog()
         self.ui.setupUi( self )
         window_icon = QIcon( window_icon_file_path ) 
         self.setWindowIcon( window_icon )
+        self.ui.qtGroupNameLabel.setText( str_account_name )
+        self.ui.qtStockSelectComboBox.setVisible( False )
+        self.dict_all_company_number_to_name_and_type = dict_all_company_number_to_name_and_type
+        self.dict_company_number_to_transfer_fee = dict_company_number_to_transfer_fee
+
+        delegate = CenterIconDelegate()
+        self.dividend_transfer_fee_model = QStandardItemModel( 0, 0 ) 
+        self.ui.qtDividendTransferFeeTableView.setModel( self.dividend_transfer_fee_model )
+        self.ui.qtDividendTransferFeeTableView.setItemDelegate( delegate )
+        # self.ui.qtDividendTransferFeeTableView.verticalHeader().setSectionResizeMode( QHeaderView.Fixed )
+
+        self.ui.qtStockSelectComboBox.activated.connect( self.on_stock_select_combo_box_current_index_changed )
+        self.ui.qtAddStockPushButton.clicked.connect( self.on_add_stock_push_button_clicked )
+        self.ui.qtStockInputLineEdit.textChanged.connect( self.on_stock_input_text_changed ) 
+        self.ui.qtOkPushButton.clicked.connect( self.accept_data )
+        self.ui.qtCancelPushButton.clicked.connect( self.cancel )
+
+        self.refresh_table_view()
+
+    def on_stock_input_text_changed( self ):
+        with QSignalBlocker( self.ui.qtStockInputLineEdit ), QSignalBlocker( self.ui.qtStockSelectComboBox ):
+            self.ui.qtStockSelectComboBox.clear()
+            str_stock_input = self.ui.qtStockInputLineEdit.text()
+            str_stock_input = Utility.lowercase_english_uppercase( str_stock_input )
+            if len( str_stock_input ) == 0:
+                self.ui.qtStockSelectComboBox.setVisible( False )
+                return
+            self.ui.qtStockSelectComboBox.setVisible( True )
+
+            for stock_number, list_stock_name_and_type in self.dict_all_company_number_to_name_and_type.items():
+                str_stock_name = list_stock_name_and_type[ 0 ]
+                str_stock_name_lowercase = Utility.lowercase_english_uppercase( str_stock_name )
+                if str_stock_input in stock_number or str_stock_input in str_stock_name_lowercase:
+                    self.ui.qtStockSelectComboBox.addItem( f"{stock_number} {str_stock_name}" )
+            # self.ui.qtStockSelectComboBox.showPopup() #showPopup的話，focus會被搶走
+
+            self.ui.qtStockInputLineEdit.setFocus()
+
+    def on_stock_select_combo_box_current_index_changed( self, index ): 
+        str_stock_input = self.ui.qtStockSelectComboBox.currentText()
+        self.ui.qtStockInputLineEdit.setText( str_stock_input )
+        self.ui.qtStockSelectComboBox.setVisible( False )
+        self.ui.qtStockInputLineEdit.setFocus()
+
+    def on_add_stock_push_button_clicked( self ):
+        str_stock_input = self.ui.qtStockInputLineEdit.text()
+        self.ui.qtStockInputLineEdit.clear()
+        str_first_four_chars = str_stock_input.split(" ")[0]
+        if str_first_four_chars not in self.dict_all_company_number_to_name_and_type:
+            b_find = False
+            for stock_number, list_stock_name_and_type in self.dict_all_company_number_to_name_and_type.items():
+                str_stock_name = list_stock_name_and_type[ 0 ]
+                if str_first_four_chars == str_stock_name:
+                    str_first_four_chars = stock_number
+                    b_find = True
+                    break
+            if not b_find:
+                QMessageBox.warning( self, "警告", "輸入的股票代碼不存在", QMessageBox.Ok )
+                return
+
+        if str_first_four_chars not in self.dict_company_number_to_transfer_fee:
+            self.dict_company_number_to_transfer_fee[ str_first_four_chars ] = 5
+
+        self.refresh_table_view()
+
+    def refresh_table_view( self ):
+        self.dividend_transfer_fee_model.clear()
+        self.dividend_transfer_fee_model.setHorizontalHeaderLabels( [ "股利匯費" ] )
+        list_vertical_labels = []
+        for index_row,( key_stock_number, value ) in enumerate( self.dict_company_number_to_transfer_fee.items() ):
+
+            list_stock_name_and_type = self.dict_all_company_number_to_name_and_type[ key_stock_number ]
+            str_stock_name = list_stock_name_and_type[ 0 ]
+            list_vertical_labels.append( f"{key_stock_number} {str_stock_name}" )
+
+            transfer_fee_item = QStandardItem( str( value ) )
+            transfer_fee_item.setTextAlignment( Qt.AlignHCenter | Qt.AlignVCenter )
+            transfer_fee_item.setFlags( transfer_fee_item.flags() & ~Qt.ItemIsEditable )
+            self.dividend_transfer_fee_model.setItem( index_row, 0, transfer_fee_item ) 
+            # self.ui.qtDividendTransferFeeTableView.setItemDelegateForColumn( 1, SpinBoxDelegate( self.ui.qtDividendTransferFeeTableView ) )
+        self.dividend_transfer_fee_model.setVerticalHeaderLabels( list_vertical_labels )
 
     def accept_data( self ):
-        n_transfer_value = 1
-        if n_transfer_value != 0:
-            self.accept()
-        else:
-            self.reject()
+        self.accept()
     
     def cancel( self ):
         self.reject()
@@ -1565,7 +1642,7 @@ class MainWindow( QMainWindow ):
             str_tab_name = self.add_new_tab_and_table()
             self.dict_all_account_all_stock_trading_data[ str_tab_name ] = {}
             self.dict_all_account_ui_state[ str_tab_name ] = { "discount_checkbox": True, "discount_value": 0.6, "insurance_checkbox": False, "regular_buy_trading_fee_type": TradingFeeType.VARIABLE, "regular_buy_trading_fee_minimum": 1, "regular_buy_trading_fee_constant": 1 }
-            self.dict_all_account_general_data[ str_tab_name ] = { "minimum_trading_fee": 20 }
+            self.dict_all_account_general_data[ str_tab_name ] = { "minimum_trading_fee": 20, "dividend_transfer_fee":{} }
             self.dict_all_account_cash_transfer_data[ str_tab_name ] = []
         else:
             current_title = self.ui.qtTabWidget.tabText( index )
@@ -1913,11 +1990,25 @@ class MainWindow( QMainWindow ):
                     self.auto_save_trading_data()
 
     def on_trigger_edit_stock_dividend_transfer_fee( self ):
-        dialog = StockDividendTransferFeeEditDialog( self )
+        n_current_index = self.ui.qtTabWidget.currentIndex()
+        current_title = self.ui.qtTabWidget.tabText( n_current_index )
+        str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
+        dict_company_number_to_transfer_fee = self.dict_all_account_general_data[ str_tab_widget_name ][ "dividend_transfer_fee" ]
+        dialog = StockDividendTransferFeeEditDialog( current_title, self.dict_all_company_number_to_name_and_type, dict_company_number_to_transfer_fee, self )
 
         if dialog.exec():
-            str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
-            pass
+            self.dict_all_account_general_data[ str_tab_widget_name ][ "dividend_transfer_fee" ] = dialog.dict_company_number_to_transfer_fee
+
+            dict_per_company_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ]
+            for key_account_name, value_dict_per_company_trading_data in self.dict_all_account_all_stock_trading_data.items():
+                if key_account_name == str_tab_widget_name:
+                    for key_stock_name, value_list_trading_data in value_dict_per_company_trading_data.items():
+                        self.process_single_trading_data( key_account_name, key_stock_name )
+
+            self.refresh_stock_list_table()
+            if self.str_picked_stock_number != None:
+                self.refresh_trading_data_table( dict_per_company_trading_data[ self.str_picked_stock_number ] )
+            self.auto_save_trading_data()
 
     def on_trigger_edit_stock_minimum_trading_fee( self ):
         n_current_index = self.ui.qtTabWidget.currentIndex()
@@ -2454,7 +2545,7 @@ class MainWindow( QMainWindow ):
         self.dict_all_account_all_stock_trading_data[ str_tab_name ] = {}
         self.dict_all_account_cash_transfer_data[ str_tab_name ] = []
         self.dict_all_account_ui_state[ str_tab_name ] = { "discount_checkbox": True, "discount_value": 0.6, "insurance_checkbox": False, "regular_buy_trading_fee_type": TradingFeeType.VARIABLE, "regular_buy_trading_fee_minimum": 1, "regular_buy_trading_fee_constant": 1 }
-        self.dict_all_account_general_data[ str_tab_name ] = { "minimum_trading_fee": 20 }
+        self.dict_all_account_general_data[ str_tab_name ] = { "minimum_trading_fee": 20, "dividend_transfer_fee":{} }
         self.dict_all_account_all_stock_trading_data_INITIAL = copy.deepcopy( self.dict_all_account_all_stock_trading_data )
         self.ui.qtTabWidget.setCurrentIndex( 0 )
         self.pick_up_stock( None )
@@ -2514,7 +2605,7 @@ class MainWindow( QMainWindow ):
                     self.dict_all_account_all_stock_trading_data[ str_tab_name ] = {}
                     self.dict_all_account_cash_transfer_data[ str_tab_name ] = []
                     self.dict_all_account_ui_state[ str_tab_name ] = { "discount_checkbox": True, "discount_value": 0.6, "insurance_checkbox": False, "regular_buy_trading_fee_type": TradingFeeType.VARIABLE, "regular_buy_trading_fee_minimum": 1, "regular_buy_trading_fee_constant": 1 }
-                    self.dict_all_account_general_data[ str_tab_name ] = { "minimum_trading_fee": 20 }
+                    self.dict_all_account_general_data[ str_tab_name ] = { "minimum_trading_fee": 20, "dividend_transfer_fee":{} }
                 self.ui.qtTabWidget.setCurrentIndex( 0 )
 
             self.process_all_trading_data()
@@ -2703,7 +2794,7 @@ class MainWindow( QMainWindow ):
                 self.dict_all_account_all_stock_trading_data[ str_tab_name ] = {}
                 self.dict_all_account_ui_state[ str_tab_name ] = { "discount_checkbox": True, "discount_value": 0.6, "insurance_checkbox": False, "regular_buy_trading_fee_type": TradingFeeType.VARIABLE, "regular_buy_trading_fee_minimum": 1, "regular_buy_trading_fee_constant": 1 }
                 self.dict_all_account_cash_transfer_data[ str_tab_name ] = []
-                self.dict_all_account_general_data[ str_tab_name ] = { "minimum_trading_fee": 20 }
+                self.dict_all_account_general_data[ str_tab_name ] = { "minimum_trading_fee": 20, "dividend_transfer_fee":{} }
             self.dict_all_account_all_stock_trading_data_INITIAL = self.dict_all_account_all_stock_trading_data.copy()
             self.ui.qtTabWidget.setCurrentIndex( 0 )
             self.process_all_trading_data()
@@ -2741,6 +2832,7 @@ class MainWindow( QMainWindow ):
                     dict_ui_state[ "regular_buy_trading_fee_constant" ] = 1
                     dict_general_data = {}
                     dict_general_data[ "minimum_trading_fee" ] = 20
+                    dict_general_data[ "dividend_transfer_fee" ] = {}
 
                     dict_per_stock_trading_data = {} 
                     for key_stock_number, value_list_trading_data  in dict_per_account_all_stock_trading_data.items():
@@ -2811,6 +2903,7 @@ class MainWindow( QMainWindow ):
                     dict_ui_state[ "regular_buy_trading_fee_constant" ] = item_account[ "trading_fee_constant" ]
                     dict_general_data = {}
                     dict_general_data[ "minimum_trading_fee" ] = 20
+                    dict_general_data[ "dividend_transfer_fee" ] = {}
 
                     dict_per_stock_trading_data = {} 
                     for key_stock_number, value_list_trading_data  in dict_per_account_all_stock_trading_data.items():
@@ -2896,6 +2989,7 @@ class MainWindow( QMainWindow ):
                     dict_ui_state[ "regular_buy_trading_fee_constant" ] = item_account[ "regular_buy_trading_fee_constant" ]
                     dict_general_data = {}
                     dict_general_data[ "minimum_trading_fee" ] = item_account[ "minimum_trading_fee" ]
+                    dict_general_data[ "dividend_transfer_fee" ] = item_account[ "dividend_transfer_fee" ]
 
                     dict_per_stock_trading_data = {} 
                     for key_stock_number, value_list_trading_data  in dict_per_account_all_stock_trading_data.items():
@@ -3027,11 +3121,13 @@ class MainWindow( QMainWindow ):
             export_dict_per_account_all_info[ "discount_checkbox" ] = self.dict_all_account_ui_state[ str_tab_widget_name ][ "discount_checkbox"]
             export_dict_per_account_all_info[ "discount_value" ] = self.dict_all_account_ui_state[ str_tab_widget_name ][ "discount_value"]
             export_dict_per_account_all_info[ "minimum_trading_fee" ] = self.dict_all_account_general_data[ str_tab_widget_name ][ "minimum_trading_fee" ]#現股交易最低手續費
+            export_dict_per_account_all_info[ "dividend_transfer_fee" ] = self.dict_all_account_general_data[ str_tab_widget_name ][ "dividend_transfer_fee" ]
             export_dict_per_account_all_info[ "insurance_checkbox" ] = qt_insurance_check_box.isChecked()
             export_dict_per_account_all_info[ "regular_buy_trading_fee_type" ] = int( self.dict_all_account_ui_state[ str_tab_widget_name ][ "regular_buy_trading_fee_type"].value )
             export_dict_per_account_all_info[ "regular_buy_trading_fee_minimum" ] = self.dict_all_account_ui_state[ str_tab_widget_name ][ "regular_buy_trading_fee_minimum"]
             export_dict_per_account_all_info[ "regular_buy_trading_fee_constant" ] = self.dict_all_account_ui_state[ str_tab_widget_name ][ "regular_buy_trading_fee_constant"]
             export_dict_per_account_all_info[ "transfer_data" ] = list_transfer_data
+            
 
 
             export_list_all_account_all_stock_trading_data.append( export_dict_per_account_all_info )
