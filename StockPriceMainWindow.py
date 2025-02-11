@@ -3226,6 +3226,9 @@ class MainWindow( QMainWindow ):
         b_bond = True if '債' in str_stock_name else False
         b_KY = True if 'KY' in str_stock_name else False
         b_extra_insurance_fee = self.dict_all_account_ui_state[ str_tab_widget_name ][ "insurance_checkbox"]
+        dict_company_number_to_transfer_fee = self.dict_all_account_general_data[ str_tab_widget_name ][ "dividend_transfer_fee" ]
+        n_dividend_transfer_fee = dict_company_number_to_transfer_fee[ str_stock_number ] if str_stock_number in dict_company_number_to_transfer_fee else 10
+        n_minimum_trading_fee = self.dict_all_account_general_data[ str_tab_widget_name ][ "minimum_trading_fee" ]
         if b_KY:
             b_extra_insurance_fee = False
 
@@ -3267,7 +3270,7 @@ class MainWindow( QMainWindow ):
                 f_trading_price = item[ TradingData.TRADING_PRICE ]
                 n_trading_count = item[ TradingData.TRADING_COUNT ]
                 f_trading_fee_discount = item[ TradingData.TRADING_FEE_DISCOUNT ]
-                n_minimum_trading_fee = self.dict_all_account_general_data[ str_tab_widget_name ][ "minimum_trading_fee" ]
+                
                 dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, n_minimum_trading_fee, b_etf, False, b_bond )
                 item[ TradingData.TRADING_VALUE_NON_SAVE ] = dict_result[ TradingCost.TRADING_VALUE ]
                 item[ TradingData.TRADING_FEE_NON_SAVE ] = dict_result[ TradingCost.TRADING_FEE ]
@@ -3330,7 +3333,6 @@ class MainWindow( QMainWindow ):
                      obj_selling_date >= datetime.datetime.strptime( '2017-04-28', "%Y-%m-%d" ) ): #交易日期在2017-04-28之後。因為在這之後才通過當沖交易稅減半
                     item[ TradingData.IS_REALLY_DAYING_TRADING_NON_SAVE ] = True
                     if n_trading_count <= n_last_buying_count: #賣出數量小於或等於買入數量，表示全部賣出數量都可視為當沖
-                        n_minimum_trading_fee = self.dict_all_account_general_data[ str_tab_widget_name ][ "minimum_trading_fee" ]
                         dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, n_minimum_trading_fee, b_etf, True, b_bond )
                         item[ TradingData.TRADING_VALUE_NON_SAVE ] = dict_result[ TradingCost.TRADING_VALUE ]
                         item[ TradingData.TRADING_FEE_NON_SAVE ] = dict_result[ TradingCost.TRADING_FEE ]
@@ -3342,7 +3344,6 @@ class MainWindow( QMainWindow ):
                         n_last_buying_count -= n_trading_count
                     else: #賣出數量大於買入數量，表示只有部分數量都可視為當沖
                         n_trading_count_1 = n_last_buying_count
-                        n_minimum_trading_fee = self.dict_all_account_general_data[ str_tab_widget_name ][ "minimum_trading_fee" ]
                         dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count_1, f_trading_fee_discount, n_minimum_trading_fee, b_etf, True, b_bond )#這部分是當沖
                         n_trading_value_1 = dict_result[ TradingCost.TRADING_VALUE ]
                         n_trading_fee_1 = dict_result[ TradingCost.TRADING_FEE ]
@@ -3350,7 +3351,6 @@ class MainWindow( QMainWindow ):
                         n_trading_total_cost_1 = dict_result[ TradingCost.TRADING_TOTAL_COST ]
 
                         n_trading_count_2 = n_trading_count - n_last_buying_count
-                        n_minimum_trading_fee = self.dict_all_account_general_data[ str_tab_widget_name ][ "minimum_trading_fee" ]
                         dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count_2, f_trading_fee_discount, n_minimum_trading_fee, b_etf, False, b_bond )#這部分不是當沖
                         n_trading_value_2 = dict_result[ TradingCost.TRADING_VALUE ]
                         n_trading_fee_2 = dict_result[ TradingCost.TRADING_FEE ]
@@ -3368,7 +3368,6 @@ class MainWindow( QMainWindow ):
                         n_last_buying_count = 0
                 else:
                     item[ TradingData.IS_REALLY_DAYING_TRADING_NON_SAVE ] = False
-                    n_minimum_trading_fee = self.dict_all_account_general_data[ str_tab_widget_name ][ "minimum_trading_fee" ]
                     dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, n_minimum_trading_fee, b_etf, False, b_bond )
                     item[ TradingData.TRADING_VALUE_NON_SAVE ] = dict_result[ TradingCost.TRADING_VALUE ]
                     item[ TradingData.TRADING_FEE_NON_SAVE ] = dict_result[ TradingCost.TRADING_FEE ]
@@ -3433,14 +3432,15 @@ class MainWindow( QMainWindow ):
                     elif obj_dividend_date.year >= 2021:
                         n_extra_insurance_fee_for_cash_dividend = int( math.ceil( Decimal( str( n_cash_dividend_gain ) ) * Decimal( str( '0.0211' ) ) ) )
                         n_extra_insurance_fee_for_stock_dividend = int( math.ceil( Decimal( str( n_stock_dividend_value_gain ) ) * Decimal( str( '0.0211' ) ) ) )
+                
 
-                if n_cash_dividend_gain > 10:
+                if n_cash_dividend_gain > n_dividend_transfer_fee:
                     item[ TradingData.CASH_DIVIDEND_GAIN_NON_SAVE ] = n_cash_dividend_gain
-                    item[ TradingData.TRADING_FEE_NON_SAVE ] = 10
+                    item[ TradingData.TRADING_FEE_NON_SAVE ] = n_dividend_transfer_fee
 
                     item[ TradingData.EXTRA_INSURANCE_FEE_NON_SAVE ] = n_extra_insurance_fee_for_cash_dividend + n_extra_insurance_fee_for_stock_dividend
-                    n_accumulated_cost = n_accumulated_cost - n_cash_dividend_gain + 10 + n_extra_insurance_fee_for_cash_dividend + n_extra_insurance_fee_for_stock_dividend
-                    n_accumulated_cash_dividend = n_accumulated_cash_dividend + n_cash_dividend_gain - 10 - n_extra_insurance_fee_for_cash_dividend - n_extra_insurance_fee_for_stock_dividend #要想一下要不要扣掉手續費
+                    n_accumulated_cost = n_accumulated_cost - n_cash_dividend_gain + n_dividend_transfer_fee + n_extra_insurance_fee_for_cash_dividend + n_extra_insurance_fee_for_stock_dividend
+                    n_accumulated_cash_dividend = n_accumulated_cash_dividend + n_cash_dividend_gain - n_dividend_transfer_fee - n_extra_insurance_fee_for_cash_dividend - n_extra_insurance_fee_for_stock_dividend #要想一下要不要扣掉手續費
                 else:
                     item[ TradingData.CASH_DIVIDEND_GAIN_NON_SAVE ] = 0
                     item[ TradingData.TRADING_FEE_NON_SAVE ] = 0
