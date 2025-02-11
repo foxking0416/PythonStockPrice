@@ -4113,6 +4113,7 @@ class MainWindow( QMainWindow ):
                 for raw in tr:
                     data = [ td.get_text() for td in raw.findAll("td" )]
                     if len( data ) == 7 and ( data[ 5 ] == 'ESVUFR' or 
+                                              data[ 5 ] == 'ESVTFR' or
                                               data[ 5 ] == 'CEOGBU' or
                                               data[ 5 ] == 'CEOGCU' or
                                               data[ 5 ] == 'CEOGDU' or 
