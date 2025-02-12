@@ -1451,7 +1451,7 @@ class MainWindow( QMainWindow ):
         uiqt_add_stock_push_button.setObjectName( "AddStockPushButton" )
         uiqt_horizontal_layout_1.addWidget( uiqt_add_stock_push_button )
 
-        uiqt_horizontal_spacer_1_1 = QSpacerItem( 40, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum )
+        uiqt_horizontal_spacer_1_1 = QSpacerItem( 30, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum )
         uiqt_horizontal_layout_1.addItem( uiqt_horizontal_spacer_1_1 )
 
         uiqt_extra_insurance_fee_check_box = QCheckBox( stock_inventory_tab )
@@ -1459,7 +1459,7 @@ class MainWindow( QMainWindow ):
         uiqt_extra_insurance_fee_check_box.setObjectName( "ExtraInsuranceFeeCheckBox" )
         uiqt_horizontal_layout_1.addWidget( uiqt_extra_insurance_fee_check_box )
 
-        uiqt_horizontal_spacer_1_2 = QSpacerItem( 40, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum )
+        uiqt_horizontal_spacer_1_2 = QSpacerItem( 30, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum )
         uiqt_horizontal_layout_1.addItem( uiqt_horizontal_spacer_1_2 )
 
         uiqt_display_type_combobox = QComboBox( stock_inventory_tab )
@@ -1469,8 +1469,21 @@ class MainWindow( QMainWindow ):
         uiqt_display_type_combobox.setObjectName( "DisplayTypeComboBox" )
         uiqt_horizontal_layout_1.addWidget( uiqt_display_type_combobox )
 
-        uiqt_horizontal_spacer_1_3 = QSpacerItem( 40, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum )
+        uiqt_horizontal_spacer_1_3 = QSpacerItem( 30, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum )
         uiqt_horizontal_layout_1.addItem( uiqt_horizontal_spacer_1_3 )
+
+        uiqt_total_cost_label = QLabel( stock_inventory_tab )
+        uiqt_total_cost_label.setText( "總成本: " )
+        uiqt_total_cost_label.setObjectName( "TotalCostLabel" )
+        uiqt_total_cost_value_label = QLabel( stock_inventory_tab )
+        uiqt_total_cost_value_label.setText( "" )
+        uiqt_total_cost_value_label.setObjectName( "TotalCostValueLabel" )
+
+        uiqt_horizontal_layout_1.addWidget( uiqt_total_cost_label )
+        uiqt_horizontal_layout_1.addWidget( uiqt_total_cost_value_label )
+
+        uiqt_horizontal_spacer_1_4 = QSpacerItem( 30, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum )
+        uiqt_horizontal_layout_1.addItem( uiqt_horizontal_spacer_1_4 )
 
         uiqt_total_inventory_label = QLabel( stock_inventory_tab )
         uiqt_total_inventory_label.setText( "總庫存: " )
@@ -1482,8 +1495,8 @@ class MainWindow( QMainWindow ):
         uiqt_horizontal_layout_1.addWidget( uiqt_total_inventory_label )
         uiqt_horizontal_layout_1.addWidget( uiqt_total_inventory_value_label )
 
-        uiqt_horizontal_spacer_1_4 = QSpacerItem( 40, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum )
-        uiqt_horizontal_layout_1.addItem( uiqt_horizontal_spacer_1_4 )
+        uiqt_horizontal_spacer_1_5 = QSpacerItem( 30, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum )
+        uiqt_horizontal_layout_1.addItem( uiqt_horizontal_spacer_1_5 )
 
         uiqt_total_profit_label = QLabel( stock_inventory_tab )
         uiqt_total_profit_label.setText( "總損益: " )
@@ -1495,8 +1508,8 @@ class MainWindow( QMainWindow ):
         uiqt_horizontal_layout_1.addWidget( uiqt_total_profit_label )
         uiqt_horizontal_layout_1.addWidget( uiqt_total_profit_value_label )
 
-        uiqt_horizontal_spacer_1_5 = QSpacerItem( 40, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum )
-        uiqt_horizontal_layout_1.addItem( uiqt_horizontal_spacer_1_5 )
+        uiqt_horizontal_spacer_1_6 = QSpacerItem( 30, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum )
+        uiqt_horizontal_layout_1.addItem( uiqt_horizontal_spacer_1_6 )
 
         uiqt_xirr_label = QLabel( stock_inventory_tab )
         uiqt_xirr_label.setText( "年化報酬率: " )
@@ -1508,8 +1521,8 @@ class MainWindow( QMainWindow ):
         uiqt_horizontal_layout_1.addWidget( uiqt_xirr_label )
         uiqt_horizontal_layout_1.addWidget( uiqt_xirr_value_label )
 
-        uiqt_horizontal_spacer_1_6 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
-        uiqt_horizontal_layout_1.addItem( uiqt_horizontal_spacer_1_6 )
+        uiqt_horizontal_spacer_1_7 = QSpacerItem( 30, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+        uiqt_horizontal_layout_1.addItem( uiqt_horizontal_spacer_1_7 )
 
         uiqt_stock_inventory_tab_vertical_layout.addLayout( uiqt_horizontal_layout_1 )
 
@@ -3504,8 +3517,9 @@ class MainWindow( QMainWindow ):
         dict_per_account_all_stock_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ]
         table_view = self.ui.qtTabWidget.currentWidget().findChild( QTableView, "StockListTableView" )
         display_type_combobox = self.ui.qtTabWidget.currentWidget().findChild( QComboBox, "DisplayTypeComboBox")
-        n_total_profit = 0
+        n_total_cost = 0
         n_total_inventory = 0
+        n_total_profit = 0
         if table_view:
             table_model = table_view.model()
             table_model.clear()
@@ -3566,6 +3580,9 @@ class MainWindow( QMainWindow ):
                             n_accumulated_cost = dict_trading_data_last[ TradingData.ACCUMULATED_COST_WITHOUT_CONSIDERING_DIVIDEND_NON_SAVE ]
                         if TradingData.AVERAGE_COST_WITHOUT_CONSIDERING_DIVIDEND_NON_SAVE in dict_trading_data_last:
                             f_average_cost = round( dict_trading_data_last[ TradingData.AVERAGE_COST_WITHOUT_CONSIDERING_DIVIDEND_NON_SAVE ], 3 )
+
+
+                    n_total_cost += n_accumulated_cost
 
                     n_accumulated_stock_dividend = 0 
                     if TradingData.ALL_STOCK_DIVIDEND_GAIN_NON_SAVE in dict_trading_data_last:
@@ -3650,10 +3667,12 @@ class MainWindow( QMainWindow ):
                 for index_row in range( len( dict_per_account_all_stock_trading_data ) ):
                     table_view.setRowHeight( index_row, 25 )
                 table_model.setVerticalHeaderLabels( list_vertical_labels )
-        total_profit_value_label = self.ui.qtTabWidget.currentWidget().findChild( QLabel, "TotalProfitValueLabel")
-        total_profit_value_label.setText( format( n_total_profit, "," ) )
+        total_cost_value_label = self.ui.qtTabWidget.currentWidget().findChild( QLabel, "TotalCostValueLabel")
+        total_cost_value_label.setText( format( n_total_cost, "," ) )
         total_inventory_value_label = self.ui.qtTabWidget.currentWidget().findChild( QLabel, "TotalInventoryValueLabel")
         total_inventory_value_label.setText( format( n_total_inventory, "," ) )
+        total_profit_value_label = self.ui.qtTabWidget.currentWidget().findChild( QLabel, "TotalProfitValueLabel")
+        total_profit_value_label.setText( format( n_total_profit, "," ) )
 
         #以下為計算年化報酬率
         obj_current_date = datetime.datetime.today()
