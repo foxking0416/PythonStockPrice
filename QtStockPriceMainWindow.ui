@@ -159,7 +159,7 @@
           <bool>true</bool>
          </property>
          <property name="text">
-          <string>輸出所有股票交易紀錄</string>
+          <string>輸出所有股票交易紀錄成Excel</string>
          </property>
         </widget>
        </item>
@@ -169,7 +169,7 @@
           <bool>false</bool>
          </property>
          <property name="text">
-          <string>輸出單支股票交易紀錄</string>
+          <string>輸出單支股票交易紀錄成Excel</string>
          </property>
         </widget>
        </item>
@@ -341,7 +341,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>股利扣除成本</string>
+    <string>成本會扣除股利</string>
    </property>
   </action>
   <action name="qtCostWithOutDividendAction">
@@ -349,7 +349,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>股利不扣成本</string>
+    <string>成本不會扣除股利</string>
    </property>
   </action>
   <action name="qtEditDividendTransferFeeAction">
