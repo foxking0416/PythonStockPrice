@@ -20,6 +20,7 @@ from QtStockCapitalReductionEditDialog import Ui_Dialog as Ui_StockCapitalReduct
 from QtCashTransferEditDialog import Ui_Dialog as Ui_CashTransferDialog
 from QtDuplicateOptionDialog import Ui_Dialog as Ui_DuplicateOptionDialog
 from QtStockDividendTransferFeeEditDialog import Ui_Dialog as Ui_StockDividendTransferFeeEditDialog
+from QtStockDividendTransferFeeEditSpinboxDialog import Ui_Dialog as Ui_StockDividendTransferFeeEditSpinboxDialog
 from QtStockMinimumTradingFeeEditDialog import Ui_Dialog as Ui_StockMinimumTradingFeeEditDialog
 from QtSaveCheckDialog import Ui_Dialog as Ui_SaveCheckDialog
 from PySide6.QtWidgets import QApplication, QMainWindow, QDialog, QButtonGroup, QMessageBox, QStyledItemDelegate, QFileDialog, QHeaderView, QVBoxLayout, QHBoxLayout, \
@@ -58,6 +59,7 @@ from scipy.optimize import newton
 # pyside6-uic QtCashTransferEditDialog.ui -o QtCashTransferEditDialog.py
 # pyside6-uic QtSaveCheckDialog.ui -o QtSaveCheckDialog.py
 # pyside6-uic QtStockDividendTransferFeeEditDialog.ui -o QtStockDividendTransferFeeEditDialog.py
+# pyside6-uic QtStockDividendTransferFeeEditSpinboxDialog.ui -o QtStockDividendTransferFeeEditSpinboxDialog.py
 # pyside6-uic QtStockMinimumTradingFeeEditDialog.ui -o QtStockMinimumTradingFeeEditDialog.py
 
 # 下載上市櫃公司股利資料
@@ -151,7 +153,6 @@ down_icon = QIcon( down_icon_file_path )
 up_icon_file_path = os.path.join( g_exe_root_dir, 'resources\\MoveUp.svg' ) 
 up_icon = QIcon( up_icon_file_path )
 styles_css_path = os.path.join( g_exe_root_dir, 'resources\\styles.css' ) 
-
 
 class CenterIconDelegate( QStyledItemDelegate ):
     def paint( self, painter, option, index ):
@@ -959,19 +960,19 @@ class StockDividendTransferFeeEditDialog( QDialog ):
         self.ui.qtGroupNameLabel.setText( str_account_name )
         self.ui.qtStockSelectComboBox.setVisible( False )
         self.dict_all_company_number_to_name_and_type = dict_all_company_number_to_name_and_type
-        self.dict_company_number_to_transfer_fee = dict_company_number_to_transfer_fee
+        self.dict_company_number_to_transfer_fee = dict_company_number_to_transfer_fee.copy()
 
         delegate = CenterIconDelegate()
         self.dividend_transfer_fee_model = QStandardItemModel( 0, 0 ) 
         self.ui.qtDividendTransferFeeTableView.setModel( self.dividend_transfer_fee_model )
         self.ui.qtDividendTransferFeeTableView.setItemDelegate( delegate )
         # self.ui.qtDividendTransferFeeTableView.verticalHeader().setSectionResizeMode( QHeaderView.Fixed )
+        self.ui.qtDividendTransferFeeTableView.clicked.connect( lambda index: self.on_transfer_fee_table_item_clicked( index, self.dividend_transfer_fee_model ) )
 
         self.ui.qtStockSelectComboBox.activated.connect( self.on_stock_select_combo_box_current_index_changed )
         self.ui.qtAddStockPushButton.clicked.connect( self.on_add_stock_push_button_clicked )
         self.ui.qtStockInputLineEdit.textChanged.connect( self.on_stock_input_text_changed ) 
-        self.ui.qtOkPushButton.clicked.connect( self.accept_data )
-        self.ui.qtCancelPushButton.clicked.connect( self.cancel )
+        self.ui.qtOkPushButton.clicked.connect( self.accept )
 
         self.refresh_table_view()
 
@@ -1017,16 +1018,15 @@ class StockDividendTransferFeeEditDialog( QDialog ):
                 return
 
         if str_first_four_chars not in self.dict_company_number_to_transfer_fee:
-            self.dict_company_number_to_transfer_fee[ str_first_four_chars ] = 5
+            self.dict_company_number_to_transfer_fee[ str_first_four_chars ] = 10
 
         self.refresh_table_view()
 
     def refresh_table_view( self ):
         self.dividend_transfer_fee_model.clear()
-        self.dividend_transfer_fee_model.setHorizontalHeaderLabels( [ "股利匯費" ] )
+        self.dividend_transfer_fee_model.setHorizontalHeaderLabels( [ "股利匯費", "編輯" ] )
         list_vertical_labels = []
         for index_row,( key_stock_number, value ) in enumerate( self.dict_company_number_to_transfer_fee.items() ):
-
             list_stock_name_and_type = self.dict_all_company_number_to_name_and_type[ key_stock_number ]
             str_stock_name = list_stock_name_and_type[ 0 ]
             list_vertical_labels.append( f"{key_stock_number} {str_stock_name}" )
@@ -1035,12 +1035,45 @@ class StockDividendTransferFeeEditDialog( QDialog ):
             transfer_fee_item.setTextAlignment( Qt.AlignHCenter | Qt.AlignVCenter )
             transfer_fee_item.setFlags( transfer_fee_item.flags() & ~Qt.ItemIsEditable )
             self.dividend_transfer_fee_model.setItem( index_row, 0, transfer_fee_item ) 
-            # self.ui.qtDividendTransferFeeTableView.setItemDelegateForColumn( 1, SpinBoxDelegate( self.ui.qtDividendTransferFeeTableView ) )
+
+            edit_icon_item = QStandardItem("")
+            edit_icon_item.setIcon( edit_icon )
+            edit_icon_item.setFlags( edit_icon_item.flags() & ~Qt.ItemIsEditable )
+            self.dividend_transfer_fee_model.setItem( index_row, 1, edit_icon_item )
         self.dividend_transfer_fee_model.setVerticalHeaderLabels( list_vertical_labels )
 
+    def on_transfer_fee_table_item_clicked( self, index: QModelIndex, table_model ):
+        item = table_model.itemFromIndex( index )
+        if item is not None:
+            n_column = index.column()  # 獲取列索引
+            header_text = table_model.verticalHeaderItem( index.row() ).text()
+            str_stock_number = header_text.split(" ")[0]
+            n_current_fee = self.dict_company_number_to_transfer_fee[ str_stock_number ] 
+            
+            if n_column == 1:#匯出按鈕
+                dialog = StockDividendTransferFeeEditSpinboxDialog( n_current_fee, self )
+                if dialog.exec():
+                    self.dict_company_number_to_transfer_fee[ str_stock_number ] = dialog.n_new_transfer_fee
+                    self.refresh_table_view()
+
+class StockDividendTransferFeeEditSpinboxDialog( QDialog ):
+    def __init__( self, n_transfer_fee, parent = None ):
+        super().__init__( parent )
+
+        self.ui = Ui_StockDividendTransferFeeEditSpinboxDialog()
+        self.ui.setupUi( self )
+        window_icon = QIcon( window_icon_file_path ) 
+        self.setWindowIcon( window_icon )
+        self.ui.qtDividendTransferFeeSpinBox.setValue( n_transfer_fee )
+        self.n_new_transfer_fee = n_transfer_fee
+
+        self.ui.qtOkPushButton.clicked.connect( self.accept_data )
+        self.ui.qtCancelPushButton.clicked.connect( self.cancel )
+        
     def accept_data( self ):
+        self.n_new_transfer_fee = self.ui.qtDividendTransferFeeSpinBox.value()
         self.accept()
-    
+
     def cancel( self ):
         self.reject()
 

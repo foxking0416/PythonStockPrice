@@ -17,8 +17,8 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QComboBox, QDialog, QHBoxLayout,
     QHeaderView, QLabel, QLineEdit, QPushButton,
-    QSizePolicy, QSpacerItem, QSpinBox, QTableView,
-    QVBoxLayout, QWidget)
+    QSizePolicy, QSpacerItem, QTableView, QVBoxLayout,
+    QWidget)
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
@@ -60,7 +60,7 @@ class Ui_Dialog(object):
 
         self.horizontalLayout_3.addWidget(self.qtStockSelectComboBox)
 
-        self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+        self.horizontalSpacer = QSpacerItem(40, 1, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
         self.horizontalLayout_3.addItem(self.horizontalSpacer)
 
@@ -72,34 +72,12 @@ class Ui_Dialog(object):
 
         self.verticalLayout.addWidget(self.qtDividendTransferFeeTableView)
 
-        self.horizontalLayout_4 = QHBoxLayout()
-        self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
-        self.qtTransferFeeSpinBox = QSpinBox(Dialog)
-        self.qtTransferFeeSpinBox.setObjectName(u"qtTransferFeeSpinBox")
-        self.qtTransferFeeSpinBox.setMinimumSize(QSize(50, 0))
-        self.qtTransferFeeSpinBox.setMaximum(20)
-        self.qtTransferFeeSpinBox.setValue(10)
-
-        self.horizontalLayout_4.addWidget(self.qtTransferFeeSpinBox)
-
-        self.horizontalSpacer_2 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
-
-        self.horizontalLayout_4.addItem(self.horizontalSpacer_2)
-
-
-        self.verticalLayout.addLayout(self.horizontalLayout_4)
-
         self.horizontalLayout_2 = QHBoxLayout()
         self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
         self.qtOkPushButton = QPushButton(Dialog)
         self.qtOkPushButton.setObjectName(u"qtOkPushButton")
 
         self.horizontalLayout_2.addWidget(self.qtOkPushButton)
-
-        self.qtCancelPushButton = QPushButton(Dialog)
-        self.qtCancelPushButton.setObjectName(u"qtCancelPushButton")
-
-        self.horizontalLayout_2.addWidget(self.qtCancelPushButton)
 
 
         self.verticalLayout.addLayout(self.horizontalLayout_2)
@@ -115,6 +93,5 @@ class Ui_Dialog(object):
         self.qtGroupNameLabel.setText(QCoreApplication.translate("Dialog", u"TextLabel", None))
         self.qtAddStockPushButton.setText(QCoreApplication.translate("Dialog", u"\u65b0\u589e\u80a1\u7968", None))
         self.qtOkPushButton.setText(QCoreApplication.translate("Dialog", u"\u78ba\u8a8d", None))
-        self.qtCancelPushButton.setText(QCoreApplication.translate("Dialog", u"\u53d6\u6d88", None))
     # retranslateUi
 
