@@ -3601,7 +3601,7 @@ class MainWindow( QMainWindow ):
                             n_profit = n_net_value - n_accumulated_cost
                             n_total_profit += n_profit
                             n_total_inventory += n_net_value
-                            n_accumulated_dividend_profit = n_accumulated_stock_dividend * f_stock_price + n_accumulated_cash_dividend
+                            n_accumulated_dividend_profit = int( n_accumulated_stock_dividend * f_stock_price ) + n_accumulated_cash_dividend
                             str_profit = format( n_profit, "," )
                             if n_profit > 0:
                                 str_color = QBrush( '#FF0000' )
