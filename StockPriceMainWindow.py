@@ -1280,28 +1280,55 @@ class MainWindow( QMainWindow ):
             if os.path.isfile( source_file ) and filename.endswith( file_extension ):
                 shutil.copy2(source_file, destination_file )
 
-    def download_all_required_data( self, str_date, update_progress_callback ):
+    def download_all_required_data( self, update_progress_callback ):
+        obj_today_date = datetime.datetime.today()
+        obj_yesterday_date = datetime.datetime.today() - datetime.timedelta( days = 1 )
+        str_today_date = obj_today_date.strftime('%Y%m%d')
+        str_yesterday_date = obj_yesterday_date.strftime('%Y%m%d')
+        n_current_hour = obj_today_date.hour
+
         self.set_progress_value( update_progress_callback, 0 )
-        self.download_all_company_stock_number( str_date )
+        self.download_all_company_stock_number( str_yesterday_date )
         self.set_progress_value( update_progress_callback, 10 )
-        self.download_day_stock_price( str_date )
+        
+        if n_current_hour < 14:
+            obj_date = obj_yesterday_date
+        else:
+            obj_date = obj_today_date
+
+        n_retry = 0
+        while n_retry < 30:
+            n_weekday = obj_date.weekday()
+            if n_weekday >= 5:
+                obj_date -= datetime.timedelta( days = ( 2 if n_weekday == 6 else 1 ) )
+                continue
+            str_date = obj_date.strftime( '%Y%m%d' )
+            if self.download_day_stock_price( str_date ):
+                break
+            obj_date -= datetime.timedelta( days = 1 )
+            n_retry += 1
+
         self.set_progress_value( update_progress_callback, 20 )
-        self.download_general_company_all_yearly_dividend_data( 2025, str_date )
+        self.download_general_company_all_yearly_dividend_data( 2025, str_yesterday_date )
         self.set_progress_value( update_progress_callback, 50 )
-        self.download_listed_etf_all_yearly_dividend_data( 2025, str_date )
+        self.download_listed_etf_all_yearly_dividend_data( 2025, str_yesterday_date )
         self.set_progress_value( update_progress_callback, 80 )
-        self.download_OTC_etf_all_yearly_dividend_data( 2025, str_date )
+        self.download_OTC_etf_all_yearly_dividend_data( 2025, str_yesterday_date )
 
     def initialize( self, b_unit_test, update_progress_callback ):
         self.setEnabled( False ) # 資料下載前先Disable整個視窗
-        obj_current_date = datetime.datetime.today() - datetime.timedelta( days = 1 )
-        str_date = obj_current_date.strftime('%Y%m%d')
         
         if not b_unit_test:
-            self.download_all_required_data( str_date, update_progress_callback )
+            self.download_all_required_data( update_progress_callback )
         
         self.dict_all_company_number_to_name_and_type = self.load_all_company_stock_number()
-        self.dict_all_company_number_to_price_info = self.load_day_stock_price()
+        list_date_and_price = self.load_day_stock_price()
+        if len( list_date_and_price[ 1 ] ) != 0:
+            self.dict_all_company_number_to_price_info = list_date_and_price[ 1 ]
+            parsed_date = datetime.datetime.strptime(list_date_and_price[ 0 ], "%Y%m%d")  # 解析成日期對象
+            str_formatted_date = parsed_date.strftime("%m/%d")  # 轉換為 MM/DD 格式
+            self.list_stock_list_table_horizontal_header[ 3 ] = str_formatted_date + ' 收盤價'
+
         self.dict_auto_stock_yearly_dividned = self.load_general_company_all_yearly_dividend_data( 2010, b_unit_test )
         self.dict_auto_stock_listed_etf_yearly_dividned = self.load_listed_etf_all_yearly_dividend_data( 2010, b_unit_test )
         self.dict_auto_stock_OTC_etf_yearly_dividned = self.load_OTC_etf_all_yearly_dividend_data( 2010, b_unit_test )
@@ -1318,21 +1345,8 @@ class MainWindow( QMainWindow ):
             if key not in self.dict_auto_stock_yearly_dividned:
                 self.dict_auto_stock_yearly_dividned[ key ] = value
 
-        n_retry = 0
-        while len( self.dict_all_company_number_to_price_info ) == 0:
-            #因為我們要下載前一天的股價資訊，但有時候遇到前一天是假日，就要再往前，若是連續假日，就要一直往前直到可以下載
-            obj_current_date = obj_current_date - datetime.timedelta( days = 1 )
-            n_weekday = obj_current_date.weekday()
-            if n_weekday == 5 or n_weekday == 6:
-                continue
-            str_date = obj_current_date.strftime('%Y%m%d')
-            self.download_day_stock_price( str_date )
-            self.dict_all_company_number_to_price_info = self.load_day_stock_price()
-            n_retry += 1
-            if n_retry > 30:
-                break
-        str_valid_month_date = obj_current_date.strftime('%m/%d')
-        self.list_stock_list_table_horizontal_header[ 3 ] = str_valid_month_date + ' 收盤價'
+
+
         self.set_progress_value( update_progress_callback, 100 )
         # self.load_initialize_data()
         self.setEnabled( True ) # 資料下載完後就會Enable
@@ -4362,13 +4376,9 @@ class MainWindow( QMainWindow ):
         if os.path.exists( self.stock_price_file_path ):
             with open( self.stock_price_file_path, 'r', encoding='utf-8' ) as f:
                 data = f.readlines()
-                for i, row in enumerate( data ):
-                    if i == 0:
-                        if row.strip() != str_date:
-                            if self.check_internet_via_http(): #日期不一樣，且又有網路時才重新下載，不然就用舊的
-                                b_need_to_download = True
-                    else:
-                        ele = row.strip().split( ',' )
+                if data[ 0 ].strip() != str_date or data[ 1 ].strip() != 'O':
+                    if self.check_internet_via_http(): #日期不一樣，且又有網路時才重新下載，不然就用舊的
+                        b_need_to_download = True
         else:
             b_need_to_download = True
 
@@ -4376,6 +4386,7 @@ class MainWindow( QMainWindow ):
             # 上市公司股價從證交所取得
             # https://www.twse.com.tw/rwd/zh/afterTrading/MI_INDEX?date=20240912&type=ALLBUT0999&response=json&_=1726121461234
             url = 'https://www.twse.com.tw/rwd/zh/afterTrading/MI_INDEX?date=' + str_date + '&type=ALLBUT0999&response=json&_=1726121461234'
+            b_get_listed_company_stock_price = False
             try:
                 res = self.send_get_request( url )
                 soup = BeautifulSoup( res.content, 'html.parser' )
@@ -4407,6 +4418,7 @@ class MainWindow( QMainWindow ):
 
                                     list_stock_price = [ data[ 0 ], data[ 1 ], data[ 8 ].replace( ',', '' ) ] 
                                     all_stock_price.append( list_stock_price )
+                                    b_get_listed_company_stock_price = True
             except Exception as e:
                 pass
 
@@ -4414,6 +4426,7 @@ class MainWindow( QMainWindow ):
             # https://www.tpex.org.tw/www/zh-tw/afterTrading/dailyQuotes?date=2024%2F12%2F09&id=&response=html
             formatted_date = f"{str_date[:4]}%2F{str_date[4:6]}%2F{str_date[6:]}"
             url = 'https://www.tpex.org.tw/www/zh-tw/afterTrading/dailyQuotes?date=' + formatted_date + '&id=&response=html'
+            b_get_OTC_company_stock_price = False
             try:
                 res = self.send_get_request( url )
                 
@@ -4447,19 +4460,25 @@ class MainWindow( QMainWindow ):
                             str_stock_price = td_elements[ 2 ].get_text().strip()
                             list_stock_price = [ str_stock_number, str_stock_name, str_stock_price.replace( ',', '' ) ] 
                             all_stock_price.append( list_stock_price )
+                            b_get_OTC_company_stock_price = True
             except Exception as e:
                 pass    
 
             if len( all_stock_price ) == 0:
                 print( "no data" )
-                return 
+                return False 
             
             # 確保目錄存在，若不存在則遞歸創建
             os.makedirs( os.path.dirname( self.stock_price_file_path ), exist_ok = True )
             with open( self.stock_price_file_path, 'w', encoding='utf-8' ) as f:
                 f.write( str_date + '\n' )
+                if b_get_listed_company_stock_price and b_get_OTC_company_stock_price:
+                    f.write( 'O\n' )
+                else:
+                    f.write( 'X\n' )
                 for row in all_stock_price:
                     f.write( str( row[ 0 ] ) + ',' + str( row[ 1 ] ) + ',' + str( row[ 2 ] ) + '\n' )
+        return True
     
     def load_day_stock_price( self ):
         dict_company_number_to_price_info = {}
@@ -4468,11 +4487,11 @@ class MainWindow( QMainWindow ):
                 data = f.readlines()
                 for i, row in enumerate( data ):
                     if i == 0:
-                        continue
-                    else:
+                        str_date = row.strip()
+                    elif i > 1:
                         ele = row.strip().split( ',' )
                         dict_company_number_to_price_info[ ele[ 0 ] ] = ele[ 2 ]
-        return dict_company_number_to_price_info
+        return [ str_date, dict_company_number_to_price_info ]
 
     def process_output_file_path( self, str_output_path, list_file_exist, str_folder_name, str_file_name, n_year, n_season, b_overwrite, b_unit_test ):
         str_season = ''
