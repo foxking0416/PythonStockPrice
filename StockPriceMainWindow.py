@@ -1242,7 +1242,7 @@ class MainWindow( QMainWindow ):
         self.stock_number_file_path = os.path.join( g_data_dir, 'StockInventory', str_stock_number_file )
         self.stock_price_file_path = os.path.join( g_data_dir, 'StockInventory', str_stock_price_file )
 
-        self.list_stock_list_table_horizontal_header = [ '總成本', '庫存股數', '平均成本', ' 收盤價', '現值', '總手續費', '總交易稅', '損益', '股利所得', '自動帶入股利', '匯出', '刪除' ]
+        self.list_stock_list_table_horizontal_header = [ '總成本', '庫存股數', '平均成本', ' 收盤價', '現值', '總手續費', '總交易稅', '損益', '股利所得', '平均年化報酬率', '自動帶入股利', '匯出', '刪除' ]
         self.pick_up_stock( None )
         self.dict_all_account_ui_state = {}
         self.dict_all_account_general_data = {}
@@ -3656,8 +3656,10 @@ class MainWindow( QMainWindow ):
         total_inventory_value_label.setText( format( n_total_inventory, "," ) )
 
         #以下為計算年化報酬率
+        obj_current_date = datetime.datetime.today()
         list_total_trading_date = []
         list_total_trading_flows = []
+        index_row = 0
         for key_stock_number, value_list_trading_data in dict_per_account_all_stock_trading_data.items():
             dict_trading_data_last = value_list_trading_data[ len( value_list_trading_data ) - 1 ] #取最後一筆交易資料，因為最後一筆交易資料的庫存等內容才是所有累計的結果
             if key_stock_number not in self.dict_all_company_number_to_price_info:
@@ -3666,13 +3668,15 @@ class MainWindow( QMainWindow ):
             n_accumulated_inventory = 0
             if TradingData.ACCUMULATED_INVENTORY_NON_SAVE in dict_trading_data_last:
                 n_accumulated_inventory = dict_trading_data_last[ TradingData.ACCUMULATED_INVENTORY_NON_SAVE ]
-            if display_type_combobox.currentIndex() == 1:
+            if display_type_combobox.currentIndex() == 1:#僅顯示目前有庫存的股票
                 if n_accumulated_inventory == 0:
                     continue
-            elif display_type_combobox.currentIndex() == 2:
+            elif display_type_combobox.currentIndex() == 2:#僅顯示目前沒有庫存的股票
                 if n_accumulated_inventory != 0:
                     continue
 
+            list_per_stock_trading_date = []
+            list_per_stock_trading_flows = []
 
             for trading_data in value_list_trading_data:
                 e_trading_type = trading_data[ TradingData.TRADING_TYPE ]
@@ -3690,13 +3694,38 @@ class MainWindow( QMainWindow ):
                     #trading_data[ TradingData.TRADING_VALUE_NON_SAVE ]本身是負值，但因為是退款，所以在算XIRR時應該要用正數，因此取負號
                     n_cost = -trading_data[ TradingData.TRADING_VALUE_NON_SAVE ] 
                 list_total_trading_flows.append( n_cost )
+                list_per_stock_trading_flows.append( n_cost )
 
                 str_trading_date = trading_data[ TradingData.TRADING_DATE ]
                 obj_trading_date = datetime.datetime.strptime( str_trading_date, "%Y-%m-%d" )
                 list_total_trading_date.append( obj_trading_date )
+                list_per_stock_trading_date.append( obj_trading_date )
+
+            if n_accumulated_inventory > 0:
+                f_stock_price = float( self.dict_all_company_number_to_price_info[ key_stock_number ] )
+                n_net_value = int( n_accumulated_inventory * f_stock_price )
+                list_per_stock_trading_flows.append( n_net_value )    
+                list_per_stock_trading_date.append( obj_current_date )
+            str_profit_ratio = None
+            if len( list_per_stock_trading_flows ) > 1:
+                try:
+                    xirr_result = Utility.xirr( list_per_stock_trading_flows, list_per_stock_trading_date )
+                    str_profit_ratio = f"{xirr_result:.3%}"
+                except ValueError as e:
+                    str_profit_ratio = "-"
+            standard_item = QStandardItem( str_profit_ratio )
+            standard_item.setTextAlignment( Qt.AlignHCenter | Qt.AlignVCenter )
+            standard_item.setFlags( standard_item.flags() & ~Qt.ItemIsEditable )
+            standard_item.setData( key_stock_number, Qt.UserRole )
+            if str_profit_ratio.strip().startswith( '-' ):
+                str_color = QBrush( '#00AA00' )
+            else:
+                str_color = QBrush( '#FF0000' )
+            standard_item.setForeground( QBrush( str_color ) )
+            table_model.setItem( index_row, len( self.list_stock_list_table_horizontal_header ) - 4, standard_item ) 
+            index_row += 1
 
         list_total_trading_flows.append( n_total_inventory )
-        obj_current_date = datetime.datetime.today()
         list_total_trading_date.append( obj_current_date )
         if len( list_total_trading_flows ) > 1:
             try:
