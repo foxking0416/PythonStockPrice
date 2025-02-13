@@ -1053,8 +1053,8 @@ class StockCapitalIncreaseEditDialog( QDialog ):
         self.ui.qtDateEdit.setCalendarPopup( True )
 
         self.ui.qtOddTradeCountSpinBox.valueChanged.connect( self.compute_cost )
-        self.ui.qtPerSharePriceRadioButton.toggled.connect( self.update_ui )
-        self.ui.qtTotalPriceRadioButton.toggled.connect( self.update_ui )
+        self.ui.qtPerSharePriceRadioButton.toggled.connect( self.update_ui_and_compute_cost )
+        self.ui.qtTotalPriceRadioButton.toggled.connect( self.update_ui_and_compute_cost )
         
         self.ui.qtPerSharePriceDoubleSpinBox.valueChanged.connect( self.compute_cost )
         self.ui.qtTotalPriceSpinBox.valueChanged.connect( self.compute_cost )
@@ -1062,8 +1062,12 @@ class StockCapitalIncreaseEditDialog( QDialog ):
         self.ui.qtCancelPushButton.clicked.connect( self.cancel )
         self.dict_trading_data = {}
 
-        self.update_ui()
+        self.update_ui_and_compute_cost()
 
+    def update_ui_and_compute_cost( self ):
+        self.update_ui()
+        self.compute_cost()
+        
     def update_ui( self ):
         with ( QSignalBlocker( self.ui.qtPerSharePriceRadioButton ),
                QSignalBlocker( self.ui.qtTotalPriceRadioButton ),
@@ -1077,27 +1081,28 @@ class StockCapitalIncreaseEditDialog( QDialog ):
                 self.ui.qtPerSharePriceDoubleSpinBox.setEnabled( False )
                 self.ui.qtTotalPriceSpinBox.setEnabled( True )
 
-            self.compute_cost()
-
     def setup_trading_date( self, str_date ):
         self.ui.qtDateEdit.setDate( datetime.datetime.strptime( str_date, "%Y-%m-%d" ).date() )
 
     def setup_trading_count( self, n_count ):
-        self.ui.qtOddTradeCountSpinBox.setValue( n_count )
+        with ( QSignalBlocker( self.ui.qtOddTradeCountSpinBox ) ):
+            self.ui.qtOddTradeCountSpinBox.setValue( n_count )
 
     def setup_trading_price_type( self, e_trading_price_type ):
-        if e_trading_price_type == TradingPriceType.PER_SHARE:
-            self.ui.qtPerSharePriceRadioButton.setChecked( True )
-        else:
-            self.ui.qtTotalPriceRadioButton.setChecked( True )
-
-        self.update_ui()
+        with ( QSignalBlocker( self.ui.qtPerSharePriceRadioButton ), 
+               QSignalBlocker( self.ui.qtTotalPriceRadioButton ) ):
+            if e_trading_price_type == TradingPriceType.PER_SHARE:
+                self.ui.qtPerSharePriceRadioButton.setChecked( True )
+            else:
+                self.ui.qtTotalPriceRadioButton.setChecked( True )
 
     def setup_per_share_trading_price( self, f_price ):
-        self.ui.qtPerSharePriceDoubleSpinBox.setValue( f_price )
+        with ( QSignalBlocker( self.ui.qtPerSharePriceDoubleSpinBox ) ):
+            self.ui.qtPerSharePriceDoubleSpinBox.setValue( f_price )
 
     def setup_total_trading_price( self, n_total_price ):
-        self.ui.qtTotalPriceSpinBox.setValue( n_total_price )
+        with ( QSignalBlocker( self.ui.qtTotalPriceSpinBox ) ):
+            self.ui.qtTotalPriceSpinBox.setValue( n_total_price )
 
     def get_trading_price_type( self ):
         if self.ui.qtPerSharePriceRadioButton.isChecked():
