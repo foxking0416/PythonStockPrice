@@ -3194,7 +3194,7 @@ class MainWindow( QMainWindow ):
                             if ( "trading_date" in item_trading_data and
                                  "trading_type" in item_trading_data and
                                  "trading_price_type" in item_trading_data and
-                                 "trading_price" in item_trading_data and
+                                 "per_share_trading_price" in item_trading_data and
                                  "total_trading_price" in item_trading_data and
                                  "trading_count" in item_trading_data and
                                  "trading_fee_discount" in item_trading_data and
@@ -3210,7 +3210,7 @@ class MainWindow( QMainWindow ):
                                 dict_per_trading_data = Utility.generate_trading_data( item_trading_data[ "trading_date" ],                #交易日期
                                                                                        e_trading_type,                                     #交易種類
                                                                                        e_trading_price_type,                               #交易價格種類
-                                                                                       item_trading_data[ "trading_price" ],               #每股交易價格
+                                                                                       item_trading_data[ "per_share_trading_price" ],     #每股交易價格
                                                                                        item_trading_data[ "total_trading_price" ],         #總交易價格
                                                                                        item_trading_data[ "trading_count" ],               #交易股數
                                                                                        e_trading_fee_type,                                 #手續費種類
@@ -3289,11 +3289,11 @@ class MainWindow( QMainWindow ):
                     dict_per_trading_data[ "trading_type" ] = int( item[ TradingData.TRADING_TYPE ].value )
                     dict_per_trading_data[ "trading_price_type" ] = int( item[ TradingData.TRADING_PRICE_TYPE ].value )
                     if item[ TradingData.TRADING_TYPE ] == TradingType.CAPITAL_REDUCTION: #CAPITAL_REDUCTION 為了顯示，所以需要寫一些數值進去，但實際上不用存
-                        dict_per_trading_data[ "trading_price" ] = 0
+                        dict_per_trading_data[ "per_share_trading_price" ] = 0
                         dict_per_trading_data[ "total_trading_price" ] = 0
                         dict_per_trading_data[ "trading_count" ] = 0
                     else:
-                        dict_per_trading_data[ "trading_price" ] = item[ TradingData.PER_SHARE_TRADING_PRICE ]
+                        dict_per_trading_data[ "per_share_trading_price" ] = item[ TradingData.PER_SHARE_TRADING_PRICE ]
                         dict_per_trading_data[ "total_trading_price" ] = item[ TradingData.TOTAL_TRADING_PRICE ]
                         dict_per_trading_data[ "trading_count" ] = item[ TradingData.TRADING_COUNT ]
                     dict_per_trading_data[ "trading_fee_type" ] = int( item[ TradingData.REGULAR_BUY_TRADING_FEE_TYPE ].value )
