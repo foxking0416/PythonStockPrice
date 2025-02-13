@@ -106,6 +106,9 @@
        <property name="maximum">
         <number>99999</number>
        </property>
+       <property name="value">
+        <number>1</number>
+       </property>
       </widget>
      </item>
      <item>
@@ -219,6 +222,9 @@
           </property>
           <property name="maximum">
            <number>99999999</number>
+          </property>
+          <property name="value">
+           <number>10</number>
           </property>
          </widget>
         </item>
