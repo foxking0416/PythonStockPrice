@@ -348,6 +348,33 @@ class Utility():
     def lowercase_english_uppercase( text ):
         return re.sub(r'[A-Z]', lambda x: x.group( 0 ).lower(), text )
 
+class SaveCheckDialog( QDialog ):
+    def __init__( self, str_title = '', parent = None ):
+        super().__init__( parent )
+
+        self.ui = Ui_SaveCheckDialog()
+        self.ui.setupUi( self )
+        self.setWindowTitle( str_title )
+        window_icon = QIcon( window_icon_file_path ) 
+        self.setWindowIcon( window_icon )
+
+        self.ui.qtSavePushButton.clicked.connect( self.save )
+        self.ui.qtNoSavePushButton.clicked.connect( self.no_save )
+        self.ui.qtAbortPushButton.clicked.connect( self.abort )
+        self.n_return = 0
+
+    def save( self ):
+        self.n_return = 1
+        self.accept()
+
+    def no_save( self ):
+        self.n_return = 2
+        self.accept()
+    
+    def abort( self ):
+        self.n_return = 3
+        self.accept()
+
 class EditTabTitleDialog( QDialog ):
     """一個小對話框用於編輯 Tab 標題"""
     def __init__( self, current_title, parent = None ):
@@ -402,161 +429,151 @@ class ImportDataDuplicateOptionDialog( QDialog ):
     def cancel( self ):
         self.reject()
 
-class StockCapitalReductionEditDialog( QDialog ):
-    def __init__( self, str_stock_number, str_stock_name, parent = None ):
+class StockDividendTransferFeeEditDialog( QDialog ):
+    def __init__( self, str_account_name, dict_all_company_number_to_name_and_type, dict_company_number_to_transfer_fee, parent = None ):
         super().__init__( parent )
 
-        self.ui = Ui_StockCapitalReductionDialog()
+        self.ui = Ui_StockDividendTransferFeeEditDialog()
         self.ui.setupUi( self )
         window_icon = QIcon( window_icon_file_path ) 
         self.setWindowIcon( window_icon )
+        self.ui.qtGroupNameLabel.setText( str_account_name )
+        self.ui.qtStockSelectComboBox.setVisible( False )
+        self.dict_all_company_number_to_name_and_type = dict_all_company_number_to_name_and_type
+        self.dict_company_number_to_transfer_fee = dict_company_number_to_transfer_fee.copy()
 
-        self.ui.qtStockNumberLabel.setText( str_stock_number )
-        self.ui.qtStockNameLabel.setText( str_stock_name )
-        obj_current_date = datetime.datetime.today()
-        self.ui.qtDateEdit.setDate( obj_current_date.date() )
-        self.ui.qtDateEdit.setCalendarPopup( True )
+        delegate = CenterIconDelegate()
+        self.dividend_transfer_fee_model = QStandardItemModel( 0, 0 ) 
+        self.ui.qtDividendTransferFeeTableView.setModel( self.dividend_transfer_fee_model )
+        self.ui.qtDividendTransferFeeTableView.setItemDelegate( delegate )
+        # self.ui.qtDividendTransferFeeTableView.verticalHeader().setSectionResizeMode( QHeaderView.Fixed )
+        self.ui.qtDividendTransferFeeTableView.clicked.connect( lambda index: self.on_transfer_fee_table_item_clicked( index, self.dividend_transfer_fee_model ) )
+
+        self.ui.qtStockSelectComboBox.activated.connect( self.on_stock_select_combo_box_current_index_changed )
+        self.ui.qtAddStockPushButton.clicked.connect( self.on_add_stock_push_button_clicked )
+        self.ui.qtStockInputLineEdit.textChanged.connect( self.on_stock_input_text_changed ) 
+        self.ui.qtOkPushButton.clicked.connect( self.accept )
+
+        self.refresh_table_view()
+
+    def on_stock_input_text_changed( self ):
+        with QSignalBlocker( self.ui.qtStockInputLineEdit ), QSignalBlocker( self.ui.qtStockSelectComboBox ):
+            self.ui.qtStockSelectComboBox.clear()
+            str_stock_input = self.ui.qtStockInputLineEdit.text()
+            str_stock_input = Utility.lowercase_english_uppercase( str_stock_input )
+            if len( str_stock_input ) == 0:
+                self.ui.qtStockSelectComboBox.setVisible( False )
+                return
+            self.ui.qtStockSelectComboBox.setVisible( True )
+
+            for stock_number, list_stock_name_and_type in self.dict_all_company_number_to_name_and_type.items():
+                str_stock_name = list_stock_name_and_type[ 0 ]
+                str_stock_name_lowercase = Utility.lowercase_english_uppercase( str_stock_name )
+                if str_stock_input in stock_number or str_stock_input in str_stock_name_lowercase:
+                    self.ui.qtStockSelectComboBox.addItem( f"{stock_number} {str_stock_name}" )
+            # self.ui.qtStockSelectComboBox.showPopup() #showPopup的話，focus會被搶走
+
+            self.ui.qtStockInputLineEdit.setFocus()
+
+    def on_stock_select_combo_box_current_index_changed( self, index ): 
+        str_stock_input = self.ui.qtStockSelectComboBox.currentText()
+        self.ui.qtStockInputLineEdit.setText( str_stock_input )
+        self.ui.qtStockSelectComboBox.setVisible( False )
+        self.ui.qtStockInputLineEdit.setFocus()
+
+    def on_add_stock_push_button_clicked( self ):
+        str_stock_input = self.ui.qtStockInputLineEdit.text()
+        self.ui.qtStockInputLineEdit.clear()
+        str_first_four_chars = str_stock_input.split(" ")[0]
+        if str_first_four_chars not in self.dict_all_company_number_to_name_and_type:
+            b_find = False
+            for stock_number, list_stock_name_and_type in self.dict_all_company_number_to_name_and_type.items():
+                str_stock_name = list_stock_name_and_type[ 0 ]
+                if str_first_four_chars == str_stock_name:
+                    str_first_four_chars = stock_number
+                    b_find = True
+                    break
+            if not b_find:
+                QMessageBox.warning( self, "警告", "輸入的股票代碼不存在", QMessageBox.Ok )
+                return
+
+        if str_first_four_chars not in self.dict_company_number_to_transfer_fee:
+            self.dict_company_number_to_transfer_fee[ str_first_four_chars ] = 10
+
+        self.refresh_table_view()
+
+    def refresh_table_view( self ):
+        self.dividend_transfer_fee_model.clear()
+        self.dividend_transfer_fee_model.setHorizontalHeaderLabels( [ "股利匯費", "編輯" ] )
+        list_vertical_labels = []
+        for index_row,( key_stock_number, value ) in enumerate( self.dict_company_number_to_transfer_fee.items() ):
+            list_stock_name_and_type = self.dict_all_company_number_to_name_and_type[ key_stock_number ]
+            str_stock_name = list_stock_name_and_type[ 0 ]
+            list_vertical_labels.append( f"{key_stock_number} {str_stock_name}" )
+
+            transfer_fee_item = QStandardItem( str( value ) )
+            transfer_fee_item.setTextAlignment( Qt.AlignHCenter | Qt.AlignVCenter )
+            transfer_fee_item.setFlags( transfer_fee_item.flags() & ~Qt.ItemIsEditable )
+            self.dividend_transfer_fee_model.setItem( index_row, 0, transfer_fee_item ) 
+
+            edit_icon_item = QStandardItem("")
+            edit_icon_item.setIcon( edit_icon )
+            edit_icon_item.setFlags( edit_icon_item.flags() & ~Qt.ItemIsEditable )
+            self.dividend_transfer_fee_model.setItem( index_row, 1, edit_icon_item )
+        self.dividend_transfer_fee_model.setVerticalHeaderLabels( list_vertical_labels )
+
+    def on_transfer_fee_table_item_clicked( self, index: QModelIndex, table_model ):
+        item = table_model.itemFromIndex( index )
+        if item is not None:
+            n_column = index.column()  # 獲取列索引
+            header_text = table_model.verticalHeaderItem( index.row() ).text()
+            str_stock_number = header_text.split(" ")[0]
+            n_current_fee = self.dict_company_number_to_transfer_fee[ str_stock_number ] 
+            
+            if n_column == 1:#匯出按鈕
+                dialog = StockDividendTransferFeeEditSpinboxDialog( n_current_fee, self )
+                if dialog.exec():
+                    self.dict_company_number_to_transfer_fee[ str_stock_number ] = dialog.n_new_transfer_fee
+                    self.refresh_table_view()
+
+class StockDividendTransferFeeEditSpinboxDialog( QDialog ):
+    def __init__( self, n_transfer_fee, parent = None ):
+        super().__init__( parent )
+
+        self.ui = Ui_StockDividendTransferFeeEditSpinboxDialog()
+        self.ui.setupUi( self )
+        window_icon = QIcon( window_icon_file_path ) 
+        self.setWindowIcon( window_icon )
+        self.ui.qtDividendTransferFeeSpinBox.setValue( n_transfer_fee )
+        self.n_new_transfer_fee = n_transfer_fee
+
         self.ui.qtOkPushButton.clicked.connect( self.accept_data )
         self.ui.qtCancelPushButton.clicked.connect( self.cancel )
-        self.dict_trading_data = {}
-
-    def setup_trading_date( self, str_date ):
-        self.ui.qtDateEdit.setDate( datetime.datetime.strptime( str_date, "%Y-%m-%d" ).date() )
-
-    def setup_stock_capital_reduction_value( self, f_stock_capital_reduction_per_share ):
-        self.ui.qtCapitalReductionDoubleSpinBox.setValue( f_stock_capital_reduction_per_share )
-
-    def setup_stock_capital_reduction_type( self, e_capital_reduction_type ):
-        if e_capital_reduction_type == CapitalReductionType.CASH_RETURN:
-            self.ui.qtCashReturnRadioButton.setChecked( True )
-        else:
-            self.ui.qtDeficitRadioButton.setChecked( True )
-
-    def get_capital_reduction_type( self ):
-        if self.ui.qtCashReturnRadioButton.isChecked():
-            return CapitalReductionType.CASH_RETURN
-        else:
-            return CapitalReductionType.DEFICIT
-
+        
     def accept_data( self ):
-        f_stock_capital_reduction_per_share = self.ui.qtCapitalReductionDoubleSpinBox.value()
-        if f_stock_capital_reduction_per_share != 0:
+        self.n_new_transfer_fee = self.ui.qtDividendTransferFeeSpinBox.value()
+        self.accept()
 
-            self.dict_trading_data = Utility.generate_trading_data( self.ui.qtDateEdit.date().toString( "yyyy-MM-dd" ), #交易日期
-                                                                    TradingType.CAPITAL_REDUCTION,                      #交易種類
-                                                                    TradingPriceType.PER_SHARE,                         #交易價格種類
-                                                                    0,                                                  #每股交易價格
-                                                                    0,                                                  #總交易價格                         
-                                                                    0,                                                  #交易股數
-                                                                    TradingFeeType.VARIABLE,                            #手續費種類
-                                                                    1,                                                  #手續費折扣
-                                                                    0,                                                  #手續費最低金額
-                                                                    0,                                                  #手續費固定金額
-                                                                    0,                                                  #每股股票股利
-                                                                    0,                                                  #每股現金股利
-                                                                    f_stock_capital_reduction_per_share,                #每股減資金額
-                                                                    self.get_capital_reduction_type(),                  #減資種類
-                                                                    False )                                             #是否為當沖交易
-            self.accept()
-        else:
-            self.reject()
-    
     def cancel( self ):
         self.reject()
 
-class CashTransferEditDialog( QDialog ):
-    def __init__( self, str_account_name, parent = None ):
+class StockMinimumTradingFeeEditDialog( QDialog ):
+    def __init__( self, str_account_name, n_current_minimum_trading_fee, parent = None ):
         super().__init__( parent )
 
-        self.ui = Ui_CashTransferDialog()
+        self.ui = Ui_StockMinimumTradingFeeEditDialog()
         self.ui.setupUi( self )
         window_icon = QIcon( window_icon_file_path ) 
         self.setWindowIcon( window_icon )
-
-        self.ui.qtAccountNameLabel.setText( str_account_name )
-        obj_current_date = datetime.datetime.today()
-        self.ui.qtDateEdit.setDate( obj_current_date.date() )
-        self.ui.qtDateEdit.setCalendarPopup( True )
+        self.ui.qtMinimumTradingFeeSpinBox.setValue( n_current_minimum_trading_fee )
+        self.ui.qtGroupNameLabel.setText( str_account_name )
+        self.n_new_minimum_trading_fee = n_current_minimum_trading_fee
         self.ui.qtOkPushButton.clicked.connect( self.accept_data )
         self.ui.qtCancelPushButton.clicked.connect( self.cancel )
-        self.dict_cash_transfer_data = {}
-
-    def setup_transfer_date( self, str_date ):
-        self.ui.qtDateEdit.setDate( datetime.datetime.strptime( str_date, "%Y-%m-%d" ).date() )
-
-    def setup_transfer_type( self, e_transfer_type ):
-        if e_transfer_type == TransferType.TRANSFER_IN:
-            self.ui.qtTransferInRadioButton.setChecked( True )
-        else:
-            self.ui.qtTransferOutRadioButton.setChecked( True )
-
-    def setup_transfer_value( self, n_transfer_value ):
-        self.ui.qtCashDividendSpinBox.setValue( n_transfer_value )
 
     def accept_data( self ):
-        n_transfer_value = self.ui.qtCashDividendSpinBox.value()
-        if n_transfer_value != 0:
-            self.dict_cash_transfer_data[ TransferData.TRANSFER_DATE ] = self.ui.qtDateEdit.date().toString( "yyyy-MM-dd" )
-            self.dict_cash_transfer_data[ TransferData.TRANSFER_TYPE ] = TransferType.TRANSFER_IN if self.ui.qtTransferInRadioButton.isChecked() else TransferType.TRANSFER_OUT
-            self.dict_cash_transfer_data[ TransferData.TRANSFER_VALUE ] = n_transfer_value
-    
-            self.accept()
-        else:
-            self.reject()
-    
-    def cancel( self ):
-        self.reject()
-
-class StockDividendEditDialog( QDialog ):
-    def __init__( self, str_stock_number, str_stock_name, parent = None ):
-        super().__init__( parent )
-
-        self.ui = Ui_StockDividendDialog()
-        self.ui.setupUi( self )
-        window_icon = QIcon( window_icon_file_path ) 
-        self.setWindowIcon( window_icon )
-
-        self.ui.qtStockNumberLabel.setText( str_stock_number )
-        self.ui.qtStockNameLabel.setText( str_stock_name )
-        obj_current_date = datetime.datetime.today()
-        self.ui.qtDateEdit.setDate( obj_current_date.date() )
-        self.ui.qtDateEdit.setCalendarPopup( True )
-        self.ui.qtOkPushButton.clicked.connect( self.accept_data )
-        self.ui.qtCancelPushButton.clicked.connect( self.cancel )
-        self.dict_trading_data = {}
-
-    def setup_trading_date( self, str_date ):
-        self.ui.qtDateEdit.setDate( datetime.datetime.strptime( str_date, "%Y-%m-%d" ).date() )
-
-    def setup_stock_dividend( self, f_stock_dividend_per_share ):
-        self.ui.qtStockDividendDoubleSpinBox.setValue( f_stock_dividend_per_share )
-
-    def setup_cash_dividend( self, f_cash_dividend_per_share ):
-        self.ui.qtCashDividendDoubleSpinBox.setValue( f_cash_dividend_per_share )
-
-    def accept_data( self ):
-        f_stock_dividend_per_share = self.ui.qtStockDividendDoubleSpinBox.value()
-        f_cash_dividend_per_share = self.ui.qtCashDividendDoubleSpinBox.value()
-        if f_stock_dividend_per_share != 0 or f_cash_dividend_per_share != 0:
-
-            self.dict_trading_data = Utility.generate_trading_data( self.ui.qtDateEdit.date().toString( "yyyy-MM-dd" ), #交易日期
-                                                                    TradingType.DIVIDEND,                               #交易種類
-                                                                    TradingPriceType.PER_SHARE,                         #交易價格種類
-                                                                    0,                                                  #每股交易價格
-                                                                    0,                                                  #總交易價格                         
-                                                                    0,                                                  #交易股數
-                                                                    TradingFeeType.VARIABLE,                            #手續費種類
-                                                                    1,                                                  #手續費折扣
-                                                                    0,                                                  #手續費最低金額
-                                                                    0,                                                  #手續費固定金額
-                                                                    f_stock_dividend_per_share,                         #每股股票股利
-                                                                    f_cash_dividend_per_share,                          #每股現金股利
-                                                                    0,                                                  #每股減資金額
-                                                                    CapitalReductionType.CASH_RETURN,                   #減資種類
-                                                                    False )                                             #是否為當沖交易
-            self.accept()
-        else:
-            self.reject()
+        self.n_new_minimum_trading_fee = self.ui.qtMinimumTradingFeeSpinBox.value()
+        self.accept()
     
     def cancel( self ):
         self.reject()
@@ -607,6 +624,16 @@ class StockTradingEditDialog( QDialog ):
         except Exception as e:
             print(f"讀取 CSS 檔案時發生錯誤: {e}")
 
+    def on_trading_type_changed( self ):
+        if self.ui.qtCommonTradeRadioButton.isChecked():
+            self.ui.qtCommonTradeCountSpinBox.setEnabled( True )
+            self.ui.qtOddTradeCountSpinBox.setEnabled( False )
+        else:
+            self.ui.qtCommonTradeCountSpinBox.setEnabled( False )
+            self.ui.qtOddTradeCountSpinBox.setEnabled( True )
+
+        self.compute_cost()
+
     def on_discount_check_box_state_changed( self, state ):
         if state == 2:
             self.ui.qtDiscountRateDoubleSpinBox.setEnabled( True )
@@ -624,19 +651,6 @@ class StockTradingEditDialog( QDialog ):
         else:
             self.ui.qtSellRadioButton.setChecked( True )
 
-    def setup_trading_discount( self, f_discount_value ):
-        if f_discount_value != 1:
-            self.ui.qtDiscountCheckBox.setChecked( True )
-            self.ui.qtDiscountRateDoubleSpinBox.setValue( f_discount_value * 10 )
-            self.ui.qtDiscountRateDoubleSpinBox.setEnabled( True )
-        else:
-            self.ui.qtDiscountCheckBox.setChecked( False )
-            self.ui.qtDiscountRateDoubleSpinBox.setValue( 6 )
-            self.ui.qtDiscountRateDoubleSpinBox.setEnabled( False )
-
-    def setup_trading_price( self, f_price ):
-        self.ui.qtPriceDoubleSpinBox.setValue( f_price )
-
     def setup_trading_count( self, f_count ):
         if f_count % 1000 == 0:
             self.ui.qtCommonTradeRadioButton.setChecked( True )
@@ -647,47 +661,24 @@ class StockTradingEditDialog( QDialog ):
             self.ui.qtCommonTradeCountSpinBox.setValue( 0 )
             self.ui.qtOddTradeCountSpinBox.setValue( f_count )
 
+    def setup_trading_price( self, f_price ):
+        self.ui.qtPriceDoubleSpinBox.setValue( f_price )
+
+    def setup_trading_discount( self, f_discount_value ):
+        if f_discount_value != 1:
+            self.ui.qtDiscountCheckBox.setChecked( True )
+            self.ui.qtDiscountRateDoubleSpinBox.setValue( f_discount_value * 10 )
+            self.ui.qtDiscountRateDoubleSpinBox.setEnabled( True )
+        else:
+            self.ui.qtDiscountCheckBox.setChecked( False )
+            self.ui.qtDiscountRateDoubleSpinBox.setValue( 6 )
+            self.ui.qtDiscountRateDoubleSpinBox.setEnabled( False )
+    
     def setup_daying_trading( self, b_daying_trading ):
         if b_daying_trading:
             self.ui.qtDayingTradingCheckBox.setChecked( True )
         else:
             self.ui.qtDayingTradingCheckBox.setChecked( False )
-
-    def accept_data( self ):
-
-        if float( self.ui.qtTotalCostLineEdit.text().replace( ',', '' ) ) != 0:
-            
-            self.dict_trading_data = Utility.generate_trading_data( self.ui.qtDateEdit.date().toString( "yyyy-MM-dd" ), #交易日期
-                                                                    self.get_trading_type(),                            #交易種類
-                                                                    TradingPriceType.PER_SHARE,                         #交易價格種類
-                                                                    self.ui.qtPriceDoubleSpinBox.value(),               #每股交易價格
-                                                                    0,                                                  #總交易價格
-                                                                    self.get_trading_count(),                           #交易股數
-                                                                    TradingFeeType.VARIABLE,                            #手續費種類
-                                                                    self.get_trading_fee_discount(),                    #手續費折扣
-                                                                    0,                                                  #手續費最低金額
-                                                                    0,                                                  #手續費固定金額
-                                                                    0,                                                  #每股股票股利
-                                                                    0,                                                  #每股現金股利
-                                                                    0,                                                  #每股減資金額
-                                                                    CapitalReductionType.CASH_RETURN,                   #減資種類
-                                                                    self.ui.qtDayingTradingCheckBox.isChecked() )       #是否為當沖交易                                          
-            self.accept()
-        else:
-            self.reject()
-    
-    def cancel( self ):
-        self.reject()
-
-    def on_trading_type_changed( self ):
-        if self.ui.qtCommonTradeRadioButton.isChecked():
-            self.ui.qtCommonTradeCountSpinBox.setEnabled( True )
-            self.ui.qtOddTradeCountSpinBox.setEnabled( False )
-        else:
-            self.ui.qtCommonTradeCountSpinBox.setEnabled( False )
-            self.ui.qtOddTradeCountSpinBox.setEnabled( True )
-
-        self.compute_cost()
 
     def get_trading_type( self ):
         if self.ui.qtBuyRadioButton.isChecked():
@@ -723,6 +714,31 @@ class StockTradingEditDialog( QDialog ):
             self.ui.qtTotalCostLineEdit.setText( format( -dict_result[ TradingCost.TRADING_TOTAL_COST ], ',' ) )
         self.ui.qtFeeLineEdit.setText( format( dict_result[ TradingCost.TRADING_FEE ], ',' ) )
         self.ui.qtTaxLineEdit.setText( format( dict_result[ TradingCost.TRADING_TAX ], ',' ) )
+
+    def accept_data( self ):
+        if float( self.ui.qtTotalCostLineEdit.text().replace( ',', '' ) ) != 0:
+            
+            self.dict_trading_data = Utility.generate_trading_data( self.ui.qtDateEdit.date().toString( "yyyy-MM-dd" ), #交易日期
+                                                                    self.get_trading_type(),                            #交易種類
+                                                                    TradingPriceType.PER_SHARE,                         #交易價格種類
+                                                                    self.ui.qtPriceDoubleSpinBox.value(),               #每股交易價格
+                                                                    0,                                                  #總交易價格
+                                                                    self.get_trading_count(),                           #交易股數
+                                                                    TradingFeeType.VARIABLE,                            #手續費種類
+                                                                    self.get_trading_fee_discount(),                    #手續費折扣
+                                                                    0,                                                  #手續費最低金額
+                                                                    0,                                                  #手續費固定金額
+                                                                    0,                                                  #每股股票股利
+                                                                    0,                                                  #每股現金股利
+                                                                    0,                                                  #每股減資金額
+                                                                    CapitalReductionType.CASH_RETURN,                   #減資種類
+                                                                    self.ui.qtDayingTradingCheckBox.isChecked() )       #是否為當沖交易                                          
+            self.accept()
+        else:
+            self.reject()
+    
+    def cancel( self ):
+        self.reject()
 
 class StockRegularTradingEditDialog( QDialog ):
     def __init__( self, str_stock_number, str_stock_name, e_trading_fee_type, b_discount, f_discount_value, n_trading_fee_minimum, n_trading_fee_constant, parent = None ):
@@ -944,6 +960,60 @@ class StockRegularTradingEditDialog( QDialog ):
     def cancel( self ):
         self.reject()
 
+class StockDividendEditDialog( QDialog ):
+    def __init__( self, str_stock_number, str_stock_name, parent = None ):
+        super().__init__( parent )
+
+        self.ui = Ui_StockDividendDialog()
+        self.ui.setupUi( self )
+        window_icon = QIcon( window_icon_file_path ) 
+        self.setWindowIcon( window_icon )
+
+        self.ui.qtStockNumberLabel.setText( str_stock_number )
+        self.ui.qtStockNameLabel.setText( str_stock_name )
+        obj_current_date = datetime.datetime.today()
+        self.ui.qtDateEdit.setDate( obj_current_date.date() )
+        self.ui.qtDateEdit.setCalendarPopup( True )
+        self.ui.qtOkPushButton.clicked.connect( self.accept_data )
+        self.ui.qtCancelPushButton.clicked.connect( self.cancel )
+        self.dict_trading_data = {}
+
+    def setup_trading_date( self, str_date ):
+        self.ui.qtDateEdit.setDate( datetime.datetime.strptime( str_date, "%Y-%m-%d" ).date() )
+
+    def setup_stock_dividend( self, f_stock_dividend_per_share ):
+        self.ui.qtStockDividendDoubleSpinBox.setValue( f_stock_dividend_per_share )
+
+    def setup_cash_dividend( self, f_cash_dividend_per_share ):
+        self.ui.qtCashDividendDoubleSpinBox.setValue( f_cash_dividend_per_share )
+
+    def accept_data( self ):
+        f_stock_dividend_per_share = self.ui.qtStockDividendDoubleSpinBox.value()
+        f_cash_dividend_per_share = self.ui.qtCashDividendDoubleSpinBox.value()
+        if f_stock_dividend_per_share != 0 or f_cash_dividend_per_share != 0:
+
+            self.dict_trading_data = Utility.generate_trading_data( self.ui.qtDateEdit.date().toString( "yyyy-MM-dd" ), #交易日期
+                                                                    TradingType.DIVIDEND,                               #交易種類
+                                                                    TradingPriceType.PER_SHARE,                         #交易價格種類
+                                                                    0,                                                  #每股交易價格
+                                                                    0,                                                  #總交易價格                         
+                                                                    0,                                                  #交易股數
+                                                                    TradingFeeType.VARIABLE,                            #手續費種類
+                                                                    1,                                                  #手續費折扣
+                                                                    0,                                                  #手續費最低金額
+                                                                    0,                                                  #手續費固定金額
+                                                                    f_stock_dividend_per_share,                         #每股股票股利
+                                                                    f_cash_dividend_per_share,                          #每股現金股利
+                                                                    0,                                                  #每股減資金額
+                                                                    CapitalReductionType.CASH_RETURN,                   #減資種類
+                                                                    False )                                             #是否為當沖交易
+            self.accept()
+        else:
+            self.reject()
+    
+    def cancel( self ):
+        self.reject()
+
 class StockCapitalIncreaseEditDialog( QDialog ):
     def __init__( self, str_stock_number, str_stock_name, parent = None ):
         super().__init__( parent )
@@ -1045,181 +1115,110 @@ class StockCapitalIncreaseEditDialog( QDialog ):
     def cancel( self ):
         self.reject()
 
-class StockDividendTransferFeeEditDialog( QDialog ):
-    def __init__( self, str_account_name, dict_all_company_number_to_name_and_type, dict_company_number_to_transfer_fee, parent = None ):
+class StockCapitalReductionEditDialog( QDialog ):
+    def __init__( self, str_stock_number, str_stock_name, parent = None ):
         super().__init__( parent )
 
-        self.ui = Ui_StockDividendTransferFeeEditDialog()
+        self.ui = Ui_StockCapitalReductionDialog()
         self.ui.setupUi( self )
         window_icon = QIcon( window_icon_file_path ) 
         self.setWindowIcon( window_icon )
-        self.ui.qtGroupNameLabel.setText( str_account_name )
-        self.ui.qtStockSelectComboBox.setVisible( False )
-        self.dict_all_company_number_to_name_and_type = dict_all_company_number_to_name_and_type
-        self.dict_company_number_to_transfer_fee = dict_company_number_to_transfer_fee.copy()
 
-        delegate = CenterIconDelegate()
-        self.dividend_transfer_fee_model = QStandardItemModel( 0, 0 ) 
-        self.ui.qtDividendTransferFeeTableView.setModel( self.dividend_transfer_fee_model )
-        self.ui.qtDividendTransferFeeTableView.setItemDelegate( delegate )
-        # self.ui.qtDividendTransferFeeTableView.verticalHeader().setSectionResizeMode( QHeaderView.Fixed )
-        self.ui.qtDividendTransferFeeTableView.clicked.connect( lambda index: self.on_transfer_fee_table_item_clicked( index, self.dividend_transfer_fee_model ) )
-
-        self.ui.qtStockSelectComboBox.activated.connect( self.on_stock_select_combo_box_current_index_changed )
-        self.ui.qtAddStockPushButton.clicked.connect( self.on_add_stock_push_button_clicked )
-        self.ui.qtStockInputLineEdit.textChanged.connect( self.on_stock_input_text_changed ) 
-        self.ui.qtOkPushButton.clicked.connect( self.accept )
-
-        self.refresh_table_view()
-
-    def on_stock_input_text_changed( self ):
-        with QSignalBlocker( self.ui.qtStockInputLineEdit ), QSignalBlocker( self.ui.qtStockSelectComboBox ):
-            self.ui.qtStockSelectComboBox.clear()
-            str_stock_input = self.ui.qtStockInputLineEdit.text()
-            str_stock_input = Utility.lowercase_english_uppercase( str_stock_input )
-            if len( str_stock_input ) == 0:
-                self.ui.qtStockSelectComboBox.setVisible( False )
-                return
-            self.ui.qtStockSelectComboBox.setVisible( True )
-
-            for stock_number, list_stock_name_and_type in self.dict_all_company_number_to_name_and_type.items():
-                str_stock_name = list_stock_name_and_type[ 0 ]
-                str_stock_name_lowercase = Utility.lowercase_english_uppercase( str_stock_name )
-                if str_stock_input in stock_number or str_stock_input in str_stock_name_lowercase:
-                    self.ui.qtStockSelectComboBox.addItem( f"{stock_number} {str_stock_name}" )
-            # self.ui.qtStockSelectComboBox.showPopup() #showPopup的話，focus會被搶走
-
-            self.ui.qtStockInputLineEdit.setFocus()
-
-    def on_stock_select_combo_box_current_index_changed( self, index ): 
-        str_stock_input = self.ui.qtStockSelectComboBox.currentText()
-        self.ui.qtStockInputLineEdit.setText( str_stock_input )
-        self.ui.qtStockSelectComboBox.setVisible( False )
-        self.ui.qtStockInputLineEdit.setFocus()
-
-    def on_add_stock_push_button_clicked( self ):
-        str_stock_input = self.ui.qtStockInputLineEdit.text()
-        self.ui.qtStockInputLineEdit.clear()
-        str_first_four_chars = str_stock_input.split(" ")[0]
-        if str_first_four_chars not in self.dict_all_company_number_to_name_and_type:
-            b_find = False
-            for stock_number, list_stock_name_and_type in self.dict_all_company_number_to_name_and_type.items():
-                str_stock_name = list_stock_name_and_type[ 0 ]
-                if str_first_four_chars == str_stock_name:
-                    str_first_four_chars = stock_number
-                    b_find = True
-                    break
-            if not b_find:
-                QMessageBox.warning( self, "警告", "輸入的股票代碼不存在", QMessageBox.Ok )
-                return
-
-        if str_first_four_chars not in self.dict_company_number_to_transfer_fee:
-            self.dict_company_number_to_transfer_fee[ str_first_four_chars ] = 10
-
-        self.refresh_table_view()
-
-    def refresh_table_view( self ):
-        self.dividend_transfer_fee_model.clear()
-        self.dividend_transfer_fee_model.setHorizontalHeaderLabels( [ "股利匯費", "編輯" ] )
-        list_vertical_labels = []
-        for index_row,( key_stock_number, value ) in enumerate( self.dict_company_number_to_transfer_fee.items() ):
-            list_stock_name_and_type = self.dict_all_company_number_to_name_and_type[ key_stock_number ]
-            str_stock_name = list_stock_name_and_type[ 0 ]
-            list_vertical_labels.append( f"{key_stock_number} {str_stock_name}" )
-
-            transfer_fee_item = QStandardItem( str( value ) )
-            transfer_fee_item.setTextAlignment( Qt.AlignHCenter | Qt.AlignVCenter )
-            transfer_fee_item.setFlags( transfer_fee_item.flags() & ~Qt.ItemIsEditable )
-            self.dividend_transfer_fee_model.setItem( index_row, 0, transfer_fee_item ) 
-
-            edit_icon_item = QStandardItem("")
-            edit_icon_item.setIcon( edit_icon )
-            edit_icon_item.setFlags( edit_icon_item.flags() & ~Qt.ItemIsEditable )
-            self.dividend_transfer_fee_model.setItem( index_row, 1, edit_icon_item )
-        self.dividend_transfer_fee_model.setVerticalHeaderLabels( list_vertical_labels )
-
-    def on_transfer_fee_table_item_clicked( self, index: QModelIndex, table_model ):
-        item = table_model.itemFromIndex( index )
-        if item is not None:
-            n_column = index.column()  # 獲取列索引
-            header_text = table_model.verticalHeaderItem( index.row() ).text()
-            str_stock_number = header_text.split(" ")[0]
-            n_current_fee = self.dict_company_number_to_transfer_fee[ str_stock_number ] 
-            
-            if n_column == 1:#匯出按鈕
-                dialog = StockDividendTransferFeeEditSpinboxDialog( n_current_fee, self )
-                if dialog.exec():
-                    self.dict_company_number_to_transfer_fee[ str_stock_number ] = dialog.n_new_transfer_fee
-                    self.refresh_table_view()
-
-class StockDividendTransferFeeEditSpinboxDialog( QDialog ):
-    def __init__( self, n_transfer_fee, parent = None ):
-        super().__init__( parent )
-
-        self.ui = Ui_StockDividendTransferFeeEditSpinboxDialog()
-        self.ui.setupUi( self )
-        window_icon = QIcon( window_icon_file_path ) 
-        self.setWindowIcon( window_icon )
-        self.ui.qtDividendTransferFeeSpinBox.setValue( n_transfer_fee )
-        self.n_new_transfer_fee = n_transfer_fee
-
+        self.ui.qtStockNumberLabel.setText( str_stock_number )
+        self.ui.qtStockNameLabel.setText( str_stock_name )
+        obj_current_date = datetime.datetime.today()
+        self.ui.qtDateEdit.setDate( obj_current_date.date() )
+        self.ui.qtDateEdit.setCalendarPopup( True )
         self.ui.qtOkPushButton.clicked.connect( self.accept_data )
         self.ui.qtCancelPushButton.clicked.connect( self.cancel )
-        
-    def accept_data( self ):
-        self.n_new_transfer_fee = self.ui.qtDividendTransferFeeSpinBox.value()
-        self.accept()
+        self.dict_trading_data = {}
 
-    def cancel( self ):
-        self.reject()
+    def setup_trading_date( self, str_date ):
+        self.ui.qtDateEdit.setDate( datetime.datetime.strptime( str_date, "%Y-%m-%d" ).date() )
 
-class StockMinimumTradingFeeEditDialog( QDialog ):
-    def __init__( self, str_account_name, n_current_minimum_trading_fee, parent = None ):
-        super().__init__( parent )
+    def setup_stock_capital_reduction_value( self, f_stock_capital_reduction_per_share ):
+        self.ui.qtCapitalReductionDoubleSpinBox.setValue( f_stock_capital_reduction_per_share )
 
-        self.ui = Ui_StockMinimumTradingFeeEditDialog()
-        self.ui.setupUi( self )
-        window_icon = QIcon( window_icon_file_path ) 
-        self.setWindowIcon( window_icon )
-        self.ui.qtMinimumTradingFeeSpinBox.setValue( n_current_minimum_trading_fee )
-        self.ui.qtGroupNameLabel.setText( str_account_name )
-        self.n_new_minimum_trading_fee = n_current_minimum_trading_fee
-        self.ui.qtOkPushButton.clicked.connect( self.accept_data )
-        self.ui.qtCancelPushButton.clicked.connect( self.cancel )
+    def setup_stock_capital_reduction_type( self, e_capital_reduction_type ):
+        if e_capital_reduction_type == CapitalReductionType.CASH_RETURN:
+            self.ui.qtCashReturnRadioButton.setChecked( True )
+        else:
+            self.ui.qtDeficitRadioButton.setChecked( True )
+
+    def get_capital_reduction_type( self ):
+        if self.ui.qtCashReturnRadioButton.isChecked():
+            return CapitalReductionType.CASH_RETURN
+        else:
+            return CapitalReductionType.DEFICIT
 
     def accept_data( self ):
-        self.n_new_minimum_trading_fee = self.ui.qtMinimumTradingFeeSpinBox.value()
-        self.accept()
+        f_stock_capital_reduction_per_share = self.ui.qtCapitalReductionDoubleSpinBox.value()
+        if f_stock_capital_reduction_per_share != 0:
+
+            self.dict_trading_data = Utility.generate_trading_data( self.ui.qtDateEdit.date().toString( "yyyy-MM-dd" ), #交易日期
+                                                                    TradingType.CAPITAL_REDUCTION,                      #交易種類
+                                                                    TradingPriceType.PER_SHARE,                         #交易價格種類
+                                                                    0,                                                  #每股交易價格
+                                                                    0,                                                  #總交易價格                         
+                                                                    0,                                                  #交易股數
+                                                                    TradingFeeType.VARIABLE,                            #手續費種類
+                                                                    1,                                                  #手續費折扣
+                                                                    0,                                                  #手續費最低金額
+                                                                    0,                                                  #手續費固定金額
+                                                                    0,                                                  #每股股票股利
+                                                                    0,                                                  #每股現金股利
+                                                                    f_stock_capital_reduction_per_share,                #每股減資金額
+                                                                    self.get_capital_reduction_type(),                  #減資種類
+                                                                    False )                                             #是否為當沖交易
+            self.accept()
+        else:
+            self.reject()
     
     def cancel( self ):
         self.reject()
 
-class SaveCheckDialog( QDialog ):
-    def __init__( self, str_title = '', parent = None ):
+class CashTransferEditDialog( QDialog ):
+    def __init__( self, str_account_name, parent = None ):
         super().__init__( parent )
 
-        self.ui = Ui_SaveCheckDialog()
+        self.ui = Ui_CashTransferDialog()
         self.ui.setupUi( self )
-        self.setWindowTitle( str_title )
         window_icon = QIcon( window_icon_file_path ) 
         self.setWindowIcon( window_icon )
 
-        self.ui.qtSavePushButton.clicked.connect( self.save )
-        self.ui.qtNoSavePushButton.clicked.connect( self.no_save )
-        self.ui.qtAbortPushButton.clicked.connect( self.abort )
-        self.n_return = 0
+        self.ui.qtAccountNameLabel.setText( str_account_name )
+        obj_current_date = datetime.datetime.today()
+        self.ui.qtDateEdit.setDate( obj_current_date.date() )
+        self.ui.qtDateEdit.setCalendarPopup( True )
+        self.ui.qtOkPushButton.clicked.connect( self.accept_data )
+        self.ui.qtCancelPushButton.clicked.connect( self.cancel )
+        self.dict_cash_transfer_data = {}
 
-    def save( self ):
-        self.n_return = 1
-        self.accept()
+    def setup_transfer_date( self, str_date ):
+        self.ui.qtDateEdit.setDate( datetime.datetime.strptime( str_date, "%Y-%m-%d" ).date() )
 
-    def no_save( self ):
-        self.n_return = 2
-        self.accept()
+    def setup_transfer_type( self, e_transfer_type ):
+        if e_transfer_type == TransferType.TRANSFER_IN:
+            self.ui.qtTransferInRadioButton.setChecked( True )
+        else:
+            self.ui.qtTransferOutRadioButton.setChecked( True )
+
+    def setup_transfer_value( self, n_transfer_value ):
+        self.ui.qtCashDividendSpinBox.setValue( n_transfer_value )
+
+    def accept_data( self ):
+        n_transfer_value = self.ui.qtCashDividendSpinBox.value()
+        if n_transfer_value != 0:
+            self.dict_cash_transfer_data[ TransferData.TRANSFER_DATE ] = self.ui.qtDateEdit.date().toString( "yyyy-MM-dd" )
+            self.dict_cash_transfer_data[ TransferData.TRANSFER_TYPE ] = TransferType.TRANSFER_IN if self.ui.qtTransferInRadioButton.isChecked() else TransferType.TRANSFER_OUT
+            self.dict_cash_transfer_data[ TransferData.TRANSFER_VALUE ] = n_transfer_value
     
-    def abort( self ):
-        self.n_return = 3
-        self.accept()
+            self.accept()
+        else:
+            self.reject()
+    
+    def cancel( self ):
+        self.reject()
 
 class Worker( QObject ):
     progress = Signal( int )  # Signal to emit progress updates
