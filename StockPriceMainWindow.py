@@ -3186,8 +3186,8 @@ class MainWindow( QMainWindow ):
                                  "capital_reduction_type" in item_trading_data ):
                                 
                                 e_trading_type = TradingType( item_trading_data[ "trading_type" ] )
+                                e_trading_price_type = TradingPriceType( item_trading_data[ "trading_price_type" ] )
                                 e_trading_fee_type = TradingFeeType( item_trading_data[ "trading_fee_type" ] )
-                                e_trading_price_type = TradingFeeType( item_trading_data[ "trading_price_type" ] )
                                 e_capital_reduction_type = CapitalReductionType( item_trading_data[ "capital_reduction_type" ] )
                                 dict_per_trading_data = Utility.generate_trading_data( item_trading_data[ "trading_date" ],                #交易日期
                                                                                        e_trading_type,                                     #交易種類
