@@ -3772,7 +3772,7 @@ class MainWindow( QMainWindow ):
                 n_net_value = int( n_accumulated_inventory * f_stock_price )
                 list_per_stock_trading_flows.append( n_net_value )    
                 list_per_stock_trading_date.append( obj_current_date )
-            str_profit_ratio = None
+            str_profit_ratio = "-"
             if len( list_per_stock_trading_flows ) > 1:
                 try:
                     xirr_result = Utility.xirr( list_per_stock_trading_flows, list_per_stock_trading_date )
@@ -3783,7 +3783,9 @@ class MainWindow( QMainWindow ):
             standard_item.setTextAlignment( Qt.AlignHCenter | Qt.AlignVCenter )
             standard_item.setFlags( standard_item.flags() & ~Qt.ItemIsEditable )
             standard_item.setData( key_stock_number, Qt.UserRole )
-            if str_profit_ratio.strip().startswith( '-' ):
+            if str_profit_ratio == "-":
+                str_color = QBrush( '#FFFFFF' )
+            elif str_profit_ratio.strip().startswith( '-' ):
                 str_color = QBrush( '#00AA00' )
             else:
                 str_color = QBrush( '#FF0000' )
