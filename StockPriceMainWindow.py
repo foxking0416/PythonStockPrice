@@ -646,39 +646,49 @@ class StockTradingEditDialog( QDialog ):
         self.ui.qtDateEdit.setDate( datetime.datetime.strptime( str_date, "%Y-%m-%d" ).date() )
 
     def setup_trading_type( self, e_trading_type ):
-        if e_trading_type == TradingType.BUY:
-            self.ui.qtBuyRadioButton.setChecked( True )
-        else:
-            self.ui.qtSellRadioButton.setChecked( True )
+        with ( QSignalBlocker( self.ui.qtBuyRadioButton ),
+               QSignalBlocker( self.ui.qtSellRadioButton ) ):
+            if e_trading_type == TradingType.BUY:
+                self.ui.qtBuyRadioButton.setChecked( True )
+            else:
+                self.ui.qtSellRadioButton.setChecked( True )
 
     def setup_trading_count( self, f_count ):
-        if f_count % 1000 == 0:
-            self.ui.qtCommonTradeRadioButton.setChecked( True )
-            self.ui.qtCommonTradeCountSpinBox.setValue( f_count / 1000 )
-            self.ui.qtOddTradeCountSpinBox.setValue( 0 )
-        else:
-            self.ui.qtOddTradeRadioButton.setChecked( True )
-            self.ui.qtCommonTradeCountSpinBox.setValue( 0 )
-            self.ui.qtOddTradeCountSpinBox.setValue( f_count )
+        with ( QSignalBlocker( self.ui.qtCommonTradeRadioButton ),
+               QSignalBlocker( self.ui.qtOddTradeRadioButton ),
+               QSignalBlocker( self.ui.qtCommonTradeCountSpinBox ),
+               QSignalBlocker( self.ui.qtOddTradeCountSpinBox ) ):
+            if f_count % 1000 == 0:
+                self.ui.qtCommonTradeRadioButton.setChecked( True )
+                self.ui.qtCommonTradeCountSpinBox.setValue( f_count / 1000 )
+                self.ui.qtOddTradeCountSpinBox.setValue( 0 )
+            else:
+                self.ui.qtOddTradeRadioButton.setChecked( True )
+                self.ui.qtCommonTradeCountSpinBox.setValue( 0 )
+                self.ui.qtOddTradeCountSpinBox.setValue( f_count )
 
     def setup_trading_price( self, f_price ):
-        self.ui.qtPriceDoubleSpinBox.setValue( f_price )
+        with ( QSignalBlocker( self.ui.qtPriceDoubleSpinBox ) ):
+            self.ui.qtPriceDoubleSpinBox.setValue( f_price )
 
     def setup_trading_discount( self, f_discount_value ):
-        if f_discount_value != 1:
-            self.ui.qtDiscountCheckBox.setChecked( True )
-            self.ui.qtDiscountRateDoubleSpinBox.setValue( f_discount_value * 10 )
-            self.ui.qtDiscountRateDoubleSpinBox.setEnabled( True )
-        else:
-            self.ui.qtDiscountCheckBox.setChecked( False )
-            self.ui.qtDiscountRateDoubleSpinBox.setValue( 6 )
-            self.ui.qtDiscountRateDoubleSpinBox.setEnabled( False )
+        with ( QSignalBlocker( self.ui.qtDiscountCheckBox ),
+               QSignalBlocker( self.ui.qtDiscountRateDoubleSpinBox ) ):
+            if f_discount_value != 1:
+                self.ui.qtDiscountCheckBox.setChecked( True )
+                self.ui.qtDiscountRateDoubleSpinBox.setValue( f_discount_value * 10 )
+                self.ui.qtDiscountRateDoubleSpinBox.setEnabled( True )
+            else:
+                self.ui.qtDiscountCheckBox.setChecked( False )
+                self.ui.qtDiscountRateDoubleSpinBox.setValue( 6 )
+                self.ui.qtDiscountRateDoubleSpinBox.setEnabled( False )
     
     def setup_daying_trading( self, b_daying_trading ):
-        if b_daying_trading:
-            self.ui.qtDayingTradingCheckBox.setChecked( True )
-        else:
-            self.ui.qtDayingTradingCheckBox.setChecked( False )
+        with ( QSignalBlocker( self.ui.qtDayingTradingCheckBox ) ):
+            if b_daying_trading:
+                self.ui.qtDayingTradingCheckBox.setChecked( True )
+            else:
+                self.ui.qtDayingTradingCheckBox.setChecked( False )
 
     def get_trading_type( self ):
         if self.ui.qtBuyRadioButton.isChecked():
@@ -2452,6 +2462,7 @@ class MainWindow( QMainWindow ):
                         dialog.setup_trading_price( dict_selected_data[ TradingData.PER_SHARE_TRADING_PRICE ] )
                         dialog.setup_trading_count( dict_selected_data[ TradingData.TRADING_COUNT ] )
                         dialog.setup_daying_trading( dict_selected_data[ TradingData.DAYING_TRADING ] )
+                        dialog.compute_cost()
                     elif dict_selected_data[ TradingData.TRADING_TYPE ] == TradingType.REGULAR_BUY:
                         dialog = StockRegularTradingEditDialog( str_stock_number, str_stock_name, TradingFeeType.VARIABLE, True, 0, 0, 0, self )
                         dialog.setup_trading_date( dict_selected_data[ TradingData.TRADING_DATE ] )
