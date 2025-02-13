@@ -781,14 +781,14 @@ class StockRegularTradingEditDialog( QDialog ):
 
         self.ui.qtOddTradeCountSpinBox.valueChanged.connect( self.compute_cost )
 
-        self.ui.qtPerSharePriceRadioButton.toggled.connect( self.update_ui )
-        self.ui.qtTotalPriceRadioButton.toggled.connect( self.update_ui )
+        self.ui.qtPerSharePriceRadioButton.toggled.connect( self.update_ui_and_compute_cost )
+        self.ui.qtTotalPriceRadioButton.toggled.connect( self.update_ui_and_compute_cost )
         self.ui.qtPerSharePriceDoubleSpinBox.valueChanged.connect( self.compute_cost )
         self.ui.qtTotalPriceSpinBox.valueChanged.connect( self.compute_cost )
 
-        self.ui.qtVariableFeeRadioButton.toggled.connect( self.update_ui )
-        self.ui.qtConstantFeeRadioButton.toggled.connect( self.update_ui )
-        self.ui.qtDiscountCheckBox.stateChanged.connect( self.update_ui )
+        self.ui.qtVariableFeeRadioButton.toggled.connect( self.update_ui_and_compute_cost )
+        self.ui.qtConstantFeeRadioButton.toggled.connect( self.update_ui_and_compute_cost )
+        self.ui.qtDiscountCheckBox.stateChanged.connect( self.update_ui_and_compute_cost )
         self.ui.qtDiscountRateDoubleSpinBox.valueChanged.connect( self.compute_cost )
         self.ui.qtTradingFeeMinimumSpinBox.valueChanged.connect( self.compute_cost )
         self.ui.qtTradingFeeConstantSpinBox.valueChanged.connect( self.compute_cost )
@@ -797,7 +797,7 @@ class StockRegularTradingEditDialog( QDialog ):
         self.ui.qtCancelPushButton.clicked.connect( self.cancel )
         # self.load_stylesheet("style.css")
         self.dict_trading_data = {}
-        self.update_ui()
+        self.update_ui_and_compute_cost()
 
     def load_stylesheet( self, file_path ):
         try:
@@ -808,6 +808,10 @@ class StockRegularTradingEditDialog( QDialog ):
             print(f"CSS 檔案 {file_path} 找不到")
         except Exception as e:
             print(f"讀取 CSS 檔案時發生錯誤: {e}")
+
+    def update_ui_and_compute_cost( self ):
+        self.update_ui()
+        self.compute_cost()
 
     def update_ui( self ):
         with ( QSignalBlocker( self.ui.qtPerSharePriceRadioButton ),
@@ -854,53 +858,62 @@ class StockRegularTradingEditDialog( QDialog ):
                 self.ui.qtTradingFeeConstantSpinBox.setEnabled( True )
                 self.ui.label_4.setEnabled( True )
 
-            self.compute_cost()
-
     def setup_trading_date( self, str_date ):
         self.ui.qtDateEdit.setDate( datetime.datetime.strptime( str_date, "%Y-%m-%d" ).date() )
 
     def setup_trading_count( self, n_count ):
-        self.ui.qtOddTradeCountSpinBox.setValue( n_count )
+        with ( QSignalBlocker( self.ui.qtOddTradeCountSpinBox ) ):
+            self.ui.qtOddTradeCountSpinBox.setValue( n_count )
 
     def setup_trading_price_type( self, e_trading_price_type ):
-        if e_trading_price_type == TradingPriceType.PER_SHARE:
-            self.ui.qtPerSharePriceRadioButton.setChecked( True )
-        else:
-            self.ui.qtTotalPriceRadioButton.setChecked( True )
+        with ( QSignalBlocker( self.ui.qtPerSharePriceRadioButton ),
+               QSignalBlocker( self.ui.qtTotalPriceRadioButton ) ):
+            if e_trading_price_type == TradingPriceType.PER_SHARE:
+                self.ui.qtPerSharePriceRadioButton.setChecked( True )
+            else:
+                self.ui.qtTotalPriceRadioButton.setChecked( True )
 
-        self.update_ui()
+            self.update_ui()
 
     def setup_per_share_trading_price( self, f_price ):
-        self.ui.qtPerSharePriceDoubleSpinBox.setValue( f_price )
+        with ( QSignalBlocker( self.ui.qtPerSharePriceDoubleSpinBox ) ):
+            self.ui.qtPerSharePriceDoubleSpinBox.setValue( f_price )
 
     def setup_total_trading_price( self, n_total_price ):
-        self.ui.qtTotalPriceSpinBox.setValue( n_total_price )
+        with ( QSignalBlocker( self.ui.qtTotalPriceSpinBox ) ):
+            self.ui.qtTotalPriceSpinBox.setValue( n_total_price )
 
     def setup_trading_fee_type( self, e_trading_fee_type ):
-        if e_trading_fee_type == TradingFeeType.VARIABLE:
-            self.ui.qtVariableFeeRadioButton.setChecked( True )
-        else:
-            self.ui.qtConstantFeeRadioButton.setChecked( True )
+        with ( QSignalBlocker( self.ui.qtVariableFeeRadioButton ),
+               QSignalBlocker( self.ui.qtConstantFeeRadioButton ) ):
+            if e_trading_fee_type == TradingFeeType.VARIABLE:
+                self.ui.qtVariableFeeRadioButton.setChecked( True )
+            else:
+                self.ui.qtConstantFeeRadioButton.setChecked( True )
 
-        self.update_ui()
+            self.update_ui()
 
     def setup_trading_discount( self, f_discount_value ):
-        if f_discount_value != 1:
-            self.ui.qtDiscountCheckBox.setChecked( True )
-            self.ui.qtDiscountRateDoubleSpinBox.setValue( f_discount_value * 10 )
-            self.ui.qtDiscountRateDoubleSpinBox.setEnabled( True )
-        else:
-            self.ui.qtDiscountCheckBox.setChecked( False )
-            self.ui.qtDiscountRateDoubleSpinBox.setValue( 6 )
-            self.ui.qtDiscountRateDoubleSpinBox.setEnabled( False )
+        with ( QSignalBlocker( self.ui.qtDiscountCheckBox ),
+               QSignalBlocker( self.ui.qtDiscountRateDoubleSpinBox ) ):
+            if f_discount_value != 1:
+                self.ui.qtDiscountCheckBox.setChecked( True )
+                self.ui.qtDiscountRateDoubleSpinBox.setValue( f_discount_value * 10 )
+                self.ui.qtDiscountRateDoubleSpinBox.setEnabled( True )
+            else:
+                self.ui.qtDiscountCheckBox.setChecked( False )
+                self.ui.qtDiscountRateDoubleSpinBox.setValue( 6 )
+                self.ui.qtDiscountRateDoubleSpinBox.setEnabled( False )
 
-        self.update_ui()
+            self.update_ui()
 
     def setup_trading_fee_minimum( self, n_trading_fee_minimum ):
-        self.ui.qtTradingFeeMinimumSpinBox.setValue( n_trading_fee_minimum )
+        with ( QSignalBlocker( self.ui.qtTradingFeeMinimumSpinBox ) ):
+            self.ui.qtTradingFeeMinimumSpinBox.setValue( n_trading_fee_minimum )
 
     def setup_trading_fee_constant( self, n_trading_fee_constant ):
-        self.ui.qtTradingFeeConstantSpinBox.setValue( n_trading_fee_constant )
+        with ( QSignalBlocker( self.ui.qtTradingFeeConstantSpinBox ) ):
+            self.ui.qtTradingFeeConstantSpinBox.setValue( n_trading_fee_constant )
 
     def get_trading_price_type( self ):
         if self.ui.qtPerSharePriceRadioButton.isChecked():
