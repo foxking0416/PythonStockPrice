@@ -504,7 +504,7 @@ class StockDividendTransferFeeEditDialog( QDialog ):
 
     def refresh_table_view( self ):
         self.dividend_transfer_fee_model.clear()
-        self.dividend_transfer_fee_model.setHorizontalHeaderLabels( [ "股利匯費", "編輯" ] )
+        self.dividend_transfer_fee_model.setHorizontalHeaderLabels( [ "股利匯費", "編輯", "刪除" ] )
         list_vertical_labels = []
         for index_row,( key_stock_number, value ) in enumerate( self.dict_company_number_to_transfer_fee.items() ):
             list_stock_name_and_type = self.dict_all_company_number_to_name_and_type[ key_stock_number ]
@@ -520,7 +520,15 @@ class StockDividendTransferFeeEditDialog( QDialog ):
             edit_icon_item.setIcon( edit_icon )
             edit_icon_item.setFlags( edit_icon_item.flags() & ~Qt.ItemIsEditable )
             self.dividend_transfer_fee_model.setItem( index_row, 1, edit_icon_item )
+
+            delete_icon_item = QStandardItem("")
+            delete_icon_item.setIcon( delete_icon )
+            delete_icon_item.setFlags( delete_icon_item.flags() & ~Qt.ItemIsEditable )
+            self.dividend_transfer_fee_model.setItem( index_row, 2, delete_icon_item )
         self.dividend_transfer_fee_model.setVerticalHeaderLabels( list_vertical_labels )
+        self.ui.qtDividendTransferFeeTableView.setColumnWidth( 0, 60 )
+        self.ui.qtDividendTransferFeeTableView.setColumnWidth( 1, 40 )
+        self.ui.qtDividendTransferFeeTableView.setColumnWidth( 2, 40 )
 
     def on_transfer_fee_table_item_clicked( self, index: QModelIndex, table_model ):
         item = table_model.itemFromIndex( index )
@@ -535,7 +543,29 @@ class StockDividendTransferFeeEditDialog( QDialog ):
                 if dialog.exec():
                     self.dict_company_number_to_transfer_fee[ str_stock_number ] = dialog.n_new_transfer_fee
                     self.refresh_table_view()
+            elif n_column == 2:#刪除按鈕
+                result = self.show_warning_message_box_with_ok_cancel_button( "警告", f"確定要刪掉『{header_text}』的匯費資料嗎?" )
+                if result:
+                    value = self.dict_company_number_to_transfer_fee.pop( str_stock_number, None )
+                    self.refresh_table_view()
 
+    def show_warning_message_box_with_ok_cancel_button( self, str_title, str_message ): 
+        message_box = QMessageBox( self )
+        message_box.setIcon( QMessageBox.Warning )  # 設置為警告圖示
+        message_box.setWindowTitle( str_title )
+        message_box.setText( str_message )
+
+        # 添加自訂按鈕
+        button_ok = message_box.addButton("確定", QMessageBox.AcceptRole)
+        button_cancel = message_box.addButton("取消", QMessageBox.RejectRole)
+
+        message_box.exec()
+
+        if message_box.clickedButton() == button_ok:
+            return True
+        elif message_box.clickedButton() == button_cancel:
+            return False
+        
 class StockDividendTransferFeeEditSpinboxDialog( QDialog ):
     def __init__( self, n_transfer_fee, parent = None ):
         super().__init__( parent )

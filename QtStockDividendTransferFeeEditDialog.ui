@@ -101,7 +101,7 @@
      <item>
       <widget class="QPushButton" name="qtOkPushButton">
        <property name="text">
-        <string>確認</string>
+        <string>儲存</string>
        </property>
       </widget>
      </item>

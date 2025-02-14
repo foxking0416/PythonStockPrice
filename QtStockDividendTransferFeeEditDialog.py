@@ -92,6 +92,6 @@ class Ui_Dialog(object):
         Dialog.setWindowTitle(QCoreApplication.translate("Dialog", u"\u80a1\u5229\u532f\u8cbb\u8a2d\u5b9a", None))
         self.qtGroupNameLabel.setText(QCoreApplication.translate("Dialog", u"TextLabel", None))
         self.qtAddStockPushButton.setText(QCoreApplication.translate("Dialog", u"\u65b0\u589e\u80a1\u7968", None))
-        self.qtOkPushButton.setText(QCoreApplication.translate("Dialog", u"\u78ba\u8a8d", None))
+        self.qtOkPushButton.setText(QCoreApplication.translate("Dialog", u"\u5132\u5b58", None))
     # retranslateUi
 
