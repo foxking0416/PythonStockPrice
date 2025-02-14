@@ -27,7 +27,7 @@ from PySide6.QtWidgets import QApplication, QMainWindow, QDialog, QButtonGroup, 
                               QLabel, QLineEdit, QDialogButtonBox, QTabBar, QWidget, QTableView, QComboBox, QPushButton, QSizePolicy, QSpacerItem, QCheckBox, QDoubleSpinBox, \
                               QProgressBar, QTabWidget
 from PySide6.QtGui import QStandardItemModel, QStandardItem, QIcon, QBrush
-from PySide6.QtCore import Qt, QModelIndex, QRect, QSignalBlocker, QSize, QThread, QObject, Signal
+from PySide6.QtCore import Qt, QModelIndex, QRect, QSignalBlocker, QSize, QThread, QObject, Signal, QSettings
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import Alignment, PatternFill, Font, Border, Side
@@ -1316,6 +1316,9 @@ class MainWindow( QMainWindow ):
             self.progress_bar.setGeometry( 400, 350, 300, 25 )  # Adjust position and size as needed
             self.progress_bar.setMaximum( 100 )
             self.progress_bar.setVisible( False )
+        self.settings = QSettings( "FoxInfo", "StockInventory" )
+        size = self.settings.value( "window_size", QSize( 1250, 893 ) )
+        self.resize(size)
 
         self.ui.qtTabWidget.currentChanged.connect( self.on_tab_current_changed )
         self.ui.qtTabWidget.tabBarDoubleClicked.connect( self.on_tab_widget_double_clicked )
@@ -1419,6 +1422,11 @@ class MainWindow( QMainWindow ):
             if getattr( sys, 'frozen', False ):
                 self.copy_required_data()
             self.start_loading_stock_data()
+
+    def closeEvent(self, event):
+        """當視窗關閉時，儲存當前大小"""
+        self.settings.setValue("window_size", self.size())
+        super().closeEvent(event)
 
     def copy_required_data( self ):
         source_folder = os.path.join( g_exe_root_dir, 'StockInventory\\Dividend' ) 
