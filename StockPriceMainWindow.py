@@ -2045,7 +2045,7 @@ class MainWindow( QMainWindow ):
                 list_trading_data[ 0 ][ TradingData.USE_AUTO_DIVIDEND_DATA ] = not list_trading_data[ 0 ][ TradingData.USE_AUTO_DIVIDEND_DATA ]
                 self.pick_up_stock( str_stock_number )
                 sorted_list = self.process_single_trading_data( str_tab_widget_name, str_stock_number )
-                self.refresh_stock_list_table()
+                self.refresh_stock_list_table( False )
                 self.refresh_trading_data_table( sorted_list )
                 self.auto_save_trading_data()
             elif n_column == len( self.list_stock_list_table_horizontal_header ) - 2:#匯出按鈕
@@ -3711,7 +3711,7 @@ class MainWindow( QMainWindow ):
 
         self.dict_all_account_cash_transfer_data[ str_tab_widget_name ] = sorted_list
 
-    def refresh_stock_list_table( self ): 
+    def refresh_stock_list_table( self, clear_table = True ): 
         str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
         dict_per_account_all_stock_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ]
         table_view = self.ui.qtTabWidget.currentWidget().findChild( QTableView, "StockListTableView" )
@@ -3721,7 +3721,8 @@ class MainWindow( QMainWindow ):
         n_total_profit = 0
         if table_view:
             table_model = table_view.model()
-            table_model.clear()
+            if clear_table:
+                table_model.clear()
 
             if self.ui.qtUse1ShareUnitAction.isChecked():
                 self.list_stock_list_table_horizontal_header[ 1 ] = "庫存股數"
