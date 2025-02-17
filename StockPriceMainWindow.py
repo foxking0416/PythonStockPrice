@@ -4256,10 +4256,10 @@ class MainWindow( QMainWindow ):
 
     def get_trading_data_header( self ):
         if self.ui.qtUse1ShareUnitAction.isChecked():
-            return ['年度', '日期', '交易種類', '交易價格', '交易股數', '交易金額', '手續費', '交易稅', '補充保費', '單筆總成本', '全部股票股利 /\n每股股票股利', '全部現金股利 /\n每股現金股利',
+            return ['年度', '日期', '交易種類', '交易價格', '交易股數', '交易金額', '手續費', '交易稅', '補充保費', '單筆總成本', '全部股票股利(股) /\n每股股票股利(元)', '全部現金股利(元) /\n每股現金股利(元)',
                     '累計總成本', '庫存股數', '平均成本', '編輯', '刪除' ]
         else:
-            return ['年度', '日期', '交易種類', '交易價格', '交易張數', '交易金額', '手續費', '交易稅', '補充保費', '單筆總成本', '全部股票股利 /\n每股股票股利', '全部現金股利 /\n每股現金股利',
+            return ['年度', '日期', '交易種類', '交易價格', '交易張數', '交易金額', '手續費', '交易稅', '補充保費', '單筆總成本', '全部股票股利(張) /\n每股股票股利(元)', '全部現金股利(元) /\n每股現金股利(元)',
                     '累計總成本', '庫存張數', '平均成本', '編輯', '刪除' ]
 
     def get_per_trading_data_text_list( self, dict_per_trading_data ):
@@ -4305,7 +4305,7 @@ class MainWindow( QMainWindow ):
             n_cash_dividend_total = dict_per_trading_data[ TradingData.CASH_DIVIDEND ]
             n_ori_accumulated_inventory = n_accumulated_inventory - n_stock_dividend_total
 
-            f_stock_dividend_per_share = float( n_stock_dividend_total / n_ori_accumulated_inventory )
+            f_stock_dividend_per_share = float( n_stock_dividend_total / n_ori_accumulated_inventory * 10 ) 
             f_cash_dividend_per_share = float( n_cash_dividend_total / n_ori_accumulated_inventory )
         n_stock_dividend_gain = dict_per_trading_data[ TradingData.STOCK_DIVIDEND_GAIN_NON_SAVE ]
         n_cash_dividend_gain = dict_per_trading_data[ TradingData.CASH_DIVIDEND_GAIN_NON_SAVE ]
