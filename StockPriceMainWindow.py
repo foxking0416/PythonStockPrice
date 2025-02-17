@@ -194,6 +194,10 @@ class TradingFeeType( Enum ):
     VARIABLE = 0
     CONSTANT = 1
 
+class DividendValueType( Enum ):
+    PER_SHARE = 0
+    TOTAL = 1
+
 class CapitalReductionType( Enum ):
     CASH_RETURN = 0
     DEFICIT = 1
@@ -209,8 +213,10 @@ class TradingData( Enum ):
     REGULAR_BUY_TRADING_FEE_TYPE = auto() # 0:固定, 1:變動
     REGULAR_BUY_TRADING_FEE_MINIMUM = auto()
     REGULAR_BUY_TRADING_FEE_CONSTANT = auto()
-    STOCK_DIVIDEND_PER_SHARE = auto()
-    CASH_DIVIDEND_PER_SHARE = auto()
+    DIVIDEND_VALUE_TYPE = auto() # 0:每股, 1:總額
+    STOCK_DIVIDEND = auto()
+    CASH_DIVIDEND = auto()
+    CUSTOM_EXTRA_INSURANCE_FEE = auto() #-1表示不使用自訂的補充保費
     CAPITAL_REDUCTION_PER_SHARE = auto()
     CAPITAL_REDUCTION_TYPE = auto()
     USE_AUTO_DIVIDEND_DATA = auto()
@@ -303,8 +309,10 @@ class Utility():
                                f_trading_fee_discount,             #手續費折扣
                                n_regular_buy_trading_fee_minimum,  #手續費最低金額
                                n_regular_buy_trading_fee_constant, #手續費固定金額
-                               f_stock_dividend_per_share,         #每股股票股利
-                               f_cash_dividend_per_share,          #每股現金股利
+                               e_dividend_value_type,              #股利金額種類
+                               f_stock_dividend,                   #股票股利
+                               f_cash_dividend,                    #現金股利
+                               n_custom_extra_insurance_fee,       #自訂的補充保費
                                f_capital_reduction_per_share,      #每股減資金額
                                e_capital_reduction_type,           #減資種類
                                b_daying_trading  ):                #是否為當沖交易
@@ -319,8 +327,10 @@ class Utility():
         dict_trading_data[ TradingData.TRADING_FEE_DISCOUNT ] = f_trading_fee_discount
         dict_trading_data[ TradingData.REGULAR_BUY_TRADING_FEE_MINIMUM ] = n_regular_buy_trading_fee_minimum
         dict_trading_data[ TradingData.REGULAR_BUY_TRADING_FEE_CONSTANT ] = n_regular_buy_trading_fee_constant
-        dict_trading_data[ TradingData.STOCK_DIVIDEND_PER_SHARE ] = f_stock_dividend_per_share
-        dict_trading_data[ TradingData.CASH_DIVIDEND_PER_SHARE ] = f_cash_dividend_per_share
+        dict_trading_data[ TradingData.DIVIDEND_VALUE_TYPE ] = e_dividend_value_type
+        dict_trading_data[ TradingData.STOCK_DIVIDEND ] = f_stock_dividend
+        dict_trading_data[ TradingData.CASH_DIVIDEND ] = f_cash_dividend
+        dict_trading_data[ TradingData.CUSTOM_EXTRA_INSURANCE_FEE ] = n_custom_extra_insurance_fee
         dict_trading_data[ TradingData.CAPITAL_REDUCTION_PER_SHARE ] = f_capital_reduction_per_share
         dict_trading_data[ TradingData.CAPITAL_REDUCTION_TYPE ] = e_capital_reduction_type
         dict_trading_data[ TradingData.DAYING_TRADING ] = b_daying_trading
@@ -643,6 +653,7 @@ class StockTradingEditDialog( QDialog ):
         self.str_stock_name = str_stock_name
         # self.load_stylesheet("style.css")
         self.dict_trading_data = {}
+        self.compute_cost()
 
     def load_stylesheet( self, file_path ):
         try:
@@ -768,8 +779,10 @@ class StockTradingEditDialog( QDialog ):
                                                                     self.get_trading_fee_discount(),                    #手續費折扣
                                                                     0,                                                  #手續費最低金額
                                                                     0,                                                  #手續費固定金額
-                                                                    0,                                                  #每股股票股利
-                                                                    0,                                                  #每股現金股利
+                                                                    DividendValueType.PER_SHARE,                        #股利金額種類
+                                                                    0,                                                  #股票股利
+                                                                    0,                                                  #現金股利
+                                                                    -1,                                                 #自訂的補充保費
                                                                     0,                                                  #每股減資金額
                                                                     CapitalReductionType.CASH_RETURN,                   #減資種類
                                                                     self.ui.qtDayingTradingCheckBox.isChecked() )       #是否為當沖交易                                          
@@ -1001,8 +1014,10 @@ class StockRegularTradingEditDialog( QDialog ):
                                                                     self.get_trading_fee_discount(),                    #手續費折扣
                                                                     self.ui.qtTradingFeeMinimumSpinBox.value(),         #手續費最低金額
                                                                     self.ui.qtTradingFeeConstantSpinBox.value(),        #手續費固定金額
-                                                                    0,                                                  #每股股票股利
-                                                                    0,                                                  #每股現金股利
+                                                                    DividendValueType.PER_SHARE,                        #股利金額種類
+                                                                    0,                                                  #股票股利
+                                                                    0,                                                  #現金股利
+                                                                    -1,                                                 #自訂的補充保費
                                                                     0,                                                  #每股減資金額
                                                                     CapitalReductionType.CASH_RETURN,                   #減資種類
                                                                     False )                                             #是否為當沖交易
@@ -1027,24 +1042,83 @@ class StockDividendEditDialog( QDialog ):
         obj_current_date = datetime.datetime.today()
         self.ui.qtDateEdit.setDate( obj_current_date.date() )
         self.ui.qtDateEdit.setCalendarPopup( True )
+
+        self.ui.qtPerShareDividendRadioButton.toggled.connect( self.update_ui )
+        self.ui.qtTotalDividendRadioButton.toggled.connect( self.update_ui )
+        self.ui.qtCustomExtraInsuranceCheckBox.toggled.connect( self.update_ui )
+
         self.ui.qtOkPushButton.clicked.connect( self.accept_data )
         self.ui.qtCancelPushButton.clicked.connect( self.cancel )
         self.dict_trading_data = {}
 
+        self.update_ui()
+
+    def update_ui( self ):
+        if self.ui.qtPerShareDividendRadioButton.isChecked():
+            self.ui.qtPerShareStockDividendDoubleSpinBox.setEnabled( True )
+            self.ui.qtPerShareCashDividendDoubleSpinBox.setEnabled( True )
+            self.ui.qtTotalStockDividendDoubleSpinBox.setEnabled( False )
+            self.ui.qtTotalCashDividendDoubleSpinBox.setEnabled( False )
+        else:
+            self.ui.qtPerShareStockDividendDoubleSpinBox.setEnabled( False )
+            self.ui.qtPerShareCashDividendDoubleSpinBox.setEnabled( False )
+            self.ui.qtTotalStockDividendDoubleSpinBox.setEnabled( True )
+            self.ui.qtTotalCashDividendDoubleSpinBox.setEnabled( True )
+
+        if self.ui.qtCustomExtraInsuranceCheckBox.isChecked():
+            self.ui.qtExtraInsuranceSpinBox.setEnabled( True )
+        else:
+            self.ui.qtExtraInsuranceSpinBox.setEnabled( False )
+
     def setup_trading_date( self, str_date ):
         self.ui.qtDateEdit.setDate( datetime.datetime.strptime( str_date, "%Y-%m-%d" ).date() )
 
-    def setup_stock_dividend( self, f_stock_dividend_per_share ):
-        self.ui.qtStockDividendDoubleSpinBox.setValue( f_stock_dividend_per_share )
+    def setup_dividend_value_type( self, e_dividend_value_type ):
+        if e_dividend_value_type == DividendValueType.PER_SHARE:
+            self.ui.qtPerShareDividendRadioButton.setChecked( True )
+        else:
+            self.ui.qtTotalDividendRadioButton.setChecked( True )
 
-    def setup_cash_dividend( self, f_cash_dividend_per_share ):
-        self.ui.qtCashDividendDoubleSpinBox.setValue( f_cash_dividend_per_share )
+        self.update_ui()
+
+    def setup_per_share_stock_dividend( self, f_per_share_stock_dividend ):
+        self.ui.qtPerShareStockDividendDoubleSpinBox.setValue( f_per_share_stock_dividend )
+
+    def setup_per_share_cash_dividend( self, f_per_share_cash_dividend ):
+        self.ui.qtPerShareCashDividendDoubleSpinBox.setValue( f_per_share_cash_dividend )
+
+    def setup_total_stock_dividend( self, n_total_stock_dividend ):
+        self.ui.qtTotalStockDividendDoubleSpinBox.setValue( n_total_stock_dividend )
+
+    def setup_total_cash_dividend( self, n_total_cash_dividend ):
+        self.ui.qtTotalCashDividendDoubleSpinBox.setValue( n_total_cash_dividend )
+
+    def setup_custom_extra_insurance_fee( self, n_custom_extra_insurance_fee ):
+        if n_custom_extra_insurance_fee == -1:
+            self.ui.qtCustomExtraInsuranceCheckBox.setChecked( False )
+            self.ui.qtExtraInsuranceSpinBox.setValue( 0 )
+        else:
+            self.ui.qtCustomExtraInsuranceCheckBox.setChecked( True )
+            self.ui.qtExtraInsuranceSpinBox.setValue( n_custom_extra_insurance_fee )
+
+        self.update_ui()
 
     def accept_data( self ):
-        f_stock_dividend_per_share = self.ui.qtStockDividendDoubleSpinBox.value()
-        f_cash_dividend_per_share = self.ui.qtCashDividendDoubleSpinBox.value()
-        if f_stock_dividend_per_share != 0 or f_cash_dividend_per_share != 0:
+        if self.ui.qtPerShareDividendRadioButton.isChecked():
+            e_dividend_value_type = DividendValueType.PER_SHARE
+            f_stock_dividend = self.ui.qtPerShareStockDividendDoubleSpinBox.value()
+            f_cash_dividend = self.ui.qtPerShareCashDividendDoubleSpinBox.value()
+        else:
+            e_dividend_value_type = DividendValueType.TOTAL
+            f_stock_dividend = self.ui.qtTotalStockDividendDoubleSpinBox.value()
+            f_cash_dividend = self.ui.qtTotalCashDividendDoubleSpinBox.value()
 
+        if self.ui.qtCustomExtraInsuranceCheckBox.isChecked():
+            n_custom_extra_insurance_fee = self.ui.qtExtraInsuranceSpinBox.value()
+        else:
+            n_custom_extra_insurance_fee = -1
+
+        if f_stock_dividend != 0 or f_cash_dividend != 0:
             self.dict_trading_data = Utility.generate_trading_data( self.ui.qtDateEdit.date().toString( "yyyy-MM-dd" ), #交易日期
                                                                     TradingType.DIVIDEND,                               #交易種類
                                                                     TradingPriceType.PER_SHARE,                         #交易價格種類
@@ -1055,8 +1129,10 @@ class StockDividendEditDialog( QDialog ):
                                                                     1,                                                  #手續費折扣
                                                                     0,                                                  #手續費最低金額
                                                                     0,                                                  #手續費固定金額
-                                                                    f_stock_dividend_per_share,                         #每股股票股利
-                                                                    f_cash_dividend_per_share,                          #每股現金股利
+                                                                    e_dividend_value_type,                              #股利金額種類
+                                                                    f_stock_dividend,                                   #股票股利
+                                                                    f_cash_dividend,                                    #現金股利
+                                                                    n_custom_extra_insurance_fee,                      #自訂的補充保費
                                                                     0,                                                  #每股減資金額
                                                                     CapitalReductionType.CASH_RETURN,                   #減資種類
                                                                     False )                                             #是否為當沖交易
@@ -1161,8 +1237,10 @@ class StockCapitalIncreaseEditDialog( QDialog ):
                                                                     1,                                                  #手續費折扣
                                                                     0,                                                  #手續費最低金額
                                                                     0,                                                  #手續費固定金額
-                                                                    0,                                                  #每股股票股利
-                                                                    0,                                                  #每股現金股利
+                                                                    DividendValueType.PER_SHARE,                        #股利金額種類
+                                                                    0,                                                  #股票股利
+                                                                    0,                                                  #現金股利
+                                                                    -1,                                                 #自訂的補充保費
                                                                     0,                                                  #每股減資金額
                                                                     CapitalReductionType.CASH_RETURN,                   #減資種類
                                                                     False )                                             #是否為當沖交易
@@ -1223,8 +1301,10 @@ class StockCapitalReductionEditDialog( QDialog ):
                                                                     1,                                                  #手續費折扣
                                                                     0,                                                  #手續費最低金額
                                                                     0,                                                  #手續費固定金額
-                                                                    0,                                                  #每股股票股利
-                                                                    0,                                                  #每股現金股利
+                                                                    DividendValueType.PER_SHARE,                        #股利金額種類
+                                                                    0,                                                  #股票股利
+                                                                    0,                                                  #現金股利
+                                                                    -1,                                                 #自訂的補充保費
                                                                     f_stock_capital_reduction_per_share,                #每股減資金額
                                                                     self.get_capital_reduction_type(),                  #減資種類
                                                                     False )                                             #是否為當沖交易
@@ -1957,8 +2037,10 @@ class MainWindow( QMainWindow ):
                                                                1,                                #手續費折扣
                                                                0,                                #手續費最低金額
                                                                0,                                #手續費固定金額
-                                                               0,                                #每股股票股利
-                                                               0,                                #每股現金股利
+                                                               DividendValueType.PER_SHARE,      #股利金額種類
+                                                               0,                                #股票股利
+                                                               0,                                #現金股利
+                                                               -1,                               #自訂的補充保費
                                                                0,                                #每股減資金額
                                                                CapitalReductionType.CASH_RETURN, #減資種類
                                                                False )                           #是否為當沖交易
@@ -2535,8 +2617,17 @@ class MainWindow( QMainWindow ):
                     elif dict_selected_data[ TradingData.TRADING_TYPE ] == TradingType.DIVIDEND:
                         dialog = StockDividendEditDialog( str_stock_number, str_stock_name, self )
                         dialog.setup_trading_date( dict_selected_data[ TradingData.TRADING_DATE ] )
-                        dialog.setup_stock_dividend( dict_selected_data[ TradingData.STOCK_DIVIDEND_PER_SHARE ] )
-                        dialog.setup_cash_dividend( dict_selected_data[ TradingData.CASH_DIVIDEND_PER_SHARE ] )
+                        e_dividend_value_type = dict_selected_data[ TradingData.DIVIDEND_VALUE_TYPE ]
+                        dialog.setup_dividend_value_type( e_dividend_value_type )
+                        if e_dividend_value_type == DividendValueType.PER_SHARE:
+                            dialog.setup_per_share_stock_dividend( dict_selected_data[ TradingData.STOCK_DIVIDEND ] )
+                            dialog.setup_per_share_cash_dividend( dict_selected_data[ TradingData.CASH_DIVIDEND ] )
+                        else:
+                            dialog.setup_total_stock_dividend( dict_selected_data[ TradingData.STOCK_DIVIDEND ] )
+                            dialog.setup_total_cash_dividend( dict_selected_data[ TradingData.CASH_DIVIDEND ] )
+
+                        dialog.setup_custom_extra_insurance_fee( dict_selected_data[ TradingData.CUSTOM_EXTRA_INSURANCE_FEE ] )
+                        
                     elif dict_selected_data[ TradingData.TRADING_TYPE ] == TradingType.CAPITAL_INCREASE:
                         dialog = StockCapitalIncreaseEditDialog( str_stock_number, str_stock_name, self )
                         dialog.setup_trading_date( dict_selected_data[ TradingData.TRADING_DATE ] )
@@ -3097,8 +3188,10 @@ class MainWindow( QMainWindow ):
                                                                                        item_trading_data[ "trading_fee_discount" ],        #手續費折扣
                                                                                        0,                                                  #手續費最低金額
                                                                                        0,                                                  #手續費固定金額
-                                                                                       item_trading_data[ "stock_dividend_per_share" ],    #每股股票股利
-                                                                                       item_trading_data[ "cash_dividend_per_share" ],     #每股現金股利
+                                                                                       DividendValueType.PER_SHARE,                        #股利金額種類
+                                                                                       item_trading_data[ "stock_dividend_per_share" ],    #股票股利
+                                                                                       item_trading_data[ "cash_dividend_per_share" ],     #現金股利
+                                                                                       -1,                                                 #自訂的補充保費
                                                                                        item_trading_data[ "capital_reduction_per_share" ], #每股減資金額 
                                                                                        CapitalReductionType.CASH_RETURN,                   #減資種類
                                                                                        False )                                             #是否為當沖交易  
@@ -3165,8 +3258,10 @@ class MainWindow( QMainWindow ):
                                                                                        item_trading_data[ "trading_fee_discount" ],        #手續費折扣
                                                                                        item_trading_data[ "trading_fee_minimum" ],         #手續費最低金額
                                                                                        item_trading_data[ "trading_fee_constant" ],        #手續費固定金額
-                                                                                       item_trading_data[ "stock_dividend_per_share" ],    #每股股票股利
-                                                                                       item_trading_data[ "cash_dividend_per_share" ],     #每股現金股利
+                                                                                       DividendValueType.PER_SHARE,                        #股利金額種類
+                                                                                       item_trading_data[ "stock_dividend_per_share" ],    #股票股利
+                                                                                       item_trading_data[ "cash_dividend_per_share" ],     #現金股利
+                                                                                       -1,                                                 #自訂的補充保費
                                                                                        item_trading_data[ "capital_reduction_per_share" ], #每股減資金額  
                                                                                        CapitalReductionType.CASH_RETURN,                   #減資種類   
                                                                                        item_trading_data[ "daying_trading" ] )             #是否為當沖交易
@@ -3241,8 +3336,10 @@ class MainWindow( QMainWindow ):
                                  "total_trading_price" in item_trading_data and
                                  "trading_count" in item_trading_data and
                                  "trading_fee_discount" in item_trading_data and
-                                 "stock_dividend_per_share" in item_trading_data and
-                                 "cash_dividend_per_share" in item_trading_data and
+                                 "dividend_value_type" in item_trading_data and
+                                 "stock_dividend" in item_trading_data and
+                                 "cash_dividend" in item_trading_data and
+                                 "custom_extra_insurance_fee" in item_trading_data and
                                  "capital_reduction_per_share" in item_trading_data and 
                                  "capital_reduction_type" in item_trading_data ):
                                 
@@ -3250,6 +3347,7 @@ class MainWindow( QMainWindow ):
                                 e_trading_price_type = TradingPriceType( item_trading_data[ "trading_price_type" ] )
                                 e_trading_fee_type = TradingFeeType( item_trading_data[ "trading_fee_type" ] )
                                 e_capital_reduction_type = CapitalReductionType( item_trading_data[ "capital_reduction_type" ] )
+                                e_dividend_value_type = DividendValueType( item_trading_data[ "dividend_value_type" ] )
                                 dict_per_trading_data = Utility.generate_trading_data( item_trading_data[ "trading_date" ],                #交易日期
                                                                                        e_trading_type,                                     #交易種類
                                                                                        e_trading_price_type,                               #交易價格種類
@@ -3260,8 +3358,10 @@ class MainWindow( QMainWindow ):
                                                                                        item_trading_data[ "trading_fee_discount" ],        #手續費折扣
                                                                                        item_trading_data[ "trading_fee_minimum" ],         #手續費最低金額
                                                                                        item_trading_data[ "trading_fee_constant" ],        #手續費固定金額
-                                                                                       item_trading_data[ "stock_dividend_per_share" ],    #每股股票股利
-                                                                                       item_trading_data[ "cash_dividend_per_share" ],     #每股現金股利
+                                                                                       e_dividend_value_type,                              #股利金額種類
+                                                                                       item_trading_data[ "stock_dividend" ],              #股票股利
+                                                                                       item_trading_data[ "cash_dividend" ],               #現金股利
+                                                                                       item_trading_data[ "custom_extra_insurance_fee" ],  #自訂的補充保費
                                                                                        item_trading_data[ "capital_reduction_per_share" ], #每股減資金額
                                                                                        e_capital_reduction_type,                           #減資種類     
                                                                                        item_trading_data[ "daying_trading" ] )             #是否為當沖交易
@@ -3343,8 +3443,10 @@ class MainWindow( QMainWindow ):
                     dict_per_trading_data[ "trading_fee_discount" ] = item[ TradingData.TRADING_FEE_DISCOUNT ]
                     dict_per_trading_data[ "trading_fee_minimum" ] = item[ TradingData.REGULAR_BUY_TRADING_FEE_MINIMUM ]
                     dict_per_trading_data[ "trading_fee_constant" ] = item[ TradingData.REGULAR_BUY_TRADING_FEE_CONSTANT ]
-                    dict_per_trading_data[ "stock_dividend_per_share" ] = item[ TradingData.STOCK_DIVIDEND_PER_SHARE ]
-                    dict_per_trading_data[ "cash_dividend_per_share" ] = item[ TradingData.CASH_DIVIDEND_PER_SHARE ]
+                    dict_per_trading_data[ "dividend_value_type" ] = int( item[ TradingData.DIVIDEND_VALUE_TYPE ].value )
+                    dict_per_trading_data[ "stock_dividend" ] = item[ TradingData.STOCK_DIVIDEND ]
+                    dict_per_trading_data[ "cash_dividend" ] = item[ TradingData.CASH_DIVIDEND ]
+                    dict_per_trading_data[ "custom_extra_insurance_fee" ] = item[ TradingData.CUSTOM_EXTRA_INSURANCE_FEE ]
                     dict_per_trading_data[ "capital_reduction_per_share" ] = item[ TradingData.CAPITAL_REDUCTION_PER_SHARE ]
                     dict_per_trading_data[ "capital_reduction_type" ] = int( item[ TradingData.CAPITAL_REDUCTION_TYPE ].value )
                     if dict_per_trading_data[ "trading_date" ] == '0001-01-01':
@@ -3656,9 +3758,9 @@ class MainWindow( QMainWindow ):
             elif e_trading_type == TradingType.DIVIDEND:
                 if n_accumulated_inventory <= 0: #沒有庫存就不用算股利了
                     continue
-                n_stock_dividend_value_gain = int( Decimal( str( item[ TradingData.STOCK_DIVIDEND_PER_SHARE ] ) ) * Decimal( str( n_accumulated_inventory ) ) ) # n_stock_dividend_value_gain單位為元
-                n_stock_dividend_share_gain = int( Decimal( str( item[ TradingData.STOCK_DIVIDEND_PER_SHARE ] ) ) * Decimal( str( n_accumulated_inventory ) ) / Decimal( '10' ) ) # n_stock_dividend_share_gain單位為股 除以10是因為票面額10元
-                n_cash_dividend_gain = int( Decimal( str(item[ TradingData.CASH_DIVIDEND_PER_SHARE ] ) ) * Decimal( str( n_accumulated_inventory ) ) )
+                n_stock_dividend_value_gain = int( Decimal( str( item[ TradingData.STOCK_DIVIDEND ] ) ) * Decimal( str( n_accumulated_inventory ) ) ) # n_stock_dividend_value_gain單位為元
+                n_stock_dividend_share_gain = int( Decimal( str( item[ TradingData.STOCK_DIVIDEND ] ) ) * Decimal( str( n_accumulated_inventory ) ) / Decimal( '10' ) ) # n_stock_dividend_share_gain單位為股 除以10是因為票面額10元
+                n_cash_dividend_gain = int( Decimal( str(item[ TradingData.CASH_DIVIDEND ] ) ) * Decimal( str( n_accumulated_inventory ) ) )
 
                 if b_use_auto_dividend:
                     if TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE not in item or not item[TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE]:
@@ -4197,8 +4299,8 @@ class MainWindow( QMainWindow ):
         n_trading_tax = dict_per_trading_data[ TradingData.TRADING_TAX_NON_SAVE ]
         n_extra_insurance_fee = dict_per_trading_data[ TradingData.EXTRA_INSURANCE_FEE_NON_SAVE ]
         n_per_trading_total_cost = dict_per_trading_data[ TradingData.TRADING_COST_NON_SAVE ]
-        f_stock_dividend_per_share = dict_per_trading_data[ TradingData.STOCK_DIVIDEND_PER_SHARE ]
-        f_cash_dividend_per_share = dict_per_trading_data[ TradingData.CASH_DIVIDEND_PER_SHARE ]
+        f_stock_dividend_per_share = dict_per_trading_data[ TradingData.STOCK_DIVIDEND ]
+        f_cash_dividend_per_share = dict_per_trading_data[ TradingData.CASH_DIVIDEND ]
         n_stock_dividend_gain = dict_per_trading_data[ TradingData.STOCK_DIVIDEND_GAIN_NON_SAVE ]
         n_cash_dividend_gain = dict_per_trading_data[ TradingData.CASH_DIVIDEND_GAIN_NON_SAVE ]
         if self.ui.qtCostWithInDividendAction.isChecked():
@@ -5032,9 +5134,11 @@ class MainWindow( QMainWindow ):
                                                                             TradingFeeType.VARIABLE,          #手續費種類
                                                                             1,                                #手續費折扣
                                                                             0,                                #手續費最低金額
-                                                                            0,                                #手續費固定金額                        
-                                                                            f_stock_dividend_per_share,       #每股股票股利
-                                                                            f_cash_dividend_per_share,        #每股現金股利
+                                                                            0,                                #手續費固定金額
+                                                                            DividendValueType.PER_SHARE,      #股利金額種類
+                                                                            f_stock_dividend_per_share,       #股票股利
+                                                                            f_cash_dividend_per_share,        #現金股利
+                                                                            -1,                               #自訂的補充保費
                                                                             0,                                #每股減資金額
                                                                             CapitalReductionType.CASH_RETURN, #減資種類
                                                                             False )                           #是否為當沖交易
@@ -5171,9 +5275,11 @@ class MainWindow( QMainWindow ):
                                                                                     TradingFeeType.VARIABLE,          #手續費種類
                                                                                     1,                                #手續費折扣
                                                                                     0,                                #手續費最低金額
-                                                                                    0,                                #手續費固定金額                                   
-                                                                                    0,                                #每股股票股利
-                                                                                    f_cash_dividend_per_share,        #每股現金股利
+                                                                                    0,                                #手續費固定金額
+                                                                                    DividendValueType.PER_SHARE,      #股利金額種類
+                                                                                    0,                                #股票股利
+                                                                                    f_cash_dividend_per_share,        #現金股利
+                                                                                    -1,                               #自訂的補充保費
                                                                                     0,                                #每股減資金額
                                                                                     CapitalReductionType.CASH_RETURN, #減資種類
                                                                                     False )                           #是否為當沖交易
@@ -5353,9 +5459,11 @@ class MainWindow( QMainWindow ):
                                                                                     TradingFeeType.VARIABLE,          #手續費種類
                                                                                     1,                                #手續費折扣
                                                                                     0,                                #手續費最低金額
-                                                                                    0,                                #手續費固定金額                                   
-                                                                                    0,                                #每股股票股利
-                                                                                    f_cash_dividend_per_share,        #每股現金股利
+                                                                                    0,                                #手續費固定金額
+                                                                                    DividendValueType.PER_SHARE,      #股利金額種類
+                                                                                    0,                                #股票股利
+                                                                                    f_cash_dividend_per_share,        #現金股利
+                                                                                    -1,                               #自訂的補充保費
                                                                                     0,                                #每股減資金額
                                                                                     CapitalReductionType.CASH_RETURN, #減資種類
                                                                                     False )                           #是否為當沖交易

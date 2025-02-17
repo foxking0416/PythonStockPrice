@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>192</width>
-    <height>157</height>
+    <width>276</width>
+    <height>280</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -24,8 +24,8 @@
   </property>
   <property name="maximumSize">
    <size>
-    <width>192</width>
-    <height>157</height>
+    <width>16777215</width>
+    <height>16777215</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -91,6 +91,16 @@
     </layout>
    </item>
    <item>
+    <widget class="QRadioButton" name="qtPerShareDividendRadioButton">
+     <property name="text">
+      <string>設定每股股利</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
     <layout class="QHBoxLayout" name="horizontalLayout_3">
      <item>
       <widget class="QLabel" name="label_4">
@@ -100,7 +110,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QDoubleSpinBox" name="qtStockDividendDoubleSpinBox">
+      <widget class="QDoubleSpinBox" name="qtPerShareStockDividendDoubleSpinBox">
        <property name="minimumSize">
         <size>
          <width>75</width>
@@ -115,23 +125,6 @@
        </property>
       </widget>
      </item>
-     <item>
-      <spacer name="horizontalSpacer_3">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_4">
      <item>
       <widget class="QLabel" name="label_5">
        <property name="text">
@@ -140,7 +133,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QDoubleSpinBox" name="qtCashDividendDoubleSpinBox">
+      <widget class="QDoubleSpinBox" name="qtPerShareCashDividendDoubleSpinBox">
        <property name="minimumSize">
         <size>
          <width>75</width>
@@ -155,18 +148,68 @@
        </property>
       </widget>
      </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QRadioButton" name="qtTotalDividendRadioButton">
+     <property name="text">
+      <string>設定總股利</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_4">
      <item>
-      <spacer name="horizontalSpacer_4">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+      <widget class="QLabel" name="label_7">
+       <property name="text">
+        <string>配股</string>
        </property>
-       <property name="sizeHint" stdset="0">
+      </widget>
+     </item>
+     <item>
+      <widget class="QSpinBox" name="qtTotalStockDividendDoubleSpinBox">
+       <property name="minimumSize">
         <size>
-         <width>40</width>
-         <height>20</height>
+         <width>75</width>
+         <height>0</height>
         </size>
        </property>
-      </spacer>
+       <property name="maximum">
+        <number>999999999</number>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_6">
+       <property name="text">
+        <string>配息</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSpinBox" name="qtTotalCashDividendDoubleSpinBox">
+       <property name="maximum">
+        <number>999999999</number>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_6">
+     <item>
+      <widget class="QCheckBox" name="qtCustomExtraInsuranceCheckBox">
+       <property name="text">
+        <string>手動設定補充保費</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSpinBox" name="qtExtraInsuranceSpinBox">
+       <property name="maximum">
+        <number>999999999</number>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
