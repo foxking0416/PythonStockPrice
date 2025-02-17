@@ -24,14 +24,14 @@ class Ui_Dialog(object):
     def setupUi(self, Dialog):
         if not Dialog.objectName():
             Dialog.setObjectName(u"Dialog")
-        Dialog.resize(276, 280)
+        Dialog.resize(380, 260)
         sizePolicy = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(Dialog.sizePolicy().hasHeightForWidth())
         Dialog.setSizePolicy(sizePolicy)
-        Dialog.setMinimumSize(QSize(192, 157))
-        Dialog.setMaximumSize(QSize(16777215, 16777215))
+        Dialog.setMinimumSize(QSize(380, 260))
+        Dialog.setMaximumSize(QSize(380, 260))
         self.verticalLayout = QVBoxLayout(Dialog)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.horizontalLayout = QHBoxLayout()
@@ -87,11 +87,20 @@ class Ui_Dialog(object):
 
         self.qtPerShareStockDividendDoubleSpinBox = QDoubleSpinBox(Dialog)
         self.qtPerShareStockDividendDoubleSpinBox.setObjectName(u"qtPerShareStockDividendDoubleSpinBox")
-        self.qtPerShareStockDividendDoubleSpinBox.setMinimumSize(QSize(75, 0))
+        self.qtPerShareStockDividendDoubleSpinBox.setMinimumSize(QSize(95, 0))
         self.qtPerShareStockDividendDoubleSpinBox.setDecimals(9)
         self.qtPerShareStockDividendDoubleSpinBox.setMaximum(999.990000000000009)
 
         self.horizontalLayout_3.addWidget(self.qtPerShareStockDividendDoubleSpinBox)
+
+        self.label = QLabel(Dialog)
+        self.label.setObjectName(u"label")
+
+        self.horizontalLayout_3.addWidget(self.label)
+
+        self.horizontalSpacer_3 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout_3.addItem(self.horizontalSpacer_3)
 
         self.label_5 = QLabel(Dialog)
         self.label_5.setObjectName(u"label_5")
@@ -100,11 +109,16 @@ class Ui_Dialog(object):
 
         self.qtPerShareCashDividendDoubleSpinBox = QDoubleSpinBox(Dialog)
         self.qtPerShareCashDividendDoubleSpinBox.setObjectName(u"qtPerShareCashDividendDoubleSpinBox")
-        self.qtPerShareCashDividendDoubleSpinBox.setMinimumSize(QSize(75, 0))
+        self.qtPerShareCashDividendDoubleSpinBox.setMinimumSize(QSize(95, 0))
         self.qtPerShareCashDividendDoubleSpinBox.setDecimals(9)
         self.qtPerShareCashDividendDoubleSpinBox.setMaximum(999.990000000000009)
 
         self.horizontalLayout_3.addWidget(self.qtPerShareCashDividendDoubleSpinBox)
+
+        self.label_2 = QLabel(Dialog)
+        self.label_2.setObjectName(u"label_2")
+
+        self.horizontalLayout_3.addWidget(self.label_2)
 
 
         self.verticalLayout.addLayout(self.horizontalLayout_3)
@@ -118,26 +132,43 @@ class Ui_Dialog(object):
         self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
         self.label_7 = QLabel(Dialog)
         self.label_7.setObjectName(u"label_7")
+        self.label_7.setMinimumSize(QSize(48, 0))
 
         self.horizontalLayout_4.addWidget(self.label_7)
 
         self.qtTotalStockDividendDoubleSpinBox = QSpinBox(Dialog)
         self.qtTotalStockDividendDoubleSpinBox.setObjectName(u"qtTotalStockDividendDoubleSpinBox")
-        self.qtTotalStockDividendDoubleSpinBox.setMinimumSize(QSize(75, 0))
+        self.qtTotalStockDividendDoubleSpinBox.setMinimumSize(QSize(95, 0))
         self.qtTotalStockDividendDoubleSpinBox.setMaximum(999999999)
 
         self.horizontalLayout_4.addWidget(self.qtTotalStockDividendDoubleSpinBox)
 
+        self.label_8 = QLabel(Dialog)
+        self.label_8.setObjectName(u"label_8")
+
+        self.horizontalLayout_4.addWidget(self.label_8)
+
+        self.horizontalSpacer_4 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout_4.addItem(self.horizontalSpacer_4)
+
         self.label_6 = QLabel(Dialog)
         self.label_6.setObjectName(u"label_6")
+        self.label_6.setMinimumSize(QSize(48, 0))
 
         self.horizontalLayout_4.addWidget(self.label_6)
 
         self.qtTotalCashDividendDoubleSpinBox = QSpinBox(Dialog)
         self.qtTotalCashDividendDoubleSpinBox.setObjectName(u"qtTotalCashDividendDoubleSpinBox")
+        self.qtTotalCashDividendDoubleSpinBox.setMinimumSize(QSize(95, 0))
         self.qtTotalCashDividendDoubleSpinBox.setMaximum(999999999)
 
         self.horizontalLayout_4.addWidget(self.qtTotalCashDividendDoubleSpinBox)
+
+        self.label_9 = QLabel(Dialog)
+        self.label_9.setObjectName(u"label_9")
+
+        self.horizontalLayout_4.addWidget(self.label_9)
 
 
         self.verticalLayout.addLayout(self.horizontalLayout_4)
@@ -154,6 +185,11 @@ class Ui_Dialog(object):
         self.qtExtraInsuranceSpinBox.setMaximum(999999999)
 
         self.horizontalLayout_6.addWidget(self.qtExtraInsuranceSpinBox)
+
+        self.label_10 = QLabel(Dialog)
+        self.label_10.setObjectName(u"label_10")
+
+        self.horizontalLayout_6.addWidget(self.label_10)
 
 
         self.verticalLayout.addLayout(self.horizontalLayout_6)
@@ -185,12 +221,17 @@ class Ui_Dialog(object):
         self.qtStockNameLabel.setText(QCoreApplication.translate("Dialog", u"TextLabel", None))
         self.label_3.setText(QCoreApplication.translate("Dialog", u"\u65e5\u671f", None))
         self.qtPerShareDividendRadioButton.setText(QCoreApplication.translate("Dialog", u"\u8a2d\u5b9a\u6bcf\u80a1\u80a1\u5229", None))
-        self.label_4.setText(QCoreApplication.translate("Dialog", u"\u914d\u80a1", None))
-        self.label_5.setText(QCoreApplication.translate("Dialog", u"\u914d\u606f", None))
+        self.label_4.setText(QCoreApplication.translate("Dialog", u"\u6bcf\u80a1\u914d\u80a1", None))
+        self.label.setText(QCoreApplication.translate("Dialog", u"\u5143", None))
+        self.label_5.setText(QCoreApplication.translate("Dialog", u"\u6bcf\u80a1\u914d\u606f", None))
+        self.label_2.setText(QCoreApplication.translate("Dialog", u"\u5143", None))
         self.qtTotalDividendRadioButton.setText(QCoreApplication.translate("Dialog", u"\u8a2d\u5b9a\u7e3d\u80a1\u5229", None))
-        self.label_7.setText(QCoreApplication.translate("Dialog", u"\u914d\u80a1", None))
-        self.label_6.setText(QCoreApplication.translate("Dialog", u"\u914d\u606f", None))
+        self.label_7.setText(QCoreApplication.translate("Dialog", u"\u7e3d\u914d\u80a1", None))
+        self.label_8.setText(QCoreApplication.translate("Dialog", u"\u80a1", None))
+        self.label_6.setText(QCoreApplication.translate("Dialog", u"\u7e3d\u914d\u606f", None))
+        self.label_9.setText(QCoreApplication.translate("Dialog", u"\u5143", None))
         self.qtCustomExtraInsuranceCheckBox.setText(QCoreApplication.translate("Dialog", u"\u624b\u52d5\u8a2d\u5b9a\u88dc\u5145\u4fdd\u8cbb", None))
+        self.label_10.setText(QCoreApplication.translate("Dialog", u"\u5143", None))
         self.qtOkPushButton.setText(QCoreApplication.translate("Dialog", u"\u78ba\u8a8d", None))
         self.qtCancelPushButton.setText(QCoreApplication.translate("Dialog", u"\u53d6\u6d88", None))
     # retranslateUi

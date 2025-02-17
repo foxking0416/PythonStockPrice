@@ -2627,7 +2627,6 @@ class MainWindow( QMainWindow ):
                             dialog.setup_total_cash_dividend( dict_selected_data[ TradingData.CASH_DIVIDEND ] )
 
                         dialog.setup_custom_extra_insurance_fee( dict_selected_data[ TradingData.CUSTOM_EXTRA_INSURANCE_FEE ] )
-                        
                     elif dict_selected_data[ TradingData.TRADING_TYPE ] == TradingType.CAPITAL_INCREASE:
                         dialog = StockCapitalIncreaseEditDialog( str_stock_number, str_stock_name, self )
                         dialog.setup_trading_date( dict_selected_data[ TradingData.TRADING_DATE ] )
@@ -3758,9 +3757,15 @@ class MainWindow( QMainWindow ):
             elif e_trading_type == TradingType.DIVIDEND:
                 if n_accumulated_inventory <= 0: #沒有庫存就不用算股利了
                     continue
-                n_stock_dividend_value_gain = int( Decimal( str( item[ TradingData.STOCK_DIVIDEND ] ) ) * Decimal( str( n_accumulated_inventory ) ) ) # n_stock_dividend_value_gain單位為元
-                n_stock_dividend_share_gain = int( Decimal( str( item[ TradingData.STOCK_DIVIDEND ] ) ) * Decimal( str( n_accumulated_inventory ) ) / Decimal( '10' ) ) # n_stock_dividend_share_gain單位為股 除以10是因為票面額10元
-                n_cash_dividend_gain = int( Decimal( str(item[ TradingData.CASH_DIVIDEND ] ) ) * Decimal( str( n_accumulated_inventory ) ) )
+                e_dividend_value_type = item[ TradingData.DIVIDEND_VALUE_TYPE ]
+                if e_dividend_value_type == DividendValueType.PER_SHARE:
+                    n_stock_dividend_value_gain = int( Decimal( str( item[ TradingData.STOCK_DIVIDEND ] ) ) * Decimal( str( n_accumulated_inventory ) ) ) # n_stock_dividend_value_gain單位為元
+                    n_stock_dividend_share_gain = int( Decimal( str( item[ TradingData.STOCK_DIVIDEND ] ) ) * Decimal( str( n_accumulated_inventory ) ) / Decimal( '10' ) ) # n_stock_dividend_share_gain單位為股 除以10是因為票面額10元
+                    n_cash_dividend_gain = int( Decimal( str(item[ TradingData.CASH_DIVIDEND ] ) ) * Decimal( str( n_accumulated_inventory ) ) ) # n_cash_dividend_gain單位為元
+                else:
+                    n_stock_dividend_value_gain = int( Decimal( str( item[ TradingData.STOCK_DIVIDEND ] ) ) * Decimal( '10' ) ) # n_stock_dividend_value_gain單位為元
+                    n_stock_dividend_share_gain = int( Decimal( str( item[ TradingData.STOCK_DIVIDEND ] ) ) ) # n_stock_dividend_share_gain單位為股 除以10是因為票面額10元
+                    n_cash_dividend_gain = int( Decimal( str(item[ TradingData.CASH_DIVIDEND ] ) ) ) # n_cash_dividend_gain單位為元
 
                 if b_use_auto_dividend:
                     if TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE not in item or not item[TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE]:
@@ -3790,15 +3795,17 @@ class MainWindow( QMainWindow ):
                     elif obj_dividend_date.year >= 2021:
                         n_extra_insurance_fee_for_cash_dividend = int( math.ceil( Decimal( str( n_cash_dividend_gain ) ) * Decimal( str( '0.0211' ) ) ) )
                         n_extra_insurance_fee_for_stock_dividend = int( math.ceil( Decimal( str( n_stock_dividend_value_gain ) ) * Decimal( str( '0.0211' ) ) ) )
-                
+                if int( Decimal( str(item[ TradingData.CUSTOM_EXTRA_INSURANCE_FEE ] ) ) ) == -1:
+                    n_extra_insurance_fee_total = n_extra_insurance_fee_for_cash_dividend + n_extra_insurance_fee_for_stock_dividend
+                else:
+                    n_extra_insurance_fee_total = int( Decimal( str(item[ TradingData.CUSTOM_EXTRA_INSURANCE_FEE ] ) ) )
 
                 if n_cash_dividend_gain > n_dividend_transfer_fee:
                     item[ TradingData.CASH_DIVIDEND_GAIN_NON_SAVE ] = n_cash_dividend_gain
                     item[ TradingData.TRADING_FEE_NON_SAVE ] = n_dividend_transfer_fee
-
-                    item[ TradingData.EXTRA_INSURANCE_FEE_NON_SAVE ] = n_extra_insurance_fee_for_cash_dividend + n_extra_insurance_fee_for_stock_dividend
-                    n_accumulated_cost = n_accumulated_cost - n_cash_dividend_gain + n_dividend_transfer_fee + n_extra_insurance_fee_for_cash_dividend + n_extra_insurance_fee_for_stock_dividend
-                    n_accumulated_cash_dividend = n_accumulated_cash_dividend + n_cash_dividend_gain - n_dividend_transfer_fee - n_extra_insurance_fee_for_cash_dividend - n_extra_insurance_fee_for_stock_dividend #要想一下要不要扣掉手續費
+                    item[ TradingData.EXTRA_INSURANCE_FEE_NON_SAVE ] = n_extra_insurance_fee_total
+                    n_accumulated_cost = n_accumulated_cost - n_cash_dividend_gain + n_dividend_transfer_fee + n_extra_insurance_fee_total
+                    n_accumulated_cash_dividend = n_accumulated_cash_dividend + n_cash_dividend_gain - n_dividend_transfer_fee - n_extra_insurance_fee_total #要想一下要不要扣掉手續費
                 else:
                     item[ TradingData.CASH_DIVIDEND_GAIN_NON_SAVE ] = 0
                     item[ TradingData.TRADING_FEE_NON_SAVE ] = 0
@@ -4299,8 +4306,18 @@ class MainWindow( QMainWindow ):
         n_trading_tax = dict_per_trading_data[ TradingData.TRADING_TAX_NON_SAVE ]
         n_extra_insurance_fee = dict_per_trading_data[ TradingData.EXTRA_INSURANCE_FEE_NON_SAVE ]
         n_per_trading_total_cost = dict_per_trading_data[ TradingData.TRADING_COST_NON_SAVE ]
-        f_stock_dividend_per_share = dict_per_trading_data[ TradingData.STOCK_DIVIDEND ]
-        f_cash_dividend_per_share = dict_per_trading_data[ TradingData.CASH_DIVIDEND ]
+        e_dividend_value_type = dict_per_trading_data[ TradingData.DIVIDEND_VALUE_TYPE ]
+        n_accumulated_inventory = dict_per_trading_data[ TradingData.ACCUMULATED_INVENTORY_NON_SAVE ]
+        if e_dividend_value_type == DividendValueType.PER_SHARE:
+            f_stock_dividend_per_share = dict_per_trading_data[ TradingData.STOCK_DIVIDEND ]
+            f_cash_dividend_per_share = dict_per_trading_data[ TradingData.CASH_DIVIDEND ]
+        else:
+            n_stock_dividend_total = dict_per_trading_data[ TradingData.STOCK_DIVIDEND ]
+            n_cash_dividend_total = dict_per_trading_data[ TradingData.CASH_DIVIDEND ]
+            n_ori_accumulated_inventory = n_accumulated_inventory - n_stock_dividend_total
+
+            f_stock_dividend_per_share = float( n_stock_dividend_total / n_ori_accumulated_inventory )
+            f_cash_dividend_per_share = float( n_cash_dividend_total / n_ori_accumulated_inventory )
         n_stock_dividend_gain = dict_per_trading_data[ TradingData.STOCK_DIVIDEND_GAIN_NON_SAVE ]
         n_cash_dividend_gain = dict_per_trading_data[ TradingData.CASH_DIVIDEND_GAIN_NON_SAVE ]
         if self.ui.qtCostWithInDividendAction.isChecked():
@@ -4309,7 +4326,6 @@ class MainWindow( QMainWindow ):
         else:
             n_accumulated_cost = dict_per_trading_data[ TradingData.ACCUMULATED_COST_WITHOUT_CONSIDERING_DIVIDEND_NON_SAVE ]
             f_average_cost = round( dict_per_trading_data[ TradingData.AVERAGE_COST_WITHOUT_CONSIDERING_DIVIDEND_NON_SAVE ], 3 )
-        n_accumulated_inventory = dict_per_trading_data[ TradingData.ACCUMULATED_INVENTORY_NON_SAVE ]
         if self.ui.qtUse1ShareUnitAction.isChecked():
             str_trading_count = format( n_trading_count, "," )
             str_stock_dividend_gain = format( n_stock_dividend_gain, "," )
