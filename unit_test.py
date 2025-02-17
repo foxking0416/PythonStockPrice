@@ -2,7 +2,14 @@ import unittest
 from PySide6.QtWidgets import QApplication
 from StockPriceMainWindow import MainWindow  # 假設你的主程式檔名是 main.py
 from StockPriceMainWindow import TradingType
+from StockPriceMainWindow import TradingPriceType
+from StockPriceMainWindow import TradingFeeType
+from StockPriceMainWindow import DividendValueType
+from StockPriceMainWindow import CapitalReductionType
 from StockPriceMainWindow import TradingData
+from StockPriceMainWindow import TradingCost
+from StockPriceMainWindow import TransferType
+from StockPriceMainWindow import TransferData
 
 class TestMainWindow( unittest.TestCase ):
     @classmethod
@@ -23,7 +30,7 @@ class TestMainWindow( unittest.TestCase ):
                                   'UnitTestData\\StockNumber.txt',
                                   'UnitTestData\\StockPrice.txt' )
         
-        self.assertEqual( self.window.windowTitle(), "MainWindow" )
+        self.assertEqual( self.window.windowTitle(), "股票交易紀錄" )
         self.window.close()
 
     def test_window_visible(self):
@@ -107,7 +114,130 @@ class TestMainWindow( unittest.TestCase ):
 
         self.window.close()
 
+    def test_add_new_tab(self):
+        self.window = MainWindow( True, 
+                                  'UnitTestData\\TradingDataUnitTest.json',
+                                  'UnitTestData\\UISetting.config',
+                                  'UnitTestData\\StockNumber.txt',
+                                  'UnitTestData\\StockPrice.txt' )
+        str_tab_name = self.window.add_new_tab_and_table()
+        self.window.dict_all_account_all_stock_trading_data[ str_tab_name ] = {}
+        self.window.dict_all_account_ui_state[ str_tab_name ] = { "discount_checkbox": True, "discount_value": 0.6, "insurance_checkbox": False, "regular_buy_trading_price_type": TradingPriceType.PER_SHARE, "regular_buy_trading_fee_type": TradingFeeType.VARIABLE, "regular_buy_trading_fee_minimum": 1, "regular_buy_trading_fee_constant": 1 }
+        self.window.dict_all_account_general_data[ str_tab_name ] = { "minimum_trading_fee": 20, "dividend_transfer_fee":{} }
+        self.window.dict_all_account_cash_transfer_data[ str_tab_name ] = []
+        self.assertEqual( self.window.ui.qtTabWidget.count(), 3 )
 
+    def test_current_inventory1(self):
+        self.window = MainWindow( True, 
+                                  'UnitTestData\\TradingDataUnitTest_匯費10_最低手續費20_不扣補充保費.json',
+                                  'UnitTestData\\UISetting.config',
+                                  'UnitTestData\\StockNumber.txt',
+                                  'UnitTestData\\StockPrice.txt' )    
+        for key, value_dict_per_account_all_stock_trading_data in self.window.dict_all_account_all_stock_trading_data.items():
+            self.assertEqual( key, 'TabIndex0' )
+            for key_stock_number, value_dict_per_stock_trading_data in value_dict_per_account_all_stock_trading_data.items():
+                if key_stock_number == '2834':# 台企銀
+                    dict_trading_data_last = value_dict_per_stock_trading_data[ len( value_dict_per_stock_trading_data ) - 1 ]
+                    self.assertEqual( dict_trading_data_last[ TradingData.ACCUMULATED_COST_NON_SAVE ], 9251865 )
+                    self.assertEqual( dict_trading_data_last[ TradingData.ACCUMULATED_INVENTORY_NON_SAVE ], 1285472 )
+
+        self.window.close()
+
+    def test_current_inventory2(self):
+        self.window = MainWindow( True, 
+                                  'UnitTestData\\TradingDataUnitTest_匯費10_最低手續費20_扣補充保費.json',
+                                  'UnitTestData\\UISetting.config',
+                                  'UnitTestData\\StockNumber.txt',
+                                  'UnitTestData\\StockPrice.txt' )    
+        for key, value_dict_per_account_all_stock_trading_data in self.window.dict_all_account_all_stock_trading_data.items():
+            self.assertEqual( key, 'TabIndex0' )
+            for key_stock_number, value_dict_per_stock_trading_data in value_dict_per_account_all_stock_trading_data.items():
+                if key_stock_number == '2834':# 台企銀
+                    dict_trading_data_last = value_dict_per_stock_trading_data[ len( value_dict_per_stock_trading_data ) - 1 ]
+                    self.assertEqual( dict_trading_data_last[ TradingData.ACCUMULATED_COST_NON_SAVE ], 9326671 )
+                    self.assertEqual( dict_trading_data_last[ TradingData.ACCUMULATED_INVENTORY_NON_SAVE ], 1285472 )
+
+        self.window.close()
+
+    def test_current_inventory3(self):
+        self.window = MainWindow( True, 
+                                  'UnitTestData\\TradingDataUnitTest_匯費5_最低手續費20_扣補充保費.json',
+                                  'UnitTestData\\UISetting.config',
+                                  'UnitTestData\\StockNumber.txt',
+                                  'UnitTestData\\StockPrice.txt' )    
+        for key, value_dict_per_account_all_stock_trading_data in self.window.dict_all_account_all_stock_trading_data.items():
+            self.assertEqual( key, 'TabIndex0' )
+            for key_stock_number, value_dict_per_stock_trading_data in value_dict_per_account_all_stock_trading_data.items():
+                if key_stock_number == '2834':# 台企銀
+                    dict_trading_data_last = value_dict_per_stock_trading_data[ len( value_dict_per_stock_trading_data ) - 1 ]
+                    self.assertEqual( dict_trading_data_last[ TradingData.ACCUMULATED_COST_NON_SAVE ], 9251840 )
+                    self.assertEqual( dict_trading_data_last[ TradingData.ACCUMULATED_INVENTORY_NON_SAVE ], 1285472 )
+
+        self.window.close()
+
+    def test_current_inventory4(self):
+        self.window = MainWindow( True, 
+                                  'UnitTestData\\TradingDataUnitTest_匯費5_最低手續費20_不扣補充保費_自訂每股股利.json',
+                                  'UnitTestData\\UISetting.config',
+                                  'UnitTestData\\StockNumber.txt',
+                                  'UnitTestData\\StockPrice.txt' )    
+        for key, value_dict_per_account_all_stock_trading_data in self.window.dict_all_account_all_stock_trading_data.items():
+            self.assertEqual( key, 'TabIndex0' )
+            for key_stock_number, value_dict_per_stock_trading_data in value_dict_per_account_all_stock_trading_data.items():
+                if key_stock_number == '2834':# 台企銀
+                    dict_trading_data_last = value_dict_per_stock_trading_data[ len( value_dict_per_stock_trading_data ) - 1 ]
+                    self.assertEqual( dict_trading_data_last[ TradingData.ACCUMULATED_COST_NON_SAVE ], 9008555 )
+                    self.assertEqual( dict_trading_data_last[ TradingData.ACCUMULATED_INVENTORY_NON_SAVE ], 1100000 )
+
+        self.window.close()
+
+    def test_current_inventory5(self):
+        self.window = MainWindow( True, 
+                                  'UnitTestData\\TradingDataUnitTest_匯費5_最低手續費20_不扣補充保費_自訂總股利.json',
+                                  'UnitTestData\\UISetting.config',
+                                  'UnitTestData\\StockNumber.txt',
+                                  'UnitTestData\\StockPrice.txt' )    
+        for key, value_dict_per_account_all_stock_trading_data in self.window.dict_all_account_all_stock_trading_data.items():
+            self.assertEqual( key, 'TabIndex0' )
+            for key_stock_number, value_dict_per_stock_trading_data in value_dict_per_account_all_stock_trading_data.items():
+                if key_stock_number == '2834':# 台企銀
+                    dict_trading_data_last = value_dict_per_stock_trading_data[ len( value_dict_per_stock_trading_data ) - 1 ]
+                    self.assertEqual( dict_trading_data_last[ TradingData.ACCUMULATED_COST_NON_SAVE ], 9998555 )
+                    self.assertEqual( dict_trading_data_last[ TradingData.ACCUMULATED_INVENTORY_NON_SAVE ], 1010000 )
+
+        self.window.close()
+
+    def test_current_inventory6(self):
+        self.window = MainWindow( True, 
+                                  'UnitTestData\\TradingDataUnitTest_最低手續費0.json',
+                                  'UnitTestData\\UISetting.config',
+                                  'UnitTestData\\StockNumber.txt',
+                                  'UnitTestData\\StockPrice.txt' )    
+        for key, value_dict_per_account_all_stock_trading_data in self.window.dict_all_account_all_stock_trading_data.items():
+            self.assertEqual( key, 'TabIndex0' )
+            for key_stock_number, value_dict_per_stock_trading_data in value_dict_per_account_all_stock_trading_data.items():
+                if key_stock_number == '2834':# 台企銀
+                    dict_trading_data_last = value_dict_per_stock_trading_data[ len( value_dict_per_stock_trading_data ) - 1 ]
+                    self.assertEqual( dict_trading_data_last[ TradingData.ACCUMULATED_COST_NON_SAVE ], 10008 )
+                    self.assertEqual( dict_trading_data_last[ TradingData.ACCUMULATED_INVENTORY_NON_SAVE ], 1000 )
+
+        self.window.close()
+
+    def test_current_inventory7(self):
+        self.window = MainWindow( True, 
+                                  'UnitTestData\\TradingDataUnitTest_最低手續費15.json',
+                                  'UnitTestData\\UISetting.config',
+                                  'UnitTestData\\StockNumber.txt',
+                                  'UnitTestData\\StockPrice.txt' )    
+        for key, value_dict_per_account_all_stock_trading_data in self.window.dict_all_account_all_stock_trading_data.items():
+            self.assertEqual( key, 'TabIndex0' )
+            for key_stock_number, value_dict_per_stock_trading_data in value_dict_per_account_all_stock_trading_data.items():
+                if key_stock_number == '2834':# 台企銀
+                    dict_trading_data_last = value_dict_per_stock_trading_data[ len( value_dict_per_stock_trading_data ) - 1 ]
+                    self.assertEqual( dict_trading_data_last[ TradingData.ACCUMULATED_COST_NON_SAVE ], 10015 )
+                    self.assertEqual( dict_trading_data_last[ TradingData.ACCUMULATED_INVENTORY_NON_SAVE ], 1000 )
+
+        self.window.close()
 
 if __name__ == "__main__":
         unittest.main()

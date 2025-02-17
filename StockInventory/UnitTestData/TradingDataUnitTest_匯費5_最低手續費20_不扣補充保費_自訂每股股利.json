@@ -1,0 +1,80 @@
+v1.1.1
+[
+    {
+        "account_name": "新群組",
+        "trading_data": {
+            "2834": [
+                {
+                    "trading_date": "0001-01-01",
+                    "trading_type": 0,
+                    "trading_price_type": 0,
+                    "per_share_trading_price": 0,
+                    "total_trading_price": 0,
+                    "trading_count": 0,
+                    "trading_fee_type": 0,
+                    "trading_fee_discount": 1,
+                    "trading_fee_minimum": 0,
+                    "trading_fee_constant": 0,
+                    "dividend_value_type": 0,
+                    "stock_dividend": 0,
+                    "cash_dividend": 0,
+                    "custom_extra_insurance_fee": -1,
+                    "capital_reduction_per_share": 0,
+                    "capital_reduction_type": 0,
+                    "use_auto_dividend_data": false,
+                    "daying_trading": false
+                },
+                {
+                    "trading_date": "2020-02-17",
+                    "trading_type": 2,
+                    "trading_price_type": 0,
+                    "per_share_trading_price": 10.0,
+                    "total_trading_price": 0,
+                    "trading_count": 1000000,
+                    "trading_fee_type": 0,
+                    "trading_fee_discount": 0.6,
+                    "trading_fee_minimum": 0,
+                    "trading_fee_constant": 0,
+                    "dividend_value_type": 0,
+                    "stock_dividend": 0,
+                    "cash_dividend": 0,
+                    "custom_extra_insurance_fee": -1,
+                    "capital_reduction_per_share": 0,
+                    "capital_reduction_type": 0,
+                    "daying_trading": false
+                },
+                {
+                    "trading_date": "2021-02-17",
+                    "trading_type": 5,
+                    "trading_price_type": 0,
+                    "per_share_trading_price": 0,
+                    "total_trading_price": 0,
+                    "trading_count": 0,
+                    "trading_fee_type": 0,
+                    "trading_fee_discount": 1,
+                    "trading_fee_minimum": 0,
+                    "trading_fee_constant": 0,
+                    "dividend_value_type": 0,
+                    "stock_dividend": 1.0,
+                    "cash_dividend": 1.0,
+                    "custom_extra_insurance_fee": -1,
+                    "capital_reduction_per_share": 0,
+                    "capital_reduction_type": 0,
+                    "daying_trading": false
+                }
+            ]
+        },
+        "discount_checkbox": true,
+        "discount_value": 0.6,
+        "minimum_trading_fee": 20,
+        "dividend_transfer_fee": {
+            "2834": 5
+        },
+        "insurance_checkbox": false,
+        "regular_buy_trading_price_type": 0,
+        "regular_buy_trading_fee_type": 0,
+        "regular_buy_trading_fee_minimum": 1,
+        "regular_buy_trading_fee_constant": 1,
+        "transfer_data": []
+    }
+]
