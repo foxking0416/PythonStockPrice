@@ -138,7 +138,8 @@ else:
     g_data_dir = g_exe_root_dir
 
 #region 設定 icon path
-window_icon_file_path = os.path.join( g_exe_root_dir, 'resources\\FoxInfo.png' ) 
+window_icon_file_path = os.path.join( g_exe_root_dir, 'resources\\FoxInfo.svg' ) 
+window_icon = QIcon( window_icon_file_path ) 
 edit_icon_file_path = os.path.join( g_exe_root_dir, 'resources\\Edit.svg' ) 
 edit_icon = QIcon( edit_icon_file_path ) 
 delete_icon_file_path = os.path.join( g_exe_root_dir, 'resources\\Delete.svg' ) 
@@ -365,7 +366,6 @@ class SaveCheckDialog( QDialog ):
         self.ui = Ui_SaveCheckDialog()
         self.ui.setupUi( self )
         self.setWindowTitle( str_title )
-        window_icon = QIcon( window_icon_file_path ) 
         self.setWindowIcon( window_icon )
 
         self.ui.qtSavePushButton.clicked.connect( self.save )
@@ -426,7 +426,6 @@ class ImportDataDuplicateOptionDialog( QDialog ):
 
         self.ui = Ui_DuplicateOptionDialog()
         self.ui.setupUi( self )
-        window_icon = QIcon( window_icon_file_path ) 
         self.setWindowIcon( window_icon )
         self.ui.qtOkPushButton.clicked.connect( self.accept_data )
         self.ui.qtCancelPushButton.clicked.connect( self.cancel )
@@ -445,7 +444,6 @@ class StockDividendTransferFeeEditDialog( QDialog ):
 
         self.ui = Ui_StockDividendTransferFeeEditDialog()
         self.ui.setupUi( self )
-        window_icon = QIcon( window_icon_file_path ) 
         self.setWindowIcon( window_icon )
         self.ui.qtGroupNameLabel.setText( str_account_name )
         self.ui.qtStockSelectComboBox.setVisible( False )
@@ -582,7 +580,6 @@ class StockDividendTransferFeeEditSpinboxDialog( QDialog ):
 
         self.ui = Ui_StockDividendTransferFeeEditSpinboxDialog()
         self.ui.setupUi( self )
-        window_icon = QIcon( window_icon_file_path ) 
         self.setWindowIcon( window_icon )
         self.ui.qtDividendTransferFeeSpinBox.setValue( n_transfer_fee )
         self.n_new_transfer_fee = n_transfer_fee
@@ -603,7 +600,6 @@ class StockMinimumTradingFeeEditDialog( QDialog ):
 
         self.ui = Ui_StockMinimumTradingFeeEditDialog()
         self.ui.setupUi( self )
-        window_icon = QIcon( window_icon_file_path ) 
         self.setWindowIcon( window_icon )
         self.ui.qtMinimumTradingFeeSpinBox.setValue( n_current_minimum_trading_fee )
         self.ui.qtGroupNameLabel.setText( str_account_name )
@@ -625,7 +621,6 @@ class StockTradingEditDialog( QDialog ):
         self.ui = Ui_StockTradingDialog()
         self.ui.setupUi( self )
         
-        window_icon = QIcon( window_icon_file_path ) 
         self.setWindowIcon( window_icon )
 
         self.ui.qtStockNumberLabel.setText( str_stock_number )
@@ -800,7 +795,6 @@ class StockRegularTradingEditDialog( QDialog ):
         self.ui = Ui_StockRegularTradingDialog()
         self.ui.setupUi( self )
         
-        window_icon = QIcon( window_icon_file_path ) 
         self.setWindowIcon( window_icon )
 
         self.ui.qtStockNumberLabel.setText( str_stock_number )
@@ -1034,7 +1028,6 @@ class StockDividendEditDialog( QDialog ):
 
         self.ui = Ui_StockDividendDialog()
         self.ui.setupUi( self )
-        window_icon = QIcon( window_icon_file_path ) 
         self.setWindowIcon( window_icon )
 
         self.ui.qtStockNumberLabel.setText( str_stock_number )
@@ -1149,7 +1142,6 @@ class StockCapitalIncreaseEditDialog( QDialog ):
 
         self.ui = Ui_StockCapitalIncreaseDialog()
         self.ui.setupUi( self )
-        window_icon = QIcon( window_icon_file_path ) 
         self.setWindowIcon( window_icon )
 
         self.ui.qtStockNumberLabel.setText( str_stock_number )
@@ -1257,7 +1249,6 @@ class StockCapitalReductionEditDialog( QDialog ):
 
         self.ui = Ui_StockCapitalReductionDialog()
         self.ui.setupUi( self )
-        window_icon = QIcon( window_icon_file_path ) 
         self.setWindowIcon( window_icon )
 
         self.ui.qtStockNumberLabel.setText( str_stock_number )
@@ -1321,7 +1312,6 @@ class CashTransferEditDialog( QDialog ):
 
         self.ui = Ui_CashTransferDialog()
         self.ui.setupUi( self )
-        window_icon = QIcon( window_icon_file_path ) 
         self.setWindowIcon( window_icon )
 
         self.ui.qtAccountNameLabel.setText( str_account_name )
@@ -1418,7 +1408,6 @@ class MainWindow( QMainWindow ):
         super( MainWindow, self ).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi( self )  # 設置 UI
-        window_icon = QIcon( window_icon_file_path ) 
         self.setWindowIcon( window_icon )
 
         if not b_unit_test:
