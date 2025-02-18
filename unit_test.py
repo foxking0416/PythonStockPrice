@@ -123,7 +123,7 @@ class TestMainWindow( unittest.TestCase ):
         str_tab_name = self.window.add_new_tab_and_table()
         self.window.dict_all_account_all_stock_trading_data[ str_tab_name ] = {}
         self.window.dict_all_account_ui_state[ str_tab_name ] = { "discount_checkbox": True, "discount_value": 0.6, "insurance_checkbox": False, "regular_buy_trading_price_type": TradingPriceType.PER_SHARE, "regular_buy_trading_fee_type": TradingFeeType.VARIABLE, "regular_buy_trading_fee_minimum": 1, "regular_buy_trading_fee_constant": 1 }
-        self.window.dict_all_account_general_data[ str_tab_name ] = { "minimum_trading_fee": 20, "dividend_transfer_fee":{} }
+        self.window.dict_all_account_general_data[ str_tab_name ] = { "minimum_common_trading_fee": 20, "minimum_odd_trading_fee": 1, "dividend_transfer_fee":{} }
         self.window.dict_all_account_cash_transfer_data[ str_tab_name ] = []
         self.assertEqual( self.window.ui.qtTabWidget.count(), 3 )
 
