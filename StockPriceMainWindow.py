@@ -3774,20 +3774,23 @@ class MainWindow( QMainWindow ):
                 item[ TradingData.STOCK_DIVIDEND_GAIN_NON_SAVE ] = n_stock_dividend_share_gain
                 n_accumulated_inventory += n_stock_dividend_share_gain
                 
-                n_extra_insurance_fee_for_cash_dividend = 0
-                n_extra_insurance_fee_for_stock_dividend = 0
-                if b_extra_insurance_fee and n_cash_dividend_gain + n_stock_dividend_value_gain > 20000:
-                    obj_dividend_date = datetime.datetime.strptime( item[ TradingData.TRADING_DATE ], "%Y-%m-%d")
-                    if obj_dividend_date.year >= 2013 and obj_dividend_date.year < 2021:
-                        n_extra_insurance_fee_for_cash_dividend = int( math.ceil( Decimal( str( n_cash_dividend_gain ) ) * Decimal( str( '0.0191' ) ) ) )
-                        n_extra_insurance_fee_for_stock_dividend = int( math.ceil( Decimal( str( n_stock_dividend_value_gain ) ) * Decimal( str( '0.0191' ) ) ) )
-                    elif obj_dividend_date.year >= 2021:
-                        n_extra_insurance_fee_for_cash_dividend = int( math.ceil( Decimal( str( n_cash_dividend_gain ) ) * Decimal( str( '0.0211' ) ) ) )
-                        n_extra_insurance_fee_for_stock_dividend = int( math.ceil( Decimal( str( n_stock_dividend_value_gain ) ) * Decimal( str( '0.0211' ) ) ) )
-                if int( Decimal( str(item[ TradingData.CUSTOM_EXTRA_INSURANCE_FEE ] ) ) ) == -1:
-                    n_extra_insurance_fee_total = n_extra_insurance_fee_for_cash_dividend + n_extra_insurance_fee_for_stock_dividend
-                else:
-                    n_extra_insurance_fee_total = int( Decimal( str(item[ TradingData.CUSTOM_EXTRA_INSURANCE_FEE ] ) ) )
+                n_extra_insurance_fee_total = 0
+                if b_extra_insurance_fee:
+                    if int( Decimal( str(item[ TradingData.CUSTOM_EXTRA_INSURANCE_FEE ] ) ) ) != -1:
+                        n_extra_insurance_fee_total = int( Decimal( str(item[ TradingData.CUSTOM_EXTRA_INSURANCE_FEE ] ) ) )
+                    else:
+                        if n_cash_dividend_gain + n_stock_dividend_value_gain > 20000:
+                            n_extra_insurance_fee_for_cash_dividend = 0
+                            n_extra_insurance_fee_for_stock_dividend = 0
+                            obj_dividend_date = datetime.datetime.strptime( item[ TradingData.TRADING_DATE ], "%Y-%m-%d")
+                            if obj_dividend_date.year >= 2013 and obj_dividend_date.year < 2021:
+                                n_extra_insurance_fee_for_cash_dividend = int( math.ceil( Decimal( str( n_cash_dividend_gain ) ) * Decimal( str( '0.0191' ) ) ) )
+                                n_extra_insurance_fee_for_stock_dividend = int( math.ceil( Decimal( str( n_stock_dividend_value_gain ) ) * Decimal( str( '0.0191' ) ) ) )
+                            elif obj_dividend_date.year >= 2021:
+                                n_extra_insurance_fee_for_cash_dividend = int( math.ceil( Decimal( str( n_cash_dividend_gain ) ) * Decimal( str( '0.0211' ) ) ) )
+                                n_extra_insurance_fee_for_stock_dividend = int( math.ceil( Decimal( str( n_stock_dividend_value_gain ) ) * Decimal( str( '0.0211' ) ) ) )
+                            n_extra_insurance_fee_total = n_extra_insurance_fee_for_cash_dividend + n_extra_insurance_fee_for_stock_dividend
+
 
                 if n_cash_dividend_gain > n_dividend_transfer_fee:
                     item[ TradingData.CASH_DIVIDEND_GAIN_NON_SAVE ] = n_cash_dividend_gain
