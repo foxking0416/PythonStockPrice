@@ -24,13 +24,13 @@ class Ui_Dialog(object):
     def setupUi(self, Dialog):
         if not Dialog.objectName():
             Dialog.setObjectName(u"Dialog")
-        Dialog.resize(308, 390)
+        Dialog.resize(318, 390)
         sizePolicy = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(Dialog.sizePolicy().hasHeightForWidth())
         Dialog.setSizePolicy(sizePolicy)
-        Dialog.setMinimumSize(QSize(308, 390))
+        Dialog.setMinimumSize(QSize(318, 390))
         Dialog.setMaximumSize(QSize(318, 390))
         self.verticalLayout = QVBoxLayout(Dialog)
         self.verticalLayout.setObjectName(u"verticalLayout")
@@ -103,9 +103,9 @@ class Ui_Dialog(object):
         self.groupBox = QGroupBox(Dialog)
         self.groupBox.setObjectName(u"groupBox")
         self.verticalLayout_2 = QVBoxLayout(self.groupBox)
-        self.verticalLayout_2.setSpacing(0)
+        self.verticalLayout_2.setSpacing(6)
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
-        self.verticalLayout_2.setContentsMargins(0, 0, 0, 0)
+        self.verticalLayout_2.setContentsMargins(1, 1, 1, 1)
         self.horizontalLayout_3 = QHBoxLayout()
         self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
         self.qtPerSharePriceRadioButton = QRadioButton(self.groupBox)
@@ -155,22 +155,26 @@ class Ui_Dialog(object):
 
         self.verticalLayout.addWidget(self.groupBox)
 
-        self.verticalLayout_4 = QVBoxLayout()
+        self.groupBox1 = QGroupBox(Dialog)
+        self.groupBox1.setObjectName(u"groupBox1")
+        self.verticalLayout_4 = QVBoxLayout(self.groupBox1)
+        self.verticalLayout_4.setSpacing(6)
         self.verticalLayout_4.setObjectName(u"verticalLayout_4")
+        self.verticalLayout_4.setContentsMargins(1, 1, 1, 1)
         self.horizontalLayout_11 = QHBoxLayout()
         self.horizontalLayout_11.setObjectName(u"horizontalLayout_11")
-        self.qtVariableFeeRadioButton = QRadioButton(Dialog)
+        self.qtVariableFeeRadioButton = QRadioButton(self.groupBox1)
         self.qtVariableFeeRadioButton.setObjectName(u"qtVariableFeeRadioButton")
         self.qtVariableFeeRadioButton.setChecked(True)
 
         self.horizontalLayout_11.addWidget(self.qtVariableFeeRadioButton)
 
-        self.qtDiscountCheckBox = QCheckBox(Dialog)
+        self.qtDiscountCheckBox = QCheckBox(self.groupBox1)
         self.qtDiscountCheckBox.setObjectName(u"qtDiscountCheckBox")
 
         self.horizontalLayout_11.addWidget(self.qtDiscountCheckBox)
 
-        self.qtDiscountRateDoubleSpinBox = QDoubleSpinBox(Dialog)
+        self.qtDiscountRateDoubleSpinBox = QDoubleSpinBox(self.groupBox1)
         self.qtDiscountRateDoubleSpinBox.setObjectName(u"qtDiscountRateDoubleSpinBox")
         self.qtDiscountRateDoubleSpinBox.setDecimals(1)
         self.qtDiscountRateDoubleSpinBox.setMaximum(10.000000000000000)
@@ -178,7 +182,7 @@ class Ui_Dialog(object):
 
         self.horizontalLayout_11.addWidget(self.qtDiscountRateDoubleSpinBox)
 
-        self.label_10 = QLabel(Dialog)
+        self.label_10 = QLabel(self.groupBox1)
         self.label_10.setObjectName(u"label_10")
 
         self.horizontalLayout_11.addWidget(self.label_10)
@@ -196,12 +200,12 @@ class Ui_Dialog(object):
 
         self.horizontalLayout_5.addItem(self.horizontalSpacer_12)
 
-        self.label_8 = QLabel(Dialog)
+        self.label_8 = QLabel(self.groupBox1)
         self.label_8.setObjectName(u"label_8")
 
         self.horizontalLayout_5.addWidget(self.label_8)
 
-        self.qtTradingFeeMinimumSpinBox = QSpinBox(Dialog)
+        self.qtTradingFeeMinimumSpinBox = QSpinBox(self.groupBox1)
         self.qtTradingFeeMinimumSpinBox.setObjectName(u"qtTradingFeeMinimumSpinBox")
         self.qtTradingFeeMinimumSpinBox.setMinimumSize(QSize(50, 0))
         self.qtTradingFeeMinimumSpinBox.setMaximum(20)
@@ -209,7 +213,7 @@ class Ui_Dialog(object):
 
         self.horizontalLayout_5.addWidget(self.qtTradingFeeMinimumSpinBox)
 
-        self.label_11 = QLabel(Dialog)
+        self.label_11 = QLabel(self.groupBox1)
         self.label_11.setObjectName(u"label_11")
 
         self.horizontalLayout_5.addWidget(self.label_11)
@@ -221,17 +225,14 @@ class Ui_Dialog(object):
 
         self.verticalLayout_4.addLayout(self.horizontalLayout_5)
 
-
-        self.verticalLayout.addLayout(self.verticalLayout_4)
-
         self.horizontalLayout_9 = QHBoxLayout()
         self.horizontalLayout_9.setObjectName(u"horizontalLayout_9")
-        self.qtConstantFeeRadioButton = QRadioButton(Dialog)
+        self.qtConstantFeeRadioButton = QRadioButton(self.groupBox1)
         self.qtConstantFeeRadioButton.setObjectName(u"qtConstantFeeRadioButton")
 
         self.horizontalLayout_9.addWidget(self.qtConstantFeeRadioButton)
 
-        self.qtTradingFeeConstantSpinBox = QSpinBox(Dialog)
+        self.qtTradingFeeConstantSpinBox = QSpinBox(self.groupBox1)
         self.qtTradingFeeConstantSpinBox.setObjectName(u"qtTradingFeeConstantSpinBox")
         self.qtTradingFeeConstantSpinBox.setMinimumSize(QSize(50, 0))
         self.qtTradingFeeConstantSpinBox.setMaximum(20)
@@ -239,7 +240,7 @@ class Ui_Dialog(object):
 
         self.horizontalLayout_9.addWidget(self.qtTradingFeeConstantSpinBox)
 
-        self.label_4 = QLabel(Dialog)
+        self.label_4 = QLabel(self.groupBox1)
         self.label_4.setObjectName(u"label_4")
 
         self.horizontalLayout_9.addWidget(self.label_4)
@@ -249,7 +250,10 @@ class Ui_Dialog(object):
         self.horizontalLayout_9.addItem(self.horizontalSpacer)
 
 
-        self.verticalLayout.addLayout(self.horizontalLayout_9)
+        self.verticalLayout_4.addLayout(self.horizontalLayout_9)
+
+
+        self.verticalLayout.addWidget(self.groupBox1)
 
         self.horizontalLayout_4 = QHBoxLayout()
         self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")

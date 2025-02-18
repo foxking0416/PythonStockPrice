@@ -8,6 +8,8 @@ QMenu{ border: 1px solid #cccccc; background-color: #ffffff; }
 QMenu::item{ color: black; background-color: transparent; padding: 5px 15px; }
 QMenu::item:selected { color: #ffffff; background-color: #3399ff; }
 
+QGroupBox{ border: 1px solid #a0a0a0;border-radius: 2px; }
+
 
 QTabWidget { border:1px solid #f0f0f0 }
 QTabBar::tab{ border:1px solid #a0a0a0; color:#c8c8c8; background-color:#282828; font-size:12px; text-align:center; border-radius: 2px;}
