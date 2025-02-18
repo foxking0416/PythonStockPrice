@@ -239,5 +239,21 @@ class TestMainWindow( unittest.TestCase ):
 
         self.window.close()
 
+    def test_current_inventory8(self):
+        self.window = MainWindow( True, 
+                                  'UnitTestData\\TradingDataUnitTest_匯費5_最低手續費20_扣補充保費_自訂總股利_自訂補充保費.json',
+                                  'UnitTestData\\UISetting.config',
+                                  'UnitTestData\\StockNumber.txt',
+                                  'UnitTestData\\StockPrice.txt' )    
+        for key, value_dict_per_account_all_stock_trading_data in self.window.dict_all_account_all_stock_trading_data.items():
+            self.assertEqual( key, 'TabIndex0' )
+            for key_stock_number, value_dict_per_stock_trading_data in value_dict_per_account_all_stock_trading_data.items():
+                if key_stock_number == '2834':# 台企銀
+                    dict_trading_data_last = value_dict_per_stock_trading_data[ len( value_dict_per_stock_trading_data ) - 1 ]
+                    self.assertEqual( dict_trading_data_last[ TradingData.ACCUMULATED_COST_NON_SAVE ], 90590 )
+                    self.assertEqual( dict_trading_data_last[ TradingData.ACCUMULATED_INVENTORY_NON_SAVE ], 20000 )
+
+        self.window.close()
+
 if __name__ == "__main__":
         unittest.main()
