@@ -4838,6 +4838,44 @@ class MainWindow( QMainWindow ):
             except Exception as e:
                 pass    
 
+            formatted_date = f"{str_date[:4]}/{str_date[4:6]}/{str_date[6:]}"
+            url = "https://www.tpex.org.tw/www/zh-tw/emerging/des010"
+            payload = {
+                'date': formatted_date
+            }
+            b_get_ROTC_company_stock_price = False
+            try:
+                res = self.send_post_request( url, payload )
+                soup = BeautifulSoup( res.text, "lxml" )
+                json_str = soup.get_text()
+                json_data = json.loads(json_str)
+                if 'tables' in json_data:
+                    for item in json_data['tables']:
+                        if 'data' in item:
+                            for data in item['data']:
+                                #index 0 證券代號       "1260",
+                                #index 1 證券名稱       "富味鄉",
+                                #index 2 最後最佳報買價  "23.00",
+                                #index 3 最後最佳報賣價  "23.55",
+                                #index 4 日均價         "23.50",
+                                #index 5 前日均價       "23.54",
+                                #index 6 漲跌           "-0.04",
+                                #index 7 漲跌幅         "-0.17",
+                                #index 8 最高           "23.65",
+                                #index 9 最低           "23.45",
+                                #index 10 最後          "23.55",
+                                #index 11 成交量        "4074",
+                                #index 12 成交金額      "95742",
+                                #index 13 筆數          "5",
+                                #index 14 發行股數      "102098182",
+                                #index 15 上市櫃進度日期 
+                                #index 16 上市櫃進度 
+                                list_stock_price = [ data[ 0 ], data[ 1 ], data[ 4 ].replace( ',', '' ) ] 
+                                all_stock_price.append( list_stock_price )
+                                b_get_ROTC_company_stock_price = True
+            except Exception as e:
+                    pass
+
             if len( all_stock_price ) == 0:
                 print( "no data" )
                 return False 
@@ -4846,7 +4884,7 @@ class MainWindow( QMainWindow ):
             os.makedirs( os.path.dirname( self.stock_price_file_path ), exist_ok = True )
             with open( self.stock_price_file_path, 'w', encoding='utf-8' ) as f:
                 f.write( str_date + '\n' )
-                if b_get_listed_company_stock_price and b_get_OTC_company_stock_price:
+                if b_get_listed_company_stock_price and b_get_OTC_company_stock_price and b_get_ROTC_company_stock_price:
                     f.write( 'O\n' )
                 else:
                     f.write( 'X\n' )
