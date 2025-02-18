@@ -258,7 +258,7 @@ class TransferData( Enum ):
     TOTAL_VALUE_NON_SAVE = 4 #不會記錄
 
 class Utility():
-    def compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, n_minimum_trading_fee, b_etf, b_daying_trading, b_bond ):
+    def compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, n_minimum_trading_fee, n_minimum_odd_trading_fee, b_etf, b_daying_trading, b_bond ):
         f_trading_price = Decimal( str( f_trading_price ) )#原本10.45 * 100000 = 1044999.999999999 然後取 int 就變成1044999，所以改用Decimal
         n_trading_count = Decimal( str( n_trading_count ) )
         f_trading_fee_discount = Decimal( str( f_trading_fee_discount ) )
@@ -271,7 +271,7 @@ class Utility():
                 if n_trading_count % 1000 == 0:
                     n_trading_fee = max( n_minimum_trading_fee, n_trading_fee )
                 else:#零股交易
-                    n_trading_fee = max( 1, n_trading_fee )
+                    n_trading_fee = max( n_minimum_odd_trading_fee, n_trading_fee )
             
             if e_trading_type == TradingType.SELL:
                 if b_etf:
@@ -615,7 +615,7 @@ class StockMinimumTradingFeeEditDialog( QDialog ):
         self.reject()
 
 class StockTradingEditDialog( QDialog ):
-    def __init__( self, str_stock_number, str_stock_name, b_etf, b_discount, f_discount_value, n_minimum_trading_fee, parent = None ):
+    def __init__( self, str_stock_number, str_stock_name, b_etf, b_discount, f_discount_value, n_minimum_trading_fee, n_minimum_odd_trading_fee, parent = None ):
         super().__init__( parent )
 
         self.ui = Ui_StockTradingDialog()
@@ -645,6 +645,7 @@ class StockTradingEditDialog( QDialog ):
         self.ui.qtCancelPushButton.clicked.connect( self.cancel )
         self.b_etf = b_etf
         self.n_minimum_trading_fee = n_minimum_trading_fee
+        self.n_minimum_odd_trading_fee = n_minimum_odd_trading_fee
         self.str_stock_name = str_stock_name
         # self.load_stylesheet("style.css")
         self.dict_trading_data = {}
@@ -750,7 +751,7 @@ class StockTradingEditDialog( QDialog ):
         n_trading_count = self.get_trading_count()
         f_trading_fee_discount = self.get_trading_fee_discount() 
         b_bond = True if '債' in self.str_stock_name else False
-        dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, self.n_minimum_trading_fee, self.b_etf, False, b_bond )
+        dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, self.n_minimum_trading_fee, self.n_minimum_odd_trading_fee, self.b_etf, False, b_bond )
 
         if e_trading_type == TradingType.BUY:
             self.ui.qtTradingValueLineEdit.setText( format( dict_result[ TradingCost.TRADING_VALUE ], ',' ) )
@@ -1469,6 +1470,7 @@ class MainWindow( QMainWindow ):
 
         self.ui.qtEditDividendTransferFeeAction.triggered.connect( self.on_trigger_edit_stock_dividend_transfer_fee )
         self.ui.qtEditMinimumTradingFeeAction.triggered.connect( self.on_trigger_edit_stock_minimum_trading_fee )
+        self.ui.qtEditOddMinimumTradingFeeAction.triggered.connect( self.on_trigger_edit_stock_minimum_odd_trading_fee )
 
         self.ui.qtFromNewToOldAction.setChecked( True )
         self.ui.qtFromOldToNewAction.setChecked( False )
@@ -1932,7 +1934,7 @@ class MainWindow( QMainWindow ):
             str_tab_name = self.add_new_tab_and_table()
             self.dict_all_account_all_stock_trading_data[ str_tab_name ] = {}
             self.dict_all_account_ui_state[ str_tab_name ] = { "discount_checkbox": True, "discount_value": 0.6, "insurance_checkbox": False, "regular_buy_trading_price_type": TradingPriceType.PER_SHARE, "regular_buy_trading_fee_type": TradingFeeType.VARIABLE, "regular_buy_trading_fee_minimum": 1, "regular_buy_trading_fee_constant": 1 }
-            self.dict_all_account_general_data[ str_tab_name ] = { "minimum_trading_fee": 20, "dividend_transfer_fee":{} }
+            self.dict_all_account_general_data[ str_tab_name ] = { "minimum_trading_fee": 20, "minimum_odd_trading_fee": 1, "dividend_transfer_fee":{} }
             self.dict_all_account_cash_transfer_data[ str_tab_name ] = []
         else:
             current_title = self.ui.qtTabWidget.tabText( index )
@@ -2326,6 +2328,28 @@ class MainWindow( QMainWindow ):
                 self.refresh_trading_data_table( dict_per_company_trading_data[ self.str_picked_stock_number ] )
             self.auto_save_trading_data()
 
+    def on_trigger_edit_stock_minimum_odd_trading_fee( self ):
+        n_current_index = self.ui.qtTabWidget.currentIndex()
+        current_title = self.ui.qtTabWidget.tabText( n_current_index )
+        str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
+        n_current_minimum_odd_trading_fee = self.dict_all_account_general_data[ str_tab_widget_name ][ "minimum_odd_trading_fee" ]
+        dialog = StockMinimumTradingFeeEditDialog( current_title, n_current_minimum_odd_trading_fee, self )
+
+        if dialog.exec():
+            n_new_minimum_odd_trading_fee = dialog.n_new_minimum_trading_fee
+            self.dict_all_account_general_data[ str_tab_widget_name ][ "minimum_odd_trading_fee" ] = n_new_minimum_odd_trading_fee
+
+            dict_per_company_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ]
+            for key_account_name, value_dict_per_company_trading_data in self.dict_all_account_all_stock_trading_data.items():
+                if key_account_name == str_tab_widget_name:
+                    for key_stock_name, value_list_trading_data in value_dict_per_company_trading_data.items():
+                        self.process_single_trading_data( key_account_name, key_stock_name )
+
+            self.refresh_stock_list_table()
+            if self.str_picked_stock_number != None:
+                self.refresh_trading_data_table( dict_per_company_trading_data[ self.str_picked_stock_number ] )
+            self.auto_save_trading_data()
+
     def on_trigger_from_new_to_old( self ):
         with ( QSignalBlocker( self.ui.qtFromNewToOldAction ),
                QSignalBlocker( self.ui.qtFromOldToNewAction ) ):
@@ -2426,13 +2450,14 @@ class MainWindow( QMainWindow ):
         b_discount = self.dict_all_account_ui_state[ str_tab_widget_name ][ "discount_checkbox"]
         f_discount_value = self.dict_all_account_ui_state[ str_tab_widget_name ][ "discount_value"]
         n_current_minimum_trading_fee = self.dict_all_account_general_data[ str_tab_widget_name ][ "minimum_trading_fee" ]
+        n_current_minimum_odd_trading_fee = self.dict_all_account_general_data[ str_tab_widget_name ][ "minimum_odd_trading_fee" ]
 
         str_stock_number = self.str_picked_stock_number
         list_stock_name_and_type = self.dict_all_company_number_to_name_and_type[ str_stock_number ]
         str_stock_name = list_stock_name_and_type[ 0 ]
         str_b_etf = self.dict_all_company_number_to_name_and_type[ str_stock_number ][ 1 ]
         b_etf = True if str_b_etf == "True" else False
-        dialog = StockTradingEditDialog( str_stock_number, str_stock_name, b_etf, b_discount, f_discount_value, n_current_minimum_trading_fee, self )
+        dialog = StockTradingEditDialog( str_stock_number, str_stock_name, b_etf, b_discount, f_discount_value, n_current_minimum_trading_fee, n_current_minimum_odd_trading_fee, self )
 
         if dialog.exec():
             dict_trading_data = dialog.dict_trading_data
@@ -2583,7 +2608,8 @@ class MainWindow( QMainWindow ):
                         str_b_etf = self.dict_all_company_number_to_name_and_type[ str_stock_number ][ 1 ]
                         b_etf = True if str_b_etf == "True" else False
                         n_current_minimum_trading_fee = self.dict_all_account_general_data[ str_tab_widget_name ][ "minimum_trading_fee" ]
-                        dialog = StockTradingEditDialog( str_stock_number, str_stock_name, b_etf, True, 0, n_current_minimum_trading_fee, self )
+                        n_current_minimum_odd_trading_fee = self.dict_all_account_general_data[ str_tab_widget_name ][ "minimum_odd_trading_fee" ]
+                        dialog = StockTradingEditDialog( str_stock_number, str_stock_name, b_etf, True, 0, n_current_minimum_trading_fee, n_current_minimum_odd_trading_fee, self )
                         dialog.setup_trading_date( dict_selected_data[ TradingData.TRADING_DATE ] )
                         dialog.setup_trading_type( dict_selected_data[ TradingData.TRADING_TYPE ] )
                         dialog.setup_trading_discount( dict_selected_data[ TradingData.TRADING_FEE_DISCOUNT ] )
@@ -2855,7 +2881,7 @@ class MainWindow( QMainWindow ):
         self.dict_all_account_all_stock_trading_data[ str_tab_name ] = {}
         self.dict_all_account_cash_transfer_data[ str_tab_name ] = []
         self.dict_all_account_ui_state[ str_tab_name ] = { "discount_checkbox": True, "discount_value": 0.6, "insurance_checkbox": False, "regular_buy_trading_price_type": TradingPriceType.PER_SHARE, "regular_buy_trading_fee_type": TradingFeeType.VARIABLE, "regular_buy_trading_fee_minimum": 1, "regular_buy_trading_fee_constant": 1 }
-        self.dict_all_account_general_data[ str_tab_name ] = { "minimum_trading_fee": 20, "dividend_transfer_fee":{} }
+        self.dict_all_account_general_data[ str_tab_name ] = { "minimum_trading_fee": 20, "minimum_odd_trading_fee": 1, "dividend_transfer_fee":{} }
         self.dict_all_account_all_stock_trading_data_INITIAL = copy.deepcopy( self.dict_all_account_all_stock_trading_data )
         self.ui.qtTabWidget.setCurrentIndex( 0 )
         self.pick_up_stock( None )
@@ -2915,7 +2941,7 @@ class MainWindow( QMainWindow ):
                     self.dict_all_account_all_stock_trading_data[ str_tab_name ] = {}
                     self.dict_all_account_cash_transfer_data[ str_tab_name ] = []
                     self.dict_all_account_ui_state[ str_tab_name ] = { "discount_checkbox": True, "discount_value": 0.6, "insurance_checkbox": False, "regular_buy_trading_price_type": TradingPriceType.PER_SHARE, "regular_buy_trading_fee_type": TradingFeeType.VARIABLE, "regular_buy_trading_fee_minimum": 1, "regular_buy_trading_fee_constant": 1 }
-                    self.dict_all_account_general_data[ str_tab_name ] = { "minimum_trading_fee": 20, "dividend_transfer_fee":{} }
+                    self.dict_all_account_general_data[ str_tab_name ] = { "minimum_trading_fee": 20, "minimum_odd_trading_fee": 1, "dividend_transfer_fee":{} }
                 self.ui.qtTabWidget.setCurrentIndex( 0 )
 
             self.process_all_trading_data()
@@ -3104,7 +3130,7 @@ class MainWindow( QMainWindow ):
                 self.dict_all_account_all_stock_trading_data[ str_tab_name ] = {}
                 self.dict_all_account_ui_state[ str_tab_name ] = { "discount_checkbox": True, "discount_value": 0.6, "insurance_checkbox": False, "regular_buy_trading_price_type": TradingPriceType.PER_SHARE, "regular_buy_trading_fee_type": TradingFeeType.VARIABLE, "regular_buy_trading_fee_minimum": 1, "regular_buy_trading_fee_constant": 1 }
                 self.dict_all_account_cash_transfer_data[ str_tab_name ] = []
-                self.dict_all_account_general_data[ str_tab_name ] = { "minimum_trading_fee": 20, "dividend_transfer_fee":{} }
+                self.dict_all_account_general_data[ str_tab_name ] = { "minimum_trading_fee": 20, "minimum_odd_trading_fee": 1, "dividend_transfer_fee":{} }
             self.dict_all_account_all_stock_trading_data_INITIAL = self.dict_all_account_all_stock_trading_data.copy()
             self.ui.qtTabWidget.setCurrentIndex( 0 )
             self.process_all_trading_data()
@@ -3143,6 +3169,7 @@ class MainWindow( QMainWindow ):
                     dict_ui_state[ "regular_buy_trading_fee_constant" ] = 1
                     dict_general_data = {}
                     dict_general_data[ "minimum_trading_fee" ] = 20
+                    dict_general_data[ "minimum_odd_trading_fee" ] = 1
                     dict_general_data[ "dividend_transfer_fee" ] = {}
 
                     dict_per_stock_trading_data = {} 
@@ -3219,6 +3246,7 @@ class MainWindow( QMainWindow ):
                     dict_ui_state[ "regular_buy_trading_fee_constant" ] = item_account[ "trading_fee_constant" ]
                     dict_general_data = {}
                     dict_general_data[ "minimum_trading_fee" ] = 20
+                    dict_general_data[ "minimum_odd_trading_fee" ] = 1
                     dict_general_data[ "dividend_transfer_fee" ] = {}
 
                     dict_per_stock_trading_data = {} 
@@ -3299,7 +3327,8 @@ class MainWindow( QMainWindow ):
                    "regular_buy_trading_fee_type" in item_account and \
                    "regular_buy_trading_fee_minimum" in item_account and \
                    "regular_buy_trading_fee_constant" in item_account and \
-                   "minimum_trading_fee" in item_account:
+                   "minimum_trading_fee" in item_account and \
+                   "minimum_odd_trading_fee" in item_account:
                     dict_per_account_all_stock_trading_data = item_account[ "trading_data" ]
                     dict_ui_state = {}
                     dict_ui_state[ "discount_checkbox" ] = item_account[ "discount_checkbox" ]
@@ -3311,6 +3340,7 @@ class MainWindow( QMainWindow ):
                     dict_ui_state[ "regular_buy_trading_fee_constant" ] = item_account[ "regular_buy_trading_fee_constant" ]
                     dict_general_data = {}
                     dict_general_data[ "minimum_trading_fee" ] = item_account[ "minimum_trading_fee" ]
+                    dict_general_data[ "minimum_odd_trading_fee" ] = item_account[ "minimum_odd_trading_fee" ]
                     dict_general_data[ "dividend_transfer_fee" ] = item_account[ "dividend_transfer_fee" ]
 
                     dict_per_stock_trading_data = {} 
@@ -3458,6 +3488,7 @@ class MainWindow( QMainWindow ):
             export_dict_per_account_all_info[ "discount_checkbox" ] = self.dict_all_account_ui_state[ str_tab_widget_name ][ "discount_checkbox"]
             export_dict_per_account_all_info[ "discount_value" ] = self.dict_all_account_ui_state[ str_tab_widget_name ][ "discount_value"]
             export_dict_per_account_all_info[ "minimum_trading_fee" ] = self.dict_all_account_general_data[ str_tab_widget_name ][ "minimum_trading_fee" ]#現股交易最低手續費
+            export_dict_per_account_all_info[ "minimum_odd_trading_fee" ] = self.dict_all_account_general_data[ str_tab_widget_name ][ "minimum_odd_trading_fee" ]#零股交易最低手續費
             export_dict_per_account_all_info[ "dividend_transfer_fee" ] = self.dict_all_account_general_data[ str_tab_widget_name ][ "dividend_transfer_fee" ]
             export_dict_per_account_all_info[ "insurance_checkbox" ] = qt_insurance_check_box.isChecked()
             export_dict_per_account_all_info[ "regular_buy_trading_price_type" ] = int( self.dict_all_account_ui_state[ str_tab_widget_name ][ "regular_buy_trading_price_type"].value )
@@ -3567,6 +3598,7 @@ class MainWindow( QMainWindow ):
         dict_company_number_to_transfer_fee = self.dict_all_account_general_data[ str_tab_widget_name ][ "dividend_transfer_fee" ]
         n_dividend_transfer_fee = dict_company_number_to_transfer_fee[ str_stock_number ] if str_stock_number in dict_company_number_to_transfer_fee else 10
         n_minimum_trading_fee = self.dict_all_account_general_data[ str_tab_widget_name ][ "minimum_trading_fee" ]
+        n_minimum_odd_trading_fee = self.dict_all_account_general_data[ str_tab_widget_name ][ "minimum_odd_trading_fee" ]
         if b_KY:
             b_extra_insurance_fee = False
 
@@ -3609,7 +3641,7 @@ class MainWindow( QMainWindow ):
                 n_trading_count = item[ TradingData.TRADING_COUNT ]
                 f_trading_fee_discount = item[ TradingData.TRADING_FEE_DISCOUNT ]
                 
-                dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, n_minimum_trading_fee, b_etf, False, b_bond )
+                dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, n_minimum_trading_fee, n_minimum_odd_trading_fee, b_etf, False, b_bond )
                 item[ TradingData.TRADING_VALUE_NON_SAVE ] = dict_result[ TradingCost.TRADING_VALUE ]
                 item[ TradingData.TRADING_FEE_NON_SAVE ] = dict_result[ TradingCost.TRADING_FEE ]
                 item[ TradingData.TRADING_TAX_NON_SAVE ] = dict_result[ TradingCost.TRADING_TAX ]
@@ -3675,7 +3707,7 @@ class MainWindow( QMainWindow ):
                      obj_selling_date >= datetime.datetime.strptime( '2017-04-28', "%Y-%m-%d" ) ): #交易日期在2017-04-28之後。因為在這之後才通過當沖交易稅減半
                     item[ TradingData.IS_REALLY_DAYING_TRADING_NON_SAVE ] = True
                     if n_trading_count <= n_last_buying_count: #賣出數量小於或等於買入數量，表示全部賣出數量都可視為當沖
-                        dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, n_minimum_trading_fee, b_etf, True, b_bond )
+                        dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, n_minimum_trading_fee, n_minimum_odd_trading_fee, b_etf, True, b_bond )
                         item[ TradingData.TRADING_VALUE_NON_SAVE ] = dict_result[ TradingCost.TRADING_VALUE ]
                         item[ TradingData.TRADING_FEE_NON_SAVE ] = dict_result[ TradingCost.TRADING_FEE ]
                         item[ TradingData.TRADING_TAX_NON_SAVE ] = dict_result[ TradingCost.TRADING_TAX ]
@@ -3686,14 +3718,14 @@ class MainWindow( QMainWindow ):
                         n_last_buying_count -= n_trading_count
                     else: #賣出數量大於買入數量，表示只有部分數量都可視為當沖
                         n_trading_count_1 = n_last_buying_count
-                        dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count_1, f_trading_fee_discount, n_minimum_trading_fee, b_etf, True, b_bond )#這部分是當沖
+                        dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count_1, f_trading_fee_discount, n_minimum_trading_fee, n_minimum_odd_trading_fee, b_etf, True, b_bond )#這部分是當沖
                         n_trading_value_1 = dict_result[ TradingCost.TRADING_VALUE ]
                         n_trading_fee_1 = dict_result[ TradingCost.TRADING_FEE ]
                         n_trading_tax_1 = dict_result[ TradingCost.TRADING_TAX ]
                         n_trading_total_cost_1 = dict_result[ TradingCost.TRADING_TOTAL_COST ]
 
                         n_trading_count_2 = n_trading_count - n_last_buying_count
-                        dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count_2, f_trading_fee_discount, n_minimum_trading_fee, b_etf, False, b_bond )#這部分不是當沖
+                        dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count_2, f_trading_fee_discount, n_minimum_trading_fee, n_minimum_odd_trading_fee, b_etf, False, b_bond )#這部分不是當沖
                         n_trading_value_2 = dict_result[ TradingCost.TRADING_VALUE ]
                         n_trading_fee_2 = dict_result[ TradingCost.TRADING_FEE ]
                         n_trading_tax_2 = dict_result[ TradingCost.TRADING_TAX ]
@@ -3710,7 +3742,7 @@ class MainWindow( QMainWindow ):
                         n_last_buying_count = 0
                 else:
                     item[ TradingData.IS_REALLY_DAYING_TRADING_NON_SAVE ] = False
-                    dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, n_minimum_trading_fee, b_etf, False, b_bond )
+                    dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, n_minimum_trading_fee, n_minimum_odd_trading_fee, b_etf, False, b_bond )
                     item[ TradingData.TRADING_VALUE_NON_SAVE ] = dict_result[ TradingCost.TRADING_VALUE ]
                     item[ TradingData.TRADING_FEE_NON_SAVE ] = dict_result[ TradingCost.TRADING_FEE ]
                     item[ TradingData.TRADING_TAX_NON_SAVE ] = dict_result[ TradingCost.TRADING_TAX ]

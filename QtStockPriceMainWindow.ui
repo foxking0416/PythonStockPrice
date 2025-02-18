@@ -230,6 +230,7 @@
     </property>
     <addaction name="qtEditDividendTransferFeeAction"/>
     <addaction name="qtEditMinimumTradingFeeAction"/>
+    <addaction name="qtEditOddMinimumTradingFeeAction"/>
    </widget>
    <addaction name="menu"/>
    <addaction name="menu_4"/>
@@ -360,6 +361,11 @@
   <action name="qtEditMinimumTradingFeeAction">
    <property name="text">
     <string>編輯現股交易最低手續費</string>
+   </property>
+  </action>
+  <action name="qtEditOddMinimumTradingFeeAction">
+   <property name="text">
+    <string>編輯零股交易最低手續費</string>
    </property>
   </action>
  </widget>

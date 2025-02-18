@@ -74,6 +74,8 @@ class Ui_MainWindow(object):
         self.qtEditDividendTransferFeeAction.setObjectName(u"qtEditDividendTransferFeeAction")
         self.qtEditMinimumTradingFeeAction = QAction(MainWindow)
         self.qtEditMinimumTradingFeeAction.setObjectName(u"qtEditMinimumTradingFeeAction")
+        self.qtEditOddMinimumTradingFeeAction = QAction(MainWindow)
+        self.qtEditOddMinimumTradingFeeAction.setObjectName(u"qtEditOddMinimumTradingFeeAction")
         self.scrollArea = QScrollArea(MainWindow)
         self.scrollArea.setObjectName(u"scrollArea")
         self.scrollArea.setWidgetResizable(True)
@@ -215,6 +217,7 @@ class Ui_MainWindow(object):
         self.menu_3.addAction(self.qtCostWithOutDividendAction)
         self.menu_4.addAction(self.qtEditDividendTransferFeeAction)
         self.menu_4.addAction(self.qtEditMinimumTradingFeeAction)
+        self.menu_4.addAction(self.qtEditOddMinimumTradingFeeAction)
 
         self.retranslateUi(MainWindow)
 
@@ -245,6 +248,7 @@ class Ui_MainWindow(object):
         self.qtCostWithOutDividendAction.setText(QCoreApplication.translate("MainWindow", u"\u6210\u672c\u4e0d\u6703\u6263\u9664\u80a1\u5229", None))
         self.qtEditDividendTransferFeeAction.setText(QCoreApplication.translate("MainWindow", u"\u7de8\u8f2f\u80a1\u5229\u532f\u8cbb\u8a2d\u5b9a", None))
         self.qtEditMinimumTradingFeeAction.setText(QCoreApplication.translate("MainWindow", u"\u7de8\u8f2f\u73fe\u80a1\u4ea4\u6613\u6700\u4f4e\u624b\u7e8c\u8cbb", None))
+        self.qtEditOddMinimumTradingFeeAction.setText(QCoreApplication.translate("MainWindow", u"\u7de8\u8f2f\u96f6\u80a1\u4ea4\u6613\u6700\u4f4e\u624b\u7e8c\u8cbb", None))
 #if QT_CONFIG(tooltip)
         self.tab_add.setToolTip(QCoreApplication.translate("MainWindow", u"\u96d9\u64ca\u65b0\u589e", None))
 #endif // QT_CONFIG(tooltip)

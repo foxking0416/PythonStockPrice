@@ -10,6 +10,24 @@
     <height>105</height>
    </rect>
   </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>185</width>
+    <height>105</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>185</width>
+    <height>105</height>
+   </size>
+  </property>
   <property name="windowTitle">
    <string>編輯最低手續費</string>
   </property>
