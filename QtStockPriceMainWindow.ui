@@ -149,6 +149,16 @@
          </property>
         </widget>
        </item>
+       <item>
+        <widget class="QPushButton" name="qtAddStockSplitDataPushButton">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>新增股票分割紀錄(T)</string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </item>
      <item>
