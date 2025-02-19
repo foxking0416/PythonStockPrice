@@ -1405,7 +1405,8 @@ class MainWindow( QMainWindow ):
                   str_initial_data_file = 'TradingData.json', 
                   str_UI_setting_file = 'UISetting.config', 
                   str_stock_number_file = 'StockNumber.txt',
-                  str_stock_price_file = 'StockPrice.txt'  ):
+                  str_stock_price_file = 'StockPrice.txt',
+                  str_stock_pre_price_file = 'PreStockPrice.txt'  ):
         super( MainWindow, self ).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi( self )  # 設置 UI
@@ -1501,6 +1502,7 @@ class MainWindow( QMainWindow ):
         self.UISetting_file_path = os.path.join( g_data_dir, 'StockInventory', str_UI_setting_file )
         self.stock_number_file_path = os.path.join( g_data_dir, 'StockInventory', str_stock_number_file )
         self.stock_price_file_path = os.path.join( g_data_dir, 'StockInventory', str_stock_price_file )
+        self.stock_pre_price_file_path = os.path.join( g_data_dir, 'StockInventory', str_stock_pre_price_file )
 
         self.list_stock_list_table_horizontal_header = [ '總成本', '庫存股數', '平均成本', ' 收盤價', '現值', '總手續費', '總交易稅', '損益', '股利所得', '平均年化報酬率', '自動帶入股利', '匯出', '刪除' ]
         self.pick_up_stock( None )
@@ -1556,22 +1558,26 @@ class MainWindow( QMainWindow ):
         self.download_all_company_stock_number( str_yesterday_date )
         self.set_progress_value( update_progress_callback, 10 )
         
+        list_obj_date = [ obj_yesterday_date, obj_today_date ]
         if n_current_hour < 14:
-            obj_date = obj_yesterday_date
+            list_file_path = [ self.stock_price_file_path, self.stock_price_file_path ]
         else:
-            obj_date = obj_today_date
+            list_file_path = [ self.stock_pre_price_file_path, self.stock_price_file_path ]
 
-        n_retry = 0
-        while n_retry < 30:
-            n_weekday = obj_date.weekday()
-            if n_weekday >= 5:
-                obj_date -= datetime.timedelta( days = ( 2 if n_weekday == 6 else 1 ) )
-                continue
-            str_date = obj_date.strftime( '%Y%m%d' )
-            if self.download_day_stock_price( str_date ):
+        for obj_date, file_path in zip(list_obj_date, list_file_path):
+            if obj_date == obj_today_date and n_current_hour < 14:
                 break
-            obj_date -= datetime.timedelta( days = 1 )
-            n_retry += 1
+            n_retry = 0
+            while n_retry < 30:
+                n_weekday = obj_date.weekday()
+                if n_weekday >= 5:
+                    obj_date -= datetime.timedelta( days = ( 2 if n_weekday == 6 else 1 ) )
+                    continue
+                str_date = obj_date.strftime( '%Y%m%d' )
+                if self.download_day_stock_price( str_date, file_path ):
+                    break
+                obj_date -= datetime.timedelta( days = 1 )
+                n_retry += 1
 
         self.set_progress_value( update_progress_callback, 20 )
         self.download_general_company_all_yearly_dividend_data( 2025, str_yesterday_date )
@@ -1590,6 +1596,7 @@ class MainWindow( QMainWindow ):
         list_date_and_price = self.load_day_stock_price()
         if len( list_date_and_price[ 1 ] ) != 0:
             self.dict_all_company_number_to_price_info = list_date_and_price[ 1 ]
+            self.list_previous_day_data = list_date_and_price[ 2 ]
             parsed_date = datetime.datetime.strptime(list_date_and_price[ 0 ], "%Y%m%d")  # 解析成日期對象
             str_formatted_date = parsed_date.strftime("%m/%d")  # 轉換為 MM/DD 格式
             self.list_stock_list_table_horizontal_header[ 3 ] = str_formatted_date + ' 收盤價'
@@ -3972,6 +3979,10 @@ class MainWindow( QMainWindow ):
                     if key_stock_number in self.dict_all_company_number_to_price_info:
                         try:
                             f_stock_price = float( self.dict_all_company_number_to_price_info[ key_stock_number ] )
+                            if key_stock_number in self.list_previous_day_data:
+                                str_stock_price_color = QBrush( '#777777' )
+                            else:
+                                str_stock_price_color = QBrush( '#FFFFFF' )
                             str_stock_price = format( f_stock_price, "," )
                             n_net_value = int( n_accumulated_inventory * f_stock_price )
                             str_net_value = format( n_net_value, "," )
@@ -4014,6 +4025,8 @@ class MainWindow( QMainWindow ):
                         standard_item.setData( key_stock_number, Qt.UserRole )
                         if column == len( list_data ) - 2:
                             standard_item.setForeground( QBrush( str_color ) )
+                        if column == len( list_data ) - 6:
+                            standard_item.setForeground( QBrush( str_stock_price_color ) )
                         table_model.setItem( index_row, column, standard_item ) 
 
                     use_auto_dividend_item = QStandardItem()
@@ -4745,10 +4758,10 @@ class MainWindow( QMainWindow ):
                         dict_company_number_to_name[ ele[ 0 ] ] = [ ele[ 1 ], ele[ 2 ] ]
         return dict_company_number_to_name
         
-    def download_day_stock_price( self, str_date ):
+    def download_day_stock_price( self, str_date, stock_price_file_path ):
         b_need_to_download = False
-        if os.path.exists( self.stock_price_file_path ):
-            with open( self.stock_price_file_path, 'r', encoding='utf-8' ) as f:
+        if os.path.exists( stock_price_file_path ):
+            with open( stock_price_file_path, 'r', encoding='utf-8' ) as f:
                 data = f.readlines()
                 if data[ 0 ].strip() != str_date or data[ 1 ].strip() != 'O':
                     if self.check_internet_via_http(): #日期不一樣，且又有網路時才重新下載，不然就用舊的
@@ -4881,8 +4894,8 @@ class MainWindow( QMainWindow ):
                 return False 
             
             # 確保目錄存在，若不存在則遞歸創建
-            os.makedirs( os.path.dirname( self.stock_price_file_path ), exist_ok = True )
-            with open( self.stock_price_file_path, 'w', encoding='utf-8' ) as f:
+            os.makedirs( os.path.dirname( stock_price_file_path ), exist_ok = True )
+            with open( stock_price_file_path, 'w', encoding='utf-8' ) as f:
                 f.write( str_date + '\n' )
                 if b_get_listed_company_stock_price and b_get_OTC_company_stock_price and b_get_ROTC_company_stock_price:
                     f.write( 'O\n' )
@@ -4894,8 +4907,9 @@ class MainWindow( QMainWindow ):
     
     def load_day_stock_price( self ):
         dict_company_number_to_price_info = {}
-        if os.path.exists( self.stock_price_file_path ):
-            with open( self.stock_price_file_path, 'r', encoding='utf-8' ) as f:
+        pre_data = []
+        if os.path.exists( self.stock_pre_price_file_path ):#先下載前一天的股價
+            with open( self.stock_pre_price_file_path, 'r', encoding='utf-8' ) as f:
                 data = f.readlines()
                 for i, row in enumerate( data ):
                     if i == 0:
@@ -4903,7 +4917,28 @@ class MainWindow( QMainWindow ):
                     elif i > 1:
                         ele = row.strip().split( ',' )
                         dict_company_number_to_price_info[ ele[ 0 ] ] = ele[ 2 ]
-        return [ str_date, dict_company_number_to_price_info ]
+                        pre_data.append( ele[ 0 ] )
+        today_data = []
+        obj_today_date = datetime.datetime.today()
+        str_today_date = obj_today_date.strftime( "%Y%m%d" )
+        b_display_old_data = False
+        if os.path.exists( self.stock_price_file_path ):#若當天股價已經出來的話就覆蓋過去
+            with open( self.stock_price_file_path, 'r', encoding='utf-8' ) as f:
+                data = f.readlines()
+                for i, row in enumerate( data ):
+                    if i == 0:
+                        str_date = row.strip()
+                        b_display_old_data = str_date == str_today_date
+                    elif i > 1:
+                        ele = row.strip().split( ',' )
+                        dict_company_number_to_price_info[ ele[ 0 ] ] = ele[ 2 ]
+                        today_data.append( ele[ 0 ] )
+        list_within_pre_data_but_without_today_data = []
+        if b_display_old_data:
+            list_within_pre_data_but_without_today_data = list( set( pre_data ) - set( today_data ) )
+
+
+        return [ str_date, dict_company_number_to_price_info, list_within_pre_data_but_without_today_data ]
 
     def process_output_file_path( self, str_output_path, list_file_exist, str_folder_name, str_file_name, n_year, n_season, b_overwrite, b_unit_test ):
         str_season = ''
