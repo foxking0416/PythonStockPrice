@@ -3590,7 +3590,7 @@ class MainWindow( QMainWindow ):
             export_list_all_account_all_stock_trading_data.append( export_dict_per_account_all_info )
 
         with open( file_path, 'w', encoding='utf-8' ) as f:
-            f.write( "v1.1.1" '\n' )
+            f.write( "v1.1.0" '\n' )
             json.dump( export_list_all_account_all_stock_trading_data, f, ensure_ascii=False, indent=4 )
     
     def save_share_UI_state( self ): 
