@@ -82,6 +82,12 @@ class Ui_Dialog(object):
 
         self.verticalLayout.addLayout(self.horizontalLayout_2)
 
+        self.label = QLabel(Dialog)
+        self.label.setObjectName(u"label")
+        self.label.setStyleSheet(u"color: rgb(255, 0, 0);")
+
+        self.verticalLayout.addWidget(self.label)
+
 
         self.retranslateUi(Dialog)
 
@@ -93,5 +99,6 @@ class Ui_Dialog(object):
         self.qtGroupNameLabel.setText(QCoreApplication.translate("Dialog", u"TextLabel", None))
         self.qtAddStockPushButton.setText(QCoreApplication.translate("Dialog", u"\u65b0\u589e\u80a1\u7968", None))
         self.qtOkPushButton.setText(QCoreApplication.translate("Dialog", u"\u5132\u5b58", None))
+        self.label.setText(QCoreApplication.translate("Dialog", u"\u6c92\u6709\u7279\u5225\u8a2d\u5b9a\u7684\u516c\u53f8\u7684\u80a1\u5229\u532f\u8cbb\uff0c\u9810\u8a2d\u5c31\u662f10\u5143", None))
     # retranslateUi
 

@@ -107,6 +107,16 @@
      </item>
     </layout>
    </item>
+   <item>
+    <widget class="QLabel" name="label">
+     <property name="styleSheet">
+      <string notr="true">color: rgb(255, 0, 0);</string>
+     </property>
+     <property name="text">
+      <string>沒有特別設定的公司的股利匯費，預設就是10元</string>
+     </property>
+    </widget>
+   </item>
   </layout>
  </widget>
  <resources/>
