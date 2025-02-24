@@ -23,6 +23,7 @@ from QtDuplicateOptionDialog import Ui_Dialog as Ui_DuplicateOptionDialog
 from QtStockDividendTransferFeeEditDialog import Ui_Dialog as Ui_StockDividendTransferFeeEditDialog
 from QtStockDividendTransferFeeEditSpinboxDialog import Ui_Dialog as Ui_StockDividendTransferFeeEditSpinboxDialog
 from QtStockMinimumTradingFeeEditDialog import Ui_Dialog as Ui_StockMinimumTradingFeeEditDialog
+from QtAboutDialog import Ui_Dialog as Ui_AboutDialog
 from QtSaveCheckDialog import Ui_Dialog as Ui_SaveCheckDialog
 from PySide6.QtWidgets import QApplication, QMainWindow, QDialog, QButtonGroup, QMessageBox, QStyledItemDelegate, QFileDialog, QHeaderView, QVBoxLayout, QHBoxLayout, \
                               QLabel, QLineEdit, QDialogButtonBox, QTabBar, QWidget, QTableView, QComboBox, QPushButton, QSizePolicy, QSpacerItem, QCheckBox, QDoubleSpinBox, \
@@ -64,6 +65,7 @@ from scipy.optimize import newton
 # pyside6-uic QtStockDividendTransferFeeEditDialog.ui -o QtStockDividendTransferFeeEditDialog.py
 # pyside6-uic QtStockDividendTransferFeeEditSpinboxDialog.ui -o QtStockDividendTransferFeeEditSpinboxDialog.py
 # pyside6-uic QtStockMinimumTradingFeeEditDialog.ui -o QtStockMinimumTradingFeeEditDialog.py
+# pyside6-uic QtAboutDialog.ui -o QtAboutDialog.py
 
 # 下載上市櫃公司股利資料
 # https://mopsov.twse.com.tw/mops/web/t108sb27
@@ -1404,6 +1406,14 @@ class CashTransferEditDialog( QDialog ):
     def cancel( self ):
         self.reject()
 
+class AboutDialog( QDialog ):
+    def __init__( self, parent = None ):
+        super().__init__( parent )
+
+        self.ui = Ui_AboutDialog()
+        self.ui.setupUi( self )
+        self.setWindowIcon( window_icon )
+
 class Worker( QObject ):
     progress = Signal( int )  # Signal to emit progress updates
     finished = Signal( dict )  # Signal to emit the result when done
@@ -1553,6 +1563,8 @@ class MainWindow( QMainWindow ):
         self.ui.qtCostWithOutDividendAction.setChecked( False )
         self.ui.qtCostWithInDividendAction.triggered.connect( self.on_trigger_cost_with_in_dividend )
         self.ui.qtCostWithOutDividendAction.triggered.connect( self.on_trigger_cost_with_out_dividend )
+
+        self.ui.qtAboutAction.triggered.connect( self.on_trigger_about )
         
         self.trading_data_json_file_path = os.path.join( g_data_dir, 'StockInventory', str_initial_data_file )
         self.UISetting_file_path = os.path.join( g_data_dir, 'StockInventory', str_UI_setting_file )
@@ -2489,6 +2501,11 @@ class MainWindow( QMainWindow ):
                 self.ui.qtCostWithOutDividendAction.setChecked( True )
                 self.refresh_stock_list_table()
                 self.on_change_display_mode()
+
+    def on_trigger_about( self ):
+        dialog = AboutDialog( self )
+        if dialog.exec():
+            pass
 
     def on_change_display_mode( self ): 
         if self.str_picked_stock_number != None:
@@ -3597,7 +3614,7 @@ class MainWindow( QMainWindow ):
             export_list_all_account_all_stock_trading_data.append( export_dict_per_account_all_info )
 
         with open( file_path, 'w', encoding='utf-8' ) as f:
-            f.write( "v1.1.0" '\n' )
+            f.write( "v2.0.0" '\n' )
             json.dump( export_list_all_account_all_stock_trading_data, f, ensure_ascii=False, indent=4 )
     
     def save_share_UI_state( self ): 

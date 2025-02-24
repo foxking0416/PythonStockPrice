@@ -244,9 +244,9 @@
    </widget>
    <widget class="QMenu" name="menu_5">
     <property name="title">
-     <string>版本</string>
+     <string>說明</string>
     </property>
-    <addaction name="actionv1_1_0"/>
+    <addaction name="qtAboutAction"/>
    </widget>
    <addaction name="menu"/>
    <addaction name="menu_4"/>
@@ -385,9 +385,9 @@
     <string>編輯零股交易最低手續費</string>
    </property>
   </action>
-  <action name="actionv1_1_0">
+  <action name="qtAboutAction">
    <property name="text">
-    <string>v1.1.0</string>
+    <string>關於</string>
    </property>
   </action>
  </widget>
