@@ -66,7 +66,7 @@ from scipy.optimize import newton
 # pyside6-uic QtStockMinimumTradingFeeEditDialog.ui -o QtStockMinimumTradingFeeEditDialog.py
 
 # 下載上市櫃公司股利資料
-# https://mops.twse.com.tw/mops/web/t108sb27
+# https://mopsov.twse.com.tw/mops/web/t108sb27
 
 # 以下兩個網站都可以下載"上市"ETF的股利
 # https://www.twse.com.tw/zh/products/securities/etf/products/div.html
@@ -5116,7 +5116,7 @@ class MainWindow( QMainWindow ):
 
         if b_need_to_download:
             # 請求的 URL
-            url = 'https://mops.twse.com.tw/mops/web/ajax_t108sb27'
+            url = 'https://mopsov.twse.com.tw/mops/web/ajax_t108sb27'
 
             # POST 請求的數據
             payload = {
