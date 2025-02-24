@@ -242,10 +242,17 @@
     <addaction name="qtEditMinimumTradingFeeAction"/>
     <addaction name="qtEditOddMinimumTradingFeeAction"/>
    </widget>
+   <widget class="QMenu" name="menu_5">
+    <property name="title">
+     <string>版本</string>
+    </property>
+    <addaction name="actionv1_1_0"/>
+   </widget>
    <addaction name="menu"/>
    <addaction name="menu_4"/>
    <addaction name="menu_2"/>
    <addaction name="menu_3"/>
+   <addaction name="menu_5"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="qtNewFileAction">
@@ -376,6 +383,11 @@
   <action name="qtEditOddMinimumTradingFeeAction">
    <property name="text">
     <string>編輯零股交易最低手續費</string>
+   </property>
+  </action>
+  <action name="actionv1_1_0">
+   <property name="text">
+    <string>v1.1.0</string>
    </property>
   </action>
  </widget>
