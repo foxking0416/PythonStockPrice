@@ -46,6 +46,7 @@ from scipy.optimize import newton
 # pyinstaller --hidden-import "babel.numbers" --add-data "resources;./resources" --onefile --console StockPriceMainWindow.py
 # pyinstaller --hidden-import "babel.numbers" --add-data "resources;./resources" --noconsole StockPriceMainWindow.py
 # pyinstaller --hidden-import "babel.numbers" --add-data "resources;./resources" --add-data "StockInventory/Dividend;./StockInventory/Dividend" --noconsole StockPriceMainWindow.py
+# pyinstaller --hidden-import "babel.numbers" --add-data "resources;./resources" --add-data "StockInventory/Dividend;./StockInventory/Dividend" --console StockPriceMainWindow.py
 
 # 要把.ui檔變成.py
 # cd D:\_2.code\PythonStockPrice
@@ -2834,17 +2835,23 @@ class MainWindow( QMainWindow ):
                 if str_data == "買進":
                     color_fill = PatternFill( start_color = "DA9694", end_color = "DA9694", fill_type="solid")
                     cell.fill = color_fill
-                elif str_data == "賣出":
+                elif str_data == "定期定額買進":
+                    color_fill = PatternFill( start_color = "FF99FF", end_color = "FF99FF", fill_type="solid")
+                    cell.fill = color_fill
+                elif str_data == "賣出" or str_data == "當沖賣":
                     color_fill = PatternFill( start_color = "76933C", end_color = "76933C", fill_type="solid")
                     cell.fill = color_fill
                 elif str_data == "股利分配":
                     color_fill = PatternFill( start_color = "8DB4E2", end_color = "8DB4E2", fill_type="solid")
                     cell.fill = color_fill
-                elif str_data == "減資":
+                elif str_data == "現金減資" or str_data == "虧損減資":
                     color_fill = PatternFill( start_color = "B1A0C7", end_color = "B1A0C7", fill_type="solid")
                     cell.fill = color_fill
                 elif str_data == "增資":
                     color_fill = PatternFill( start_color = "FABF8F", end_color = "FABF8F", fill_type="solid")
+                    cell.fill = color_fill
+                elif str_data == "股票分割":
+                    color_fill = PatternFill( start_color = "732BF5", end_color = "732BF5", fill_type="solid")
                     cell.fill = color_fill
 
                 str_cell = get_column_letter( n_cell_column ) + str( n_cell_row )
