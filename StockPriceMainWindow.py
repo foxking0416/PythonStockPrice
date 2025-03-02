@@ -4019,6 +4019,7 @@ class MainWindow( QMainWindow ):
         display_type_combobox = self.ui.qtTabWidget.currentWidget().findChild( QComboBox, "DisplayTypeComboBox")
         n_total_cost = 0
         n_total_inventory = 0
+        n_total_inventory_deduct_trading_fee_and_tax = 0
         n_total_profit = 0
         if table_view:
             table_model = table_view.model()
@@ -4103,9 +4104,23 @@ class MainWindow( QMainWindow ):
                             str_stock_price = format( f_stock_price, "," )
                             n_net_value = int( n_accumulated_inventory * f_stock_price )
                             str_net_value = format( n_net_value, "," )
-                            n_profit = n_net_value - n_accumulated_cost
+
+                            n_trading_fee = int( n_net_value * Decimal( '0.001425' ) )
+                            str_b_etf = list_stock_name_and_type[ 1 ]
+                            b_etf = True if str_b_etf == "True" else False
+                            b_bond = True if '債' in str_stock_name else False
+                            if b_etf:
+                                if b_bond:
+                                    n_trading_tax = 0
+                                else:
+                                    n_trading_tax = int( n_net_value * Decimal( '0.001' ) )
+                            else:
+                                n_trading_tax = int( n_net_value * Decimal( '0.003' ) )
+
+                            n_profit = n_net_value - n_trading_fee - n_trading_tax - n_accumulated_cost
                             n_total_profit += n_profit
                             n_total_inventory += n_net_value
+                            n_total_inventory_deduct_trading_fee_and_tax += ( n_net_value - n_trading_fee - n_trading_tax )
                             n_accumulated_dividend_profit = int( n_accumulated_stock_dividend * f_stock_price ) + n_accumulated_cash_dividend
                             str_profit = format( n_profit, "," )
                             if n_profit > 0:
@@ -4228,9 +4243,24 @@ class MainWindow( QMainWindow ):
                 list_per_stock_trading_date.append( obj_trading_date )
 
             if n_accumulated_inventory > 0:
+                
                 f_stock_price = float( self.dict_all_company_number_to_price_info[ key_stock_number ] )
                 n_net_value = int( n_accumulated_inventory * f_stock_price )
-                list_per_stock_trading_flows.append( n_net_value )    
+                n_trading_fee = int( n_net_value * Decimal( '0.001425' ) )
+
+                list_stock_name_and_type = self.dict_all_company_number_to_name_and_type[ key_stock_number ]
+                str_stock_name = list_stock_name_and_type[ 0 ]
+                str_b_etf = list_stock_name_and_type[ 1 ]
+                b_etf = True if str_b_etf == "True" else False
+                b_bond = True if '債' in str_stock_name else False
+                if b_etf:
+                    if b_bond:
+                        n_trading_tax = 0
+                    else:
+                        n_trading_tax = int( n_net_value * Decimal( '0.001' ) )
+                else:
+                    n_trading_tax = int( n_net_value * Decimal( '0.003' ) )
+                list_per_stock_trading_flows.append( n_net_value - n_trading_fee - n_trading_tax )    
                 list_per_stock_trading_date.append( obj_current_date )
             str_profit_ratio = "-"
             if len( list_per_stock_trading_flows ) > 1:
@@ -4253,7 +4283,7 @@ class MainWindow( QMainWindow ):
             table_model.setItem( index_row, len( self.list_stock_list_table_horizontal_header ) - 4, standard_item ) 
             index_row += 1
 
-        list_total_trading_flows.append( n_total_inventory )
+        list_total_trading_flows.append( n_total_inventory_deduct_trading_fee_and_tax )
         list_total_trading_date.append( obj_current_date )
         if len( list_total_trading_flows ) > 1:
             try:
