@@ -4812,8 +4812,6 @@ class MainWindow( QMainWindow ):
                         total_company_count += 1
                         if '\u3000' in data[ 0 ]:
                             modified_data = data[ 0 ].split("\u3000")
-                            if '-創' in modified_data[ 1 ]:
-                                continue
                             modified_data_after_strip = [ modified_data[ 0 ].strip(), modified_data[ 1 ].strip(), b_ETF ]
                             tds.append( modified_data_after_strip )
             except Exception as e:
@@ -4838,8 +4836,6 @@ class MainWindow( QMainWindow ):
                         total_company_count += 1
                         if '\u3000' in data[ 0 ]:
                             modified_data = data[ 0 ].split("\u3000")
-                            if '-創' in modified_data[ 1 ]:
-                                continue
                             modified_data_after_strip = [ modified_data[ 0 ].strip(), modified_data[ 1 ].strip(), b_ETF ]
                             tds.append( modified_data_after_strip )
             except Exception as e:
@@ -4857,8 +4853,6 @@ class MainWindow( QMainWindow ):
                         total_company_count += 1
                         if '\u3000' in data[ 0 ]:
                             modified_data = data[ 0 ].split("\u3000")
-                            if '-創' in modified_data[ 1 ]:
-                                continue
                             modified_data_after_strip = [ modified_data[ 0 ].strip(), modified_data[ 1 ].strip(), False ]
                             tds.append( modified_data_after_strip )
             except Exception as e:
