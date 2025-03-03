@@ -24,6 +24,7 @@ from QtStockDividendTransferFeeEditDialog import Ui_Dialog as Ui_StockDividendTr
 from QtStockDividendTransferFeeEditSpinboxDialog import Ui_Dialog as Ui_StockDividendTransferFeeEditSpinboxDialog
 from QtStockMinimumTradingFeeEditDialog import Ui_Dialog as Ui_StockMinimumTradingFeeEditDialog
 from QtAboutDialog import Ui_Dialog as Ui_AboutDialog
+from QtSelectFolderDialog import Ui_Dialog as Ui_SelectFolderDialog
 from QtSaveCheckDialog import Ui_Dialog as Ui_SaveCheckDialog
 from PySide6.QtWidgets import QApplication, QMainWindow, QDialog, QButtonGroup, QMessageBox, QStyledItemDelegate, QFileDialog, QHeaderView, QVBoxLayout, QHBoxLayout, \
                               QLabel, QLineEdit, QDialogButtonBox, QTabBar, QWidget, QTableView, QComboBox, QPushButton, QSizePolicy, QSpacerItem, QCheckBox, QDoubleSpinBox, \
@@ -66,6 +67,7 @@ from scipy.optimize import newton
 # pyside6-uic QtStockDividendTransferFeeEditSpinboxDialog.ui -o QtStockDividendTransferFeeEditSpinboxDialog.py
 # pyside6-uic QtStockMinimumTradingFeeEditDialog.ui -o QtStockMinimumTradingFeeEditDialog.py
 # pyside6-uic QtAboutDialog.ui -o QtAboutDialog.py
+# pyside6-uic QtSelectFolderDialog.ui -o QtSelectFolderDialog.py
 
 # 下載上市櫃公司股利資料
 # https://mopsov.twse.com.tw/mops/web/t108sb27
@@ -132,15 +134,16 @@ print( "g_exe_dir :" + g_exe_dir ) #開發模式下是D:\_2.code\PythonStockPric
 print( "g_exe2_dir :" + g_exe2_dir ) #開發模式下是C:\Users\foxki\AppData\Local\Programs\Python\Python312 #打包模式後是:D:\_2.code\PythonStockPrice\dist
 print( "g_abs_dir :" + g_abs_dir ) #開發模式下是D:\_2.code\PythonStockPrice #打包模式後是C:\Users\foxki\AppData\Local\Temp\_MEI60962 最後那個資料夾是暫時性的隨機名稱
 
+reg_settings = QSettings( "FoxInfo", "StockInventory" )
 
 if getattr( sys, 'frozen', False ):
     # PyInstaller 打包後執行時
     g_exe_root_dir = os.path.dirname(__file__) #使用--onefile打包 C:\Users\foxki\AppData\Local\Temp\_MEI60962 否則就是 D:\_2.code\PythonStockPrice\dist\StockPriceMainWindow\_internal
-    g_data_dir = os.path.join( g_user_dir, "AppData", "Local", "FoxInfo" ) #C:\Users\foxki\AppData\Local\FoxInfo 
+    g_data_dir = reg_settings.value( "TemporaryFolderPath", os.path.join( g_user_dir, "AppData", "Local", "FoxInfo" ) ) #C:\Users\foxki\AppData\Local\FoxInfo 
 else:
     # VSCode執行 Python 腳本時
     g_exe_root_dir = os.path.dirname( os.path.abspath(__file__) )
-    g_data_dir = g_exe_root_dir
+    g_data_dir = reg_settings.value( "TemporaryFolderPathDebug", g_exe_root_dir ) #D:\_2.code\PythonStockPrice
 
 #region 設定 icon path
 window_icon_file_path = os.path.join( g_exe_root_dir, 'resources\\FoxInfo.svg' ) 
@@ -1414,6 +1417,60 @@ class AboutDialog( QDialog ):
         self.ui.setupUi( self )
         self.setWindowIcon( window_icon )
 
+class SelectFolderDialog( QDialog ):
+    def __init__( self, parent = None ):
+        super().__init__( parent )
+
+        self.ui = Ui_SelectFolderDialog()
+        self.ui.setupUi( self )
+        self.setWindowIcon( window_icon )
+
+        
+        if getattr( sys, 'frozen', False ):
+            # PyInstaller 打包後執行時
+            str_folder_path = reg_settings.value( "TemporaryFolderPath", g_data_dir )
+        else:
+            str_folder_path = reg_settings.value( "TemporaryFolderPathDebug", g_data_dir )
+        self.ui.qtFolderPathLineEdit.setText( str_folder_path )
+        self.folder_path = str_folder_path
+
+        self.ui.qtSelectPushButton.clicked.connect( self.select_folder )
+        self.ui.qtReturnToDefaultPushButton.clicked.connect( self.return_to_default )
+        self.ui.qtOkPushButton.clicked.connect( self.accept_data )
+        self.ui.qtCancelPushButton.clicked.connect( self.cancel )
+    
+    def select_folder( self ):
+        folder_path = self.open_existing_directory_dialog()
+        if folder_path:
+            self.ui.qtFolderPathLineEdit.setText( folder_path )
+            self.folder_path = folder_path
+
+    def return_to_default( self ):
+        if getattr( sys, 'frozen', False ):
+            # PyInstaller 打包後執行時
+            folder_path = os.path.join( g_user_dir, "AppData", "Local", "FoxInfo" ) #C:\Users\foxki\AppData\Local\FoxInfo 
+        else:
+            # VSCode執行 Python 腳本時
+            folder_path = os.path.dirname( os.path.abspath(__file__) )
+
+        self.ui.qtFolderPathLineEdit.setText( folder_path )
+        self.folder_path = folder_path
+
+    def open_existing_directory_dialog( self ): 
+        # 彈出讀取檔案對話框
+        file_path = QFileDialog.getExistingDirectory(
+            self,
+            "選擇資料夾",  # 對話框標題
+            "",           # 預設路徑
+        )
+        return file_path
+
+    def accept_data( self ):
+        self.accept()
+
+    def cancel( self ):
+        self.reject()
+
 class Worker( QObject ):
     progress = Signal( int )  # Signal to emit progress updates
     finished = Signal( dict )  # Signal to emit the result when done
@@ -1482,8 +1539,7 @@ class MainWindow( QMainWindow ):
             self.progress_bar.setGeometry( 400, 350, 300, 25 )  # Adjust position and size as needed
             self.progress_bar.setMaximum( 100 )
             self.progress_bar.setVisible( False )
-        self.settings = QSettings( "FoxInfo", "StockInventory" )
-        size = self.settings.value( "window_size", QSize( 1250, 893 ) )
+        size = reg_settings.value( "window_size", QSize( 1250, 893 ) )
         self.resize(size)
 
         self.ui.qtTabWidget.currentChanged.connect( self.on_tab_current_changed )
@@ -1534,6 +1590,7 @@ class MainWindow( QMainWindow ):
         self.ui.qtImportFullAction.triggered.connect( self.on_import_full_action_triggered )
         self.ui.qtImportSingleStockAction.setShortcut( "Ctrl+I" )
         self.ui.qtImportSingleStockAction.triggered.connect( self.on_import_single_stock_action_triggered )
+        self.ui.qtSetTemporaryFilePathAction.triggered.connect( self.on_set_temporary_file_path_action_triggered )
 
         self.ui.qtEditDividendTransferFeeAction.triggered.connect( self.on_trigger_edit_stock_dividend_transfer_fee )
         self.ui.qtEditMinimumTradingFeeAction.triggered.connect( self.on_trigger_edit_stock_minimum_common_trading_fee )
@@ -1596,12 +1653,11 @@ class MainWindow( QMainWindow ):
 
     def closeEvent(self, event):
         """當視窗關閉時，儲存當前大小"""
-        self.settings.setValue("window_size", self.size())
+        reg_settings.setValue("window_size", self.size())
         super().closeEvent(event)
 
     def copy_required_data( self ):
         source_folder = os.path.join( g_exe_root_dir, 'StockInventory\\Dividend' ) 
-        g_data_dir = os.path.join( g_user_dir, "AppData", "Local", "FoxInfo" )
         destination_folder = os.path.join( g_data_dir, 'StockInventory\\Dividend' ) 
 
         os.makedirs( destination_folder, exist_ok = True )
@@ -3227,6 +3283,39 @@ class MainWindow( QMainWindow ):
             self.clear_per_stock_trading_table()
             self.update_button_enable_disable_status()
             self.auto_save_trading_data()
+
+    def on_set_temporary_file_path_action_triggered( self ):
+        dialog = SelectFolderDialog( self )
+        if dialog.exec():
+            global g_data_dir
+            if getattr( sys, 'frozen', False ):
+                # PyInstaller 打包後執行時
+                reg_settings.setValue("TemporaryFolderPath", dialog.folder_path )
+            else:
+                reg_settings.setValue("TemporaryFolderPathDebug", dialog.folder_path )
+
+            source_folder = os.path.join( g_data_dir, 'StockInventory' ) 
+            destination_folder = os.path.join( dialog.folder_path, 'StockInventory' ) 
+
+            for root, dirs, files in os.walk( source_folder ):
+                # 計算對應的目的地資料夾路徑
+                relative_path = os.path.relpath( root, source_folder )
+                destination_path = os.path.join( destination_folder, relative_path )
+
+                # 確保目標資料夾存在
+                os.makedirs( destination_path, exist_ok = True )
+
+                for filename in files:
+                    if filename.endswith('.txt') or filename.endswith('.json') or filename.endswith('.config'):
+                        source_file = os.path.join( root, filename )
+                        destination_file = os.path.join( destination_path, filename )
+
+                        # 複製檔案
+                        shutil.copy2( source_file, destination_file )
+
+            g_data_dir = dialog.folder_path
+            self.trading_data_json_file_path = os.path.join( g_data_dir, 'StockInventory', 'TradingData.json' )
+            self.UISetting_file_path = os.path.join( g_data_dir, 'StockInventory', 'UISetting.config' )
 
     def load_initialize_data( self ): 
         with QSignalBlocker( self.ui.qtTabWidget ):

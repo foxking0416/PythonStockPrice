@@ -210,6 +210,8 @@
     <addaction name="qtExportCurrentGroupAction"/>
     <addaction name="qtImportFullAction"/>
     <addaction name="qtImportSingleStockAction"/>
+    <addaction name="separator"/>
+    <addaction name="qtSetTemporaryFilePathAction"/>
    </widget>
    <widget class="QMenu" name="menu_2">
     <property name="title">
@@ -388,6 +390,11 @@
   <action name="qtAboutAction">
    <property name="text">
     <string>關於</string>
+   </property>
+  </action>
+  <action name="qtSetTemporaryFilePathAction">
+   <property name="text">
+    <string>設定暫存檔位置</string>
    </property>
   </action>
  </widget>
