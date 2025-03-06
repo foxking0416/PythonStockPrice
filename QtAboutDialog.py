@@ -43,7 +43,7 @@ class Ui_Dialog(object):
 
     def retranslateUi(self, Dialog):
         Dialog.setWindowTitle(QCoreApplication.translate("Dialog", u"\u95dc\u65bc", None))
-        self.label.setText(QCoreApplication.translate("Dialog", u"\u7248\u672c v2.0.0", None))
+        self.label.setText(QCoreApplication.translate("Dialog", u"\u7248\u672c v2.0.1", None))
         self.label_2.setText(QCoreApplication.translate("Dialog", u"E-Mail\uff1afoxking0416@gmail.com", None))
     # retranslateUi
 
