@@ -2223,7 +2223,6 @@ class MainWindow( QMainWindow ):
         for index_row,( key_stock_number, value ) in enumerate( dict_per_account_all_stock_trading_data.items() ):
             list_stock_number_all.append( key_stock_number )
         
-        
         table_view = self.ui.qtTabWidget.currentWidget().findChild( QTableView, "StockListTableView" )
         list_stock_number_visible = []
         list_visible_stock_index_of_all = []
@@ -2237,10 +2236,8 @@ class MainWindow( QMainWindow ):
                     list_stock_number_visible.append( str_stock_number )
                     list_visible_stock_index_of_all.append( list_stock_number_all.index( str_stock_number ) )
 
-
         element = list_stock_number_visible.pop( n_old_visual_index )
         list_stock_number_visible.insert( n_new_visual_index, element )
-
 
         for idx, val in zip( list_visible_stock_index_of_all, list_stock_number_visible ):
             list_stock_number_all[ idx ] = val
@@ -2248,7 +2245,6 @@ class MainWindow( QMainWindow ):
         dict_all_stock_trading_data_new = {}
         for index_row, str_stock_number in enumerate( list_stock_number_all ):
             dict_all_stock_trading_data_new[ str_stock_number ] = dict_per_account_all_stock_trading_data[ str_stock_number ]
-
 
         self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ] = dict_all_stock_trading_data_new
         self.refresh_stock_list_table()
