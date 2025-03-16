@@ -1495,7 +1495,7 @@ class CustomSortModel( QStandardItemModel ):
             item = self.item(row, column)
             try:
                 # 嘗試轉換為整數，去掉逗號
-                value = float(item.text().replace(",", ""))
+                value = float( item.text().replace(",", "").replace("%", "") )
             except ( ValueError, AttributeError ):
                 # 如果轉換失敗，跳過此項目
                 value = float('-inf') if order.value == 1 else float('inf')
