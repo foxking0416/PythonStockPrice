@@ -4219,11 +4219,13 @@ class MainWindow( QMainWindow ):
                             str_net_value = "N/A"
                             str_profit = "N/A"
                             str_color = QBrush( '#FFFFFF' )
+                            str_stock_price_color = QBrush( '#FFFFFF' )
                     else:
                         str_stock_price = "N/A"
                         str_net_value = "N/A"
                         str_profit = "N/A"
                         str_color = QBrush( '#FFFFFF' )
+                        str_stock_price_color = QBrush( '#FFFFFF' )
 
                     list_data = [ format( n_accumulated_cost, "," ),      #總成本
                                   str_accumulated_inventory,              #庫存股數
@@ -4289,6 +4291,12 @@ class MainWindow( QMainWindow ):
         for key_stock_number, value_list_trading_data in dict_per_account_all_stock_trading_data.items():
             dict_trading_data_last = value_list_trading_data[ len( value_list_trading_data ) - 1 ] #取最後一筆交易資料，因為最後一筆交易資料的庫存等內容才是所有累計的結果
             if key_stock_number not in self.dict_all_company_number_to_price_info:
+                standard_item = QStandardItem( "-" )
+                standard_item.setTextAlignment( Qt.AlignHCenter | Qt.AlignVCenter )
+                standard_item.setFlags( standard_item.flags() & ~Qt.ItemIsEditable )
+                standard_item.setData( key_stock_number, Qt.UserRole )
+                table_model.setItem( index_row, len( self.list_stock_list_table_horizontal_header ) - 4, standard_item ) 
+                index_row += 1
                 continue
 
             n_accumulated_inventory = 0
