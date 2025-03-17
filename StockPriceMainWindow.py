@@ -4153,6 +4153,11 @@ class MainWindow( QMainWindow ):
 
                     list_stock_name_and_type = self.dict_all_company_number_to_name_and_type[ key_stock_number ]
                     str_stock_name = list_stock_name_and_type[ 0 ]
+                    b_suspend_company = key_stock_number in self.dict_all_suspend_company_number_to_name_and_type
+                    if b_suspend_company:
+                        str_stock_number_and_name = f"{key_stock_number} {str_stock_name} (已下市)"
+                    else:
+                        str_stock_number_and_name = f"{key_stock_number} {str_stock_name}"
                     list_vertical_labels.append( "   " )
                     n_total_trading_fee = 0
                     n_total_trading_tax = 0
@@ -4234,7 +4239,7 @@ class MainWindow( QMainWindow ):
                         str_color = QBrush( '#FFFFFF' )
                         str_stock_price_color = QBrush( '#FFFFFF' )
 
-                    list_data = [ f"{key_stock_number} {str_stock_name}",          #股票名稱
+                    list_data = [ str_stock_number_and_name,              #股票名稱
                                   format( n_accumulated_cost, "," ),      #總成本
                                   str_accumulated_inventory,              #庫存股數
                                   format( f_average_cost, "," ),          #平均成本
