@@ -1494,8 +1494,12 @@ class CustomSortModel( QStandardItemModel ):
         for row in range(self.rowCount()):
             item = self.item(row, column)
             try:
-                # 嘗試轉換為整數，去掉逗號
-                value = float( item.text().replace(",", "").replace("%", "") )
+                if column == 0:
+                    str_stock_number_and_name = item.text()
+                    value = str_stock_number_and_name.split(" ")[0]
+                else:
+                    # 嘗試轉換為整數，去掉逗號
+                    value = float( item.text().replace(",", "").replace("%", "") )
             except ( ValueError, AttributeError ):
                 # 如果轉換失敗，跳過此項目
                 value = float('-inf') if order.value == 1 else float('inf')
@@ -1629,7 +1633,7 @@ class MainWindow( QMainWindow ):
         self.stock_price_file_path = os.path.join( g_data_dir, 'StockInventory', str_stock_price_file )
         self.stock_pre_price_file_path = os.path.join( g_data_dir, 'StockInventory', str_stock_pre_price_file )
 
-        self.list_stock_list_table_horizontal_header = [ '總成本', '庫存股數', '平均成本', ' 收盤價', '現值', '總手續費', '總交易稅', '損益', '股利所得', '平均年化報酬率', '自動帶入股利', '匯出', '刪除' ]
+        self.list_stock_list_table_horizontal_header = [ '股票代碼', '總成本', '庫存股數', '平均成本', ' 收盤價', '現值', '總手續費', '總交易稅', '損益', '股利所得', '平均年化報酬率', '自動帶入股利', '匯出', '刪除' ]
         self.pick_up_stock( None )
         self.dict_all_account_ui_state = {}
         self.dict_all_account_general_data = {}
@@ -1723,7 +1727,7 @@ class MainWindow( QMainWindow ):
             self.list_previous_day_data = list_date_and_price[ 2 ]
             parsed_date = datetime.datetime.strptime(list_date_and_price[ 0 ], "%Y%m%d")  # 解析成日期對象
             str_formatted_date = parsed_date.strftime("%m/%d")  # 轉換為 MM/DD 格式
-            self.list_stock_list_table_horizontal_header[ 3 ] = str_formatted_date + ' 收盤價'
+            self.list_stock_list_table_horizontal_header[ 4 ] = str_formatted_date + ' 收盤價'
 
         self.dict_auto_stock_yearly_dividned = self.load_general_company_all_yearly_dividend_data( 2010, b_unit_test )
         self.dict_auto_stock_listed_etf_yearly_dividned = self.load_listed_etf_all_yearly_dividend_data( 2010, b_unit_test )
@@ -1973,7 +1977,7 @@ class MainWindow( QMainWindow ):
         uiqt_stock_list_table_view.setModel( stock_list_model )
         uiqt_stock_list_table_view.setItemDelegate( delegate )
         uiqt_stock_list_table_view.clicked.connect( lambda index: self.on_stock_list_table_item_clicked( index, stock_list_model ) )
-        uiqt_stock_list_table_view.horizontalHeader().sortIndicatorChanged.connect( self.update_stock_list_vertical_header )
+        # uiqt_stock_list_table_view.horizontalHeader().sortIndicatorChanged.connect( self.update_stock_list_vertical_header )
         uiqt_stock_list_table_view.horizontalHeader().sectionDoubleClicked.connect( self.refresh_stock_list_table)
 
         uiqt_stock_input_line_edit.textChanged.connect( self.on_stock_input_text_changed ) 
@@ -2184,8 +2188,8 @@ class MainWindow( QMainWindow ):
         if table_view:
             table_model = table_view.model()
             for row in range( table_model.rowCount() ):
-                header_text = table_model.verticalHeaderItem( row ).text()
-                str_stock_number = header_text.split(" ")[0]
+                str_stock_number_and_name = table_model.item( row, 0 ).text()
+                str_stock_number = str_stock_number_and_name.split(" ")[0]
                 if str_stock_number == str_first_four_chars:
                     index = table_model.index( row, 0 )
                     table_view.scrollTo( index, QTableView.PositionAtTop )
@@ -2230,8 +2234,8 @@ class MainWindow( QMainWindow ):
             table_model = table_view.model()
 
             for row in range( table_model.rowCount() ):
-                header_text = table_model.verticalHeaderItem( row ).text()
-                str_stock_number = header_text.split(" ")[0]
+                str_stock_number_and_name = table_model.item( row, 0 ).text()
+                str_stock_number = str_stock_number_and_name.split(" ")[0]
                 if str_stock_number in list_stock_number_all:
                     list_stock_number_visible.append( str_stock_number )
                     list_visible_stock_index_of_all.append( list_stock_number_all.index( str_stock_number ) )
@@ -2257,9 +2261,8 @@ class MainWindow( QMainWindow ):
 
             str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
             dict_per_account_all_stock_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ]
-            header_text = table_model.verticalHeaderItem( n_logical_index ).text()
-            str_stock_number = header_text.split(" ")[0]
-
+            str_stock_number_and_name = table_model.item( n_logical_index, 0 ).text()
+            str_stock_number = str_stock_number_and_name.split(" ")[0]
             if str_stock_number in dict_per_account_all_stock_trading_data:
                 if str_stock_number != self.str_picked_stock_number:
                     self.pick_up_stock( str_stock_number )
@@ -2278,9 +2281,8 @@ class MainWindow( QMainWindow ):
         if item is not None:
             n_column = index.column()  # 獲取列索引
             n_row = index.row()  # 獲取行索引
-            header_text = table_model.verticalHeaderItem( index.row() ).text()
-            str_stock_number = header_text.split(" ")[0]
-            
+            str_stock_number_and_name = table_model.item( index.row() , 0 ).text()
+            str_stock_number = str_stock_number_and_name.split(" ")[0]
             if n_column == len( self.list_stock_list_table_horizontal_header ) - 3:#自動帶入股利按鈕
                 list_trading_data = dict_per_account_all_stock_trading_data[ str_stock_number ]
                 list_trading_data[ 0 ][ TradingData.USE_AUTO_DIVIDEND_DATA ] = not list_trading_data[ 0 ][ TradingData.USE_AUTO_DIVIDEND_DATA ]
@@ -2300,7 +2302,7 @@ class MainWindow( QMainWindow ):
                     list_trading_data = dict_per_account_all_stock_trading_data[ str_stock_number ]
                     self.refresh_trading_data_table( list_trading_data )
             elif n_column == len( self.list_stock_list_table_horizontal_header ) - 1:#刪除按鈕
-                result = self.show_warning_message_box_with_ok_cancel_button( "警告", f"確定要刪掉『{header_text}』的所有資料嗎?" )
+                result = self.show_warning_message_box_with_ok_cancel_button( "警告", f"確定要刪掉『{str_stock_number}』的所有資料嗎?" )
                 if result:
                     del dict_per_account_all_stock_trading_data[ str_stock_number ]
                     self.pick_up_stock( None )
@@ -4112,9 +4114,9 @@ class MainWindow( QMainWindow ):
                 table_model.clear()
 
             if self.ui.qtUse1ShareUnitAction.isChecked():
-                self.list_stock_list_table_horizontal_header[ 1 ] = "庫存股數"
+                self.list_stock_list_table_horizontal_header[ 2 ] = "庫存股數"
             else:
-                self.list_stock_list_table_horizontal_header[ 1 ] = "庫存張數"
+                self.list_stock_list_table_horizontal_header[ 2 ] = "庫存張數"
             table_model.setHorizontalHeaderLabels( self.list_stock_list_table_horizontal_header )
             
             with QSignalBlocker( table_view.horizontalHeader() ):
@@ -4146,7 +4148,7 @@ class MainWindow( QMainWindow ):
 
                     list_stock_name_and_type = self.dict_all_company_number_to_name_and_type[ key_stock_number ]
                     str_stock_name = list_stock_name_and_type[ 0 ]
-                    list_vertical_labels.append( f"{key_stock_number} {str_stock_name}" )
+                    list_vertical_labels.append( "   " )
                     n_total_trading_fee = 0
                     n_total_trading_tax = 0
                     for index, item_trading_data in enumerate( value_list_stock_trading_data ):
@@ -4227,7 +4229,8 @@ class MainWindow( QMainWindow ):
                         str_color = QBrush( '#FFFFFF' )
                         str_stock_price_color = QBrush( '#FFFFFF' )
 
-                    list_data = [ format( n_accumulated_cost, "," ),      #總成本
+                    list_data = [ f"{key_stock_number} {str_stock_name}",          #股票名稱
+                                  format( n_accumulated_cost, "," ),      #總成本
                                   str_accumulated_inventory,              #庫存股數
                                   format( f_average_cost, "," ),          #平均成本
                                   str_stock_price,                        #當前股價
