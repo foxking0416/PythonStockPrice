@@ -4247,7 +4247,10 @@ class MainWindow( QMainWindow ):
                                     
                     for column, data in enumerate( list_data ):
                         standard_item = QStandardItem( data )
-                        standard_item.setTextAlignment( Qt.AlignHCenter | Qt.AlignVCenter )
+                        if column == 0:
+                            standard_item.setTextAlignment( Qt.AlignLeft | Qt.AlignVCenter )
+                        else:
+                            standard_item.setTextAlignment( Qt.AlignHCenter | Qt.AlignVCenter )
                         standard_item.setFlags( standard_item.flags() & ~Qt.ItemIsEditable )
                         standard_item.setData( key_stock_number, Qt.UserRole )
                         if column == len( list_data ) - 2:
