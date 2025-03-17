@@ -1531,6 +1531,7 @@ class MainWindow( QMainWindow ):
                   str_initial_data_file = 'TradingData.json', 
                   str_UI_setting_file = 'UISetting.config', 
                   str_stock_number_file = 'StockNumber.txt',
+                  str_suspend_stock_number_file = 'SuspendStockNumber.txt',
                   str_stock_price_file = 'StockPrice.txt',
                   str_stock_pre_price_file = 'PreStockPrice.txt'  ):
         super( MainWindow, self ).__init__()
@@ -1630,6 +1631,7 @@ class MainWindow( QMainWindow ):
         self.trading_data_json_file_path = os.path.join( g_data_dir, 'StockInventory', str_initial_data_file )
         self.UISetting_file_path = os.path.join( g_data_dir, 'StockInventory', str_UI_setting_file )
         self.stock_number_file_path = os.path.join( g_data_dir, 'StockInventory', str_stock_number_file )
+        self.suspend_stock_number_file_path = os.path.join( g_data_dir, 'StockInventory', str_suspend_stock_number_file )
         self.stock_price_file_path = os.path.join( g_data_dir, 'StockInventory', str_stock_price_file )
         self.stock_pre_price_file_path = os.path.join( g_data_dir, 'StockInventory', str_stock_pre_price_file )
 
@@ -1684,6 +1686,7 @@ class MainWindow( QMainWindow ):
 
         self.set_progress_value( update_progress_callback, 0 )
         self.download_all_company_stock_number( str_yesterday_date )
+        self.download_all_suspend_company_stock_number( str_yesterday_date )
         self.set_progress_value( update_progress_callback, 10 )
         
         list_obj_date = [ obj_yesterday_date, obj_today_date ]
@@ -1721,6 +1724,8 @@ class MainWindow( QMainWindow ):
             self.download_all_required_data( update_progress_callback )
         
         self.dict_all_company_number_to_name_and_type = self.load_all_company_stock_number()
+        self.dict_all_suspend_company_number_to_name_and_type = self.load_all_suspend_company_stock_number()
+        self.dict_all_company_number_to_name_and_type.update( self.dict_all_suspend_company_number_to_name_and_type )
         list_date_and_price = self.load_day_stock_price()
         if len( list_date_and_price[ 1 ] ) != 0:
             self.dict_all_company_number_to_price_info = list_date_and_price[ 1 ]
@@ -4918,7 +4923,6 @@ class MainWindow( QMainWindow ):
                 soup = BeautifulSoup( res.text, "lxml" )
                 tr = soup.findAll( 'tr' )
 
-                total_company_count = 0
                 for raw in tr:
                     data = [ td.get_text() for td in raw.findAll("td" )]
                     if len( data ) == 7 and ( data[ 5 ] == 'ESVUFR' or 
@@ -4935,7 +4939,6 @@ class MainWindow( QMainWindow ):
                                               data[ 5 ] == 'CEOIEU' or
                                               data[ 5 ] == 'CEOIRU' ): 
                         b_ETF = False if data[ 5 ] == 'ESVUFR' else True
-                        total_company_count += 1
                         if '\u3000' in data[ 0 ]:
                             modified_data = data[ 0 ].split("\u3000")
                             modified_data_after_strip = [ modified_data[ 0 ].strip(), modified_data[ 1 ].strip(), b_ETF ]
@@ -4959,7 +4962,6 @@ class MainWindow( QMainWindow ):
                                               data[ 5 ] == 'CEOIEU' or
                                               data[ 5 ] == 'CEOIRU' ): 
                         b_ETF = False if data[ 5 ] == 'ESVUFR' else True
-                        total_company_count += 1
                         if '\u3000' in data[ 0 ]:
                             modified_data = data[ 0 ].split("\u3000")
                             modified_data_after_strip = [ modified_data[ 0 ].strip(), modified_data[ 1 ].strip(), b_ETF ]
@@ -4976,7 +4978,6 @@ class MainWindow( QMainWindow ):
                 for raw in tr:
                     data = [ td.get_text() for td in raw.findAll("td") ]
                     if len( data ) == 7 and data[ 5 ] == 'ESVUFR': 
-                        total_company_count += 1
                         if '\u3000' in data[ 0 ]:
                             modified_data = data[ 0 ].split("\u3000")
                             modified_data_after_strip = [ modified_data[ 0 ].strip(), modified_data[ 1 ].strip(), False ]
@@ -4995,7 +4996,7 @@ class MainWindow( QMainWindow ):
                     f.write( str( row[ 0 ] ) + ',' + str( row[ 1 ] ) + ',' + str( row[ 2 ] ) + '\n' )
                     dict_company_number_to_name.pop( row[ 0 ], None )
     
-                for key_number, value_name_and_etf in dict_company_number_to_name.items():
+                for key_number, value_name_and_etf in dict_company_number_to_name.items(): #保留已下市公司的資料
                     f.write( str( key_number ) + ',' + str( value_name_and_etf[ 0 ] ) + ',' + str( value_name_and_etf[ 1 ] ) + '\n' )
 
     def load_all_company_stock_number( self ):
@@ -5011,6 +5012,66 @@ class MainWindow( QMainWindow ):
                         dict_company_number_to_name[ ele[ 0 ] ] = [ ele[ 1 ], ele[ 2 ] ]
         return dict_company_number_to_name
         
+    def download_all_suspend_company_stock_number( self, str_date ):
+        dict_suspend_company_number_to_name = {}
+        b_need_to_download = False
+        if os.path.exists( self.suspend_stock_number_file_path ):
+            with open( self.suspend_stock_number_file_path, 'r', encoding='utf-8' ) as f:
+                data = f.readlines()
+                for i, row in enumerate( data ):
+                    if i == 0:
+                        if row.strip() != str_date:
+                            if self.check_internet_via_http(): #日期不一樣，且又有網路時才重新下載，不然就用舊的
+                                b_need_to_download = True
+                        else:
+                            break
+                    else:
+                        ele = row.strip().split( ',' )
+                        dict_suspend_company_number_to_name[ ele[ 0 ] ] = [ ele[ 1 ], ele[ 2 ], ele[ 3 ] ]
+        else:
+            b_need_to_download = True
+
+
+        if b_need_to_download:
+            tds = []
+            companyNymUrl = "https://www.twse.com.tw/rwd/zh/company/suspendListing"
+            try:
+                res = self.send_get_request( companyNymUrl )
+                json_data = res.json()
+                if "data" in json_data:
+                    for item in json_data["data"]:
+                        modified_data_after_strip = [ item[ 2 ].strip(), item[ 1 ].strip(), False, item[ 0 ].strip() ]
+                        tds.append( modified_data_after_strip )
+            except Exception as e:
+                pass
+
+            if len( tds ) == 0:
+                return
+            
+            # 確保目錄存在，若不存在則遞歸創建
+            os.makedirs( os.path.dirname( self.suspend_stock_number_file_path ), exist_ok = True )
+            with open( self.suspend_stock_number_file_path, 'w', encoding='utf-8' ) as f:
+                f.write( str_date + '\n' )
+                for row in tds:
+                    f.write( str( row[ 0 ] ) + ',' + str( row[ 1 ] ) + ',' + str( row[ 2 ] ) + ',' + str( row[ 3 ] ) + '\n' )
+                    dict_suspend_company_number_to_name.pop( row[ 0 ], None )
+    
+                for key_number, value_name_and_etf in dict_suspend_company_number_to_name.items():
+                    f.write( str( key_number ) + ',' + str( value_name_and_etf[ 0 ] ) + ',' + str( value_name_and_etf[ 1 ] ) + ',' + str( value_name_and_etf[ 2 ] ) + '\n' )
+
+    def load_all_suspend_company_stock_number( self ):
+        dict_suspend_company_number_to_name = {}
+        if os.path.exists( self.suspend_stock_number_file_path ):
+            with open( self.suspend_stock_number_file_path, 'r', encoding='utf-8' ) as f:
+                data = f.readlines()
+                for i, row in enumerate( data ):
+                    if i == 0:
+                        continue
+                    else:
+                        ele = row.strip().split( ',' )
+                        dict_suspend_company_number_to_name[ ele[ 0 ] ] = [ ele[ 1 ], ele[ 2 ] ]
+        return dict_suspend_company_number_to_name
+
     def download_day_stock_price( self, str_date, stock_price_file_path ):
         b_need_to_download = False
         if os.path.exists( stock_price_file_path ):
@@ -5869,6 +5930,7 @@ def run_app():
                         'TradingData.json',
                         'UISetting.config',
                         'StockNumber.txt',
+                        'SuspendStockNumber.txt',
                         'StockPrice.txt' )
 
     window.show()
