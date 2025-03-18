@@ -1562,7 +1562,8 @@ class MainWindow( QMainWindow ):
         self.per_stock_trading_data_model.setVerticalHeaderLabels( self.get_trading_data_header() )
         self.ui.qtTradingDataTableView.setModel( self.per_stock_trading_data_model )
         self.ui.qtTradingDataTableView.setItemDelegate( delegate )
-        self.ui.qtTradingDataTableView.horizontalHeader().hide()
+        self.ui.qtTradingDataTableView.horizontalHeader().setSectionsMovable( True )
+        self.ui.qtTradingDataTableView.horizontalHeader().sectionMoved.connect( self.on_trading_data_table_horizontal_header_section_moved )
         self.ui.qtTradingDataTableView.verticalHeader().setSectionResizeMode( QHeaderView.Fixed )
         self.ui.qtTradingDataTableView.clicked.connect( lambda index: self.on_trading_data_table_item_clicked( index, self.per_stock_trading_data_model ) )
         for row in range( len( self.get_trading_data_header() ) ):
@@ -2840,6 +2841,68 @@ class MainWindow( QMainWindow ):
                         self.refresh_stock_list_table()
                         self.refresh_trading_data_table( sorted_list )
                         self.auto_save_trading_data()
+
+    def on_trading_data_table_horizontal_header_section_moved( self, logicalIndex, n_old_visual_index, n_new_visual_index ):
+        center_point = self.ui.qtTradingDataTableView.viewport().rect().center()
+        center_index = self.ui.qtTradingDataTableView.indexAt( center_point )
+
+        n_target_visual_index = n_new_visual_index
+
+        str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
+        dict_per_account_all_stock_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ]
+        list_trading_data = dict_per_account_all_stock_trading_data[ self.str_picked_stock_number ]
+
+        n_old_table_model_index = self.per_stock_trading_data_model.item( 0, n_old_visual_index ).data( Qt.UserRole )
+        n_old_data_index = -1
+        for index, dict_selected_data in enumerate( list_trading_data ):
+            if dict_selected_data[ TradingData.SORTED_INDEX_NON_SAVE ] == n_old_table_model_index:
+                n_old_data_index = index
+                break
+        if n_old_data_index == -1:
+            header = self.ui.qtTradingDataTableView.horizontalHeader()
+            with QSignalBlocker( header ):
+                header.moveSection( n_new_visual_index, n_old_visual_index )
+            return
+
+        per_trading_data_old = list_trading_data[ n_old_data_index ]
+        e_trading_type_old = per_trading_data_old[ TradingData.TRADING_TYPE ]
+        str_trading_date_old = per_trading_data_old[ TradingData.TRADING_DATE ]
+
+        step = -1 if n_target_visual_index > n_old_visual_index else 1
+        while n_target_visual_index != n_old_visual_index:
+            n_new_table_model_index = self.per_stock_trading_data_model.item( 0, n_target_visual_index ).data( Qt.UserRole )
+            n_new_data_index = -1
+            for index, dict_selected_data in enumerate( list_trading_data ):
+                if dict_selected_data[ TradingData.SORTED_INDEX_NON_SAVE ] == n_new_table_model_index:
+                    n_new_data_index = index
+                    break
+            if n_new_data_index == -1:
+                header = self.ui.qtTradingDataTableView.horizontalHeader()
+                with QSignalBlocker( header ):
+                    header.moveSection( n_new_visual_index, n_old_visual_index )
+                return
+            
+            per_trading_data_new = list_trading_data[ n_new_data_index ]
+            e_trading_type_new = per_trading_data_new[ TradingData.TRADING_TYPE ]
+            str_trading_date_new = per_trading_data_new[ TradingData.TRADING_DATE ]
+            if e_trading_type_old == e_trading_type_new and str_trading_date_old == str_trading_date_new:
+                break
+            n_target_visual_index += step
+
+        if n_target_visual_index != n_old_visual_index:
+            element = list_trading_data.pop( n_old_data_index )
+            list_trading_data.insert( n_new_data_index, element )
+
+            dict_per_account_all_stock_trading_data[ self.str_picked_stock_number ] = list_trading_data
+
+            sorted_list = self.process_single_trading_data( str_tab_widget_name, self.str_picked_stock_number )
+            self.refresh_stock_list_table()
+            self.refresh_trading_data_table( sorted_list )
+            self.auto_save_trading_data()
+        else:
+            header = self.ui.qtTradingDataTableView.horizontalHeader()
+            with QSignalBlocker( header ):
+                header.moveSection( n_new_visual_index, n_old_visual_index )
 
     def export_trading_data_to_excel( self, worksheet, str_stock_number, str_stock_name, list_trading_data ): 
         all_thin_border = Border(
@@ -4521,7 +4584,6 @@ class MainWindow( QMainWindow ):
     def refresh_trading_data_table( self, sorted_list ):
         self.clear_per_stock_trading_table()
         self.per_stock_trading_data_model.setVerticalHeaderLabels( self.get_trading_data_header() )
-        self.ui.qtTradingDataTableView.horizontalHeader().hide()
 
         if self.ui.qtFromNewToOldAction.isChecked():
             loop_list = sorted_list[::-1]
@@ -4530,6 +4592,7 @@ class MainWindow( QMainWindow ):
 
         b_use_auto_dividend = sorted_list[ 0 ][ TradingData.USE_AUTO_DIVIDEND_DATA ]
         column = 0
+        
         for dict_per_trading_data in loop_list:
             e_trading_type = dict_per_trading_data[ TradingData.TRADING_TYPE ]
             if e_trading_type == TradingType.TEMPLATE:
@@ -4567,6 +4630,7 @@ class MainWindow( QMainWindow ):
                     standard_item.setBackground( QBrush( '#732BF5' ) )
                 standard_item.setTextAlignment( Qt.AlignHCenter | Qt.AlignVCenter )
                 standard_item.setFlags( standard_item.flags() & ~Qt.ItemIsEditable )
+                standard_item.setData( dict_per_trading_data[ TradingData.SORTED_INDEX_NON_SAVE ], Qt.UserRole )
                 self.per_stock_trading_data_model.setItem( row, column, standard_item ) 
 
             if e_trading_type != TradingType.DIVIDEND or not b_use_auto_dividend:
@@ -4586,7 +4650,9 @@ class MainWindow( QMainWindow ):
                     if column == 9:
                         break
             column += 1
-
+        list_horizontal_header = [ "" ] * column
+        self.per_stock_trading_data_model.setHorizontalHeaderLabels( list_horizontal_header )
+        
         for row in range( len( self.get_trading_data_header() ) ):
             if row == 10 or row == 11:
                 self.ui.qtTradingDataTableView.setRowHeight( row, 40 )
