@@ -8581,7 +8581,7 @@ v2.0.0
                     "trading_price_type": 0,
                     "per_share_trading_price": 20.7,
                     "total_trading_price": 0,
-                    "trading_count": 2000,
+                    "trading_count": 8000,
                     "trading_fee_type": 0,
                     "trading_fee_discount": 0.6,
                     "trading_fee_minimum": 0,
@@ -8600,7 +8600,7 @@ v2.0.0
                     "trading_price_type": 0,
                     "per_share_trading_price": 20.7,
                     "total_trading_price": 0,
-                    "trading_count": 8000,
+                    "trading_count": 2000,
                     "trading_fee_type": 0,
                     "trading_fee_discount": 0.6,
                     "trading_fee_minimum": 0,
@@ -9797,7 +9797,7 @@ v2.0.0
                     "trading_date": "2021-07-13",
                     "trading_type": 2,
                     "trading_price_type": 0,
-                    "per_share_trading_price": 56.3,
+                    "per_share_trading_price": 56.4,
                     "total_trading_price": 0,
                     "trading_count": 1000,
                     "trading_fee_type": 0,
@@ -9816,7 +9816,7 @@ v2.0.0
                     "trading_date": "2021-07-13",
                     "trading_type": 2,
                     "trading_price_type": 0,
-                    "per_share_trading_price": 56.4,
+                    "per_share_trading_price": 56.3,
                     "total_trading_price": 0,
                     "trading_count": 1000,
                     "trading_fee_type": 0,
@@ -9984,7 +9984,7 @@ v2.0.0
                     "custom_extra_insurance_fee": -1,
                     "capital_reduction_per_share": 0,
                     "capital_reduction_type": 0,
-                    "daying_trading": false
+                    "daying_trading": true
                 },
                 {
                     "trading_date": "2022-06-30",
@@ -10003,7 +10003,7 @@ v2.0.0
                     "custom_extra_insurance_fee": -1,
                     "capital_reduction_per_share": 0,
                     "capital_reduction_type": 0,
-                    "daying_trading": false
+                    "daying_trading": true
                 },
                 {
                     "trading_date": "2022-07-01",
@@ -10541,7 +10541,7 @@ v2.0.0
                     "custom_extra_insurance_fee": -1,
                     "capital_reduction_per_share": 0,
                     "capital_reduction_type": 0,
-                    "daying_trading": false
+                    "daying_trading": true
                 },
                 {
                     "trading_date": "2024-03-13",
@@ -10560,7 +10560,7 @@ v2.0.0
                     "custom_extra_insurance_fee": -1,
                     "capital_reduction_per_share": 0,
                     "capital_reduction_type": 0,
-                    "daying_trading": false
+                    "daying_trading": true
                 },
                 {
                     "trading_date": "2024-06-07",
@@ -14724,9 +14724,9 @@ v2.0.0
                     "trading_date": "2023-05-17",
                     "trading_type": 1,
                     "trading_price_type": 0,
-                    "per_share_trading_price": 53.5,
+                    "per_share_trading_price": 53.3,
                     "total_trading_price": 0,
-                    "trading_count": 8000,
+                    "trading_count": 10000,
                     "trading_fee_type": 0,
                     "trading_fee_discount": 0.6,
                     "trading_fee_minimum": 0,
@@ -14743,9 +14743,9 @@ v2.0.0
                     "trading_date": "2023-05-17",
                     "trading_type": 1,
                     "trading_price_type": 0,
-                    "per_share_trading_price": 53.3,
+                    "per_share_trading_price": 53.5,
                     "total_trading_price": 0,
-                    "trading_count": 10000,
+                    "trading_count": 8000,
                     "trading_fee_type": 0,
                     "trading_fee_discount": 0.6,
                     "trading_fee_minimum": 0,
@@ -17999,7 +17999,7 @@ v2.0.0
                     "trading_date": "2023-06-27",
                     "trading_type": 2,
                     "trading_price_type": 0,
-                    "per_share_trading_price": 59.5,
+                    "per_share_trading_price": 61.1,
                     "total_trading_price": 0,
                     "trading_count": 1000,
                     "trading_fee_type": 0,
@@ -18018,7 +18018,7 @@ v2.0.0
                     "trading_date": "2023-06-27",
                     "trading_type": 2,
                     "trading_price_type": 0,
-                    "per_share_trading_price": 61.1,
+                    "per_share_trading_price": 59.5,
                     "total_trading_price": 0,
                     "trading_count": 1000,
                     "trading_fee_type": 0,
@@ -20480,7 +20480,7 @@ v2.0.0
                     "custom_extra_insurance_fee": -1,
                     "capital_reduction_per_share": 0,
                     "capital_reduction_type": 0,
-                    "daying_trading": false
+                    "daying_trading": true
                 },
                 {
                     "trading_date": "2024-03-14",
@@ -20499,7 +20499,7 @@ v2.0.0
                     "custom_extra_insurance_fee": -1,
                     "capital_reduction_per_share": 0,
                     "capital_reduction_type": 0,
-                    "daying_trading": false
+                    "daying_trading": true
                 },
                 {
                     "trading_date": "2024-03-15",
@@ -20720,25 +20720,6 @@ v2.0.0
                     "daying_trading": false
                 },
                 {
-                    "trading_date": "2024-01-07",
-                    "trading_type": 1,
-                    "trading_price_type": 0,
-                    "per_share_trading_price": 42.4,
-                    "total_trading_price": 0,
-                    "trading_count": 20000,
-                    "trading_fee_type": 0,
-                    "trading_fee_discount": 0.6,
-                    "trading_fee_minimum": 0,
-                    "trading_fee_constant": 0,
-                    "dividend_value_type": 0,
-                    "stock_dividend": 0,
-                    "cash_dividend": 0,
-                    "custom_extra_insurance_fee": -1,
-                    "capital_reduction_per_share": 0,
-                    "capital_reduction_type": 0,
-                    "daying_trading": false
-                },
-                {
                     "trading_date": "2024-05-08",
                     "trading_type": 2,
                     "trading_price_type": 0,
@@ -20878,6 +20859,25 @@ v2.0.0
                     "per_share_trading_price": 48.5,
                     "total_trading_price": 0,
                     "trading_count": 3000,
+                    "trading_fee_type": 0,
+                    "trading_fee_discount": 0.6,
+                    "trading_fee_minimum": 0,
+                    "trading_fee_constant": 0,
+                    "dividend_value_type": 0,
+                    "stock_dividend": 0,
+                    "cash_dividend": 0,
+                    "custom_extra_insurance_fee": -1,
+                    "capital_reduction_per_share": 0,
+                    "capital_reduction_type": 0,
+                    "daying_trading": false
+                },
+                {
+                    "trading_date": "2024-07-09",
+                    "trading_type": 1,
+                    "trading_price_type": 0,
+                    "per_share_trading_price": 42.4,
+                    "total_trading_price": 0,
+                    "trading_count": 20000,
                     "trading_fee_type": 0,
                     "trading_fee_discount": 0.6,
                     "trading_fee_minimum": 0,
@@ -22191,7 +22191,7 @@ v2.0.0
                     "trading_date": "2023-06-02",
                     "trading_type": 2,
                     "trading_price_type": 0,
-                    "per_share_trading_price": 90.7,
+                    "per_share_trading_price": 90.8,
                     "total_trading_price": 0,
                     "trading_count": 1000,
                     "trading_fee_type": 0,
@@ -22210,7 +22210,7 @@ v2.0.0
                     "trading_date": "2023-06-02",
                     "trading_type": 2,
                     "trading_price_type": 0,
-                    "per_share_trading_price": 90.8,
+                    "per_share_trading_price": 90.7,
                     "total_trading_price": 0,
                     "trading_count": 1000,
                     "trading_fee_type": 0,
