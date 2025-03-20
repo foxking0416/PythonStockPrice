@@ -65,6 +65,11 @@ class Ui_Dialog(object):
 
         self.horizontalLayout_2.addWidget(self.qtDateEdit)
 
+        self.qtWeekdayLabel = QLabel(Dialog)
+        self.qtWeekdayLabel.setObjectName(u"qtWeekdayLabel")
+
+        self.horizontalLayout_2.addWidget(self.qtWeekdayLabel)
+
         self.horizontalSpacer_2 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
         self.horizontalLayout_2.addItem(self.horizontalSpacer_2)
@@ -220,6 +225,7 @@ class Ui_Dialog(object):
         self.qtStockNumberLabel.setText(QCoreApplication.translate("Dialog", u"TextLabel", None))
         self.qtStockNameLabel.setText(QCoreApplication.translate("Dialog", u"TextLabel", None))
         self.label_3.setText(QCoreApplication.translate("Dialog", u"\u65e5\u671f", None))
+        self.qtWeekdayLabel.setText(QCoreApplication.translate("Dialog", u"TextLabel", None))
         self.qtPerShareDividendRadioButton.setText(QCoreApplication.translate("Dialog", u"\u8a2d\u5b9a\u6bcf\u80a1\u80a1\u5229", None))
         self.label_4.setText(QCoreApplication.translate("Dialog", u"\u6bcf\u80a1\u914d\u80a1", None))
         self.label.setText(QCoreApplication.translate("Dialog", u"\u5143", None))

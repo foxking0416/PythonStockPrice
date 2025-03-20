@@ -59,6 +59,11 @@ class Ui_Dialog(object):
 
         self.horizontalLayout_2.addWidget(self.qtDateEdit)
 
+        self.qtWeekdayLabel = QLabel(Dialog)
+        self.qtWeekdayLabel.setObjectName(u"qtWeekdayLabel")
+
+        self.horizontalLayout_2.addWidget(self.qtWeekdayLabel)
+
         self.horizontalSpacer_2 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
         self.horizontalLayout_2.addItem(self.horizontalSpacer_2)
@@ -128,6 +133,7 @@ class Ui_Dialog(object):
         Dialog.setWindowTitle(QCoreApplication.translate("Dialog", u"\u5165\u91d1/\u51fa\u91d1", None))
         self.qtAccountNameLabel.setText(QCoreApplication.translate("Dialog", u"TextLabel", None))
         self.label_3.setText(QCoreApplication.translate("Dialog", u"\u65e5\u671f", None))
+        self.qtWeekdayLabel.setText(QCoreApplication.translate("Dialog", u"TextLabel", None))
         self.qtTransferInRadioButton.setText(QCoreApplication.translate("Dialog", u"\u5165\u91d1", None))
         self.qtTransferOutRadioButton.setText(QCoreApplication.translate("Dialog", u"\u51fa\u91d1", None))
         self.label_5.setText(QCoreApplication.translate("Dialog", u"\u91d1\u984d", None))

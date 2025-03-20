@@ -70,6 +70,13 @@
       <widget class="QDateEdit" name="qtDateEdit"/>
      </item>
      <item>
+      <widget class="QLabel" name="qtWeekdayLabel">
+       <property name="text">
+        <string>TextLabel</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="horizontalSpacer_5">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>

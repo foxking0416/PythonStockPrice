@@ -370,6 +370,28 @@ class Utility():
 
     def lowercase_english_uppercase( text ):
         return re.sub(r'[A-Z]', lambda x: x.group( 0 ).lower(), text )
+    
+    def get_qt_weekday_text( n_weekday ):
+        if n_weekday == 1:
+            return "(一)"
+        elif n_weekday == 2:    
+            return "(二)"
+        elif n_weekday == 3:
+            return "(三)"
+        elif n_weekday == 4:
+            return "(四)"
+        elif n_weekday == 5:
+            return "(五)"
+        elif n_weekday == 6:
+            return "(六)"
+        else:
+            return "(日)"
+        
+    def update_weekly_text_by_date( qt_date_edit, qt_weekday_label ):
+        obj_date = qt_date_edit.date()
+        n_weekday = obj_date.dayOfWeek()
+        str_weekday = Utility.get_qt_weekday_text( n_weekday )
+        qt_weekday_label.setText( str_weekday )
 
 class SaveCheckDialog( QDialog ):
     def __init__( self, str_title = '', parent = None ):
@@ -640,6 +662,7 @@ class StockTradingEditDialog( QDialog ):
         obj_current_date = datetime.datetime.today()
         self.ui.qtDateEdit.setDate( obj_current_date.date() )
         self.ui.qtDateEdit.setCalendarPopup( True )
+        self.ui.qtDateEdit.dateChanged.connect( lambda: Utility.update_weekly_text_by_date( self.ui.qtDateEdit, self.ui.qtWeekdayLabel ) )
         self.ui.qtDiscountCheckBox.setChecked( b_discount )
         self.ui.qtDiscountRateDoubleSpinBox.setValue( f_discount_value * 10 )
         self.ui.qtDiscountRateDoubleSpinBox.setEnabled( b_discount )
@@ -662,6 +685,7 @@ class StockTradingEditDialog( QDialog ):
         # self.load_stylesheet("style.css")
         self.dict_trading_data = {}
         self.compute_cost()
+        Utility.update_weekly_text_by_date( self.ui.qtDateEdit, self.ui.qtWeekdayLabel )
 
     def load_stylesheet( self, file_path ):
         try:
@@ -815,6 +839,7 @@ class StockRegularTradingEditDialog( QDialog ):
         obj_current_date = datetime.datetime.today()
         self.ui.qtDateEdit.setDate( obj_current_date.date() )
         self.ui.qtDateEdit.setCalendarPopup( True )
+        self.ui.qtDateEdit.dateChanged.connect( lambda: Utility.update_weekly_text_by_date( self.ui.qtDateEdit, self.ui.qtWeekdayLabel ) )
 
         self.setup_trading_price_type( e_trading_price_type )
         self.setup_trading_fee_type( e_trading_fee_type )
@@ -848,6 +873,7 @@ class StockRegularTradingEditDialog( QDialog ):
         # self.load_stylesheet("style.css")
         self.dict_trading_data = {}
         self.update_ui_and_compute_cost()
+        Utility.update_weekly_text_by_date( self.ui.qtDateEdit, self.ui.qtWeekdayLabel )
 
     def load_stylesheet( self, file_path ):
         try:
@@ -1048,6 +1074,7 @@ class StockDividendEditDialog( QDialog ):
         obj_current_date = datetime.datetime.today()
         self.ui.qtDateEdit.setDate( obj_current_date.date() )
         self.ui.qtDateEdit.setCalendarPopup( True )
+        self.ui.qtDateEdit.dateChanged.connect( lambda: Utility.update_weekly_text_by_date( self.ui.qtDateEdit, self.ui.qtWeekdayLabel ) )
 
         self.ui.qtPerShareDividendRadioButton.toggled.connect( self.update_ui )
         self.ui.qtTotalDividendRadioButton.toggled.connect( self.update_ui )
@@ -1058,6 +1085,7 @@ class StockDividendEditDialog( QDialog ):
         self.dict_trading_data = {}
 
         self.update_ui()
+        Utility.update_weekly_text_by_date( self.ui.qtDateEdit, self.ui.qtWeekdayLabel )
 
     def update_ui( self ):
         if self.ui.qtPerShareDividendRadioButton.isChecked():
@@ -1162,6 +1190,7 @@ class StockCapitalIncreaseEditDialog( QDialog ):
         obj_current_date = datetime.datetime.today()
         self.ui.qtDateEdit.setDate( obj_current_date.date() )
         self.ui.qtDateEdit.setCalendarPopup( True )
+        self.ui.qtDateEdit.dateChanged.connect( lambda: Utility.update_weekly_text_by_date( self.ui.qtDateEdit, self.ui.qtWeekdayLabel ) )
 
         self.ui.qtOddTradeCountSpinBox.valueChanged.connect( self.compute_cost )
         self.ui.qtPerSharePriceRadioButton.toggled.connect( self.update_ui_and_compute_cost )
@@ -1174,6 +1203,7 @@ class StockCapitalIncreaseEditDialog( QDialog ):
         self.dict_trading_data = {}
 
         self.update_ui_and_compute_cost()
+        Utility.update_weekly_text_by_date( self.ui.qtDateEdit, self.ui.qtWeekdayLabel )
 
     def update_ui_and_compute_cost( self ):
         self.update_ui()
@@ -1269,9 +1299,12 @@ class StockCapitalReductionEditDialog( QDialog ):
         obj_current_date = datetime.datetime.today()
         self.ui.qtDateEdit.setDate( obj_current_date.date() )
         self.ui.qtDateEdit.setCalendarPopup( True )
+        self.ui.qtDateEdit.dateChanged.connect( lambda: Utility.update_weekly_text_by_date( self.ui.qtDateEdit, self.ui.qtWeekdayLabel ) )
+
         self.ui.qtOkPushButton.clicked.connect( self.accept_data )
         self.ui.qtCancelPushButton.clicked.connect( self.cancel )
         self.dict_trading_data = {}
+        Utility.update_weekly_text_by_date( self.ui.qtDateEdit, self.ui.qtWeekdayLabel )
 
     def setup_trading_date( self, str_date ):
         self.ui.qtDateEdit.setDate( datetime.datetime.strptime( str_date, "%Y-%m-%d" ).date() )
@@ -1332,9 +1365,12 @@ class StockSplitEditDialog( QDialog ):
         obj_current_date = datetime.datetime.today()
         self.ui.qtDateEdit.setDate( obj_current_date.date() )
         self.ui.qtDateEdit.setCalendarPopup( True )
+        self.ui.qtDateEdit.dateChanged.connect( lambda: Utility.update_weekly_text_by_date( self.ui.qtDateEdit, self.ui.qtWeekdayLabel ) )
+
         self.ui.qtOkPushButton.clicked.connect( self.accept_data )
         self.ui.qtCancelPushButton.clicked.connect( self.cancel )
         self.dict_trading_data = {}
+        Utility.update_weekly_text_by_date( self.ui.qtDateEdit, self.ui.qtWeekdayLabel )
 
     def setup_trading_date( self, str_date ):
         self.ui.qtDateEdit.setDate( datetime.datetime.strptime( str_date, "%Y-%m-%d" ).date() )
@@ -1382,9 +1418,12 @@ class CashTransferEditDialog( QDialog ):
         obj_current_date = datetime.datetime.today()
         self.ui.qtDateEdit.setDate( obj_current_date.date() )
         self.ui.qtDateEdit.setCalendarPopup( True )
+        self.ui.qtDateEdit.dateChanged.connect( lambda: Utility.update_weekly_text_by_date( self.ui.qtDateEdit, self.ui.qtWeekdayLabel ) )
+
         self.ui.qtOkPushButton.clicked.connect( self.accept_data )
         self.ui.qtCancelPushButton.clicked.connect( self.cancel )
         self.dict_cash_transfer_data = {}
+        Utility.update_weekly_text_by_date( self.ui.qtDateEdit, self.ui.qtWeekdayLabel )
 
     def setup_transfer_date( self, str_date ):
         self.ui.qtDateEdit.setDate( datetime.datetime.strptime( str_date, "%Y-%m-%d" ).date() )

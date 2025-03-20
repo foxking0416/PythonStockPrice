@@ -65,6 +65,11 @@ class Ui_Dialog(object):
 
         self.horizontalLayout.addWidget(self.qtDateEdit)
 
+        self.qtWeekdayLabel = QLabel(Dialog)
+        self.qtWeekdayLabel.setObjectName(u"qtWeekdayLabel")
+
+        self.horizontalLayout.addWidget(self.qtWeekdayLabel)
+
         self.horizontalSpacer_3 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
         self.horizontalLayout.addItem(self.horizontalSpacer_3)
@@ -344,6 +349,7 @@ class Ui_Dialog(object):
         self.qtStockNumberLabel.setText(QCoreApplication.translate("Dialog", u"TextLabel", None))
         self.qtStockNameLabel.setText(QCoreApplication.translate("Dialog", u"TextLabel", None))
         self.label.setText(QCoreApplication.translate("Dialog", u"\u65e5\u671f", None))
+        self.qtWeekdayLabel.setText(QCoreApplication.translate("Dialog", u"TextLabel", None))
         self.label_12.setText(QCoreApplication.translate("Dialog", u"\u8cfc\u8cb7\u80a1\u6578", None))
         self.label_5.setText(QCoreApplication.translate("Dialog", u"\u80a1", None))
         self.groupBox.setTitle("")
