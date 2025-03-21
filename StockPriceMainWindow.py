@@ -1777,7 +1777,7 @@ class MainWindow( QMainWindow ):
             str_formatted_date = parsed_date.strftime("%m/%d")  # 轉換為 MM/DD 格式
             self.list_stock_list_table_horizontal_header[ 4 ] = str_formatted_date + ' 收盤價'
 
-        self.dict_auto_stock_yearly_dividned = self.load_general_company_all_yearly_dividend_data( 2010, b_unit_test )
+        self.dict_auto_stock_yearly_dividned = self.load_general_company_all_yearly_dividend_data( 2005, b_unit_test )
         self.dict_auto_stock_listed_etf_yearly_dividned = self.load_listed_etf_all_yearly_dividend_data( 2010, b_unit_test )
         self.dict_auto_stock_OTC_etf_yearly_dividned = self.load_OTC_etf_all_yearly_dividend_data( 2010, b_unit_test )
 
@@ -5522,7 +5522,7 @@ class MainWindow( QMainWindow ):
                         if not raw.find( 'th' ):
                             data = []
                             td_elements = raw.findAll( "td" )
-                            if n_year >= 99 and n_year < 105:
+                            if n_year >= 94 and n_year < 105:
                                 if len( td_elements ) == 23:
                                     # [0]公司代號
                                     # [1]公司名稱	
