@@ -2657,7 +2657,7 @@ class MainWindow( QMainWindow ):
             dict_per_account_all_stock_trading_data[ str_stock_number ].append( dict_trading_data )
             sorted_list = self.process_single_trading_data( str_tab_widget_name, str_stock_number )
             self.refresh_stock_list_table()
-            self.refresh_trading_data_table( sorted_list )
+            self.refresh_trading_data_table( sorted_list, dict_trading_data )
             self.auto_save_trading_data()
 
     def on_add_regular_trading_data_push_button_clicked( self ):
@@ -2695,7 +2695,7 @@ class MainWindow( QMainWindow ):
             dict_per_account_all_stock_trading_data[ str_stock_number ].append( dict_trading_data )
             sorted_list = self.process_single_trading_data( str_tab_widget_name, str_stock_number )
             self.refresh_stock_list_table()
-            self.refresh_trading_data_table( sorted_list )
+            self.refresh_trading_data_table( sorted_list, dict_trading_data )
             self.auto_save_trading_data()
 
     def on_add_dividend_data_push_button_clicked( self ): 
@@ -2715,7 +2715,7 @@ class MainWindow( QMainWindow ):
             dict_per_account_all_stock_trading_data[ str_stock_number ].append( dict_trading_data )
             sorted_list = self.process_single_trading_data( str_tab_widget_name, str_stock_number )
             self.refresh_stock_list_table()
-            self.refresh_trading_data_table( sorted_list )
+            self.refresh_trading_data_table( sorted_list, dict_trading_data )
             self.auto_save_trading_data()
 
     def on_add_limit_buying_data_push_button_clicked( self ): 
@@ -2731,13 +2731,12 @@ class MainWindow( QMainWindow ):
         dialog = StockCapitalIncreaseEditDialog( str_stock_number, str_stock_name, self )
 
         if dialog.exec():
-            pass
             dict_trading_data = dialog.dict_trading_data
 
             dict_per_account_all_stock_trading_data[ str_stock_number ].append( dict_trading_data )
             sorted_list = self.process_single_trading_data( str_tab_widget_name, str_stock_number )
             self.refresh_stock_list_table()
-            self.refresh_trading_data_table( sorted_list )
+            self.refresh_trading_data_table( sorted_list, dict_trading_data )
             self.auto_save_trading_data()
 
     def on_add_capital_reduction_data_push_button_clicked( self ): 
@@ -2756,7 +2755,7 @@ class MainWindow( QMainWindow ):
             dict_per_account_all_stock_trading_data[ str_stock_number ].append( dict_trading_data )
             sorted_list = self.process_single_trading_data( str_tab_widget_name, str_stock_number )
             self.refresh_stock_list_table()
-            self.refresh_trading_data_table( sorted_list )
+            self.refresh_trading_data_table( sorted_list, dict_trading_data )
             self.auto_save_trading_data()
 
     def on_add_stock_split_data_push_button_clicked( self ): 
@@ -2775,7 +2774,7 @@ class MainWindow( QMainWindow ):
             dict_per_account_all_stock_trading_data[ str_stock_number ].append( dict_trading_data )
             sorted_list = self.process_single_trading_data( str_tab_widget_name, str_stock_number )
             self.refresh_stock_list_table()
-            self.refresh_trading_data_table( sorted_list )
+            self.refresh_trading_data_table( sorted_list, dict_trading_data )
             self.auto_save_trading_data()
 
     def on_trading_data_table_item_clicked( self, index: QModelIndex, table_model ): 
@@ -2869,7 +2868,7 @@ class MainWindow( QMainWindow ):
                         dict_per_account_all_stock_trading_data[ str_stock_number ][ n_findindex ] = dict_trading_data
                         sorted_list = self.process_single_trading_data( str_tab_widget_name, str_stock_number )
                         self.refresh_stock_list_table()
-                        self.refresh_trading_data_table( sorted_list )
+                        self.refresh_trading_data_table( sorted_list, dict_trading_data )
                         self.auto_save_trading_data()
 
                 elif n_row == len( self.get_trading_data_header() ) - 1: #刪除
@@ -4620,7 +4619,7 @@ class MainWindow( QMainWindow ):
         self.per_stock_trading_data_model.clear()
         self.per_stock_trading_data_model.setVerticalHeaderLabels( self.get_trading_data_header() )
 
-    def refresh_trading_data_table( self, sorted_list ):
+    def refresh_trading_data_table( self, sorted_list, target_trading_data = None ):
         self.clear_per_stock_trading_table()
         self.per_stock_trading_data_model.setVerticalHeaderLabels( self.get_trading_data_header() )
 
@@ -4631,6 +4630,7 @@ class MainWindow( QMainWindow ):
 
         b_use_auto_dividend = sorted_list[ 0 ][ TradingData.USE_AUTO_DIVIDEND_DATA ]
         column = 0
+        n_scroll_column = -1
         
         for dict_per_trading_data in loop_list:
             e_trading_type = dict_per_trading_data[ TradingData.TRADING_TYPE ]
@@ -4688,7 +4688,18 @@ class MainWindow( QMainWindow ):
                 if self.ui.qtShow10Action.isChecked():
                     if column == 9:
                         break
+
+            if target_trading_data:
+                if ( dict_per_trading_data[ TradingData.TRADING_DATE ] == target_trading_data[ TradingData.TRADING_DATE ] and 
+                     dict_per_trading_data[ TradingData.TRADING_TYPE ] == target_trading_data[ TradingData.TRADING_TYPE ] and 
+                     dict_per_trading_data[ TradingData.TOTAL_TRADING_PRICE ] == target_trading_data[ TradingData.TOTAL_TRADING_PRICE ] and 
+                     dict_per_trading_data[ TradingData.STOCK_DIVIDEND ] == target_trading_data[ TradingData.STOCK_DIVIDEND ] and 
+                     dict_per_trading_data[ TradingData.CASH_DIVIDEND ] == target_trading_data[ TradingData.CASH_DIVIDEND ] and 
+                     dict_per_trading_data[ TradingData.TRADING_COUNT ] == target_trading_data[ TradingData.TRADING_COUNT ] and 
+                     dict_per_trading_data[ TradingData.PER_SHARE_TRADING_PRICE ] == target_trading_data[ TradingData.PER_SHARE_TRADING_PRICE ] ):
+                    n_scroll_column = column
             column += 1
+
         list_horizontal_header = [ "" ] * column
         self.per_stock_trading_data_model.setHorizontalHeaderLabels( list_horizontal_header )
         
@@ -4697,6 +4708,11 @@ class MainWindow( QMainWindow ):
                 self.ui.qtTradingDataTableView.setRowHeight( row, 40 )
             else:
                 self.ui.qtTradingDataTableView.setRowHeight( row, 25 )
+
+        if n_scroll_column != -1:
+            scrollbar = self.ui.qtTradingDataTableView.horizontalScrollBar()
+            column_x_position = self.ui.qtTradingDataTableView.columnViewportPosition( n_scroll_column - 1 )
+            scrollbar.setValue( column_x_position )
 
     def clear_per_stock_trading_table( self ):
         self.per_stock_trading_data_model.clear()
