@@ -4017,6 +4017,8 @@ class MainWindow( QMainWindow ):
                 f_trading_fee_discount = item[ TradingData.TRADING_FEE_DISCOUNT ]
                 n_trading_count = item[ TradingData.TRADING_COUNT ]
 
+                n_day_trading_selling_count = 0 #當沖數量
+                n_general_selling_count = 0 #非當沖數量
                 if ( str_selling_date == str_last_buying_date and    #賣出與買入同一天
                      item[ TradingData.DAYING_TRADING ] == True and  #有勾選是當沖交易
                      obj_selling_date >= datetime.datetime.strptime( '2017-04-28', "%Y-%m-%d" ) ): #交易日期在2017-04-28之後。因為在這之後才通過當沖交易稅減半
@@ -4031,6 +4033,7 @@ class MainWindow( QMainWindow ):
                         n_accumulated_cost_without_considering_dividend -= n_per_trading_total_cost
                         n_accumulated_inventory -= n_trading_count
                         n_last_buying_count -= n_trading_count
+                        n_day_trading_selling_count = n_trading_count
                     else: #賣出數量大於買入數量，表示只有部分數量都可視為當沖
                         n_trading_count_1 = n_last_buying_count
                         dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count_1, f_trading_fee_discount, n_minimum_common_trading_fee, n_minimum_odd_trading_fee, b_etf, True, b_bond )#這部分是當沖
@@ -4038,6 +4041,7 @@ class MainWindow( QMainWindow ):
                         n_trading_fee_1 = dict_result[ TradingCost.TRADING_FEE ]
                         n_trading_tax_1 = dict_result[ TradingCost.TRADING_TAX ]
                         n_trading_total_cost_1 = dict_result[ TradingCost.TRADING_TOTAL_COST ]
+                        n_day_trading_selling_count = n_trading_count_1
 
                         n_trading_count_2 = n_trading_count - n_last_buying_count
                         dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count_2, f_trading_fee_discount, n_minimum_common_trading_fee, n_minimum_odd_trading_fee, b_etf, False, b_bond )#這部分不是當沖
@@ -4045,6 +4049,7 @@ class MainWindow( QMainWindow ):
                         n_trading_fee_2 = dict_result[ TradingCost.TRADING_FEE ]
                         n_trading_tax_2 = dict_result[ TradingCost.TRADING_TAX ]
                         n_trading_total_cost_2 = dict_result[ TradingCost.TRADING_TOTAL_COST ]
+                        n_general_selling_count = n_trading_count_2
 
                         item[ TradingData.TRADING_VALUE_NON_SAVE ] = n_trading_value_1 + n_trading_value_2
                         item[ TradingData.TRADING_FEE_NON_SAVE ] = n_trading_fee_1 + n_trading_fee_2
@@ -4066,41 +4071,71 @@ class MainWindow( QMainWindow ):
                     n_accumulated_cost -= n_per_trading_total_cost
                     n_accumulated_cost_without_considering_dividend -= n_per_trading_total_cost
                     n_accumulated_inventory -= n_trading_count
+                    n_general_selling_count = n_trading_count
 
 
                 n_accumulate_cost_for_this_selling = 0
-                n_selling_count = n_trading_count 
+                #一般現股交易是先買先賣
                 if len( queue_buying_data ) != 0:
                     list_buying_data = queue_buying_data[ 0 ]
                     n_buying_cost = list_buying_data[ 0 ]
                     n_buying_count = list_buying_data[ 1 ]
-                    if n_selling_count < n_buying_count:
-                        n_used_buying_cost = int( n_buying_cost * n_selling_count / n_buying_count )
+                    if n_general_selling_count < n_buying_count:
+                        n_used_buying_cost = int( n_buying_cost * n_general_selling_count / n_buying_count )
                         n_rest_buying_cost = n_buying_cost - n_used_buying_cost
-                        n_rest_buying_count = n_buying_count - n_selling_count
+                        n_rest_buying_count = n_buying_count - n_general_selling_count
                         queue_buying_data[ 0 ] = [ n_rest_buying_cost, n_rest_buying_count ]
                         n_accumulate_cost_for_this_selling += n_used_buying_cost
                     else:
-                        while n_selling_count >= n_buying_count:
+                        while n_general_selling_count >= n_buying_count:
                             queue_buying_data.popleft()
-                            n_selling_count -= n_buying_count
+                            n_general_selling_count -= n_buying_count
                             n_accumulate_cost_for_this_selling += n_buying_cost
-                            if n_selling_count == 0:
+                            if n_general_selling_count == 0:
                                 break
                             if len( queue_buying_data ) == 0:
                                 break
                             list_buying_data = queue_buying_data[ 0 ]
                             n_buying_cost = list_buying_data[ 0 ]
                             n_buying_count = list_buying_data[ 1 ]
-                            if n_selling_count < n_buying_count:
-                                n_used_buying_cost = int( n_buying_cost * n_selling_count / n_buying_count )
+                            if n_general_selling_count < n_buying_count:
+                                n_used_buying_cost = int( n_buying_cost * n_general_selling_count / n_buying_count )
                                 n_rest_buying_cost = n_buying_cost - n_used_buying_cost
-                                n_rest_buying_count = n_buying_count - n_selling_count
+                                n_rest_buying_count = n_buying_count - n_general_selling_count
                                 queue_buying_data[ 0 ] = [ n_rest_buying_cost, n_rest_buying_count ]
                                 n_accumulate_cost_for_this_selling += n_used_buying_cost
+                
+                #當沖交易則需要從最新的購買交易去取
+                if len( queue_buying_data ) != 0:
+                    list_buying_data = queue_buying_data[ -1 ]
+                    n_buying_cost = list_buying_data[ 0 ]
+                    n_buying_count = list_buying_data[ 1 ]
+                    if n_day_trading_selling_count < n_buying_count:
+                        n_used_buying_cost = int( n_buying_cost * n_day_trading_selling_count / n_buying_count )
+                        n_rest_buying_cost = n_buying_cost - n_used_buying_cost
+                        n_rest_buying_count = n_buying_count - n_day_trading_selling_count
+                        queue_buying_data[ -1 ] = [ n_rest_buying_cost, n_rest_buying_count ]
+                        n_accumulate_cost_for_this_selling += n_used_buying_cost
+                    else:
+                        while n_day_trading_selling_count >= n_buying_count:
+                            queue_buying_data.pop()
+                            n_day_trading_selling_count -= n_buying_count
+                            n_accumulate_cost_for_this_selling += n_buying_cost
+                            if n_day_trading_selling_count == 0:
+                                break
+                            if len( queue_buying_data ) == 0:
+                                break
+                            list_buying_data = queue_buying_data[ -1 ]
+                            n_buying_cost = list_buying_data[ 0 ]
+                            n_buying_count = list_buying_data[ 1 ]
+                            if n_day_trading_selling_count < n_buying_count:
+                                n_used_buying_cost = int( n_buying_cost * n_day_trading_selling_count / n_buying_count )
+                                n_rest_buying_cost = n_buying_cost - n_used_buying_cost
+                                n_rest_buying_count = n_buying_count - n_day_trading_selling_count
+                                queue_buying_data[ -1 ] = [ n_rest_buying_cost, n_rest_buying_count ]
+                                n_accumulate_cost_for_this_selling += n_used_buying_cost                
+
                 item[ TradingData.SELLING_PROFIT_NON_SAVE ] = n_per_trading_total_cost - n_accumulate_cost_for_this_selling
-
-
                 item[ TradingData.EXTRA_INSURANCE_FEE_NON_SAVE ] = 0
                 item[ TradingData.STOCK_DIVIDEND_GAIN_NON_SAVE ] = 0
                 item[ TradingData.CASH_DIVIDEND_GAIN_NON_SAVE ] = 0
@@ -4125,6 +4160,8 @@ class MainWindow( QMainWindow ):
                 item[ TradingData.STOCK_DIVIDEND_GAIN_NON_SAVE ] = 0
                 item[ TradingData.CASH_DIVIDEND_GAIN_NON_SAVE ] = 0
                 str_buying_date = item[ TradingData.TRADING_DATE ]
+                list_buying_data = [ 0, n_trading_count ]
+                queue_buying_data.append( list_buying_data )
             elif e_trading_type == TradingType.DIVIDEND:
                 if n_accumulated_inventory <= 0: #沒有庫存就不用算股利了
                     continue
@@ -4205,7 +4242,7 @@ class MainWindow( QMainWindow ):
                     
                 n_accumulated_inventory = int( Decimal( str( n_accumulated_inventory ) ) * ( Decimal( str( '10' ) ) - Decimal( str( item[ TradingData.CAPITAL_REDUCTION_PER_SHARE ] ) ) ) / Decimal( str( '10' ) ) )
             elif e_trading_type == TradingType.SPLIT:
-                if n_accumulated_inventory == 0: #沒有庫存就不用算減資了
+                if n_accumulated_inventory == 0: #沒有庫存就不用算分割了
                     continue
                 item[ TradingData.PER_SHARE_TRADING_PRICE ] = 0
                 item[ TradingData.TRADING_COUNT ] = 0
@@ -4217,6 +4254,8 @@ class MainWindow( QMainWindow ):
                 item[ TradingData.STOCK_DIVIDEND_GAIN_NON_SAVE ] = 0
                 item[ TradingData.CASH_DIVIDEND_GAIN_NON_SAVE ] = 0
                 n_accumulated_inventory = int( Decimal( str( n_accumulated_inventory ) ) * Decimal( str( item[ TradingData.CAPITAL_REDUCTION_PER_SHARE ] ) ) )
+                for i in range ( len( queue_buying_data ) ):
+                    queue_buying_data[ i ][ 1 ] = int( Decimal( str( queue_buying_data[ i ][ 1 ] ) ) * Decimal( str( item[ TradingData.CAPITAL_REDUCTION_PER_SHARE ] ) ) )
             item[ TradingData.ACCUMULATED_COST_NON_SAVE ] = n_accumulated_cost
             item[ TradingData.ACCUMULATED_COST_WITHOUT_CONSIDERING_DIVIDEND_NON_SAVE ] = n_accumulated_cost_without_considering_dividend
             item[ TradingData.ACCUMULATED_INVENTORY_NON_SAVE ] = n_accumulated_inventory
