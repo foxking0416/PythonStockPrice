@@ -2892,9 +2892,11 @@ class MainWindow( QMainWindow ):
 
         n_old_table_model_index = self.per_stock_trading_data_model.item( 0, n_old_visual_index ).data( Qt.UserRole )
         n_old_data_index = -1
+        moved_trading_data = None
         for index, dict_selected_data in enumerate( list_trading_data ):
             if dict_selected_data[ TradingData.SORTED_INDEX_NON_SAVE ] == n_old_table_model_index:
                 n_old_data_index = index
+                moved_trading_data = dict_selected_data
                 break
         if n_old_data_index == -1:
             header = self.ui.qtTradingDataTableView.horizontalHeader()
@@ -2935,7 +2937,7 @@ class MainWindow( QMainWindow ):
 
             sorted_list = self.process_single_trading_data( str_tab_widget_name, self.str_picked_stock_number )
             self.refresh_stock_list_table()
-            self.refresh_trading_data_table( sorted_list )
+            self.refresh_trading_data_table( sorted_list, moved_trading_data )
             self.auto_save_trading_data()
         else:
             header = self.ui.qtTradingDataTableView.horizontalHeader()
