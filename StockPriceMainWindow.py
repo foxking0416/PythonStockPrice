@@ -27,8 +27,6 @@ from QtStockDividendTransferFeeEditDialog import Ui_Dialog as Ui_StockDividendTr
 from QtStockDividendTransferFeeEditSpinboxDialog import Ui_Dialog as Ui_StockDividendTransferFeeEditSpinboxDialog
 from QtStockMinimumTradingFeeEditDialog import Ui_Dialog as Ui_StockMinimumTradingFeeEditDialog
 from QtAboutDialog import Ui_Dialog as Ui_AboutDialog
-from QtSelectFolderDialog import Ui_Dialog as Ui_SelectFolderDialog
-from QtSaveCheckDialog import Ui_Dialog as Ui_SaveCheckDialog
 from PySide6.QtWidgets import QApplication, QMainWindow, QDialog, QButtonGroup, QMessageBox, QStyledItemDelegate, QFileDialog, QHeaderView, QVBoxLayout, QHBoxLayout, \
                               QLabel, QLineEdit, QDialogButtonBox, QTabBar, QWidget, QTableView, QComboBox, QPushButton, QSizePolicy, QSpacerItem, QCheckBox, QDoubleSpinBox, \
                               QProgressBar, QTabWidget
@@ -65,12 +63,11 @@ from scipy.optimize import newton
 # pyside6-uic QtStockSplitEditDialog.ui -o QtStockSplitEditDialog.py
 # pyside6-uic QtDuplicateOptionDialog.ui -o QtDuplicateOptionDialog.py
 # pyside6-uic QtCashTransferEditDialog.ui -o QtCashTransferEditDialog.py
-# pyside6-uic QtSaveCheckDialog.ui -o QtSaveCheckDialog.py
 # pyside6-uic QtStockDividendTransferFeeEditDialog.ui -o QtStockDividendTransferFeeEditDialog.py
 # pyside6-uic QtStockDividendTransferFeeEditSpinboxDialog.ui -o QtStockDividendTransferFeeEditSpinboxDialog.py
 # pyside6-uic QtStockMinimumTradingFeeEditDialog.ui -o QtStockMinimumTradingFeeEditDialog.py
 # pyside6-uic QtAboutDialog.ui -o QtAboutDialog.py
-# pyside6-uic QtSelectFolderDialog.ui -o QtSelectFolderDialog.py
+
 
 # 下載上市櫃公司股利資料
 # https://mopsov.twse.com.tw/mops/web/t108sb27
@@ -253,7 +250,6 @@ class TradingData( Enum ):
     IS_REALLY_DAYING_TRADING_NON_SAVE = auto() #不會記錄
     SELLING_PROFIT_NON_SAVE = auto() #不會記錄 本次出售損益
     
-
 class TradingCost( Enum ):
     TRADING_VALUE = 0
     TRADING_FEE = 1
@@ -394,32 +390,6 @@ class Utility():
         n_weekday = obj_date.dayOfWeek()
         str_weekday = Utility.get_qt_weekday_text( n_weekday )
         qt_weekday_label.setText( str_weekday )
-
-class SaveCheckDialog( QDialog ):
-    def __init__( self, str_title = '', parent = None ):
-        super().__init__( parent )
-
-        self.ui = Ui_SaveCheckDialog()
-        self.ui.setupUi( self )
-        self.setWindowTitle( str_title )
-        self.setWindowIcon( window_icon )
-
-        self.ui.qtSavePushButton.clicked.connect( self.save )
-        self.ui.qtNoSavePushButton.clicked.connect( self.no_save )
-        self.ui.qtAbortPushButton.clicked.connect( self.abort )
-        self.n_return = 0
-
-    def save( self ):
-        self.n_return = 1
-        self.accept()
-
-    def no_save( self ):
-        self.n_return = 2
-        self.accept()
-    
-    def abort( self ):
-        self.n_return = 3
-        self.accept()
 
 class EditTabTitleDialog( QDialog ):
     """一個小對話框用於編輯 Tab 標題"""
@@ -1444,60 +1414,6 @@ class AboutDialog( QDialog ):
         self.ui.setupUi( self )
         self.setWindowIcon( window_icon )
 
-class SelectFolderDialog( QDialog ):
-    def __init__( self, parent = None ):
-        super().__init__( parent )
-
-        self.ui = Ui_SelectFolderDialog()
-        self.ui.setupUi( self )
-        self.setWindowIcon( window_icon )
-
-        
-        if getattr( sys, 'frozen', False ):
-            # PyInstaller 打包後執行時
-            str_folder_path = reg_settings.value( "TemporaryFolderPath", g_data_dir )
-        else:
-            str_folder_path = reg_settings.value( "TemporaryFolderPathDebug", g_data_dir )
-        self.ui.qtFolderPathLineEdit.setText( str_folder_path )
-        self.folder_path = str_folder_path
-
-        self.ui.qtSelectPushButton.clicked.connect( self.select_folder )
-        self.ui.qtReturnToDefaultPushButton.clicked.connect( self.return_to_default )
-        self.ui.qtOkPushButton.clicked.connect( self.accept_data )
-        self.ui.qtCancelPushButton.clicked.connect( self.cancel )
-    
-    def select_folder( self ):
-        folder_path = self.open_existing_directory_dialog()
-        if folder_path:
-            self.ui.qtFolderPathLineEdit.setText( folder_path )
-            self.folder_path = folder_path
-
-    def return_to_default( self ):
-        if getattr( sys, 'frozen', False ):
-            # PyInstaller 打包後執行時
-            folder_path = os.path.join( g_user_dir, "AppData", "Local", "FoxInfo" ) #C:\Users\foxki\AppData\Local\FoxInfo 
-        else:
-            # VSCode執行 Python 腳本時
-            folder_path = os.path.dirname( os.path.abspath(__file__) )
-
-        self.ui.qtFolderPathLineEdit.setText( folder_path )
-        self.folder_path = folder_path
-
-    def open_existing_directory_dialog( self ): 
-        # 彈出讀取檔案對話框
-        file_path = QFileDialog.getExistingDirectory(
-            self,
-            "選擇資料夾",  # 對話框標題
-            "",           # 預設路徑
-        )
-        return file_path
-
-    def accept_data( self ):
-        self.accept()
-
-    def cancel( self ):
-        self.reject()
-
 class Worker( QObject ):
     progress = Signal( int )  # Signal to emit progress updates
     finished = Signal( dict )  # Signal to emit the result when done
@@ -2327,7 +2243,7 @@ class MainWindow( QMainWindow ):
                 self.refresh_trading_data_table( sorted_list )
                 self.auto_save_trading_data()
             elif n_column == len( self.list_stock_list_table_horizontal_header ) - 2:#匯出按鈕
-                file_path = self.open_save_json_file_dialog()
+                file_path = share_ui.open_save_file_dialog( self, "匯出交易資料", "", "JSON (*.json);;" )
                 if file_path:
                     list_save_tab_widget = [ self.ui.qtTabWidget.currentIndex() ]
                     self.manual_save_trading_data( list_save_tab_widget, file_path, str_stock_number )
@@ -3055,7 +2971,7 @@ class MainWindow( QMainWindow ):
         str_stock_name = list_stock_name_and_type[ 0 ]
         dict_per_account_all_stock_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ]
         list_trading_data = dict_per_account_all_stock_trading_data[ str_stock_number ]
-        file_path = self.open_save_excel_file_dialog()
+        file_path = share_ui.open_save_file_dialog( self, "輸出Excel", "", "Excel 活頁簿 (*.xlsx);;All Files (*)" )
         if file_path:
             workbook = Workbook()
             worksheet = workbook.active
@@ -3072,7 +2988,7 @@ class MainWindow( QMainWindow ):
             workbook.save( file_path )
 
     def on_export_all_to_excell_button_clicked( self ): 
-        file_path = self.open_save_excel_file_dialog()
+        file_path = share_ui.open_save_file_dialog( self, "輸出Excel", "", "Excel 活頁簿 (*.xlsx);;All Files (*)" )
         if file_path:
             workbook = Workbook()
             str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
@@ -3110,7 +3026,7 @@ class MainWindow( QMainWindow ):
         b_need_save = False
         if ( ( self.dict_all_account_all_stock_trading_data_INITIAL != self.dict_all_account_all_stock_trading_data ) and
              ( self.str_current_save_file_path is None or not share_api.compare_json_files( self.str_current_save_file_path, self.trading_data_json_file_path ) ) ):
-            dialog = SaveCheckDialog( '開新檔案', self )
+            dialog = share_ui.SaveCheckDialog( window_icon, '開新檔案', self )
             if dialog.exec():
                 if dialog.n_return == 1: #儲存
                     b_need_save = True
@@ -3125,7 +3041,7 @@ class MainWindow( QMainWindow ):
                 list_save_tab_widget = list( range( self.ui.qtTabWidget.count() - 1 ) )
                 self.manual_save_trading_data( list_save_tab_widget, self.str_current_save_file_path )
             else:
-                file_path = self.open_save_json_file_dialog()
+                file_path = share_ui.open_save_file_dialog( self, "匯出交易資料", "", "JSON (*.json);;" )
                 if file_path:
                     list_save_tab_widget = list( range( self.ui.qtTabWidget.count() - 1 ) )
                     self.manual_save_trading_data( list_save_tab_widget, file_path )
@@ -3157,12 +3073,12 @@ class MainWindow( QMainWindow ):
         self.str_current_save_file_path = None
 
     def on_open_file_action_triggered( self ): 
-        file_path = self.open_load_json_file_dialog()
+        file_path = share_ui.open_load_file_dialog( self, "匯入交易資料", "", "JSON (*.json);;" )
         if file_path:
             b_need_save = False
             if ( ( self.dict_all_account_all_stock_trading_data_INITIAL != self.dict_all_account_all_stock_trading_data ) and
                  ( self.str_current_save_file_path is None or not share_api.compare_json_files( self.str_current_save_file_path, self.trading_data_json_file_path ) ) ):
-                dialog = SaveCheckDialog( '開啟舊檔', self )
+                dialog = share_ui.SaveCheckDialog( window_icon, '開啟舊檔', self )
                 if dialog.exec():
                     if dialog.n_return == 1: #儲存
                         b_need_save = True
@@ -3177,7 +3093,7 @@ class MainWindow( QMainWindow ):
                     list_save_tab_widget = list( range( self.ui.qtTabWidget.count() - 1 ) )
                     self.manual_save_trading_data( list_save_tab_widget, self.str_current_save_file_path )
                 else:
-                    file_path = self.open_save_json_file_dialog()
+                    file_path = share_ui.open_save_file_dialog( self, "匯出交易資料", "", "JSON (*.json);;" )
                     if file_path:
                         list_save_tab_widget = list( range( self.ui.qtTabWidget.count() - 1 ) )
                         self.manual_save_trading_data( list_save_tab_widget, file_path )
@@ -3219,27 +3135,27 @@ class MainWindow( QMainWindow ):
             self.str_current_save_file_path = file_path
 
     def on_save_as_action_triggered( self ): 
-        file_path = self.open_save_json_file_dialog()
+        file_path = share_ui.open_save_file_dialog( self, "匯出交易資料", "", "JSON (*.json);;" )
         if file_path:
             list_save_tab_widget = list( range( self.ui.qtTabWidget.count() - 1 ) )
             self.manual_save_trading_data( list_save_tab_widget, file_path )
             self.str_current_save_file_path = file_path
 
     def on_save_action_triggered( self ): 
-        file_path = self.str_current_save_file_path or self.open_save_json_file_dialog()
+        file_path = self.str_current_save_file_path or share_ui.open_save_file_dialog( self, "匯出交易資料", "", "JSON (*.json);;" )
         if file_path:
             list_save_tab_widget = list( range( self.ui.qtTabWidget.count() - 1 ) )
             self.manual_save_trading_data( list_save_tab_widget, file_path )
             self.str_current_save_file_path = file_path
 
     def on_export_current_group_action_triggered( self ): 
-        file_path = self.open_save_json_file_dialog()
+        file_path = share_ui.open_save_file_dialog( self, "匯出交易資料", "", "JSON (*.json);;" )
         if file_path:
             list_save_tab_widget = [ self.ui.qtTabWidget.currentIndex() ]
             self.manual_save_trading_data( list_save_tab_widget, file_path )
 
     def on_import_full_action_triggered( self ):
-        file_path = self.open_load_json_file_dialog()
+        file_path = share_ui.open_load_file_dialog( self, "匯入交易資料", "", "JSON (*.json);;" )
         if file_path:
             dict_account_to_tab_widget_name = {}
             for index in range( self.ui.qtTabWidget.count() - 1 ):
@@ -3327,7 +3243,7 @@ class MainWindow( QMainWindow ):
             self.auto_save_trading_data()
 
     def on_import_single_stock_action_triggered( self ):
-        file_path = self.open_load_json_file_dialog()
+        file_path = share_ui.open_load_file_dialog( self, "匯入交易資料", "", "JSON (*.json);;" )
         if file_path:
             dict_all_account_all_stock_trading_data_LOAD = {}
             dict_all_account_ui_state_LOAD = {}
@@ -3342,19 +3258,19 @@ class MainWindow( QMainWindow ):
             if len( dict_all_account_all_stock_trading_data_LOAD ) == 0:
                 return
             elif len( dict_all_account_all_stock_trading_data_LOAD ) > 1:
-                self.show_error_message_box_with_ok_button( "錯誤", "請選擇只包含單一帳戶及單一個股的檔案" )
+                share_ui.show_error_message_box_with_ok_button( "錯誤", "請選擇只包含單一帳戶及單一個股的檔案", self )
                 return
             
             dict_per_account_all_stock_trading_data_LOAD = dict_all_account_all_stock_trading_data_LOAD.popitem()[ 1 ]
             if len( dict_per_account_all_stock_trading_data_LOAD ) == 0:
                 return
             elif len( dict_per_account_all_stock_trading_data_LOAD ) > 1:
-                self.show_error_message_box_with_ok_button( "錯誤", "請選擇只包含單一帳戶及單一個股的檔案" )
+                share_ui.show_error_message_box_with_ok_button( "錯誤", "請選擇只包含單一帳戶及單一個股的檔案", self )
                 return
             str_stock_number, list_trading_data = dict_per_account_all_stock_trading_data_LOAD.popitem()
 
             if self.ui.qtTabWidget.count() <= 1:
-                self.show_error_message_box_with_ok_button( "錯誤", "請先建立群組" )
+                share_ui.show_error_message_box_with_ok_button( "錯誤", "請先建立群組", self )
                 return
 
             str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
@@ -3381,9 +3297,10 @@ class MainWindow( QMainWindow ):
             self.auto_save_trading_data()
 
     def on_set_temporary_file_path_action_triggered( self ):
-        dialog = SelectFolderDialog( self )
+        str_default_exe_path = os.path.dirname( os.path.abspath(__file__) )
+        global g_data_dir
+        dialog = share_ui.SelectFolderDialog( window_icon, reg_settings, str_default_exe_path, g_data_dir, g_user_dir, self )
         if dialog.exec():
-            global g_data_dir
             if getattr( sys, 'frozen', False ):
                 # PyInstaller 打包後執行時
                 reg_settings.setValue("TemporaryFolderPath", dialog.folder_path )
@@ -4952,50 +4869,6 @@ class MainWindow( QMainWindow ):
                 self.ui.qtAddDividendDataPushButton.setEnabled( not b_use_auto_dividend )
             else:
                 self.ui.qtAddDividendDataPushButton.setEnabled( False )
-
-    def open_load_json_file_dialog( self ): 
-        # 彈出讀取檔案對話框
-        file_path, _ = QFileDialog.getOpenFileName(
-            self,
-            "匯入交易資料",     # 對話框標題
-            "",                # 預設路徑
-            "JSON (*.json);;"  # 檔案類型過濾
-        )
-        return file_path
-
-    def open_save_json_file_dialog( self ): 
-        # 彈出儲存檔案對話框
-        file_path, _ = QFileDialog.getSaveFileName(
-            self,
-            "匯出交易資料",     # 對話框標題
-            "",                # 預設路徑
-            "JSON (*.json);;"  # 檔案類型過濾
-        )
-        return file_path
-    
-    def open_save_excel_file_dialog( self ): 
-        # 彈出儲存檔案對話框
-        file_path, _ = QFileDialog.getSaveFileName(
-            self,
-            "Save File",             # 對話框標題
-            "",                      # 預設路徑
-            "Excel 活頁簿 (*.xlsx);;All Files (*)"  # 檔案類型過濾
-        )
-        return file_path
-
-    def show_error_message_box_with_ok_button( self, str_title, str_message ): 
-        message_box = QMessageBox( self )
-        message_box.setIcon( QMessageBox.Critical )  # 設置為警告圖示
-        message_box.setWindowTitle( str_title )
-        message_box.setText( str_message )
-
-        # 添加自訂按鈕
-        button_ok = message_box.addButton("確定", QMessageBox.AcceptRole)
-
-        message_box.exec()
-
-        if message_box.clickedButton() == button_ok:
-            return True
 
     def pick_up_stock( self, str_stock_number ):
         self.str_picked_stock_number = str_stock_number
