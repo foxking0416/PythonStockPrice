@@ -1,3 +1,5 @@
+import foxinfo_share_utility.share_api as share_api
+import foxinfo_share_utility.share_ui as share_ui
 import requests
 from bs4 import BeautifulSoup
 import json
@@ -586,28 +588,11 @@ class StockDividendTransferFeeEditDialog( QDialog ):
                     self.dict_company_number_to_transfer_fee[ str_stock_number ] = dialog.n_new_transfer_fee
                     self.refresh_table_view()
             elif n_column == 2:#刪除按鈕
-                result = self.show_warning_message_box_with_ok_cancel_button( "警告", f"確定要刪掉『{header_text}』的匯費資料嗎?" )
+                result = share_ui.show_warning_message_box_with_ok_cancel_button( "警告", f"確定要刪掉『{header_text}』的匯費資料嗎?", self )
                 if result:
                     value = self.dict_company_number_to_transfer_fee.pop( str_stock_number, None )
                     self.refresh_table_view()
 
-    def show_warning_message_box_with_ok_cancel_button( self, str_title, str_message ): 
-        message_box = QMessageBox( self )
-        message_box.setIcon( QMessageBox.Warning )  # 設置為警告圖示
-        message_box.setWindowTitle( str_title )
-        message_box.setText( str_message )
-
-        # 添加自訂按鈕
-        button_ok = message_box.addButton("確定", QMessageBox.AcceptRole)
-        button_cancel = message_box.addButton("取消", QMessageBox.RejectRole)
-
-        message_box.exec()
-
-        if message_box.clickedButton() == button_ok:
-            return True
-        elif message_box.clickedButton() == button_cancel:
-            return False
-        
 class StockDividendTransferFeeEditSpinboxDialog( QDialog ):
     def __init__( self, n_transfer_fee, parent = None ):
         super().__init__( parent )
@@ -2134,7 +2119,9 @@ class MainWindow( QMainWindow ):
 
         str_tab_title = self.ui.qtTabWidget.tabText( index )
         tab_widget = self.ui.qtTabWidget.widget( index )
-        result = self.show_warning_message_box_with_ok_cancel_button( "警告", f"確定要刪掉『{str_tab_title}』的所有資料嗎?\n建議先從「檔案」=>「匯出目前帳號資料」，匯出檔案做備份" )
+        result = share_ui.show_warning_message_box_with_ok_cancel_button( "警告", 
+                                                                         f"確定要刪掉『{str_tab_title}』的所有資料嗎?\n建議先從「檔案」=>「匯出目前帳號資料」，匯出檔案做備份",
+                                                                          self )
         if result:
             str_tab_widget_name = tab_widget.objectName()
             value = self.dict_all_account_all_stock_trading_data.pop( str_tab_widget_name, None )
@@ -2350,7 +2337,7 @@ class MainWindow( QMainWindow ):
                     list_trading_data = dict_per_account_all_stock_trading_data[ str_stock_number ]
                     self.refresh_trading_data_table( list_trading_data )
             elif n_column == len( self.list_stock_list_table_horizontal_header ) - 1:#刪除按鈕
-                result = self.show_warning_message_box_with_ok_cancel_button( "警告", f"確定要刪掉『{str_stock_number}』的所有資料嗎?" )
+                result = share_ui.show_warning_message_box_with_ok_cancel_button( "警告", f"確定要刪掉『{str_stock_number}』的所有資料嗎?", self )
                 if result:
                     del dict_per_account_all_stock_trading_data[ str_stock_number ]
                     self.pick_up_stock( None )
@@ -2458,7 +2445,7 @@ class MainWindow( QMainWindow ):
                     self.auto_save_trading_data()
 
             elif n_row == len( self.get_cash_transfer_header() ) - 1: #刪除
-                result = self.show_warning_message_box_with_ok_cancel_button( "警告", f"確定要刪掉這筆匯款資料嗎?" )
+                result = share_ui.show_warning_message_box_with_ok_cancel_button( "警告", f"確定要刪掉這筆匯款資料嗎?", self )
                 if result:
                     del list_per_account_cash_transfer_data[ n_findindex ]
                     self.process_single_transfer_data( str_tab_widget_name )
@@ -2872,7 +2859,7 @@ class MainWindow( QMainWindow ):
                         self.auto_save_trading_data()
 
                 elif n_row == len( self.get_trading_data_header() ) - 1: #刪除
-                    result = self.show_warning_message_box_with_ok_cancel_button( "警告", f"確定要刪掉這筆交易資料嗎?" )
+                    result = share_ui.show_warning_message_box_with_ok_cancel_button( "警告", f"確定要刪掉這筆交易資料嗎?", self )
                     if result:
                         del dict_per_account_all_stock_trading_data[ str_stock_number ][ n_findindex ]
                         sorted_list = self.process_single_trading_data( str_tab_widget_name, str_stock_number )
@@ -3122,7 +3109,7 @@ class MainWindow( QMainWindow ):
     def on_new_file_action_triggered( self ): 
         b_need_save = False
         if ( ( self.dict_all_account_all_stock_trading_data_INITIAL != self.dict_all_account_all_stock_trading_data ) and
-             ( self.str_current_save_file_path is None or not self.compare_json_files( self.str_current_save_file_path, self.trading_data_json_file_path ) ) ):
+             ( self.str_current_save_file_path is None or not share_api.compare_json_files( self.str_current_save_file_path, self.trading_data_json_file_path ) ) ):
             dialog = SaveCheckDialog( '開新檔案', self )
             if dialog.exec():
                 if dialog.n_return == 1: #儲存
@@ -3174,7 +3161,7 @@ class MainWindow( QMainWindow ):
         if file_path:
             b_need_save = False
             if ( ( self.dict_all_account_all_stock_trading_data_INITIAL != self.dict_all_account_all_stock_trading_data ) and
-                 ( self.str_current_save_file_path is None or not self.compare_json_files( self.str_current_save_file_path, self.trading_data_json_file_path ) ) ):
+                 ( self.str_current_save_file_path is None or not share_api.compare_json_files( self.str_current_save_file_path, self.trading_data_json_file_path ) ) ):
                 dialog = SaveCheckDialog( '開啟舊檔', self )
                 if dialog.exec():
                     if dialog.n_return == 1: #儲存
@@ -4996,23 +4983,6 @@ class MainWindow( QMainWindow ):
         )
         return file_path
 
-    def show_warning_message_box_with_ok_cancel_button( self, str_title, str_message ): 
-        message_box = QMessageBox( self )
-        message_box.setIcon( QMessageBox.Warning )  # 設置為警告圖示
-        message_box.setWindowTitle( str_title )
-        message_box.setText( str_message )
-
-        # 添加自訂按鈕
-        button_ok = message_box.addButton("確定", QMessageBox.AcceptRole)
-        button_cancel = message_box.addButton("取消", QMessageBox.RejectRole)
-
-        message_box.exec()
-
-        if message_box.clickedButton() == button_ok:
-            return True
-        elif message_box.clickedButton() == button_cancel:
-            return False
-        
     def show_error_message_box_with_ok_button( self, str_title, str_message ): 
         message_box = QMessageBox( self )
         message_box.setIcon( QMessageBox.Critical )  # 設置為警告圖示
@@ -5026,21 +4996,6 @@ class MainWindow( QMainWindow ):
 
         if message_box.clickedButton() == button_ok:
             return True
-
-    def compare_json_files( self, file1, file2 ):
-        """比較兩個 JSON 文件內容是否一致"""
-        if os.path.exists( file1 ) and os.path.exists( file2 ):
-            with open( file1, 'r', encoding='utf-8') as f1, open( file2, 'r', encoding='utf-8') as f2:
-                f1.readline()  # 跳過第一行
-                data1 = json.load(f1)  # 解析第一個 JSON 文件
-                
-                f2.readline()  # 跳過第一行
-                data2 = json.load(f2)  # 解析第二個 JSON 文件
-
-            # 返回比較結果
-            return data1 == data2
-        else:
-            return False
 
     def pick_up_stock( self, str_stock_number ):
         self.str_picked_stock_number = str_stock_number
