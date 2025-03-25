@@ -1,5 +1,6 @@
 import foxinfo_share_utility.share_api as share_api
 import foxinfo_share_utility.share_ui as share_ui
+import foxinfo_share_utility.share_icon as share_icon
 import requests
 from bs4 import BeautifulSoup
 import json
@@ -99,7 +100,7 @@ reg_settings = QSettings( "FoxInfo", "StockInventory" )
 
 if getattr( sys, 'frozen', False ):
     # PyInstaller 打包後執行時
-    
+
     # region 設定 錯誤資訊 logging
     # 設定日誌
     logger = logging.getLogger()
@@ -148,25 +149,7 @@ else:
     g_exe_root_dir = os.path.dirname( os.path.abspath(__file__) )
     g_data_dir = reg_settings.value( "TemporaryFolderPathDebug", g_exe_root_dir ) #D:\_2.code\PythonStockPrice
 
-#region 設定 icon path
-window_icon_file_path = os.path.join( g_exe_root_dir, 'resources\\FoxInfo.svg' ) 
-window_icon = QIcon( window_icon_file_path ) 
-edit_icon_file_path = os.path.join( g_exe_root_dir, 'resources\\Edit.svg' ) 
-edit_icon = QIcon( edit_icon_file_path ) 
-delete_icon_file_path = os.path.join( g_exe_root_dir, 'resources\\Delete.svg' ) 
-delete_icon = QIcon( delete_icon_file_path ) 
-export_icon_file_path = os.path.join( g_exe_root_dir, 'resources\\Export.svg' ) 
-export_icon = QIcon( export_icon_file_path )
-check_icon_file_path = os.path.join( g_exe_root_dir, 'resources\\CheckOn.svg' ) 
-check_icon = QIcon( check_icon_file_path )
-uncheck_icon_file_path = os.path.join( g_exe_root_dir, 'resources\\CheckOff.svg' ) 
-uncheck_icon = QIcon( uncheck_icon_file_path )
-down_icon_file_path = os.path.join( g_exe_root_dir, 'resources\\MoveDown.svg' ) 
-down_icon = QIcon( down_icon_file_path )
-up_icon_file_path = os.path.join( g_exe_root_dir, 'resources\\MoveUp.svg' ) 
-up_icon = QIcon( up_icon_file_path )
 styles_css_path = os.path.join( g_exe_root_dir, 'resources\\styles.css' ) 
-#endregion
 
 class CenterIconDelegate( QStyledItemDelegate ):
     def paint( self, painter, option, index ):
@@ -416,7 +399,7 @@ class ImportDataDuplicateOptionDialog( QDialog ):
 
         self.ui = Ui_DuplicateOptionDialog()
         self.ui.setupUi( self )
-        self.setWindowIcon( window_icon )
+        self.setWindowIcon( share_icon.get_icon( share_icon.IconType.WINDOW ) )
         self.ui.qtOkPushButton.clicked.connect( self.accept_data )
         self.ui.qtCancelPushButton.clicked.connect( self.cancel )
         self.b_overwrite = False
@@ -434,7 +417,7 @@ class StockDividendTransferFeeEditDialog( QDialog ):
 
         self.ui = Ui_StockDividendTransferFeeEditDialog()
         self.ui.setupUi( self )
-        self.setWindowIcon( window_icon )
+        self.setWindowIcon( share_icon.get_icon( share_icon.IconType.WINDOW ) )
         self.ui.qtGroupNameLabel.setText( str_account_name )
         self.ui.qtStockSelectComboBox.setVisible( False )
         self.dict_all_company_number_to_name_and_type = dict_all_company_number_to_name_and_type
@@ -515,12 +498,12 @@ class StockDividendTransferFeeEditDialog( QDialog ):
             self.dividend_transfer_fee_model.setItem( index_row, 0, transfer_fee_item ) 
 
             edit_icon_item = QStandardItem("")
-            edit_icon_item.setIcon( edit_icon )
+            edit_icon_item.setIcon( share_icon.get_icon( share_icon.IconType.EDIT ) )
             edit_icon_item.setFlags( edit_icon_item.flags() & ~Qt.ItemIsEditable )
             self.dividend_transfer_fee_model.setItem( index_row, 1, edit_icon_item )
 
             delete_icon_item = QStandardItem("")
-            delete_icon_item.setIcon( delete_icon )
+            delete_icon_item.setIcon( share_icon.get_icon( share_icon.IconType.DELETE ) )
             delete_icon_item.setFlags( delete_icon_item.flags() & ~Qt.ItemIsEditable )
             self.dividend_transfer_fee_model.setItem( index_row, 2, delete_icon_item )
         self.dividend_transfer_fee_model.setVerticalHeaderLabels( list_vertical_labels )
@@ -553,7 +536,7 @@ class StockDividendTransferFeeEditSpinboxDialog( QDialog ):
 
         self.ui = Ui_StockDividendTransferFeeEditSpinboxDialog()
         self.ui.setupUi( self )
-        self.setWindowIcon( window_icon )
+        self.setWindowIcon( share_icon.get_icon( share_icon.IconType.WINDOW ) )
         self.ui.qtDividendTransferFeeSpinBox.setValue( n_transfer_fee )
         self.n_new_transfer_fee = n_transfer_fee
 
@@ -573,7 +556,7 @@ class StockMinimumTradingFeeEditDialog( QDialog ):
 
         self.ui = Ui_StockMinimumTradingFeeEditDialog()
         self.ui.setupUi( self )
-        self.setWindowIcon( window_icon )
+        self.setWindowIcon( share_icon.get_icon( share_icon.IconType.WINDOW ) )
         self.ui.qtMinimumTradingFeeSpinBox.setValue( n_current_minimum_common_trading_fee )
         self.ui.qtGroupNameLabel.setText( str_account_name )
         self.n_new_minimum_common_trading_fee = n_current_minimum_common_trading_fee
@@ -594,7 +577,7 @@ class StockTradingEditDialog( QDialog ):
         self.ui = Ui_StockTradingDialog()
         self.ui.setupUi( self )
         
-        self.setWindowIcon( window_icon )
+        self.setWindowIcon( share_icon.get_icon( share_icon.IconType.WINDOW ) )
 
         self.ui.qtStockNumberLabel.setText( str_stock_number )
         self.ui.qtStockNameLabel.setText( str_stock_name )
@@ -771,7 +754,7 @@ class StockRegularTradingEditDialog( QDialog ):
         self.ui = Ui_StockRegularTradingDialog()
         self.ui.setupUi( self )
         
-        self.setWindowIcon( window_icon )
+        self.setWindowIcon( share_icon.get_icon( share_icon.IconType.WINDOW ) )
 
         self.ui.qtStockNumberLabel.setText( str_stock_number )
         self.ui.qtStockNameLabel.setText( str_stock_name )
@@ -1006,7 +989,7 @@ class StockDividendEditDialog( QDialog ):
 
         self.ui = Ui_StockDividendDialog()
         self.ui.setupUi( self )
-        self.setWindowIcon( window_icon )
+        self.setWindowIcon( share_icon.get_icon( share_icon.IconType.WINDOW ) )
 
         self.ui.qtStockNumberLabel.setText( str_stock_number )
         self.ui.qtStockNameLabel.setText( str_stock_name )
@@ -1122,7 +1105,7 @@ class StockCapitalIncreaseEditDialog( QDialog ):
 
         self.ui = Ui_StockCapitalIncreaseDialog()
         self.ui.setupUi( self )
-        self.setWindowIcon( window_icon )
+        self.setWindowIcon( share_icon.get_icon( share_icon.IconType.WINDOW ) )
 
         self.ui.qtStockNumberLabel.setText( str_stock_number )
         self.ui.qtStockNameLabel.setText( str_stock_name )
@@ -1231,7 +1214,7 @@ class StockCapitalReductionEditDialog( QDialog ):
 
         self.ui = Ui_StockCapitalReductionDialog()
         self.ui.setupUi( self )
-        self.setWindowIcon( window_icon )
+        self.setWindowIcon( share_icon.get_icon( share_icon.IconType.WINDOW ) )
 
         self.ui.qtStockNumberLabel.setText( str_stock_number )
         self.ui.qtStockNameLabel.setText( str_stock_name )
@@ -1297,7 +1280,7 @@ class StockSplitEditDialog( QDialog ):
 
         self.ui = Ui_StockSplitDialog()
         self.ui.setupUi( self )
-        self.setWindowIcon( window_icon )
+        self.setWindowIcon( share_icon.get_icon( share_icon.IconType.WINDOW ) )
 
         self.ui.qtStockNumberLabel.setText( str_stock_number )
         self.ui.qtStockNameLabel.setText( str_stock_name )
@@ -1351,7 +1334,7 @@ class CashTransferEditDialog( QDialog ):
 
         self.ui = Ui_CashTransferDialog()
         self.ui.setupUi( self )
-        self.setWindowIcon( window_icon )
+        self.setWindowIcon( share_icon.get_icon( share_icon.IconType.WINDOW ) )
 
         self.ui.qtAccountNameLabel.setText( str_account_name )
         obj_current_date = datetime.datetime.today()
@@ -1396,7 +1379,7 @@ class AboutDialog( QDialog ):
 
         self.ui = Ui_AboutDialog()
         self.ui.setupUi( self )
-        self.setWindowIcon( window_icon )
+        self.setWindowIcon( share_icon.get_icon( share_icon.IconType.WINDOW ) )
 
 class Worker( QObject ):
     progress = Signal( int )  # Signal to emit progress updates
@@ -1464,7 +1447,7 @@ class MainWindow( QMainWindow ):
         super( MainWindow, self ).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi( self )  # 設置 UI
-        self.setWindowIcon( window_icon )
+        self.setWindowIcon( share_icon.get_icon( share_icon.IconType.WINDOW ) )
 
         if not b_unit_test:
             self.progress_bar = QProgressBar( self )
@@ -1507,7 +1490,7 @@ class MainWindow( QMainWindow ):
         self.ui.qtExportAllStockTradingDataPushButton.clicked.connect( self.on_export_all_to_excell_button_clicked )
         self.ui.qtExportSelectedStockTradingDataPushButton.clicked.connect( self.on_export_selected_to_excell_button_clicked )
 
-        self.ui.qtHideTradingDataTableToolButton.setIcon( down_icon )
+        self.ui.qtHideTradingDataTableToolButton.setIcon( share_icon.get_icon( share_icon.IconType.DOWN ) )
 
         self.ui.qtNewFileAction.setShortcut( "Ctrl+N" )
         self.ui.qtNewFileAction.triggered.connect( self.on_new_file_action_triggered )
@@ -2507,10 +2490,10 @@ class MainWindow( QMainWindow ):
 
     def on_hide_trading_data_table_tool_button_clicked( self ):
         if self.ui.qtTradingDataTableView.isVisible():
-            self.ui.qtHideTradingDataTableToolButton.setIcon( up_icon )
+            self.ui.qtHideTradingDataTableToolButton.setIcon( share_icon.get_icon( share_icon.IconType.UP ) )
             self.ui.qtTradingDataTableView.setHidden( True )
         else:
-            self.ui.qtHideTradingDataTableToolButton.setIcon( down_icon )
+            self.ui.qtHideTradingDataTableToolButton.setIcon( share_icon.get_icon( share_icon.IconType.DOWN ) )
             self.ui.qtTradingDataTableView.setHidden( False )
 
     def on_add_trading_data_push_button_clicked( self ): 
@@ -3010,7 +2993,7 @@ class MainWindow( QMainWindow ):
         b_need_save = False
         if ( ( self.dict_all_account_all_stock_trading_data_INITIAL != self.dict_all_account_all_stock_trading_data ) and
              ( self.str_current_save_file_path is None or not share_api.compare_json_files( self.str_current_save_file_path, self.trading_data_json_file_path ) ) ):
-            dialog = share_ui.SaveCheckDialog( window_icon, '開新檔案', self )
+            dialog = share_ui.SaveCheckDialog( share_icon.get_icon( share_icon.IconType.WINDOW ), '開新檔案', self )
             if dialog.exec():
                 if dialog.n_return == 1: #儲存
                     b_need_save = True
@@ -3062,7 +3045,7 @@ class MainWindow( QMainWindow ):
             b_need_save = False
             if ( ( self.dict_all_account_all_stock_trading_data_INITIAL != self.dict_all_account_all_stock_trading_data ) and
                  ( self.str_current_save_file_path is None or not share_api.compare_json_files( self.str_current_save_file_path, self.trading_data_json_file_path ) ) ):
-                dialog = share_ui.SaveCheckDialog( window_icon, '開啟舊檔', self )
+                dialog = share_ui.SaveCheckDialog( share_icon.get_icon( share_icon.IconType.WINDOW ), '開啟舊檔', self )
                 if dialog.exec():
                     if dialog.n_return == 1: #儲存
                         b_need_save = True
@@ -3283,7 +3266,7 @@ class MainWindow( QMainWindow ):
     def on_set_temporary_file_path_action_triggered( self ):
         str_default_exe_path = os.path.dirname( os.path.abspath(__file__) )
         global g_data_dir
-        dialog = share_ui.SelectFolderDialog( window_icon, reg_settings, str_default_exe_path, g_data_dir, g_user_dir, self )
+        dialog = share_ui.SelectFolderDialog( share_icon.get_icon( share_icon.IconType.WINDOW ), reg_settings, str_default_exe_path, g_data_dir, g_user_dir, self )
         if dialog.exec():
             if getattr( sys, 'frozen', False ):
                 # PyInstaller 打包後執行時
@@ -4341,18 +4324,18 @@ class MainWindow( QMainWindow ):
 
                     use_auto_dividend_item = QStandardItem()
                     if dict_trading_data_first[ TradingData.USE_AUTO_DIVIDEND_DATA ]:
-                        use_auto_dividend_item.setIcon( check_icon )
+                        use_auto_dividend_item.setIcon( share_icon.get_icon( share_icon.IconType.CHECK ) )
                     else:
-                        use_auto_dividend_item.setIcon( uncheck_icon )
+                        use_auto_dividend_item.setIcon( share_icon.get_icon( share_icon.IconType.UNCHECK ) )
                     use_auto_dividend_item.setFlags( use_auto_dividend_item.flags() & ~Qt.ItemIsEditable )
                     table_model.setItem( index_row, len( self.list_stock_list_table_horizontal_header ) - 3, use_auto_dividend_item)
                         
                     export_icon_item = QStandardItem("")
-                    export_icon_item.setIcon( export_icon )
+                    export_icon_item.setIcon( share_icon.get_icon( share_icon.IconType.EXPORT ) )
                     export_icon_item.setFlags( export_icon_item.flags() & ~Qt.ItemIsEditable )
                     table_model.setItem( index_row, len( self.list_stock_list_table_horizontal_header ) - 2, export_icon_item )
                     delete_icon_item = QStandardItem("")
-                    delete_icon_item.setIcon( delete_icon )
+                    delete_icon_item.setIcon( share_icon.get_icon( share_icon.IconType.DELETE ) )
                     delete_icon_item.setFlags( delete_icon_item.flags() & ~Qt.ItemIsEditable )
                     table_model.setItem( index_row, len( self.list_stock_list_table_horizontal_header ) - 1, delete_icon_item )
                     index_row += 1
@@ -4529,11 +4512,11 @@ class MainWindow( QMainWindow ):
                 table_model.setItem( 2, column, total_value_standard_item )
 
                 edit_icon_item = QStandardItem("")
-                edit_icon_item.setIcon( edit_icon )
+                edit_icon_item.setIcon( share_icon.get_icon( share_icon.IconType.EDIT ) )
                 edit_icon_item.setFlags( edit_icon_item.flags() & ~Qt.ItemIsEditable )
                 edit_icon_item.setData( item[ TransferData.SORTED_INDEX_NON_SAVE ], Qt.UserRole )
                 delete_icon_item = QStandardItem("")
-                delete_icon_item.setIcon( delete_icon )
+                delete_icon_item.setIcon( share_icon.get_icon( share_icon.IconType.DELETE ) )
                 delete_icon_item.setFlags( delete_icon_item.flags() & ~Qt.ItemIsEditable )
                 delete_icon_item.setData( item[ TransferData.SORTED_INDEX_NON_SAVE ], Qt.UserRole )
 
@@ -4603,11 +4586,11 @@ class MainWindow( QMainWindow ):
 
             if e_trading_type != TradingType.DIVIDEND or not b_use_auto_dividend:
                 edit_icon_item = QStandardItem("")
-                edit_icon_item.setIcon( edit_icon )
+                edit_icon_item.setIcon( share_icon.get_icon( share_icon.IconType.EDIT ) )
                 edit_icon_item.setFlags( edit_icon_item.flags() & ~Qt.ItemIsEditable )
                 edit_icon_item.setData( dict_per_trading_data[ TradingData.SORTED_INDEX_NON_SAVE ], Qt.UserRole )
                 delete_icon_item = QStandardItem("")
-                delete_icon_item.setIcon( delete_icon )
+                delete_icon_item.setIcon( share_icon.get_icon( share_icon.IconType.DELETE ) )
                 delete_icon_item.setFlags( delete_icon_item.flags() & ~Qt.ItemIsEditable )
                 delete_icon_item.setData( dict_per_trading_data[ TradingData.SORTED_INDEX_NON_SAVE ], Qt.UserRole )
 

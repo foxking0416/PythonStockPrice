@@ -16,6 +16,7 @@ pyinstaller --clean ^
 			--hidden-import "babel.numbers" ^
             --add-data "resources;./resources" ^
 			--add-data "StockInventory/Dividend;./StockInventory/Dividend" ^
+			--add-data "../FoxInfoShareUtility/foxinfo_share_utility/icons;foxinfo_share_utility/icons" ^
 			--noconsole StockPriceMainWindow.py
 
 echo ♻️  Reinstalling in editable mode for development...
