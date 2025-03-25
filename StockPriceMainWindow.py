@@ -84,46 +84,7 @@ from scipy.optimize import newton
 # pylint -E StockPriceMainWindow.py 只顯示錯誤級別的資訊
 
 
-# region 設定 錯誤資訊 logging
-# 設定日誌
-logger = logging.getLogger()
-logger.setLevel(logging.ERROR)
 
-current_date = datetime.datetime.today().strftime("%Y-%m-%d")
-log_filename = f"log_{current_date}.txt"
-# 日誌檔案處理器
-file_handler = TimedRotatingFileHandler(
-    filename = log_filename,  # 基本文件名
-    when = "midnight",  # 依據每天午夜分割日誌
-    interval = 1,  # 每 1 天生成一個新檔案
-    backupCount = 7,  # 保留最近 7 天的日誌檔案
-    encoding = "utf-8"  # 確保支援 UTF-8 編碼
-)
-file_handler.setLevel(logging.ERROR)
-file_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-file_handler.setFormatter(file_formatter)
-
-# 終端處理器
-console_handler = logging.StreamHandler()
-console_handler.setLevel(logging.ERROR)
-console_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-console_handler.setFormatter(console_formatter)
-
-# 添加處理器到 logger
-logger.addHandler(file_handler)
-logger.addHandler(console_handler)
-
-# 自定義未處理例外的鉤子
-def handle_exception(exc_type, exc_value, exc_traceback):
-    if issubclass(exc_type, KeyboardInterrupt):
-        # 如果是鍵盤中斷，保持預設行為
-        sys.__excepthook__(exc_type, exc_value, exc_traceback)
-        return
-    # 記錄例外
-    logging.error("Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback))
-# 將自定義的鉤子設定為全局的未處理例外處理器
-sys.excepthook = handle_exception
-# endregion
 
 g_user_dir = os.path.expanduser("~")  #開發模式跟打包模式下都是C:\Users\foxki
 g_exe_dir = os.path.dirname(__file__) #開發模式下是D:\_2.code\PythonStockPrice #打包模式後是C:\Users\foxki\AppData\Local\Temp\_MEI60962 最後那個資料夾是暫時性的隨機名稱
@@ -138,6 +99,48 @@ reg_settings = QSettings( "FoxInfo", "StockInventory" )
 
 if getattr( sys, 'frozen', False ):
     # PyInstaller 打包後執行時
+    
+    # region 設定 錯誤資訊 logging
+    # 設定日誌
+    logger = logging.getLogger()
+    logger.setLevel(logging.ERROR)
+
+    current_date = datetime.datetime.today().strftime("%Y-%m-%d")
+    log_filename = f"log_{current_date}.txt"
+    # 日誌檔案處理器
+    file_handler = TimedRotatingFileHandler(
+        filename = log_filename,  # 基本文件名
+        when = "midnight",  # 依據每天午夜分割日誌
+        interval = 1,  # 每 1 天生成一個新檔案
+        backupCount = 7,  # 保留最近 7 天的日誌檔案
+        encoding = "utf-8"  # 確保支援 UTF-8 編碼
+    )
+    file_handler.setLevel(logging.ERROR)
+    file_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    file_handler.setFormatter(file_formatter)
+
+    # 終端處理器
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.ERROR)
+    console_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    console_handler.setFormatter(console_formatter)
+
+    # 添加處理器到 logger
+    logger.addHandler(file_handler)
+    logger.addHandler(console_handler)
+
+    # 自定義未處理例外的鉤子
+    def handle_exception(exc_type, exc_value, exc_traceback):
+        if issubclass(exc_type, KeyboardInterrupt):
+            # 如果是鍵盤中斷，保持預設行為
+            sys.__excepthook__(exc_type, exc_value, exc_traceback)
+            return
+        # 記錄例外
+        logging.error("Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback))
+    # 將自定義的鉤子設定為全局的未處理例外處理器
+    sys.excepthook = handle_exception
+    # endregion
+
     g_exe_root_dir = os.path.dirname(__file__) #使用--onefile打包 C:\Users\foxki\AppData\Local\Temp\_MEI60962 否則就是 D:\_2.code\PythonStockPrice\dist\StockPriceMainWindow\_internal
     g_data_dir = reg_settings.value( "TemporaryFolderPath", os.path.join( g_user_dir, "AppData", "Local", "FoxInfo" ) ) #C:\Users\foxki\AppData\Local\FoxInfo 
 else:
