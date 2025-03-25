@@ -365,30 +365,11 @@ class Utility():
             return newton(lambda r: xnpv(r), 0.1)
         except RuntimeError:
             raise ValueError("無法找到解，請檢查輸入的現金流和日期。")
-
-    def lowercase_english_uppercase( text ):
-        return re.sub(r'[A-Z]', lambda x: x.group( 0 ).lower(), text )
-    
-    def get_qt_weekday_text( n_weekday ):
-        if n_weekday == 1:
-            return "(一)"
-        elif n_weekday == 2:    
-            return "(二)"
-        elif n_weekday == 3:
-            return "(三)"
-        elif n_weekday == 4:
-            return "(四)"
-        elif n_weekday == 5:
-            return "(五)"
-        elif n_weekday == 6:
-            return "(六)"
-        else:
-            return "(日)"
-        
+           
     def update_weekly_text_by_date( qt_date_edit, qt_weekday_label ):
         obj_date = qt_date_edit.date()
         n_weekday = obj_date.dayOfWeek()
-        str_weekday = Utility.get_qt_weekday_text( n_weekday )
+        str_weekday = share_api.get_qt_weekday_text( n_weekday )
         qt_weekday_label.setText( str_weekday )
 
 class EditTabTitleDialog( QDialog ):
@@ -474,7 +455,7 @@ class StockDividendTransferFeeEditDialog( QDialog ):
         with QSignalBlocker( self.ui.qtStockInputLineEdit ), QSignalBlocker( self.ui.qtStockSelectComboBox ):
             self.ui.qtStockSelectComboBox.clear()
             str_stock_input = self.ui.qtStockInputLineEdit.text()
-            str_stock_input = Utility.lowercase_english_uppercase( str_stock_input )
+            str_stock_input = share_api.lowercase_english_uppercase( str_stock_input )
             if len( str_stock_input ) == 0:
                 self.ui.qtStockSelectComboBox.setVisible( False )
                 return
@@ -482,7 +463,7 @@ class StockDividendTransferFeeEditDialog( QDialog ):
 
             for stock_number, list_stock_name_and_type in self.dict_all_company_number_to_name_and_type.items():
                 str_stock_name = list_stock_name_and_type[ 0 ]
-                str_stock_name_lowercase = Utility.lowercase_english_uppercase( str_stock_name )
+                str_stock_name_lowercase = share_api.lowercase_english_uppercase( str_stock_name )
                 if str_stock_input in stock_number or str_stock_input in str_stock_name_lowercase:
                     self.ui.qtStockSelectComboBox.addItem( f"{stock_number} {str_stock_name}" )
             # self.ui.qtStockSelectComboBox.showPopup() #showPopup的話，focus會被搶走
@@ -2061,7 +2042,7 @@ class MainWindow( QMainWindow ):
         with QSignalBlocker( qt_combo_box ), QSignalBlocker( qt_line_edit ):
             qt_combo_box.clear()
             str_stock_input = qt_line_edit.text()
-            str_stock_input = Utility.lowercase_english_uppercase( str_stock_input )
+            str_stock_input = share_api.lowercase_english_uppercase( str_stock_input )
             if len( str_stock_input ) == 0:
                 qt_combo_box.setVisible( False )
                 return
@@ -2069,7 +2050,7 @@ class MainWindow( QMainWindow ):
 
             for stock_number, list_stock_name_and_type in self.dict_all_company_number_to_name_and_type.items():
                 str_stock_name = list_stock_name_and_type[ 0 ]
-                str_stock_name_lowercase = Utility.lowercase_english_uppercase( str_stock_name )
+                str_stock_name_lowercase = share_api.lowercase_english_uppercase( str_stock_name )
                 if str_stock_input in stock_number or str_stock_input in str_stock_name_lowercase:
                     qt_combo_box.addItem( f"{stock_number} {str_stock_name}" )
             # self.ui.qtStockSelectComboBox.showPopup() #showPopup的話，focus會被搶走
@@ -4691,20 +4672,8 @@ class MainWindow( QMainWindow ):
         str_month_date = str_date[ 5: ].replace( '-', '/' )
         obj_date = datetime.datetime.strptime( str_date, "%Y-%m-%d" )
         n_weekday = obj_date.weekday()
-        if n_weekday == 0:
-            str_weekday = "(一)"
-        elif n_weekday == 1:
-            str_weekday = "(二)"
-        elif n_weekday == 2:
-            str_weekday = "(三)"
-        elif n_weekday == 3:
-            str_weekday = "(四)"
-        elif n_weekday == 4:
-            str_weekday = "(五)"
-        elif n_weekday == 5:
-            str_weekday = "(六)"
-        else:
-            str_weekday = "(日)"
+        str_weekday = share_api.get_obj_datetime_weekday_text( n_weekday )
+
         f_trading_price = dict_per_trading_data[ TradingData.PER_SHARE_TRADING_PRICE ]
         n_trading_count = dict_per_trading_data[ TradingData.TRADING_COUNT ]
         n_trading_value = dict_per_trading_data[ TradingData.TRADING_VALUE_NON_SAVE ]
