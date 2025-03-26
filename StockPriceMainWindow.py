@@ -49,8 +49,8 @@ from scipy.optimize import newton
 # pyinstaller --hidden-import "babel.numbers" --add-data "resources;./resources" --onefile --noconsole StockPriceMainWindow.py
 # pyinstaller --hidden-import "babel.numbers" --add-data "resources;./resources" --onefile --console StockPriceMainWindow.py
 # pyinstaller --hidden-import "babel.numbers" --add-data "resources;./resources" --noconsole StockPriceMainWindow.py
-# pyinstaller --hidden-import "babel.numbers" --add-data "resources;./resources" --add-data "StockInventory/Dividend;./StockInventory/Dividend" --noconsole StockPriceMainWindow.py
-# pyinstaller --hidden-import "babel.numbers" --add-data "resources;./resources" --add-data "StockInventory/Dividend;./StockInventory/Dividend" --console StockPriceMainWindow.py
+# pyinstaller --hidden-import "babel.numbers" --add-data "resources;./resources" --add-data "StockInventory/Dividend;./StockInventory/Dividend" --add-data "../FoxInfoShareUtility/foxinfo_share_utility/icons;foxinfo_share_utility/icons" --noconsole StockPriceMainWindow.py
+# pyinstaller --hidden-import "babel.numbers" --add-data "resources;./resources" --add-data "StockInventory/Dividend;./StockInventory/Dividend" --add-data "../FoxInfoShareUtility/foxinfo_share_utility/icons;foxinfo_share_utility/icons" --console StockPriceMainWindow.py
 
 # 要把.ui檔變成.py
 # cd D:\_2.code\PythonStockPrice
@@ -87,14 +87,14 @@ from scipy.optimize import newton
 
 
 
-g_user_dir = os.path.expanduser("~")  #開發模式跟打包模式下都是C:\Users\foxki
-g_exe_dir = os.path.dirname(__file__) #開發模式下是D:\_2.code\PythonStockPrice #打包模式後是C:\Users\foxki\AppData\Local\Temp\_MEI60962 最後那個資料夾是暫時性的隨機名稱
-g_exe2_dir = os.path.dirname( sys.executable ) #開發模式下是C:\Users\foxki\AppData\Local\Programs\Python\Python312 #打包模式後是:D:\_2.code\PythonStockPrice\dist
-g_abs_dir = os.path.dirname( os.path.abspath(__file__) ) #開發模式下是D:\_2.code\PythonStockPrice #打包模式後是C:\Users\foxki\AppData\Local\Temp\_MEI60962 最後那個資料夾是暫時性的隨機名稱
-print( "g_user_dir :" + g_user_dir ) #開發模式下是C:\Users\foxki
-print( "g_exe_dir :" + g_exe_dir ) #開發模式下是D:\_2.code\PythonStockPrice #打包模式後是C:\Users\foxki\AppData\Local\Temp\_MEI60962 最後那個資料夾是暫時性的隨機名稱
-print( "g_exe2_dir :" + g_exe2_dir ) #開發模式下是C:\Users\foxki\AppData\Local\Programs\Python\Python312 #打包模式後是:D:\_2.code\PythonStockPrice\dist
-print( "g_abs_dir :" + g_abs_dir ) #開發模式下是D:\_2.code\PythonStockPrice #打包模式後是C:\Users\foxki\AppData\Local\Temp\_MEI60962 最後那個資料夾是暫時性的隨機名稱
+g_user_dir = os.path.expanduser("~")                     
+g_exe_dir = os.path.dirname(__file__)                    
+g_exe2_dir = os.path.dirname( sys.executable )           
+g_abs_dir = os.path.dirname( os.path.abspath(__file__) ) 
+print( "g_user_dir :" + g_user_dir ) #開發模式跟打包模式下都是C:\Users\foxki
+print( "g_exe_dir :" + g_exe_dir )   #開發模式下是D:\_2.code\PythonStockPrice                              #打包模式後是 D:\_2.code\PythonStockPrice\dist\StockPriceMainWindow\_internal 
+print( "g_exe2_dir :" + g_exe2_dir ) #開發模式下是C:\Users\foxki\AppData\Local\Programs\Python\Python312   #打包模式後是:D:\_2.code\PythonStockPrice\dist\StockPriceMainWindow
+print( "g_abs_dir :" + g_abs_dir )   #開發模式下是D:\_2.code\PythonStockPrice                              #打包模式後是 D:\_2.code\PythonStockPrice\dist\StockPriceMainWindow\_internal 
 
 reg_settings = QSettings( "FoxInfo", "StockInventory" )
 
