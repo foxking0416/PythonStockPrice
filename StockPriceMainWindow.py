@@ -2469,10 +2469,10 @@ class MainWindow( QMainWindow ):
 
     def on_hide_trading_data_table_tool_button_clicked( self ):
         if self.ui.qtTradingDataTableView.isVisible():
-            self.ui.qtHideTradingDataTableToolButton.setIcon( share_icon.get_icon( share_icon.IconType.UP ) )
+            self.ui.qtHideTradingDataTableToolButton.setIcon( share_icon.get_icon( share_icon.IconType.MOVE_UP ) )
             self.ui.qtTradingDataTableView.setHidden( True )
         else:
-            self.ui.qtHideTradingDataTableToolButton.setIcon( share_icon.get_icon( share_icon.IconType.DOWN ) )
+            self.ui.qtHideTradingDataTableToolButton.setIcon( share_icon.get_icon( share_icon.IconType.MOVE_DOWN ) )
             self.ui.qtTradingDataTableView.setHidden( False )
 
     def on_add_trading_data_push_button_clicked( self ): 
