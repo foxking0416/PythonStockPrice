@@ -151,27 +151,6 @@ else:
 
 styles_css_path = os.path.join( g_exe_root_dir, 'resources\\styles.css' ) 
 
-class CenterIconDelegate( QStyledItemDelegate ):
-    def paint( self, painter, option, index ):
-        # 获取单元格数据
-        icon = index.data( Qt.DecorationRole )  # 获取图标
-        
-        # 如果有图标
-        if icon:
-            rect = option.rect  # 单元格的绘制区域
-            size = icon.actualSize( rect.size() ) * 0.7  # 图标实际尺寸
-            
-            # 计算居中位置
-            x = rect.x() + ( rect.width() - size.width() ) // 2
-            y = rect.y() + ( rect.height() - size.height() ) // 2
-            target_rect = QRect( x, y, size.width(), size.height() )
-            
-            # 绘制图标
-            icon.paint( painter, target_rect, Qt.AlignCenter )
-        else:
-            # 如果没有图标，使用默认绘制方法
-            super().paint( painter, option, index )
-
 class TradingType( IntEnum ):
     TEMPLATE = 0
     SELL = 1
@@ -423,7 +402,7 @@ class StockDividendTransferFeeEditDialog( QDialog ):
         self.dict_all_company_number_to_name_and_type = dict_all_company_number_to_name_and_type
         self.dict_company_number_to_transfer_fee = dict_company_number_to_transfer_fee.copy()
 
-        delegate = CenterIconDelegate()
+        delegate = share_ui.CenterIconDelegate()
         self.dividend_transfer_fee_model = QStandardItemModel( 0, 0 ) 
         self.ui.qtDividendTransferFeeTableView.setModel( self.dividend_transfer_fee_model )
         self.ui.qtDividendTransferFeeTableView.setItemDelegate( delegate )
@@ -1463,7 +1442,7 @@ class MainWindow( QMainWindow ):
         self.ui.qtTabWidget.tabBar().tabMoved.connect( self.on_tab_moved )
         self.ui.qtTabWidget.tabBar().setTabButton( 0, QTabBar.RightSide, None )  # 隱藏最後一個 tab 的 close 按鈕
 
-        delegate = CenterIconDelegate()
+        delegate = share_ui.CenterIconDelegate()
 
         self.per_stock_trading_data_model = QStandardItemModel( 0, 0 ) 
         self.per_stock_trading_data_model.setVerticalHeaderLabels( self.get_trading_data_header() )
@@ -1881,7 +1860,7 @@ class MainWindow( QMainWindow ):
 
         uiqt_stock_inventory_tab_vertical_layout.addLayout( uiqt_horizontal_layout_3 )
 
-        delegate = CenterIconDelegate()
+        delegate = share_ui.CenterIconDelegate()
         stock_list_model = CustomSortModel( 0, 0 )
         stock_list_model.setHorizontalHeaderLabels( self.list_stock_list_table_horizontal_header )
         uiqt_stock_list_table_view.verticalHeader().setSectionsMovable( True )
@@ -2210,7 +2189,7 @@ class MainWindow( QMainWindow ):
                 self.refresh_trading_data_table( sorted_list )
                 self.auto_save_trading_data()
             elif n_column == len( self.list_stock_list_table_horizontal_header ) - 2:#匯出按鈕
-                file_path = share_ui.open_save_file_dialog( self, "匯出交易資料", "", "JSON (*.json);;" )
+                file_path = share_ui.open_save_file_dialog( self, "匯出交易資料", "", share_ui.FileFilter.JSON )
                 if file_path:
                     list_save_tab_widget = [ self.ui.qtTabWidget.currentIndex() ]
                     self.manual_save_trading_data( list_save_tab_widget, file_path, str_stock_number )
@@ -2938,7 +2917,7 @@ class MainWindow( QMainWindow ):
         str_stock_name = list_stock_name_and_type[ 0 ]
         dict_per_account_all_stock_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ]
         list_trading_data = dict_per_account_all_stock_trading_data[ str_stock_number ]
-        file_path = share_ui.open_save_file_dialog( self, "輸出Excel", "", "Excel 活頁簿 (*.xlsx);;All Files (*)" )
+        file_path = share_ui.open_save_file_dialog( self, "輸出Excel", "", share_ui.FileFilter.EXCEL )
         if file_path:
             workbook = Workbook()
             worksheet = workbook.active
@@ -2955,7 +2934,7 @@ class MainWindow( QMainWindow ):
             workbook.save( file_path )
 
     def on_export_all_to_excell_button_clicked( self ): 
-        file_path = share_ui.open_save_file_dialog( self, "輸出Excel", "", "Excel 活頁簿 (*.xlsx);;All Files (*)" )
+        file_path = share_ui.open_save_file_dialog( self, "輸出Excel", "", share_ui.FileFilter.EXCEL )
         if file_path:
             workbook = Workbook()
             str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
@@ -3008,7 +2987,7 @@ class MainWindow( QMainWindow ):
                 list_save_tab_widget = list( range( self.ui.qtTabWidget.count() - 1 ) )
                 self.manual_save_trading_data( list_save_tab_widget, self.str_current_save_file_path )
             else:
-                file_path = share_ui.open_save_file_dialog( self, "匯出交易資料", "", "JSON (*.json);;" )
+                file_path = share_ui.open_save_file_dialog( self, "匯出交易資料", "", share_ui.FileFilter.JSON )
                 if file_path:
                     list_save_tab_widget = list( range( self.ui.qtTabWidget.count() - 1 ) )
                     self.manual_save_trading_data( list_save_tab_widget, file_path )
@@ -3040,7 +3019,7 @@ class MainWindow( QMainWindow ):
         self.str_current_save_file_path = None
 
     def on_open_file_action_triggered( self ): 
-        file_path = share_ui.open_load_file_dialog( self, "匯入交易資料", "", "JSON (*.json);;" )
+        file_path = share_ui.open_load_file_dialog( self, "匯入交易資料", "", share_ui.FileFilter.JSON )
         if file_path:
             b_need_save = False
             if ( ( self.dict_all_account_all_stock_trading_data_INITIAL != self.dict_all_account_all_stock_trading_data ) and
@@ -3060,7 +3039,7 @@ class MainWindow( QMainWindow ):
                     list_save_tab_widget = list( range( self.ui.qtTabWidget.count() - 1 ) )
                     self.manual_save_trading_data( list_save_tab_widget, self.str_current_save_file_path )
                 else:
-                    file_path = share_ui.open_save_file_dialog( self, "匯出交易資料", "", "JSON (*.json);;" )
+                    file_path = share_ui.open_save_file_dialog( self, "匯出交易資料", "", share_ui.FileFilter.JSON )
                     if file_path:
                         list_save_tab_widget = list( range( self.ui.qtTabWidget.count() - 1 ) )
                         self.manual_save_trading_data( list_save_tab_widget, file_path )
@@ -3102,27 +3081,27 @@ class MainWindow( QMainWindow ):
             self.str_current_save_file_path = file_path
 
     def on_save_as_action_triggered( self ): 
-        file_path = share_ui.open_save_file_dialog( self, "匯出交易資料", "", "JSON (*.json);;" )
+        file_path = share_ui.open_save_file_dialog( self, "匯出交易資料", "", share_ui.FileFilter.JSON )
         if file_path:
             list_save_tab_widget = list( range( self.ui.qtTabWidget.count() - 1 ) )
             self.manual_save_trading_data( list_save_tab_widget, file_path )
             self.str_current_save_file_path = file_path
 
     def on_save_action_triggered( self ): 
-        file_path = self.str_current_save_file_path or share_ui.open_save_file_dialog( self, "匯出交易資料", "", "JSON (*.json);;" )
+        file_path = self.str_current_save_file_path or share_ui.open_save_file_dialog( self, "匯出交易資料", "", share_ui.FileFilter.JSON )
         if file_path:
             list_save_tab_widget = list( range( self.ui.qtTabWidget.count() - 1 ) )
             self.manual_save_trading_data( list_save_tab_widget, file_path )
             self.str_current_save_file_path = file_path
 
     def on_export_current_group_action_triggered( self ): 
-        file_path = share_ui.open_save_file_dialog( self, "匯出交易資料", "", "JSON (*.json);;" )
+        file_path = share_ui.open_save_file_dialog( self, "匯出交易資料", "", share_ui.FileFilter.JSON )
         if file_path:
             list_save_tab_widget = [ self.ui.qtTabWidget.currentIndex() ]
             self.manual_save_trading_data( list_save_tab_widget, file_path )
 
     def on_import_full_action_triggered( self ):
-        file_path = share_ui.open_load_file_dialog( self, "匯入交易資料", "", "JSON (*.json);;" )
+        file_path = share_ui.open_load_file_dialog( self, "匯入交易資料", "", share_ui.FileFilter.JSON )
         if file_path:
             dict_account_to_tab_widget_name = {}
             for index in range( self.ui.qtTabWidget.count() - 1 ):
@@ -3210,7 +3189,7 @@ class MainWindow( QMainWindow ):
             self.auto_save_trading_data()
 
     def on_import_single_stock_action_triggered( self ):
-        file_path = share_ui.open_load_file_dialog( self, "匯入交易資料", "", "JSON (*.json);;" )
+        file_path = share_ui.open_load_file_dialog( self, "匯入交易資料", "", share_ui.FileFilter.JSON )
         if file_path:
             dict_all_account_all_stock_trading_data_LOAD = {}
             dict_all_account_ui_state_LOAD = {}
