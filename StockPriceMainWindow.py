@@ -1469,7 +1469,7 @@ class MainWindow( QMainWindow ):
         self.ui.qtExportAllStockTradingDataPushButton.clicked.connect( self.on_export_all_to_excell_button_clicked )
         self.ui.qtExportSelectedStockTradingDataPushButton.clicked.connect( self.on_export_selected_to_excell_button_clicked )
 
-        self.ui.qtHideTradingDataTableToolButton.setIcon( share_icon.get_icon( share_icon.IconType.DOWN ) )
+        self.ui.qtHideTradingDataTableToolButton.setIcon( share_icon.get_icon( share_icon.IconType.MOVE_DOWN ) )
 
         self.ui.qtNewFileAction.setShortcut( "Ctrl+N" )
         self.ui.qtNewFileAction.triggered.connect( self.on_new_file_action_triggered )
