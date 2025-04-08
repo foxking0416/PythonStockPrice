@@ -238,6 +238,7 @@ class TransferData( Enum ):
     TOTAL_VALUE_NON_SAVE = 4 #不會記錄
 
 class Utility():
+    @staticmethod
     def compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, n_minimum_common_trading_fee, n_minimum_odd_trading_fee, b_etf, b_daying_trading, b_bond ):
         f_trading_price = Decimal( str( f_trading_price ) )#原本10.45 * 100000 = 1044999.999999999 然後取 int 就變成1044999，所以改用Decimal
         n_trading_count = Decimal( str( n_trading_count ) )
@@ -280,6 +281,7 @@ class Utility():
             dict_result[ TradingCost.TRADING_TOTAL_COST ] = 0
         return dict_result
 
+    @staticmethod
     def generate_trading_data( str_trading_date,                   #交易日期
                                e_trading_type,                     #交易種類
                                e_trading_price_type,               #交易價格種類
@@ -317,6 +319,7 @@ class Utility():
         dict_trading_data[ TradingData.DAYING_TRADING ] = b_daying_trading
         return dict_trading_data
 
+    @staticmethod
     def xirr(cash_flows, dates):
         """
         計算 XIRR (年化報酬率)
@@ -336,6 +339,7 @@ class Utility():
         except RuntimeError:
             raise ValueError("無法找到解，請檢查輸入的現金流和日期。")
            
+    @staticmethod
     def update_weekly_text_by_date( qt_date_edit, qt_weekday_label ):
         obj_date = qt_date_edit.date()
         n_weekday = obj_date.dayOfWeek()
