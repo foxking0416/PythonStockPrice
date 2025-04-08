@@ -1528,12 +1528,20 @@ class MainWindow( QMainWindow ):
 
         self.ui.qtAboutAction.triggered.connect( self.on_trigger_about )
         
-        self.trading_data_json_file_path = os.path.join( g_data_dir, 'StockInventory', str_initial_data_file )
-        self.UISetting_file_path = os.path.join( g_data_dir, 'StockInventory', str_UI_setting_file )
-        self.stock_number_file_path = os.path.join( g_data_dir, 'StockInventory', str_stock_number_file )
-        self.suspend_stock_number_file_path = os.path.join( g_data_dir, 'StockInventory', str_suspend_stock_number_file )
-        self.stock_price_file_path = os.path.join( g_data_dir, 'StockInventory', str_stock_price_file )
-        self.stock_pre_price_file_path = os.path.join( g_data_dir, 'StockInventory', str_stock_pre_price_file )
+        if not b_unit_test:
+            self.trading_data_json_file_path = os.path.join( g_data_dir, 'StockInventory', str_initial_data_file )
+            self.UISetting_file_path = os.path.join( g_data_dir, 'StockInventory', str_UI_setting_file )
+            self.stock_number_file_path = os.path.join( g_data_dir, 'StockInventory', str_stock_number_file )
+            self.suspend_stock_number_file_path = os.path.join( g_data_dir, 'StockInventory', str_suspend_stock_number_file )
+            self.stock_price_file_path = os.path.join( g_data_dir, 'StockInventory', str_stock_price_file )
+            self.stock_pre_price_file_path = os.path.join( g_data_dir, 'StockInventory', str_stock_pre_price_file )
+        else:
+            self.trading_data_json_file_path = os.path.join( g_exe_dir, 'StockInventory', str_initial_data_file )
+            self.UISetting_file_path = os.path.join( g_exe_dir, 'StockInventory', str_UI_setting_file )
+            self.stock_number_file_path = os.path.join( g_exe_dir, 'StockInventory', str_stock_number_file )
+            self.suspend_stock_number_file_path = os.path.join( g_exe_dir, 'StockInventory', str_suspend_stock_number_file )
+            self.stock_price_file_path = os.path.join( g_exe_dir, 'StockInventory', str_stock_price_file )
+            self.stock_pre_price_file_path = os.path.join( g_exe_dir, 'StockInventory', str_stock_pre_price_file )
 
         self.list_stock_list_table_horizontal_header = [ '股票代碼', '總成本', '庫存股數', '平均成本', ' 收盤價', '現值', '總手續費', '總交易稅', '損益', '股利所得', '平均年化報酬率', '自動帶入股利', '匯出', '刪除' ]
         self.pick_up_stock( None )
@@ -5264,7 +5272,7 @@ class MainWindow( QMainWindow ):
             str_season = '_Q' + str( n_season )
         if str_output_path == None:
             if b_unit_test:
-                str_output_path = os.path.join( g_data_dir, 'StockInventory', 'UnitTestData', str_file_name + str( n_year ) + str_season + '.txt' )
+                str_output_path = os.path.join( g_exe_dir, 'StockInventory', 'UnitTestData', str_file_name + str( n_year ) + str_season + '.txt' )
             else:
                 str_output_path = os.path.join( g_data_dir, 'StockInventory', str_folder_name, str_file_name + str( n_year ) + str_season + '.txt' )
         # 確保目錄存在，若不存在則遞歸創建
