@@ -1364,6 +1364,7 @@ class AboutDialog( QDialog ):
         self.ui = Ui_AboutDialog()
         self.ui.setupUi( self )
         self.setWindowIcon( share_icon.get_icon( share_icon.IconType.WINDOW ) )
+        self.ui.qtVersionLabel.setText( "v2.1.0" )
 
 class Worker( QObject ):
     progress = Signal( int )  # Signal to emit progress updates
