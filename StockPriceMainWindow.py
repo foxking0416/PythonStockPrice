@@ -4631,9 +4631,12 @@ class MainWindow( QMainWindow ):
                 self.ui.qtTradingDataTableView.setRowHeight( row, 25 )
 
         if n_scroll_column != -1:
-            scrollbar = self.ui.qtTradingDataTableView.horizontalScrollBar()
-            column_x_position = self.ui.qtTradingDataTableView.columnViewportPosition( n_scroll_column - 1 )
-            scrollbar.setValue( column_x_position )
+            # scrollbar = self.ui.qtTradingDataTableView.horizontalScrollBar()
+            # column_x_position = self.ui.qtTradingDataTableView.columnViewportPosition( n_scroll_column - 1 )
+            # scrollbar.setValue( column_x_position )
+            self.ui.qtTradingDataTableView.scrollTo(self.ui.qtTradingDataTableView.model().index( 0, n_scroll_column ) )
+            self.ui.qtTradingDataTableView.selectColumn( n_scroll_column )
+            self.ui.qtTradingDataTableView.setFocus()
 
     def clear_per_stock_trading_table( self ):
         self.per_stock_trading_data_model.clear()
