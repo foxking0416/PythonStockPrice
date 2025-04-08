@@ -177,6 +177,11 @@ class CapitalReductionType( Enum ):
     CASH_RETURN = 0
     DEFICIT = 1
 
+class AutoDividendType( Enum ):
+    AUTO = 0
+    MANUAL = 1
+    MANUAL_WITH_AUTO = 2
+
 class TradingData( Enum ):
     TRADING_DATE = 0
     TRADING_TYPE = auto() # 0:賣出, 1:買進, 2:股利, 3:減資
@@ -2070,7 +2075,7 @@ class MainWindow( QMainWindow ):
                                                                0,                                #每股減資金額
                                                                CapitalReductionType.CASH_RETURN, #減資種類
                                                                False )                           #是否為當沖交易
-            dict_trading_data[ TradingData.USE_AUTO_DIVIDEND_DATA ] = True
+            dict_trading_data[ TradingData.USE_AUTO_DIVIDEND_DATA ] = AutoDividendType.AUTO
             dict_per_account_all_stock_trading_data[ str_first_four_chars ] = [ dict_trading_data ]
             sorted_list = self.process_single_trading_data( str_tab_widget_name, str_first_four_chars )
             display_type_combobox.setCurrentIndex( 0 )
@@ -2182,7 +2187,12 @@ class MainWindow( QMainWindow ):
             str_stock_number = str_stock_number_and_name.split(" ")[0]
             if n_column == len( self.list_stock_list_table_horizontal_header ) - 3:#自動帶入股利按鈕
                 list_trading_data = dict_per_account_all_stock_trading_data[ str_stock_number ]
-                list_trading_data[ 0 ][ TradingData.USE_AUTO_DIVIDEND_DATA ] = not list_trading_data[ 0 ][ TradingData.USE_AUTO_DIVIDEND_DATA ]
+                if list_trading_data[ 0 ][ TradingData.USE_AUTO_DIVIDEND_DATA ] == AutoDividendType.AUTO:
+                    list_trading_data[ 0 ][ TradingData.USE_AUTO_DIVIDEND_DATA ] = AutoDividendType.MANUAL
+                elif list_trading_data[ 0 ][ TradingData.USE_AUTO_DIVIDEND_DATA ] == AutoDividendType.MANUAL:
+                    list_trading_data[ 0 ][ TradingData.USE_AUTO_DIVIDEND_DATA ] = AutoDividendType.MANUAL_WITH_AUTO
+                elif list_trading_data[ 0 ][ TradingData.USE_AUTO_DIVIDEND_DATA ] == AutoDividendType.MANUAL_WITH_AUTO:
+                    list_trading_data[ 0 ][ TradingData.USE_AUTO_DIVIDEND_DATA ] = AutoDividendType.AUTO
                 self.pick_up_stock( str_stock_number )
                 sorted_list = self.process_single_trading_data( str_tab_widget_name, str_stock_number )
                 self.refresh_stock_list_table( False )
@@ -2825,7 +2835,7 @@ class MainWindow( QMainWindow ):
         str_title = str_stock_number + " " + str_stock_name
         worksheet.column_dimensions['A'].width = 22
 
-        b_use_auto_dividend = list_trading_data[ 0 ][ TradingData.USE_AUTO_DIVIDEND_DATA ]
+        e_auto_dividend_type = list_trading_data[ 0 ][ TradingData.USE_AUTO_DIVIDEND_DATA ]
         data_index = 0
         n_row_start = 0
         for dict_per_trading_data in list_trading_data:
@@ -2835,10 +2845,10 @@ class MainWindow( QMainWindow ):
                 continue
 
             if e_trading_type == TradingType.DIVIDEND:
-                if b_use_auto_dividend:#使用自動帶入股利資料，但是這筆資料不是自動股利資料，就跳過，反之亦然
+                if e_auto_dividend_type == AutoDividendType.AUTO:#使用自動帶入股利資料，但是這筆資料不是自動股利資料，就跳過，反之亦然
                     if TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE not in dict_per_trading_data or not dict_per_trading_data[TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE]:
                         continue
-                else:
+                elif e_auto_dividend_type == AutoDividendType.MANUAL:
                     if TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE in dict_per_trading_data and dict_per_trading_data[TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE]:
                         continue
             if data_index % 10 == 0:
@@ -3371,7 +3381,10 @@ class MainWindow( QMainWindow ):
                                                                                        CapitalReductionType.CASH_RETURN,                   #減資種類
                                                                                        False )                                             #是否為當沖交易  
                                 if item_trading_data[ "trading_date" ] == '0001-01-01':
-                                    dict_per_trading_data[ TradingData.USE_AUTO_DIVIDEND_DATA ] = item_trading_data[ "use_auto_dividend_data" ]       
+                                    if item_trading_data[ "use_auto_dividend_data" ]:
+                                        dict_per_trading_data[ TradingData.USE_AUTO_DIVIDEND_DATA ] = AutoDividendType.AUTO
+                                    else:
+                                        dict_per_trading_data[ TradingData.USE_AUTO_DIVIDEND_DATA ] = AutoDividendType.MANUAL
                                 list_trading_data.append( dict_per_trading_data )
                         dict_per_stock_trading_data[ key_stock_number ] = list_trading_data
                     if b_create_tab:
@@ -3442,7 +3455,10 @@ class MainWindow( QMainWindow ):
                                                                                        CapitalReductionType.CASH_RETURN,                   #減資種類   
                                                                                        item_trading_data[ "daying_trading" ] )             #是否為當沖交易
                                 if item_trading_data[ "trading_date" ] == '0001-01-01':
-                                    dict_per_trading_data[ TradingData.USE_AUTO_DIVIDEND_DATA ] = item_trading_data[ "use_auto_dividend_data" ]       
+                                    if item_trading_data[ "use_auto_dividend_data" ]:
+                                        dict_per_trading_data[ TradingData.USE_AUTO_DIVIDEND_DATA ] = AutoDividendType.AUTO
+                                    else:
+                                        dict_per_trading_data[ TradingData.USE_AUTO_DIVIDEND_DATA ] = AutoDividendType.MANUAL
                                 list_trading_data.append( dict_per_trading_data )
                         dict_per_stock_trading_data[ key_stock_number ] = list_trading_data
 
@@ -3478,106 +3494,87 @@ class MainWindow( QMainWindow ):
                         dict_all_account_general_data[ item_account[ "account_name" ] ] = dict_general_data
         else:
             for item_account in data:
-                if "account_name" in item_account and \
-                   "trading_data" in item_account and \
-                   "discount_checkbox" in item_account and \
-                   "discount_value" in item_account and \
-                   "insurance_checkbox" in item_account and \
-                   "regular_buy_trading_price_type" in item_account and \
-                   "regular_buy_trading_fee_type" in item_account and \
-                   "regular_buy_trading_fee_minimum" in item_account and \
-                   "regular_buy_trading_fee_constant" in item_account and \
-                   "minimum_common_trading_fee" in item_account and \
-                   "minimum_odd_trading_fee" in item_account:
-                    dict_per_account_all_stock_trading_data = item_account[ "trading_data" ]
-                    dict_ui_state = {}
-                    dict_ui_state[ "discount_checkbox" ] = item_account[ "discount_checkbox" ]
-                    dict_ui_state[ "discount_value" ] = item_account[ "discount_value" ]
-                    dict_ui_state[ "insurance_checkbox" ] = item_account[ "insurance_checkbox" ]
-                    dict_ui_state[ "regular_buy_trading_price_type" ] = TradingPriceType( item_account[ "regular_buy_trading_price_type" ] )
-                    dict_ui_state[ "regular_buy_trading_fee_type" ] = TradingFeeType( item_account[ "regular_buy_trading_fee_type" ] )
-                    dict_ui_state[ "regular_buy_trading_fee_minimum" ] = item_account[ "regular_buy_trading_fee_minimum" ]
-                    dict_ui_state[ "regular_buy_trading_fee_constant" ] = item_account[ "regular_buy_trading_fee_constant" ]
-                    dict_general_data = {}
-                    dict_general_data[ "minimum_common_trading_fee" ] = item_account[ "minimum_common_trading_fee" ]
-                    dict_general_data[ "minimum_odd_trading_fee" ] = item_account[ "minimum_odd_trading_fee" ]
-                    dict_general_data[ "dividend_transfer_fee" ] = item_account[ "dividend_transfer_fee" ]
+                dict_ui_state = {}
+                dict_ui_state[ "discount_checkbox" ] = item_account[ "discount_checkbox" ]
+                dict_ui_state[ "discount_value" ] = item_account[ "discount_value" ]
+                dict_ui_state[ "insurance_checkbox" ] = item_account[ "insurance_checkbox" ]
+                dict_ui_state[ "regular_buy_trading_price_type" ] = TradingPriceType( item_account[ "regular_buy_trading_price_type" ] )
+                dict_ui_state[ "regular_buy_trading_fee_type" ] = TradingFeeType( item_account[ "regular_buy_trading_fee_type" ] )
+                dict_ui_state[ "regular_buy_trading_fee_minimum" ] = item_account[ "regular_buy_trading_fee_minimum" ]
+                dict_ui_state[ "regular_buy_trading_fee_constant" ] = item_account[ "regular_buy_trading_fee_constant" ]
+                dict_general_data = {}
+                dict_general_data[ "minimum_common_trading_fee" ] = item_account[ "minimum_common_trading_fee" ]
+                dict_general_data[ "minimum_odd_trading_fee" ] = item_account[ "minimum_odd_trading_fee" ]
+                dict_general_data[ "dividend_transfer_fee" ] = item_account[ "dividend_transfer_fee" ]
 
-                    dict_per_stock_trading_data = {} 
-                    for key_stock_number, value_list_trading_data  in dict_per_account_all_stock_trading_data.items():
-                        list_trading_data = []
-                        for item_trading_data in value_list_trading_data:
-                            if ( "trading_date" in item_trading_data and
-                                 "trading_type" in item_trading_data and
-                                 "trading_price_type" in item_trading_data and
-                                 "per_share_trading_price" in item_trading_data and
-                                 "total_trading_price" in item_trading_data and
-                                 "trading_count" in item_trading_data and
-                                 "trading_fee_discount" in item_trading_data and
-                                 "dividend_value_type" in item_trading_data and
-                                 "stock_dividend" in item_trading_data and
-                                 "cash_dividend" in item_trading_data and
-                                 "custom_extra_insurance_fee" in item_trading_data and
-                                 "capital_reduction_per_share" in item_trading_data and 
-                                 "capital_reduction_type" in item_trading_data ):
-                                
-                                e_trading_type = TradingType( item_trading_data[ "trading_type" ] )
-                                e_trading_price_type = TradingPriceType( item_trading_data[ "trading_price_type" ] )
-                                e_trading_fee_type = TradingFeeType( item_trading_data[ "trading_fee_type" ] )
-                                e_capital_reduction_type = CapitalReductionType( item_trading_data[ "capital_reduction_type" ] )
-                                e_dividend_value_type = DividendValueType( item_trading_data[ "dividend_value_type" ] )
-                                dict_per_trading_data = Utility.generate_trading_data( item_trading_data[ "trading_date" ],                #交易日期
-                                                                                       e_trading_type,                                     #交易種類
-                                                                                       e_trading_price_type,                               #交易價格種類
-                                                                                       item_trading_data[ "per_share_trading_price" ],     #每股交易價格
-                                                                                       item_trading_data[ "total_trading_price" ],         #總交易價格
-                                                                                       item_trading_data[ "trading_count" ],               #交易股數
-                                                                                       e_trading_fee_type,                                 #手續費種類
-                                                                                       item_trading_data[ "trading_fee_discount" ],        #手續費折扣
-                                                                                       item_trading_data[ "trading_fee_minimum" ],         #手續費最低金額
-                                                                                       item_trading_data[ "trading_fee_constant" ],        #手續費固定金額
-                                                                                       e_dividend_value_type,                              #股利金額種類
-                                                                                       item_trading_data[ "stock_dividend" ],              #股票股利
-                                                                                       item_trading_data[ "cash_dividend" ],               #現金股利
-                                                                                       item_trading_data[ "custom_extra_insurance_fee" ],  #自訂的補充保費
-                                                                                       item_trading_data[ "capital_reduction_per_share" ], #每股減資金額
-                                                                                       e_capital_reduction_type,                           #減資種類     
-                                                                                       item_trading_data[ "daying_trading" ] )             #是否為當沖交易
-                                if item_trading_data[ "trading_date" ] == '0001-01-01':
-                                    dict_per_trading_data[ TradingData.USE_AUTO_DIVIDEND_DATA ] = item_trading_data[ "use_auto_dividend_data" ]       
-                                list_trading_data.append( dict_per_trading_data )
-                        dict_per_stock_trading_data[ key_stock_number ] = list_trading_data
+                dict_per_stock_trading_data = {} 
+                dict_per_account_all_stock_trading_data = item_account[ "trading_data" ]
+                for key_stock_number, value_list_trading_data  in dict_per_account_all_stock_trading_data.items():
+                    list_trading_data = []
+                    for item_trading_data in value_list_trading_data:
+                        e_trading_type = TradingType( item_trading_data[ "trading_type" ] )
+                        e_trading_price_type = TradingPriceType( item_trading_data[ "trading_price_type" ] )
+                        e_trading_fee_type = TradingFeeType( item_trading_data[ "trading_fee_type" ] )
+                        e_capital_reduction_type = CapitalReductionType( item_trading_data[ "capital_reduction_type" ] )
+                        e_dividend_value_type = DividendValueType( item_trading_data[ "dividend_value_type" ] )
+                        dict_per_trading_data = Utility.generate_trading_data( item_trading_data[ "trading_date" ],                #交易日期
+                                                                                e_trading_type,                                     #交易種類
+                                                                                e_trading_price_type,                               #交易價格種類
+                                                                                item_trading_data[ "per_share_trading_price" ],     #每股交易價格
+                                                                                item_trading_data[ "total_trading_price" ],         #總交易價格
+                                                                                item_trading_data[ "trading_count" ],               #交易股數
+                                                                                e_trading_fee_type,                                 #手續費種類
+                                                                                item_trading_data[ "trading_fee_discount" ],        #手續費折扣
+                                                                                item_trading_data[ "trading_fee_minimum" ],         #手續費最低金額
+                                                                                item_trading_data[ "trading_fee_constant" ],        #手續費固定金額
+                                                                                e_dividend_value_type,                              #股利金額種類
+                                                                                item_trading_data[ "stock_dividend" ],              #股票股利
+                                                                                item_trading_data[ "cash_dividend" ],               #現金股利
+                                                                                item_trading_data[ "custom_extra_insurance_fee" ],  #自訂的補充保費
+                                                                                item_trading_data[ "capital_reduction_per_share" ], #每股減資金額
+                                                                                e_capital_reduction_type,                           #減資種類     
+                                                                                item_trading_data[ "daying_trading" ] )             #是否為當沖交易
+                        if item_trading_data[ "trading_date" ] == '0001-01-01':
+                            if self.compare_version_order( "v2.1.0", version ):
+                                dict_per_trading_data[ TradingData.USE_AUTO_DIVIDEND_DATA ] = AutoDividendType( item_trading_data[ "use_auto_dividend_data" ] )
+                            else:
+                                if item_trading_data[ "use_auto_dividend_data" ]:
+                                    dict_per_trading_data[ TradingData.USE_AUTO_DIVIDEND_DATA ] = AutoDividendType.AUTO
+                                else:
+                                    dict_per_trading_data[ TradingData.USE_AUTO_DIVIDEND_DATA ] = AutoDividendType.MANUAL
+                        list_trading_data.append( dict_per_trading_data )
+                    dict_per_stock_trading_data[ key_stock_number ] = list_trading_data
 
-                    list_transfer_data = item_account[ "transfer_data" ]
-                    list_per_account_cash_transfer_data = []
-                    for item_transfer_data in list_transfer_data:
-                        if ( "transfer_date" in item_transfer_data and
-                             "transfer_type" in item_transfer_data and
-                             "transfer_value" in item_transfer_data ):
-                            dict_per_transfer_data = {}
-                            dict_per_transfer_data[ TransferData.TRANSFER_DATE ] = item_transfer_data[ "transfer_date" ]
-                            dict_per_transfer_data[ TransferData.TRANSFER_TYPE ] = TransferType( item_transfer_data[ "transfer_type" ] )
-                            dict_per_transfer_data[ TransferData.TRANSFER_VALUE ] = item_transfer_data[ "transfer_value" ]
-                            list_per_account_cash_transfer_data.append( dict_per_transfer_data )
+                list_transfer_data = item_account[ "transfer_data" ]
+                list_per_account_cash_transfer_data = []
+                for item_transfer_data in list_transfer_data:
+                    if ( "transfer_date" in item_transfer_data and
+                            "transfer_type" in item_transfer_data and
+                            "transfer_value" in item_transfer_data ):
+                        dict_per_transfer_data = {}
+                        dict_per_transfer_data[ TransferData.TRANSFER_DATE ] = item_transfer_data[ "transfer_date" ]
+                        dict_per_transfer_data[ TransferData.TRANSFER_TYPE ] = TransferType( item_transfer_data[ "transfer_type" ] )
+                        dict_per_transfer_data[ TransferData.TRANSFER_VALUE ] = item_transfer_data[ "transfer_value" ]
+                        list_per_account_cash_transfer_data.append( dict_per_transfer_data )
 
-                    if b_create_tab:
-                        str_tab_name = self.add_new_tab_and_table( item_account[ "account_name" ] )
-                        for index in range( self.ui.qtTabWidget.count() - 1 ):
-                            tab_widget = self.ui.qtTabWidget.widget( index )
-                            if tab_widget.objectName() == str_tab_name:
-                                qt_insurance_check_box = tab_widget.findChild( QCheckBox, "ExtraInsuranceFeeCheckBox" )
-                                with QSignalBlocker( qt_insurance_check_box ):
-                                    qt_insurance_check_box.setChecked( item_account[ "insurance_checkbox" ] )
-                                    break
-                        dict_all_account_ui_state[ str_tab_name ] = dict_ui_state
-                        dict_all_account_all_stock_trading_data[ str_tab_name ] = dict_per_stock_trading_data
-                        dict_all_account_cash_transfer[ str_tab_name ] = list_per_account_cash_transfer_data
-                        dict_all_account_general_data[ str_tab_name ] = dict_general_data
-                    else:
-                        dict_all_account_ui_state[ item_account[ "account_name" ] ] = dict_ui_state
-                        dict_all_account_all_stock_trading_data[ item_account[ "account_name" ] ] = dict_per_stock_trading_data
-                        dict_all_account_cash_transfer[ item_account[ "account_name" ] ] = list_per_account_cash_transfer_data
-                        dict_all_account_general_data[ item_account[ "account_name" ] ] = dict_general_data
+                if b_create_tab:
+                    str_tab_name = self.add_new_tab_and_table( item_account[ "account_name" ] )
+                    for index in range( self.ui.qtTabWidget.count() - 1 ):
+                        tab_widget = self.ui.qtTabWidget.widget( index )
+                        if tab_widget.objectName() == str_tab_name:
+                            qt_insurance_check_box = tab_widget.findChild( QCheckBox, "ExtraInsuranceFeeCheckBox" )
+                            with QSignalBlocker( qt_insurance_check_box ):
+                                qt_insurance_check_box.setChecked( item_account[ "insurance_checkbox" ] )
+                                break
+                    dict_all_account_ui_state[ str_tab_name ] = dict_ui_state
+                    dict_all_account_all_stock_trading_data[ str_tab_name ] = dict_per_stock_trading_data
+                    dict_all_account_cash_transfer[ str_tab_name ] = list_per_account_cash_transfer_data
+                    dict_all_account_general_data[ str_tab_name ] = dict_general_data
+                else:
+                    dict_all_account_ui_state[ item_account[ "account_name" ] ] = dict_ui_state
+                    dict_all_account_all_stock_trading_data[ item_account[ "account_name" ] ] = dict_per_stock_trading_data
+                    dict_all_account_cash_transfer[ item_account[ "account_name" ] ] = list_per_account_cash_transfer_data
+                    dict_all_account_general_data[ item_account[ "account_name" ] ] = dict_general_data
 
     def auto_save_trading_data( self ): 
         list_save_tab_widget = list( range( self.ui.qtTabWidget.count() - 1 ) )
@@ -3628,7 +3625,7 @@ class MainWindow( QMainWindow ):
                     dict_per_trading_data[ "capital_reduction_per_share" ] = item[ TradingData.CAPITAL_REDUCTION_PER_SHARE ]
                     dict_per_trading_data[ "capital_reduction_type" ] = int( item[ TradingData.CAPITAL_REDUCTION_TYPE ].value )
                     if dict_per_trading_data[ "trading_date" ] == '0001-01-01':
-                        dict_per_trading_data[ "use_auto_dividend_data" ] = item[ TradingData.USE_AUTO_DIVIDEND_DATA ]
+                        dict_per_trading_data[ "use_auto_dividend_data" ] = int( item[ TradingData.USE_AUTO_DIVIDEND_DATA ].value )
                     dict_per_trading_data[ "daying_trading" ] = item[ TradingData.DAYING_TRADING ]
 
                     export_data.append( dict_per_trading_data )
@@ -3662,9 +3659,22 @@ class MainWindow( QMainWindow ):
             export_list_all_account_all_stock_trading_data.append( export_dict_per_account_all_info )
 
         with open( file_path, 'w', encoding='utf-8' ) as f:
-            f.write( "v2.0.0" '\n' )
+            f.write( "v2.1.0" '\n' )
             json.dump( export_list_all_account_all_stock_trading_data, f, ensure_ascii=False, indent=4 )
     
+    def compare_version_order( self, str_version_base, str_version_check ): 
+        str_version_base = str_version_base.lstrip('v')
+        str_version_check = str_version_check.lstrip('v')
+        # 先將版本號字串轉為數字列表
+        version_base = [ int( i ) for i in str_version_base.split( '.' ) ]
+        version_check = [ int( i ) for i in str_version_check.split( '.' ) ]
+
+        # 比較兩個版本號的大小
+        if version_base <= version_check:
+            return True
+        else:
+            return False
+
     def save_share_UI_state( self ): 
         # 確保目錄存在，若不存在則遞歸創建
         os.makedirs( os.path.dirname( self.UISetting_file_path ), exist_ok = True )
@@ -3767,8 +3777,8 @@ class MainWindow( QMainWindow ):
         sorted_list = sorted( list_trading_data, key=lambda x: ( datetime.datetime.strptime( x[ TradingData.TRADING_DATE ], "%Y-%m-%d"), -x[ TradingData.TRADING_TYPE ] ) )
 
         str_current_date = datetime.datetime.today().strftime("%Y-%m-%d")
-        b_use_auto_dividend = sorted_list[ 0 ][ TradingData.USE_AUTO_DIVIDEND_DATA ]
-        if b_use_auto_dividend:
+        e_auto_dividend_type = sorted_list[ 0 ][ TradingData.USE_AUTO_DIVIDEND_DATA ]
+        if e_auto_dividend_type == AutoDividendType.AUTO or e_auto_dividend_type == AutoDividendType.MANUAL_WITH_AUTO:
             if str_stock_number in self.dict_auto_stock_yearly_dividned:
                 auto_list_dividend = copy.deepcopy( self.dict_auto_stock_yearly_dividned[ str_stock_number ] ) 
                 auto_list_dividend = sorted( auto_list_dividend, key=lambda x: ( datetime.datetime.strptime( x[ TradingData.TRADING_DATE ], "%Y-%m-%d") ) )
@@ -4025,12 +4035,12 @@ class MainWindow( QMainWindow ):
                     n_stock_dividend_share_gain = int( Decimal( str( item[ TradingData.STOCK_DIVIDEND ] ) ) ) # n_stock_dividend_share_gain單位為股 除以10是因為票面額10元
                     n_cash_dividend_gain = int( Decimal( str(item[ TradingData.CASH_DIVIDEND ] ) ) ) # n_cash_dividend_gain單位為元
 
-                if b_use_auto_dividend:
-                    if TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE not in item or not item[TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE]:
+                if e_auto_dividend_type == AutoDividendType.AUTO:
+                    if TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE not in item or not item[TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE]:#表示這筆股利資料是手動輸入
                         n_stock_dividend_share_gain = 0
                         n_stock_dividend_value_gain = 0
                         n_cash_dividend_gain = 0
-                else:
+                elif e_auto_dividend_type == AutoDividendType.MANUAL:
                     if TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE in item and item[TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE]:
                         n_stock_dividend_share_gain = 0
                         n_stock_dividend_value_gain = 0
@@ -4302,10 +4312,16 @@ class MainWindow( QMainWindow ):
                         table_model.setItem( index_row, column, standard_item ) 
 
                     use_auto_dividend_item = QStandardItem()
-                    if dict_trading_data_first[ TradingData.USE_AUTO_DIVIDEND_DATA ]:
-                        use_auto_dividend_item.setIcon( share_icon.get_icon( share_icon.IconType.CHECK ) )
-                    else:
-                        use_auto_dividend_item.setIcon( share_icon.get_icon( share_icon.IconType.UNCHECK ) )
+                    if dict_trading_data_first[ TradingData.USE_AUTO_DIVIDEND_DATA ] == AutoDividendType.AUTO:
+                        use_auto_dividend_item.setIcon( share_icon.get_icon( share_icon.IconType.STAR_SOLID ) )
+                        use_auto_dividend_item.setText( "自動" )
+                    elif dict_trading_data_first[ TradingData.USE_AUTO_DIVIDEND_DATA ] == AutoDividendType.MANUAL:
+                        use_auto_dividend_item.setIcon( share_icon.get_icon( share_icon.IconType.STAR_DASHED ) )
+                        use_auto_dividend_item.setText( "手動" )
+                    elif dict_trading_data_first[ TradingData.USE_AUTO_DIVIDEND_DATA ] == AutoDividendType.MANUAL_WITH_AUTO:
+                        use_auto_dividend_item.setIcon( share_icon.get_icon( share_icon.IconType.STAR_HALF_DASHED ) )
+                        use_auto_dividend_item.setText( "混和" )
+
                     use_auto_dividend_item.setFlags( use_auto_dividend_item.flags() & ~Qt.ItemIsEditable )
                     table_model.setItem( index_row, len( self.list_stock_list_table_horizontal_header ) - 3, use_auto_dividend_item)
                         
@@ -4519,7 +4535,7 @@ class MainWindow( QMainWindow ):
         else:
             loop_list = sorted_list
 
-        b_use_auto_dividend = sorted_list[ 0 ][ TradingData.USE_AUTO_DIVIDEND_DATA ]
+        e_auto_dividend_type = sorted_list[ 0 ][ TradingData.USE_AUTO_DIVIDEND_DATA ]
         column = 0
         n_scroll_column = -1
         
@@ -4529,10 +4545,10 @@ class MainWindow( QMainWindow ):
                 continue
 
             if e_trading_type == TradingType.DIVIDEND:
-                if b_use_auto_dividend:#使用自動帶入股利資料，但是這筆資料不是自動股利資料，就跳過，反之亦然
+                if e_auto_dividend_type == AutoDividendType.AUTO:#使用自動帶入股利資料，但是這筆資料不是自動股利資料，就跳過，反之亦然
                     if TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE not in dict_per_trading_data or not dict_per_trading_data[TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE]:
                         continue
-                else:
+                elif e_auto_dividend_type == AutoDividendType.MANUAL:
                     if TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE in dict_per_trading_data and dict_per_trading_data[TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE]:
                         continue
 
@@ -4563,7 +4579,8 @@ class MainWindow( QMainWindow ):
                 standard_item.setData( dict_per_trading_data[ TradingData.SORTED_INDEX_NON_SAVE ], Qt.UserRole )
                 self.per_stock_trading_data_model.setItem( row, column, standard_item ) 
 
-            if e_trading_type != TradingType.DIVIDEND or not b_use_auto_dividend:
+            if ( e_trading_type != TradingType.DIVIDEND or
+                 ( TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE not in dict_per_trading_data or not dict_per_trading_data[TradingData.IS_AUTO_DIVIDEND_DATA_NON_SAVE] ) ): 
                 edit_icon_item = QStandardItem("")
                 edit_icon_item.setIcon( share_icon.get_icon( share_icon.IconType.EDIT ) )
                 edit_icon_item.setFlags( edit_icon_item.flags() & ~Qt.ItemIsEditable )
@@ -4799,8 +4816,8 @@ class MainWindow( QMainWindow ):
             dict_per_account_all_stock_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ]
             if self.str_picked_stock_number in dict_per_account_all_stock_trading_data:
                 list_trading_data = dict_per_account_all_stock_trading_data[ self.str_picked_stock_number ]
-                b_use_auto_dividend = list_trading_data[ 0 ][ TradingData.USE_AUTO_DIVIDEND_DATA ]
-                self.ui.qtAddDividendDataPushButton.setEnabled( not b_use_auto_dividend )
+                e_auto_dividend_type = list_trading_data[ 0 ][ TradingData.USE_AUTO_DIVIDEND_DATA ]
+                self.ui.qtAddDividendDataPushButton.setEnabled( e_auto_dividend_type == AutoDividendType.MANUAL or e_auto_dividend_type == AutoDividendType.MANUAL_WITH_AUTO )
             else:
                 self.ui.qtAddDividendDataPushButton.setEnabled( False )
 
