@@ -4637,10 +4637,12 @@ class MainWindow( QMainWindow ):
     def get_trading_data_header( self ):
         if self.ui.qtUse1ShareUnitAction.isChecked():
             return ['年度', '日期', '交易種類', '交易價格', '交易股數', '交易金額', '手續費', '交易稅', '補充保費', '單筆總成本', '全部股票股利(股) /\n每股股票股利(元)', '全部現金股利(元) /\n每股現金股利(元)',
-                    '累計總成本', '庫存股數', '平均成本', '單筆損益', '編輯', '刪除' ]
+                    # '累計總成本', '庫存股數', '平均成本', '單筆損益', '編輯', '刪除' ]
+                    '累計總成本', '庫存股數', '平均成本', '編輯', '刪除' ]
         else:
             return ['年度', '日期', '交易種類', '交易價格', '交易張數', '交易金額', '手續費', '交易稅', '補充保費', '單筆總成本', '全部股票股利(張) /\n每股股票股利(元)', '全部現金股利(元) /\n每股現金股利(元)',
-                    '累計總成本', '庫存張數', '平均成本', '單筆損益', '編輯', '刪除' ]
+                    # '累計總成本', '庫存張數', '平均成本', '單筆損益', '編輯', '刪除' ]
+                    '累計總成本', '庫存張數', '平均成本', '編輯', '刪除' ]
 
     def get_per_trading_data_text_list( self, dict_per_trading_data ):
         e_trading_type = dict_per_trading_data[ TradingData.TRADING_TYPE ]
@@ -4791,8 +4793,8 @@ class MainWindow( QMainWindow ):
                       str_cash_dividend,            #總獲得現金 / 每股現金股利
                       str_accumulated_cost,         #累計總成本
                       str_accumulated_inventory,    #庫存股數
-                      str_average_cost,             #均價
-                      str_selling_profit ]          #單筆損益  
+                      str_average_cost ]            #均價
+                    #   str_selling_profit ]          #單筆損益  
         return list_data
 
     def update_button_enable_disable_status( self ): 
