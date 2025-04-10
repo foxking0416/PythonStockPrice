@@ -41,54 +41,6 @@ from enum import Enum, IntEnum, auto
 from decimal import Decimal
 from scipy.optimize import newton
 
-#有考慮當沖交易稅減半
-#有考慮 ETF 交易稅減少
-#有考慮法人交易不需扣補充保費
-
-#打包指令
-# cd D:\_2.code\PythonStockPrice   
-# pyinstaller --hidden-import "babel.numbers" --add-data "resources;./resources" --onefile --noconsole StockPriceMainWindow.py
-# pyinstaller --hidden-import "babel.numbers" --add-data "resources;./resources" --onefile --console StockPriceMainWindow.py
-# pyinstaller --hidden-import "babel.numbers" --add-data "resources;./resources" --noconsole StockPriceMainWindow.py
-# pyinstaller --hidden-import "babel.numbers" --add-data "resources;./resources" --add-data "StockInventory/Dividend;./StockInventory/Dividend" --add-data "../FoxInfoShareUtility/foxinfo_share_utility/icons;foxinfo_share_utility/icons" --noconsole StockPriceMainWindow.py
-# pyinstaller --hidden-import "babel.numbers" --add-data "resources;./resources" --add-data "StockInventory/Dividend;./StockInventory/Dividend" --add-data "../FoxInfoShareUtility/foxinfo_share_utility/icons;foxinfo_share_utility/icons" --console StockPriceMainWindow.py
-
-# 要把.ui檔變成.py
-# cd D:\_2.code\PythonStockPrice
-# pyside6-uic QtStockPriceMainWindowTemplate.ui -o QtStockPriceMainWindowTemplate.py
-# pyside6-uic QtStockPriceMainWindow.ui -o QtStockPriceMainWindow.py
-# pyside6-uic QtStockTradingEditDialog.ui -o QtStockTradingEditDialog.py
-# pyside6-uic QtStockRegularTradingEditDialog.ui -o QtStockRegularTradingEditDialog.py
-# pyside6-uic QtStockDividendEditDialog.ui -o QtStockDividendEditDialog.py
-# pyside6-uic QtStockCapitalReductionEditDialog.ui -o QtStockCapitalReductionEditDialog.py
-# pyside6-uic QtStockCapitalIncreaseEditDialog.ui -o QtStockCapitalIncreaseEditDialog.py
-# pyside6-uic QtStockSplitEditDialog.ui -o QtStockSplitEditDialog.py
-# pyside6-uic QtDuplicateOptionDialog.ui -o QtDuplicateOptionDialog.py
-# pyside6-uic QtCashTransferEditDialog.ui -o QtCashTransferEditDialog.py
-# pyside6-uic QtStockDividendTransferFeeEditDialog.ui -o QtStockDividendTransferFeeEditDialog.py
-# pyside6-uic QtStockDividendTransferFeeEditSpinboxDialog.ui -o QtStockDividendTransferFeeEditSpinboxDialog.py
-# pyside6-uic QtStockMinimumTradingFeeEditDialog.ui -o QtStockMinimumTradingFeeEditDialog.py
-# pyside6-uic QtAboutDialog.ui -o QtAboutDialog.py
-# pyside6-uic QtStockDividendPositionDateEditDialog.ui -o QtStockDividendPositionDateEditDialog.py
-
-
-# 下載上市櫃公司股利資料
-# https://mopsov.twse.com.tw/mops/web/t108sb27
-
-# 以下兩個網站都可以下載"上市"ETF的股利
-# https://www.twse.com.tw/zh/products/securities/etf/products/div.html
-# https://www.twse.com.tw/zh/ETFortune/dividendList
-
-# 以下這個網站可以下載"上櫃"ETF的股利
-# https://www.tpex.org.tw/zh-tw/announce/market/ex/cal.html
-
-# 靜態掃描
-# pylint --disable=all --enable=E1120,E1121 StockPriceMainWindow.py 只顯示參數數量錯誤
-# pylint -E StockPriceMainWindow.py 只顯示錯誤級別的資訊
-
-
-
-
 g_user_dir = os.path.expanduser("~")                     
 g_exe_dir = os.path.dirname(__file__)                    
 g_exe2_dir = os.path.dirname( sys.executable )           
@@ -153,6 +105,7 @@ else:
 
 styles_css_path = os.path.join( g_exe_root_dir, 'resources\\styles.css' ) 
 
+#region enum相關
 class TradingType( IntEnum ):
     TEMPLATE = 0
     SELL = 1
@@ -239,116 +192,9 @@ class TransferData( Enum ):
     TRANSFER_VALUE = 2
     SORTED_INDEX_NON_SAVE = 3 #不會記錄
     TOTAL_VALUE_NON_SAVE = 4 #不會記錄
+#endregion
 
-class Utility():
-    @staticmethod
-    def compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, n_minimum_common_trading_fee, n_minimum_odd_trading_fee, b_etf, b_daying_trading, b_bond ):
-        f_trading_price = Decimal( str( f_trading_price ) )#原本10.45 * 100000 = 1044999.999999999 然後取 int 就變成1044999，所以改用Decimal
-        n_trading_count = Decimal( str( n_trading_count ) )
-        f_trading_fee_discount = Decimal( str( f_trading_fee_discount ) )
-        dict_result = {}
-        if e_trading_type == TradingType.BUY or e_trading_type == TradingType.SELL:
-            n_trading_value = int( f_trading_price * n_trading_count )
-            n_trading_fee = int( n_trading_value * Decimal( '0.001425' ) * f_trading_fee_discount )
-            
-            if n_trading_value != 0:
-                if n_trading_count % 1000 == 0:
-                    n_trading_fee = max( n_minimum_common_trading_fee, n_trading_fee )
-                else:#零股交易
-                    n_trading_fee = max( n_minimum_odd_trading_fee, n_trading_fee )
-            
-            if e_trading_type == TradingType.SELL:
-                if b_etf:
-                    if b_bond:
-                         n_trading_tax = 0
-                    else:
-                        n_trading_tax = int( n_trading_value * Decimal( '0.001' ) )
-                elif b_daying_trading:
-                    n_trading_tax = int( n_trading_value * Decimal( '0.0015' ) )
-                else:
-                    n_trading_tax = int( n_trading_value * Decimal( '0.003' ) )
-            else:
-                n_trading_tax = 0
-
-            dict_result[ TradingCost.TRADING_VALUE ] = n_trading_value
-            dict_result[ TradingCost.TRADING_FEE ] = n_trading_fee
-            dict_result[ TradingCost.TRADING_TAX ] = n_trading_tax
-            if e_trading_type == TradingType.BUY:
-                dict_result[ TradingCost.TRADING_TOTAL_COST ] = n_trading_value + n_trading_fee + n_trading_tax
-            else:
-                dict_result[ TradingCost.TRADING_TOTAL_COST ] = n_trading_value - n_trading_fee - n_trading_tax
-        else:   
-            dict_result[ TradingCost.TRADING_VALUE ] = 0
-            dict_result[ TradingCost.TRADING_FEE ] = 0
-            dict_result[ TradingCost.TRADING_TAX ] = 0
-            dict_result[ TradingCost.TRADING_TOTAL_COST ] = 0
-        return dict_result
-
-    @staticmethod
-    def generate_trading_data( str_trading_date,                   #交易日期
-                               e_trading_type,                     #交易種類
-                               e_trading_price_type,               #交易價格種類
-                               f_per_share_trading_price,          #每股交易價格
-                               n_total_trading_price,              #總交易金額
-                               n_trading_count,                    #交易股數
-                               e_regular_buy_trading_fee_type,     #手續費種類
-                               f_trading_fee_discount,             #手續費折扣
-                               n_regular_buy_trading_fee_minimum,  #手續費最低金額
-                               n_regular_buy_trading_fee_constant, #手續費固定金額
-                               e_dividend_value_type,              #股利金額種類
-                               f_stock_dividend,                   #股票股利
-                               f_cash_dividend,                    #現金股利
-                               n_custom_extra_insurance_fee,       #自訂的補充保費
-                               f_capital_reduction_per_share,      #每股減資金額
-                               e_capital_reduction_type,           #減資種類
-                               b_daying_trading  ):                #是否為當沖交易
-        dict_trading_data = {}
-        dict_trading_data[ TradingData.TRADING_DATE ] = str_trading_date
-        dict_trading_data[ TradingData.TRADING_TYPE ] = e_trading_type
-        dict_trading_data[ TradingData.TRADING_PRICE_TYPE ] = e_trading_price_type
-        dict_trading_data[ TradingData.PER_SHARE_TRADING_PRICE ] = f_per_share_trading_price
-        dict_trading_data[ TradingData.TOTAL_TRADING_PRICE ] = n_total_trading_price
-        dict_trading_data[ TradingData.TRADING_COUNT ] = n_trading_count
-        dict_trading_data[ TradingData.REGULAR_BUY_TRADING_FEE_TYPE ] = e_regular_buy_trading_fee_type
-        dict_trading_data[ TradingData.TRADING_FEE_DISCOUNT ] = f_trading_fee_discount
-        dict_trading_data[ TradingData.REGULAR_BUY_TRADING_FEE_MINIMUM ] = n_regular_buy_trading_fee_minimum
-        dict_trading_data[ TradingData.REGULAR_BUY_TRADING_FEE_CONSTANT ] = n_regular_buy_trading_fee_constant
-        dict_trading_data[ TradingData.DIVIDEND_VALUE_TYPE ] = e_dividend_value_type
-        dict_trading_data[ TradingData.STOCK_DIVIDEND ] = f_stock_dividend
-        dict_trading_data[ TradingData.CASH_DIVIDEND ] = f_cash_dividend
-        dict_trading_data[ TradingData.CUSTOM_EXTRA_INSURANCE_FEE ] = n_custom_extra_insurance_fee
-        dict_trading_data[ TradingData.CAPITAL_REDUCTION_PER_SHARE ] = f_capital_reduction_per_share
-        dict_trading_data[ TradingData.CAPITAL_REDUCTION_TYPE ] = e_capital_reduction_type
-        dict_trading_data[ TradingData.DAYING_TRADING ] = b_daying_trading
-        return dict_trading_data
-
-    @staticmethod
-    def xirr(cash_flows, dates):
-        """
-        計算 XIRR (年化報酬率)
-        :param cash_flows: list of cash flows (現金流金額，正數為收入，負數為支出)
-        :param dates: list of datetime objects (對應的日期)
-        :return: 年化報酬率
-        """
-        def xnpv(rate):
-            """
-            計算 XNPV
-            """
-            return sum(cf / ((1 + rate) ** ((d - dates[0]).days / 365.0)) for cf, d in zip(cash_flows, dates))
-
-        # 初始猜測的 XIRR 值
-        try:
-            return newton(lambda r: xnpv(r), 0.1)
-        except RuntimeError:
-            raise ValueError("無法找到解，請檢查輸入的現金流和日期。")
-           
-    @staticmethod
-    def update_weekly_text_by_date( qt_date_edit, qt_weekday_label ):
-        obj_date = qt_date_edit.date()
-        n_weekday = obj_date.dayOfWeek()
-        str_weekday = share_api.get_qt_weekday_text( n_weekday )
-        qt_weekday_label.setText( str_weekday )
-
+#region 各式Dialog
 class EditTabTitleDialog( QDialog ):
     """一個小對話框用於編輯 Tab 標題"""
     def __init__( self, current_title, parent = None ):
@@ -1400,6 +1246,116 @@ class AboutDialog( QDialog ):
         self.ui.setupUi( self )
         self.setWindowIcon( share_icon.get_icon( share_icon.IconType.WINDOW ) )
         self.ui.qtVersionLabel.setText( "v2.1.0" )
+#endregion
+ 
+class Utility():
+    @staticmethod
+    def compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, n_minimum_common_trading_fee, n_minimum_odd_trading_fee, b_etf, b_daying_trading, b_bond ):
+        f_trading_price = Decimal( str( f_trading_price ) )#原本10.45 * 100000 = 1044999.999999999 然後取 int 就變成1044999，所以改用Decimal
+        n_trading_count = Decimal( str( n_trading_count ) )
+        f_trading_fee_discount = Decimal( str( f_trading_fee_discount ) )
+        dict_result = {}
+        if e_trading_type == TradingType.BUY or e_trading_type == TradingType.SELL:
+            n_trading_value = int( f_trading_price * n_trading_count )
+            n_trading_fee = int( n_trading_value * Decimal( '0.001425' ) * f_trading_fee_discount )
+            
+            if n_trading_value != 0:
+                if n_trading_count % 1000 == 0:
+                    n_trading_fee = max( n_minimum_common_trading_fee, n_trading_fee )
+                else:#零股交易
+                    n_trading_fee = max( n_minimum_odd_trading_fee, n_trading_fee )
+            
+            if e_trading_type == TradingType.SELL:
+                if b_etf:
+                    if b_bond:
+                         n_trading_tax = 0
+                    else:
+                        n_trading_tax = int( n_trading_value * Decimal( '0.001' ) )
+                elif b_daying_trading:
+                    n_trading_tax = int( n_trading_value * Decimal( '0.0015' ) )
+                else:
+                    n_trading_tax = int( n_trading_value * Decimal( '0.003' ) )
+            else:
+                n_trading_tax = 0
+
+            dict_result[ TradingCost.TRADING_VALUE ] = n_trading_value
+            dict_result[ TradingCost.TRADING_FEE ] = n_trading_fee
+            dict_result[ TradingCost.TRADING_TAX ] = n_trading_tax
+            if e_trading_type == TradingType.BUY:
+                dict_result[ TradingCost.TRADING_TOTAL_COST ] = n_trading_value + n_trading_fee + n_trading_tax
+            else:
+                dict_result[ TradingCost.TRADING_TOTAL_COST ] = n_trading_value - n_trading_fee - n_trading_tax
+        else:   
+            dict_result[ TradingCost.TRADING_VALUE ] = 0
+            dict_result[ TradingCost.TRADING_FEE ] = 0
+            dict_result[ TradingCost.TRADING_TAX ] = 0
+            dict_result[ TradingCost.TRADING_TOTAL_COST ] = 0
+        return dict_result
+
+    @staticmethod
+    def generate_trading_data( str_trading_date,                   #交易日期
+                               e_trading_type,                     #交易種類
+                               e_trading_price_type,               #交易價格種類
+                               f_per_share_trading_price,          #每股交易價格
+                               n_total_trading_price,              #總交易金額
+                               n_trading_count,                    #交易股數
+                               e_regular_buy_trading_fee_type,     #手續費種類
+                               f_trading_fee_discount,             #手續費折扣
+                               n_regular_buy_trading_fee_minimum,  #手續費最低金額
+                               n_regular_buy_trading_fee_constant, #手續費固定金額
+                               e_dividend_value_type,              #股利金額種類
+                               f_stock_dividend,                   #股票股利
+                               f_cash_dividend,                    #現金股利
+                               n_custom_extra_insurance_fee,       #自訂的補充保費
+                               f_capital_reduction_per_share,      #每股減資金額
+                               e_capital_reduction_type,           #減資種類
+                               b_daying_trading  ):                #是否為當沖交易
+        dict_trading_data = {}
+        dict_trading_data[ TradingData.TRADING_DATE ] = str_trading_date
+        dict_trading_data[ TradingData.TRADING_TYPE ] = e_trading_type
+        dict_trading_data[ TradingData.TRADING_PRICE_TYPE ] = e_trading_price_type
+        dict_trading_data[ TradingData.PER_SHARE_TRADING_PRICE ] = f_per_share_trading_price
+        dict_trading_data[ TradingData.TOTAL_TRADING_PRICE ] = n_total_trading_price
+        dict_trading_data[ TradingData.TRADING_COUNT ] = n_trading_count
+        dict_trading_data[ TradingData.REGULAR_BUY_TRADING_FEE_TYPE ] = e_regular_buy_trading_fee_type
+        dict_trading_data[ TradingData.TRADING_FEE_DISCOUNT ] = f_trading_fee_discount
+        dict_trading_data[ TradingData.REGULAR_BUY_TRADING_FEE_MINIMUM ] = n_regular_buy_trading_fee_minimum
+        dict_trading_data[ TradingData.REGULAR_BUY_TRADING_FEE_CONSTANT ] = n_regular_buy_trading_fee_constant
+        dict_trading_data[ TradingData.DIVIDEND_VALUE_TYPE ] = e_dividend_value_type
+        dict_trading_data[ TradingData.STOCK_DIVIDEND ] = f_stock_dividend
+        dict_trading_data[ TradingData.CASH_DIVIDEND ] = f_cash_dividend
+        dict_trading_data[ TradingData.CUSTOM_EXTRA_INSURANCE_FEE ] = n_custom_extra_insurance_fee
+        dict_trading_data[ TradingData.CAPITAL_REDUCTION_PER_SHARE ] = f_capital_reduction_per_share
+        dict_trading_data[ TradingData.CAPITAL_REDUCTION_TYPE ] = e_capital_reduction_type
+        dict_trading_data[ TradingData.DAYING_TRADING ] = b_daying_trading
+        return dict_trading_data
+
+    @staticmethod
+    def xirr(cash_flows, dates):
+        """
+        計算 XIRR (年化報酬率)
+        :param cash_flows: list of cash flows (現金流金額，正數為收入，負數為支出)
+        :param dates: list of datetime objects (對應的日期)
+        :return: 年化報酬率
+        """
+        def xnpv(rate):
+            """
+            計算 XNPV
+            """
+            return sum(cf / ((1 + rate) ** ((d - dates[0]).days / 365.0)) for cf, d in zip(cash_flows, dates))
+
+        # 初始猜測的 XIRR 值
+        try:
+            return newton(lambda r: xnpv(r), 0.1)
+        except RuntimeError:
+            raise ValueError("無法找到解，請檢查輸入的現金流和日期。")
+           
+    @staticmethod
+    def update_weekly_text_by_date( qt_date_edit, qt_weekday_label ):
+        obj_date = qt_date_edit.date()
+        n_weekday = obj_date.dayOfWeek()
+        str_weekday = share_api.get_qt_weekday_text( n_weekday )
+        qt_weekday_label.setText( str_weekday )
 
 class Worker( QObject ):
     progress = Signal( int )  # Signal to emit progress updates
@@ -6071,3 +6027,43 @@ def run_app():
 if __name__ == "__main__":
     sys.exit( run_app() )
 
+#region 工具備忘
+
+#打包指令
+# cd D:\_2.code\PythonStockPrice   
+# pyinstaller --hidden-import "babel.numbers" --add-data "resources;./resources" --add-data "StockInventory/Dividend;./StockInventory/Dividend" --add-data "../FoxInfoShareUtility/foxinfo_share_utility/icons;foxinfo_share_utility/icons" --noconsole StockPriceMainWindow.py
+# pyinstaller --hidden-import "babel.numbers" --add-data "resources;./resources" --add-data "StockInventory/Dividend;./StockInventory/Dividend" --add-data "../FoxInfoShareUtility/foxinfo_share_utility/icons;foxinfo_share_utility/icons" --console StockPriceMainWindow.py
+
+# 要把.ui檔變成.py
+# cd D:\_2.code\PythonStockPrice
+# pyside6-uic QtStockPriceMainWindowTemplate.ui -o QtStockPriceMainWindowTemplate.py
+# pyside6-uic QtStockPriceMainWindow.ui -o QtStockPriceMainWindow.py
+# pyside6-uic QtStockTradingEditDialog.ui -o QtStockTradingEditDialog.py
+# pyside6-uic QtStockRegularTradingEditDialog.ui -o QtStockRegularTradingEditDialog.py
+# pyside6-uic QtStockDividendEditDialog.ui -o QtStockDividendEditDialog.py
+# pyside6-uic QtStockCapitalReductionEditDialog.ui -o QtStockCapitalReductionEditDialog.py
+# pyside6-uic QtStockCapitalIncreaseEditDialog.ui -o QtStockCapitalIncreaseEditDialog.py
+# pyside6-uic QtStockSplitEditDialog.ui -o QtStockSplitEditDialog.py
+# pyside6-uic QtDuplicateOptionDialog.ui -o QtDuplicateOptionDialog.py
+# pyside6-uic QtCashTransferEditDialog.ui -o QtCashTransferEditDialog.py
+# pyside6-uic QtStockDividendTransferFeeEditDialog.ui -o QtStockDividendTransferFeeEditDialog.py
+# pyside6-uic QtStockDividendTransferFeeEditSpinboxDialog.ui -o QtStockDividendTransferFeeEditSpinboxDialog.py
+# pyside6-uic QtStockMinimumTradingFeeEditDialog.ui -o QtStockMinimumTradingFeeEditDialog.py
+# pyside6-uic QtAboutDialog.ui -o QtAboutDialog.py
+# pyside6-uic QtStockDividendPositionDateEditDialog.ui -o QtStockDividendPositionDateEditDialog.py
+
+
+# 下載上市櫃公司股利資料
+# https://mopsov.twse.com.tw/mops/web/t108sb27
+
+# 以下兩個網站都可以下載"上市"ETF的股利
+# https://www.twse.com.tw/zh/products/securities/etf/products/div.html
+# https://www.twse.com.tw/zh/ETFortune/dividendList
+
+# 以下這個網站可以下載"上櫃"ETF的股利
+# https://www.tpex.org.tw/zh-tw/announce/market/ex/cal.html
+
+# 靜態掃描
+# pylint --disable=all --enable=E1120,E1121 StockPriceMainWindow.py 只顯示參數數量錯誤
+# pylint -E StockPriceMainWindow.py 只顯示錯誤級別的資訊
+#endregion
