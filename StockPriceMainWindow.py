@@ -4671,10 +4671,10 @@ class MainWindow( QMainWindow ):
 
     def get_trading_data_header( self ):
         if self.ui.qtUse1ShareUnitAction.isChecked():
-            return ['年度', '日期', '交易種類', '交易價格', '交易股數', '交易金額', '手續費', '交易稅', '補充保費', '單筆總成本', '全部股票股利(股) /\n每股股票股利(元)', '全部現金股利(元) /\n每股現金股利(元)',
+            return ['日期', '交易種類', '交易價格', '交易股數', '交易金額', '手續費', '交易稅', '補充保費', '單筆總成本', '全部股票股利(股) /\n每股股票股利(元)', '全部現金股利(元) /\n每股現金股利(元)',
                     '累計總成本', '庫存股數', '平均成本', '單筆損益', '編輯', '刪除' ]
         else:
-            return ['年度', '日期', '交易種類', '交易價格', '交易張數', '交易金額', '手續費', '交易稅', '補充保費', '單筆總成本', '全部股票股利(張) /\n每股股票股利(元)', '全部現金股利(元) /\n每股現金股利(元)',
+            return ['日期', '交易種類', '交易價格', '交易張數', '交易金額', '手續費', '交易稅', '補充保費', '單筆總成本', '全部股票股利(張) /\n每股股票股利(元)', '全部現金股利(元) /\n每股現金股利(元)',
                     '累計總成本', '庫存張數', '平均成本', '單筆損益', '編輯', '刪除' ]
 
     def get_per_trading_data_text_list( self, dict_per_trading_data ):
@@ -4686,7 +4686,7 @@ class MainWindow( QMainWindow ):
         if self.ui.qtROCYearAction.isChecked():
             str_year = str( int( str_year ) - 1911 )
 
-        str_month_date = str_date[ 5: ].replace( '-', '/' )
+        str_month_date = str_date[ 5: ]#.replace( '-', '/' )
         obj_date = datetime.datetime.strptime( str_date, "%Y-%m-%d" )
         n_weekday = obj_date.weekday()
         str_weekday = share_api.get_obj_datetime_weekday_text( n_weekday )
@@ -4812,8 +4812,7 @@ class MainWindow( QMainWindow ):
             str_stock_dividend = "N/A"
             str_cash_dividend = "N/A"
 
-        list_data = [ str_year,                     #交易年度
-                      str_month_date + str_weekday, #交易日期
+        list_data = [ str_year + "-" + str_month_date + " " + str_weekday, #交易日期
                       str_trading_type,             #交易種類
                       str_trading_price,            #交易價格
                       str_trading_count,            #交易股數
