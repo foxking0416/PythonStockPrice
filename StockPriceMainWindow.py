@@ -29,11 +29,11 @@ from QtStockDividendTransferFeeEditDialog import Ui_Dialog as Ui_StockDividendTr
 from QtStockDividendTransferFeeEditSpinboxDialog import Ui_Dialog as Ui_StockDividendTransferFeeEditSpinboxDialog
 from QtStockMinimumTradingFeeEditDialog import Ui_Dialog as Ui_StockMinimumTradingFeeEditDialog
 from QtAboutDialog import Ui_Dialog as Ui_AboutDialog
-from PySide6.QtWidgets import QApplication, QMainWindow, QDialog, QButtonGroup, QMessageBox, QStyledItemDelegate, QFileDialog, QHeaderView, QVBoxLayout, QHBoxLayout, \
-                              QLabel, QLineEdit, QDialogButtonBox, QTabBar, QWidget, QTableView, QComboBox, QPushButton, QSizePolicy, QSpacerItem, QCheckBox, QDoubleSpinBox, \
+from PySide6.QtWidgets import QApplication, QMainWindow, QDialog, QButtonGroup, QMessageBox, QHeaderView, QVBoxLayout, QHBoxLayout, \
+                              QLabel, QLineEdit, QTabBar, QWidget, QTableView, QComboBox, QPushButton, QSizePolicy, QSpacerItem, QCheckBox, \
                               QProgressBar, QTabWidget, QMenu
-from PySide6.QtGui import QStandardItemModel, QStandardItem, QIcon, QBrush
-from PySide6.QtCore import Qt, QModelIndex, QRect, QSignalBlocker, QSize, QThread, QObject, Signal, QSettings, QPoint
+from PySide6.QtGui import QStandardItemModel, QStandardItem, QBrush
+from PySide6.QtCore import Qt, QModelIndex, QSignalBlocker, QSize, QThread, QObject, Signal, QSettings, QPoint
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import Alignment, PatternFill, Font, Border, Side
@@ -1373,44 +1373,7 @@ class Worker( QObject ):
     def update_progress( self, value ):
         self.progress.emit( value )  # Emit progress updates
 
-class CustomSortModel( QStandardItemModel ):
-    def sort(self, column, order):
 
-        numeric_data = []
-        for row in range(self.rowCount()):
-            item = self.item(row, column)
-            try:
-                if column == 0:
-                    str_stock_number_and_name = item.text()
-                    value = str_stock_number_and_name.split(" ")[0]
-                else:
-                    # 嘗試轉換為整數，去掉逗號
-                    value = float( item.text().replace(",", "").replace("%", "") )
-            except ( ValueError, AttributeError ):
-                # 如果轉換失敗，跳過此項目
-                value = float('-inf') if order.value == 1 else float('inf')
-            numeric_data.append(( value, row ) )
-
-        numeric_data.sort(
-            key = lambda x: x[ 0 ],
-            reverse = ( order.value == 1 )
-        )
-
-        # 保存整個行的 QStandardItem 物件
-        data = [
-            [self.item( row, col ).clone() for col in range( self.columnCount() ) ]
-            for row in range(self.rowCount())
-        ]
-        list_header = []
-        for row in range( self.rowCount() ):
-            header_text = self.verticalHeaderItem( row ).text()
-            list_header.append( header_text )
-
-        self.setRowCount( 0 )
-        for row_data in numeric_data:
-            self.appendRow( data[ row_data[1] ] )
-
-        self.setVerticalHeaderLabels( list_header )
 
 class MainWindow( QMainWindow ):
     def __init__( self, b_unit_test = False, 
@@ -1871,7 +1834,7 @@ class MainWindow( QMainWindow ):
         uiqt_stock_inventory_tab_vertical_layout.addLayout( uiqt_horizontal_layout_3 )
 
         delegate = share_ui.CenterIconDelegate()
-        stock_list_model = CustomSortModel( 0, 0 )
+        stock_list_model = share_ui.CustomSortModel( 0, 0 )
         stock_list_model.setHorizontalHeaderLabels( self.list_stock_list_table_horizontal_header )
         uiqt_stock_list_table_view.verticalHeader().setSectionsMovable( True )
         uiqt_stock_list_table_view.verticalHeader().sectionMoved.connect( self.on_stock_list_table_vertical_header_section_moved )
