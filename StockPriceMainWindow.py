@@ -22,6 +22,7 @@ from QtStockRegularTradingEditDialog import Ui_Dialog as Ui_StockRegularTradingD
 from QtStockDividendEditDialog import Ui_Dialog as Ui_StockDividendDialog
 from QtStockCapitalReductionEditDialog import Ui_Dialog as Ui_StockCapitalReductionDialog
 from QtStockSplitEditDialog import Ui_Dialog as Ui_StockSplitDialog
+from QtStockDividendPositionDateEditDialog import Ui_Dialog as Ui_StockDividendPositionDateEditDialog
 from QtCashTransferEditDialog import Ui_Dialog as Ui_CashTransferDialog
 from QtDuplicateOptionDialog import Ui_Dialog as Ui_DuplicateOptionDialog
 from QtStockDividendTransferFeeEditDialog import Ui_Dialog as Ui_StockDividendTransferFeeEditDialog
@@ -30,9 +31,9 @@ from QtStockMinimumTradingFeeEditDialog import Ui_Dialog as Ui_StockMinimumTradi
 from QtAboutDialog import Ui_Dialog as Ui_AboutDialog
 from PySide6.QtWidgets import QApplication, QMainWindow, QDialog, QButtonGroup, QMessageBox, QStyledItemDelegate, QFileDialog, QHeaderView, QVBoxLayout, QHBoxLayout, \
                               QLabel, QLineEdit, QDialogButtonBox, QTabBar, QWidget, QTableView, QComboBox, QPushButton, QSizePolicy, QSpacerItem, QCheckBox, QDoubleSpinBox, \
-                              QProgressBar, QTabWidget
+                              QProgressBar, QTabWidget, QMenu
 from PySide6.QtGui import QStandardItemModel, QStandardItem, QIcon, QBrush
-from PySide6.QtCore import Qt, QModelIndex, QRect, QSignalBlocker, QSize, QThread, QObject, Signal, QSettings
+from PySide6.QtCore import Qt, QModelIndex, QRect, QSignalBlocker, QSize, QThread, QObject, Signal, QSettings, QPoint
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import Alignment, PatternFill, Font, Border, Side
@@ -68,6 +69,7 @@ from scipy.optimize import newton
 # pyside6-uic QtStockDividendTransferFeeEditSpinboxDialog.ui -o QtStockDividendTransferFeeEditSpinboxDialog.py
 # pyside6-uic QtStockMinimumTradingFeeEditDialog.ui -o QtStockMinimumTradingFeeEditDialog.py
 # pyside6-uic QtAboutDialog.ui -o QtAboutDialog.py
+# pyside6-uic QtStockDividendPositionDateEditDialog.ui -o QtStockDividendPositionDateEditDialog.py
 
 
 # 下載上市櫃公司股利資料
@@ -207,6 +209,7 @@ class TradingData( Enum ):
     TRADING_TAX_NON_SAVE = auto() #不會記錄
     TRADING_COST_NON_SAVE = auto() #不會記錄
     STOCK_DIVIDEND_GAIN_NON_SAVE = auto() #不會記錄
+    STOCK_DIVIDEND_POSITION_DATE_NON_SAVE = auto() #不會記錄 股票股利入帳日(不是除權日)
     CASH_DIVIDEND_GAIN_NON_SAVE = auto() #不會記錄
     EXTRA_INSURANCE_FEE_NON_SAVE = auto() #不會記錄
     ACCUMULATED_COST_NON_SAVE = auto() #不會記錄
@@ -1316,6 +1319,34 @@ class StockSplitEditDialog( QDialog ):
     def cancel( self ):
         self.reject()
 
+class StockDividendPositionDateEditDialog( QDialog ):
+    def __init__( self, str_stock_number, str_stock_name, obj_position_date, parent = None ):
+        super().__init__( parent )
+
+        self.ui = Ui_StockDividendPositionDateEditDialog()
+        self.ui.setupUi( self )
+        self.setWindowIcon( share_icon.get_icon( share_icon.IconType.WINDOW ) )
+
+        self.ui.qtStockNumberLabel.setText( str_stock_number )
+        self.ui.qtStockNameLabel.setText( str_stock_name )
+        self.ui.qtDateEdit.setDate( obj_position_date.date() )
+        self.ui.qtDateEdit.setCalendarPopup( True )
+        self.ui.qtDateEdit.dateChanged.connect( lambda: Utility.update_weekly_text_by_date( self.ui.qtDateEdit, self.ui.qtWeekdayLabel ) )
+
+        self.ui.qtOkPushButton.clicked.connect( self.accept_data )
+        self.ui.qtCancelPushButton.clicked.connect( self.cancel )
+        Utility.update_weekly_text_by_date( self.ui.qtDateEdit, self.ui.qtWeekdayLabel )
+
+    def setup_position_date( self, str_date ):
+        self.ui.qtDateEdit.setDate( datetime.datetime.strptime( str_date, "%Y-%m-%d" ).date() )
+
+    def accept_data( self ):
+        self.str_position_date = self.ui.qtDateEdit.date().toString( "yyyy-MM-dd" )
+        self.accept()
+    
+    def cancel( self ):
+        self.reject()
+
 class CashTransferEditDialog( QDialog ):
     def __init__( self, str_account_name, parent = None ):
         super().__init__( parent )
@@ -1432,7 +1463,8 @@ class MainWindow( QMainWindow ):
                   str_stock_number_file = 'StockNumber.txt',
                   str_suspend_stock_number_file = 'SuspendStockNumber.txt',
                   str_stock_price_file = 'StockPrice.txt',
-                  str_stock_pre_price_file = 'PreStockPrice.txt'  ):
+                  str_stock_pre_price_file = 'PreStockPrice.txt',
+                  str_stock_dividend_position_date_file = 'StockDividendPositionDate.json' ):
         super( MainWindow, self ).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi( self )  # 設置 UI
@@ -1462,6 +1494,8 @@ class MainWindow( QMainWindow ):
         self.ui.qtTradingDataTableView.horizontalHeader().sectionMoved.connect( self.on_trading_data_table_horizontal_header_section_moved )
         self.ui.qtTradingDataTableView.verticalHeader().setSectionResizeMode( QHeaderView.Fixed )
         self.ui.qtTradingDataTableView.clicked.connect( lambda index: self.on_trading_data_table_item_clicked( index, self.per_stock_trading_data_model ) )
+        self.ui.qtTradingDataTableView.setContextMenuPolicy( Qt.CustomContextMenu )
+        self.ui.qtTradingDataTableView.customContextMenuRequested.connect( self.show_context_menu )
         for row in range( len( self.get_trading_data_header() ) ):
             if row == 10 or row == 11:
                 self.ui.qtTradingDataTableView.setRowHeight( row, 40 )
@@ -1535,6 +1569,7 @@ class MainWindow( QMainWindow ):
             self.suspend_stock_number_file_path = os.path.join( g_data_dir, 'StockInventory', str_suspend_stock_number_file )
             self.stock_price_file_path = os.path.join( g_data_dir, 'StockInventory', str_stock_price_file )
             self.stock_pre_price_file_path = os.path.join( g_data_dir, 'StockInventory', str_stock_pre_price_file )
+            self.stock_dividend_position_date_file_path = os.path.join( g_data_dir, 'StockInventory', str_stock_dividend_position_date_file )
         else:
             self.trading_data_json_file_path = os.path.join( g_exe_dir, 'StockInventory', str_initial_data_file )
             self.UISetting_file_path = os.path.join( g_exe_dir, 'StockInventory', str_UI_setting_file )
@@ -1542,6 +1577,7 @@ class MainWindow( QMainWindow ):
             self.suspend_stock_number_file_path = os.path.join( g_exe_dir, 'StockInventory', str_suspend_stock_number_file )
             self.stock_price_file_path = os.path.join( g_exe_dir, 'StockInventory', str_stock_price_file )
             self.stock_pre_price_file_path = os.path.join( g_exe_dir, 'StockInventory', str_stock_pre_price_file )
+            self.stock_dividend_position_date_file_path = os.path.join( g_exe_dir, 'StockInventory', str_stock_dividend_position_date_file )
 
         self.list_stock_list_table_horizontal_header = [ '股票代碼', '總成本', '庫存股數', '平均成本', ' 收盤價', '現值', '總手續費', '總交易稅', '損益', '股利所得', '平均年化報酬率', '自動帶入股利', '匯出', '刪除' ]
         self.pick_up_stock( None )
@@ -1658,7 +1694,7 @@ class MainWindow( QMainWindow ):
             if key not in self.dict_auto_stock_yearly_dividned:
                 self.dict_auto_stock_yearly_dividned[ key ] = value
 
-
+        self.dict_all_stock_dividend_position_date = self.load_stock_dividend_position_date()
 
         self.set_progress_value( update_progress_callback, 100 )
         # self.load_initialize_data()
@@ -2653,18 +2689,16 @@ class MainWindow( QMainWindow ):
         item = table_model.itemFromIndex( index )
         if item is not None:
             n_row = index.row()  # 獲取行索引
-            str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
-            dict_per_account_all_stock_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ]
-            list_trading_data = dict_per_account_all_stock_trading_data[ self.str_picked_stock_number ]
 
             if ( n_row == len( self.get_trading_data_header() ) - 2 or #編輯
                 n_row == len( self.get_trading_data_header() ) - 1 ): #刪除
 
+                str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
+                dict_per_account_all_stock_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ]
+                list_trading_data = dict_per_account_all_stock_trading_data[ self.str_picked_stock_number ]
+
                 if self.str_picked_stock_number is None:
                     return
-                str_stock_number = self.str_picked_stock_number
-                list_stock_name_and_type = self.dict_all_company_number_to_name_and_type[ str_stock_number ]
-                str_stock_name = list_stock_name_and_type[ 0 ]
 
                 hidden_data = table_model.data( index, Qt.UserRole )
                 n_findindex = -1
@@ -2675,6 +2709,10 @@ class MainWindow( QMainWindow ):
                 if n_findindex == -1:
                     return
                 dict_selected_data = list_trading_data[ n_findindex ]
+
+                str_stock_number = self.str_picked_stock_number
+                list_stock_name_and_type = self.dict_all_company_number_to_name_and_type[ str_stock_number ]
+                str_stock_name = list_stock_name_and_type[ 0 ]
 
                 if n_row == len( self.get_trading_data_header() ) - 2: #編輯
                     if dict_selected_data[ TradingData.TRADING_TYPE ] == TradingType.TEMPLATE:
@@ -3298,6 +3336,7 @@ class MainWindow( QMainWindow ):
             g_data_dir = dialog.folder_path
             self.trading_data_json_file_path = os.path.join( g_data_dir, 'StockInventory', 'TradingData.json' )
             self.UISetting_file_path = os.path.join( g_data_dir, 'StockInventory', 'UISetting.config' )
+            self.stock_dividend_position_date_file_path = os.path.join( g_data_dir, 'StockInventory', 'StockDividendPositionDate.json' )
 
     def load_initialize_data( self ): 
         with QSignalBlocker( self.ui.qtTabWidget ):
@@ -3764,6 +3803,19 @@ class MainWindow( QMainWindow ):
                             for i in range( 1, len( row ) ):
                                 self.list_stock_list_column_width.append( int( row[ i ] ) )
 
+    def save_stock_dividend_position_date( self ):
+        with open( self.stock_dividend_position_date_file_path, 'w', encoding='utf-8' ) as f:
+            f.write( "v2.1.0" '\n' )
+            json.dump( self.dict_all_stock_dividend_position_date, f, ensure_ascii=False, indent=4 )
+
+    def load_stock_dividend_position_date( self ):
+        data = {}
+        if os.path.exists( self.stock_dividend_position_date_file_path ):
+            with open( self.stock_dividend_position_date_file_path, 'r', encoding='utf-8' ) as f:
+                version = f.readline().strip()
+                data = json.load( f )
+        return data
+
     def process_all_trading_data( self ): 
         for key_account_name, value_dict_per_company_trading_data in self.dict_all_account_all_stock_trading_data.items():
             for key_stock_name, value_list_trading_data in value_dict_per_company_trading_data.items():
@@ -3804,6 +3856,9 @@ class MainWindow( QMainWindow ):
                             sorted_list.append( auto_dividend_data )
                     sorted_list = sorted( sorted_list, key=lambda x: ( datetime.datetime.strptime( x[ TradingData.TRADING_DATE ], "%Y-%m-%d"), -x[ TradingData.TRADING_TYPE ] ) )
 
+        dict_per_stock_dividend_position_date = {}
+        if str_stock_number in self.dict_all_stock_dividend_position_date:
+            dict_per_stock_dividend_position_date = self.dict_all_stock_dividend_position_date[ str_stock_number ]
         n_accumulated_inventory = 0
         n_accumulated_cost = 0
         n_accumulated_cost_without_considering_dividend = 0
@@ -4064,6 +4119,10 @@ class MainWindow( QMainWindow ):
                 item[ TradingData.TRADING_COST_NON_SAVE ] = 0
 
                 item[ TradingData.STOCK_DIVIDEND_GAIN_NON_SAVE ] = n_stock_dividend_share_gain
+                if item[ TradingData.TRADING_DATE ] in dict_per_stock_dividend_position_date:
+                    item[ TradingData.STOCK_DIVIDEND_POSITION_DATE_NON_SAVE ] = dict_per_stock_dividend_position_date[ item[ TradingData.TRADING_DATE ] ]
+                else:
+                    item[ TradingData.STOCK_DIVIDEND_POSITION_DATE_NON_SAVE ] = item[ TradingData.TRADING_DATE ]
                 n_accumulated_inventory += n_stock_dividend_share_gain
                 
                 n_extra_insurance_fee_total = 0
@@ -4587,9 +4646,15 @@ class MainWindow( QMainWindow ):
                     standard_item.setBackground( QBrush( '#FABF8F' ) )
                 elif data == "股票分割":
                     standard_item.setBackground( QBrush( '#732BF5' ) )
+
+                if e_trading_type == TradingType.DIVIDEND and dict_per_trading_data[ TradingData.STOCK_DIVIDEND ] != 0:
+                    str_dividend_tooltip = f"股票股利入帳日：{ dict_per_trading_data[ TradingData.STOCK_DIVIDEND_POSITION_DATE_NON_SAVE ] }\n可使用滑鼠右鍵設定"
+                    standard_item.setData( str_dividend_tooltip, Qt.ToolTipRole )
+                
                 standard_item.setTextAlignment( Qt.AlignHCenter | Qt.AlignVCenter )
                 standard_item.setFlags( standard_item.flags() & ~Qt.ItemIsEditable )
                 standard_item.setData( dict_per_trading_data[ TradingData.SORTED_INDEX_NON_SAVE ], Qt.UserRole )
+                standard_item.setData( e_trading_type, Qt.UserRole + 1 )
                 self.per_stock_trading_data_model.setItem( row, column, standard_item ) 
 
             if ( e_trading_type != TradingType.DIVIDEND or
@@ -4637,6 +4702,56 @@ class MainWindow( QMainWindow ):
             self.ui.qtTradingDataTableView.scrollTo(self.ui.qtTradingDataTableView.model().index( 0, n_scroll_column ) )
             self.ui.qtTradingDataTableView.selectColumn( n_scroll_column )
             self.ui.qtTradingDataTableView.setFocus()
+
+    def show_context_menu( self, position: QPoint ):
+        index = self.ui.qtTradingDataTableView.indexAt( position )
+        if not index.isValid():
+            return
+
+        e_trading_type = index.data( Qt.UserRole + 1 )
+        if e_trading_type == TradingType.DIVIDEND:
+            if self.str_picked_stock_number is None:
+                return
+            str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
+            dict_per_account_all_stock_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ]
+            list_trading_data = dict_per_account_all_stock_trading_data[ self.str_picked_stock_number ]
+
+            # hidden_data = self.per_stock_trading_data_model.data( index, Qt.UserRole )
+            hidden_data = index.data( Qt.UserRole )
+            n_findindex = -1
+            for index, dict_selected_data in enumerate( list_trading_data ):
+                if dict_selected_data[ TradingData.SORTED_INDEX_NON_SAVE ] == hidden_data:
+                    n_findindex = index
+                    break
+            if n_findindex == -1:
+                return
+            dict_selected_data = list_trading_data[ n_findindex ]
+            f_stock_dividend = Decimal( str( dict_selected_data[ TradingData.STOCK_DIVIDEND ] ) )
+            if f_stock_dividend == 0:
+                return
+
+            qt_menu = QMenu()
+            qt_edit_position_date_action = qt_menu.addAction( "編輯股票股利入帳日" )
+            exe_action = qt_menu.exec( self.ui.qtTradingDataTableView.viewport().mapToGlobal( position ) )
+            if exe_action == qt_edit_position_date_action:
+
+                str_stock_dividend_position_date = dict_selected_data[ TradingData.STOCK_DIVIDEND_POSITION_DATE_NON_SAVE ] #股票股利入帳日
+                obj_stock_dividend_position_date = datetime.datetime.strptime( str_stock_dividend_position_date, "%Y-%m-%d" )
+
+                str_stock_number = self.str_picked_stock_number
+                list_stock_name_and_type = self.dict_all_company_number_to_name_and_type[ str_stock_number ]
+                str_stock_name = list_stock_name_and_type[ 0 ]
+
+                dialog = StockDividendPositionDateEditDialog( str_stock_number, str_stock_name, obj_stock_dividend_position_date, self )
+                if dialog.exec():
+                    str_stock_dividend_trading_date = dict_selected_data[ TradingData.TRADING_DATE ] #股利除權息日
+                    if str_stock_number not in self.dict_all_stock_dividend_position_date:
+                        self.dict_all_stock_dividend_position_date[ str_stock_number ] = {}
+                    self.dict_all_stock_dividend_position_date[ str_stock_number ][ str_stock_dividend_trading_date ] = dialog.str_position_date
+                    self.save_stock_dividend_position_date()
+                    sorted_list = self.process_single_trading_data( str_tab_widget_name, str_stock_number )
+                    self.refresh_stock_list_table()
+                    self.refresh_trading_data_table( sorted_list, dict_selected_data )
 
     def clear_per_stock_trading_table( self ):
         self.per_stock_trading_data_model.clear()
@@ -5946,7 +6061,9 @@ def run_app():
                         'UISetting.config',
                         'StockNumber.txt',
                         'SuspendStockNumber.txt',
-                        'StockPrice.txt' )
+                        'StockPrice.txt',
+                        'PreStockPrice.txt',
+                        'StockDividendPositionDate.json' )
 
     window.show()
     return app.exec()
