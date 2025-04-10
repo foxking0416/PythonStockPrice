@@ -3805,8 +3805,9 @@ class MainWindow( QMainWindow ):
                     if item[ TradingData.DAYING_TRADING ] == True:
                         str_last_buying_date = str_trading_date
                         n_last_buying_count = n_trading_count
-                list_buying_data = [ n_per_trading_total_cost, n_trading_count ]
+                list_buying_data = [ n_per_trading_total_cost, n_trading_count, str_trading_date ]
                 queue_buying_data.append( list_buying_data )
+                queue_buying_data = deque( sorted( queue_buying_data, key = lambda x: x[ 2 ] ) )
             elif e_trading_type == TradingType.REGULAR_BUY:
                 n_trading_count = item[ TradingData.TRADING_COUNT ]
                 e_trading_price_type = item[ TradingData.TRADING_PRICE_TYPE ]
@@ -3841,8 +3842,9 @@ class MainWindow( QMainWindow ):
 
                 item[ TradingData.STOCK_DIVIDEND_GAIN_NON_SAVE ] = 0
                 item[ TradingData.CASH_DIVIDEND_GAIN_NON_SAVE ] = 0
-                list_buying_data = [ n_trading_total_cost, n_trading_count ]
+                list_buying_data = [ n_trading_total_cost, n_trading_count, str_trading_date ]
                 queue_buying_data.append( list_buying_data )
+                queue_buying_data = deque( sorted( queue_buying_data, key = lambda x: x[ 2 ] ) )
             elif e_trading_type == TradingType.SELL:
                 f_trading_price = item[ TradingData.PER_SHARE_TRADING_PRICE ]
                 f_trading_fee_discount = item[ TradingData.TRADING_FEE_DISCOUNT ]
@@ -3904,18 +3906,18 @@ class MainWindow( QMainWindow ):
                     n_accumulated_inventory -= n_trading_count
                     n_general_selling_count = n_trading_count
 
-
                 n_accumulate_cost_for_this_selling = 0
                 #一般現股交易是先買先賣
-                if len( queue_buying_data ) != 0:
+                if len( queue_buying_data ) != 0 and n_general_selling_count > 0:
                     list_buying_data = queue_buying_data[ 0 ]
                     n_buying_cost = list_buying_data[ 0 ]
                     n_buying_count = list_buying_data[ 1 ]
+                    str_date = list_buying_data[ 2 ]
                     if n_general_selling_count < n_buying_count:
                         n_used_buying_cost = int( n_buying_cost * n_general_selling_count / n_buying_count )
                         n_rest_buying_cost = n_buying_cost - n_used_buying_cost
                         n_rest_buying_count = n_buying_count - n_general_selling_count
-                        queue_buying_data[ 0 ] = [ n_rest_buying_cost, n_rest_buying_count ]
+                        queue_buying_data[ 0 ] = [ n_rest_buying_cost, n_rest_buying_count, str_date ]
                         n_accumulate_cost_for_this_selling += n_used_buying_cost
                     else:
                         while n_general_selling_count >= n_buying_count:
@@ -3933,19 +3935,20 @@ class MainWindow( QMainWindow ):
                                 n_used_buying_cost = int( n_buying_cost * n_general_selling_count / n_buying_count )
                                 n_rest_buying_cost = n_buying_cost - n_used_buying_cost
                                 n_rest_buying_count = n_buying_count - n_general_selling_count
-                                queue_buying_data[ 0 ] = [ n_rest_buying_cost, n_rest_buying_count ]
+                                queue_buying_data[ 0 ] = [ n_rest_buying_cost, n_rest_buying_count, str_date ]
                                 n_accumulate_cost_for_this_selling += n_used_buying_cost
                 
                 #當沖交易則需要從最新的購買交易去取
-                if len( queue_buying_data ) != 0:
+                if len( queue_buying_data ) != 0 and n_day_trading_selling_count > 0:
                     list_buying_data = queue_buying_data[ -1 ]
                     n_buying_cost = list_buying_data[ 0 ]
                     n_buying_count = list_buying_data[ 1 ]
+                    str_date = list_buying_data[ 2 ]
                     if n_day_trading_selling_count < n_buying_count:
                         n_used_buying_cost = int( n_buying_cost * n_day_trading_selling_count / n_buying_count )
                         n_rest_buying_cost = n_buying_cost - n_used_buying_cost
                         n_rest_buying_count = n_buying_count - n_day_trading_selling_count
-                        queue_buying_data[ -1 ] = [ n_rest_buying_cost, n_rest_buying_count ]
+                        queue_buying_data[ -1 ] = [ n_rest_buying_cost, n_rest_buying_count, str_date ]
                         n_accumulate_cost_for_this_selling += n_used_buying_cost
                     else:
                         while n_day_trading_selling_count >= n_buying_count:
@@ -3963,7 +3966,7 @@ class MainWindow( QMainWindow ):
                                 n_used_buying_cost = int( n_buying_cost * n_day_trading_selling_count / n_buying_count )
                                 n_rest_buying_cost = n_buying_cost - n_used_buying_cost
                                 n_rest_buying_count = n_buying_count - n_day_trading_selling_count
-                                queue_buying_data[ -1 ] = [ n_rest_buying_cost, n_rest_buying_count ]
+                                queue_buying_data[ -1 ] = [ n_rest_buying_cost, n_rest_buying_count, str_date ]
                                 n_accumulate_cost_for_this_selling += n_used_buying_cost                
 
                 item[ TradingData.SELLING_PROFIT_NON_SAVE ] = n_per_trading_total_cost - n_accumulate_cost_for_this_selling
@@ -3990,8 +3993,9 @@ class MainWindow( QMainWindow ):
 
                 item[ TradingData.STOCK_DIVIDEND_GAIN_NON_SAVE ] = 0
                 item[ TradingData.CASH_DIVIDEND_GAIN_NON_SAVE ] = 0
-                list_buying_data = [ 0, n_trading_count ]
+                list_buying_data = [ 0, n_trading_count, str_trading_date ]
                 queue_buying_data.append( list_buying_data )
+                queue_buying_data = deque( sorted( queue_buying_data, key = lambda x: x[ 2 ] ) )
             elif e_trading_type == TradingType.DIVIDEND:
                 if n_accumulated_inventory <= 0: #沒有庫存就不用算股利了
                     continue
@@ -4042,8 +4046,6 @@ class MainWindow( QMainWindow ):
                                 n_extra_insurance_fee_for_cash_dividend = int( math.ceil( Decimal( str( n_cash_dividend_gain ) ) * Decimal( str( '0.0211' ) ) ) )
                                 n_extra_insurance_fee_for_stock_dividend = int( math.ceil( Decimal( str( n_stock_dividend_value_gain ) ) * Decimal( str( '0.0211' ) ) ) )
                             n_extra_insurance_fee_total = n_extra_insurance_fee_for_cash_dividend + n_extra_insurance_fee_for_stock_dividend
-
-
                 if n_cash_dividend_gain > n_dividend_transfer_fee:
                     item[ TradingData.CASH_DIVIDEND_GAIN_NON_SAVE ] = n_cash_dividend_gain
                     item[ TradingData.TRADING_FEE_NON_SAVE ] = n_dividend_transfer_fee
@@ -4055,8 +4057,9 @@ class MainWindow( QMainWindow ):
                     item[ TradingData.TRADING_FEE_NON_SAVE ] = 0
                     item[ TradingData.EXTRA_INSURANCE_FEE_NON_SAVE ] = 0 
                 n_accumulated_stock_dividend += n_stock_dividend_share_gain
-                list_buying_data = [ 0, n_stock_dividend_share_gain ]
+                list_buying_data = [ 0, n_stock_dividend_share_gain, item[ TradingData.STOCK_DIVIDEND_POSITION_DATE_NON_SAVE ] ]
                 queue_buying_data.append( list_buying_data )
+                queue_buying_data = deque( sorted( queue_buying_data, key = lambda x: x[ 2 ] ) )
             elif e_trading_type == TradingType.CAPITAL_REDUCTION:
                 if n_accumulated_inventory == 0: #沒有庫存就不用算減資了
                     continue
@@ -4669,12 +4672,10 @@ class MainWindow( QMainWindow ):
     def get_trading_data_header( self ):
         if self.ui.qtUse1ShareUnitAction.isChecked():
             return ['年度', '日期', '交易種類', '交易價格', '交易股數', '交易金額', '手續費', '交易稅', '補充保費', '單筆總成本', '全部股票股利(股) /\n每股股票股利(元)', '全部現金股利(元) /\n每股現金股利(元)',
-                    # '累計總成本', '庫存股數', '平均成本', '單筆損益', '編輯', '刪除' ]
-                    '累計總成本', '庫存股數', '平均成本', '編輯', '刪除' ]
+                    '累計總成本', '庫存股數', '平均成本', '單筆損益', '編輯', '刪除' ]
         else:
             return ['年度', '日期', '交易種類', '交易價格', '交易張數', '交易金額', '手續費', '交易稅', '補充保費', '單筆總成本', '全部股票股利(張) /\n每股股票股利(元)', '全部現金股利(元) /\n每股現金股利(元)',
-                    # '累計總成本', '庫存張數', '平均成本', '單筆損益', '編輯', '刪除' ]
-                    '累計總成本', '庫存張數', '平均成本', '編輯', '刪除' ]
+                    '累計總成本', '庫存張數', '平均成本', '單筆損益', '編輯', '刪除' ]
 
     def get_per_trading_data_text_list( self, dict_per_trading_data ):
         e_trading_type = dict_per_trading_data[ TradingData.TRADING_TYPE ]
@@ -4825,8 +4826,8 @@ class MainWindow( QMainWindow ):
                       str_cash_dividend,            #總獲得現金 / 每股現金股利
                       str_accumulated_cost,         #累計總成本
                       str_accumulated_inventory,    #庫存股數
-                      str_average_cost ]            #均價
-                    #   str_selling_profit ]          #單筆損益  
+                      str_average_cost,             #均價
+                      str_selling_profit ]          #單筆損益  
         return list_data
 
     def update_button_enable_disable_status( self ): 
