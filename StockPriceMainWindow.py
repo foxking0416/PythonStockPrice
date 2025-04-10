@@ -33,7 +33,7 @@ from PySide6.QtWidgets import QApplication, QMainWindow, QDialog, QButtonGroup, 
                               QLabel, QLineEdit, QTabBar, QWidget, QTableView, QComboBox, QPushButton, QSizePolicy, QSpacerItem, QCheckBox, \
                               QProgressBar, QTabWidget, QMenu
 from PySide6.QtGui import QStandardItemModel, QStandardItem, QBrush
-from PySide6.QtCore import Qt, QModelIndex, QSignalBlocker, QSize, QThread, QObject, Signal, QSettings, QPoint
+from PySide6.QtCore import Qt, QModelIndex, QSignalBlocker, QSize, QThread, QObject, Signal, QSettings, QPoint, QItemSelection, QItemSelectionModel
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import Alignment, PatternFill, Font, Border, Side
@@ -4603,8 +4603,13 @@ class MainWindow( QMainWindow ):
             # scrollbar = self.ui.qtTradingDataTableView.horizontalScrollBar()
             # column_x_position = self.ui.qtTradingDataTableView.columnViewportPosition( n_scroll_column - 1 )
             # scrollbar.setValue( column_x_position )
-            self.ui.qtTradingDataTableView.scrollTo(self.ui.qtTradingDataTableView.model().index( 0, n_scroll_column ) )
-            self.ui.qtTradingDataTableView.selectColumn( n_scroll_column )
+            self.ui.qtTradingDataTableView.scrollTo( self.ui.qtTradingDataTableView.model().index( 0, n_scroll_column ) )
+            selection_model = self.ui.qtTradingDataTableView.selectionModel()
+            selection_model.clearSelection()
+            index1 = self.per_stock_trading_data_model.index( 0, n_scroll_column )
+            selection = QItemSelection()
+            selection.select( index1, index1 )
+            selection_model.select( selection, QItemSelectionModel.Select )
             self.ui.qtTradingDataTableView.setFocus()
 
     def show_context_menu( self, position: QPoint ):
