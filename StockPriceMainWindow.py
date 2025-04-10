@@ -1373,8 +1373,6 @@ class Worker( QObject ):
     def update_progress( self, value ):
         self.progress.emit( value )  # Emit progress updates
 
-
-
 class MainWindow( QMainWindow ):
     def __init__( self, b_unit_test = False, 
                   str_initial_data_file = 'TradingData.json', 
@@ -3506,7 +3504,7 @@ class MainWindow( QMainWindow ):
                                                                                 e_capital_reduction_type,                           #減資種類     
                                                                                 item_trading_data[ "daying_trading" ] )             #是否為當沖交易
                         if item_trading_data[ "trading_date" ] == '0001-01-01':
-                            if self.compare_version_order( "v2.1.0", version ):
+                            if share_api.compare_version_order( "v2.1.0", version ):
                                 dict_per_trading_data[ TradingData.USE_AUTO_DIVIDEND_DATA ] = AutoDividendType( item_trading_data[ "use_auto_dividend_data" ] )
                             else:
                                 if item_trading_data[ "use_auto_dividend_data" ]:
@@ -3632,19 +3630,6 @@ class MainWindow( QMainWindow ):
         with open( file_path, 'w', encoding='utf-8' ) as f:
             f.write( "v2.1.0" '\n' )
             json.dump( export_list_all_account_all_stock_trading_data, f, ensure_ascii=False, indent=4 )
-    
-    def compare_version_order( self, str_version_base, str_version_check ): 
-        str_version_base = str_version_base.lstrip('v')
-        str_version_check = str_version_check.lstrip('v')
-        # 先將版本號字串轉為數字列表
-        version_base = [ int( i ) for i in str_version_base.split( '.' ) ]
-        version_check = [ int( i ) for i in str_version_check.split( '.' ) ]
-
-        # 比較兩個版本號的大小
-        if version_base <= version_check:
-            return True
-        else:
-            return False
 
     def save_share_UI_state( self ): 
         # 確保目錄存在，若不存在則遞歸創建
