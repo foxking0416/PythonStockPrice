@@ -3775,6 +3775,8 @@ class MainWindow( QMainWindow ):
         for index, item in enumerate( sorted_list ):
             item[ TradingData.SORTED_INDEX_NON_SAVE ] = index
             e_trading_type = item[ TradingData.TRADING_TYPE ]
+            str_trading_date = item[ TradingData.TRADING_DATE ]
+            obj_trading_date = datetime.datetime.strptime( str_trading_date, "%Y-%m-%d")
             
             if e_trading_type == TradingType.TEMPLATE:
                 list_calibration_data.append( item )
@@ -3796,13 +3798,12 @@ class MainWindow( QMainWindow ):
 
                 item[ TradingData.STOCK_DIVIDEND_GAIN_NON_SAVE ] = 0
                 item[ TradingData.CASH_DIVIDEND_GAIN_NON_SAVE ] = 0
-                str_buying_date = item[ TradingData.TRADING_DATE ]
-                if str_last_buying_date == str_buying_date:
+                if str_last_buying_date == str_trading_date:
                     if item[ TradingData.DAYING_TRADING ] == True:
                         n_last_buying_count += n_trading_count
                 else:
                     if item[ TradingData.DAYING_TRADING ] == True:
-                        str_last_buying_date = str_buying_date
+                        str_last_buying_date = str_trading_date
                         n_last_buying_count = n_trading_count
                 list_buying_data = [ n_per_trading_total_cost, n_trading_count ]
                 queue_buying_data.append( list_buying_data )
@@ -3843,17 +3844,15 @@ class MainWindow( QMainWindow ):
                 list_buying_data = [ n_trading_total_cost, n_trading_count ]
                 queue_buying_data.append( list_buying_data )
             elif e_trading_type == TradingType.SELL:
-                str_selling_date = item[ TradingData.TRADING_DATE ]
-                obj_selling_date = datetime.datetime.strptime( str_selling_date, "%Y-%m-%d")
                 f_trading_price = item[ TradingData.PER_SHARE_TRADING_PRICE ]
                 f_trading_fee_discount = item[ TradingData.TRADING_FEE_DISCOUNT ]
                 n_trading_count = item[ TradingData.TRADING_COUNT ]
 
                 n_day_trading_selling_count = 0 #當沖數量
                 n_general_selling_count = 0 #非當沖數量
-                if ( str_selling_date == str_last_buying_date and    #賣出與買入同一天
+                if ( str_trading_date == str_last_buying_date and    #賣出與買入同一天
                      item[ TradingData.DAYING_TRADING ] == True and  #有勾選是當沖交易
-                     obj_selling_date >= datetime.datetime.strptime( '2017-04-28', "%Y-%m-%d" ) ): #交易日期在2017-04-28之後。因為在這之後才通過當沖交易稅減半
+                     obj_trading_date >= datetime.datetime.strptime( '2017-04-28', "%Y-%m-%d" ) ): #交易日期在2017-04-28之後。因為在這之後才通過當沖交易稅減半
                     item[ TradingData.IS_REALLY_DAYING_TRADING_NON_SAVE ] = True
                     if n_trading_count <= n_last_buying_count: #賣出數量小於或等於買入數量，表示全部賣出數量都可視為當沖
                         dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, n_minimum_common_trading_fee, n_minimum_odd_trading_fee, b_etf, True, b_bond )
@@ -3991,7 +3990,6 @@ class MainWindow( QMainWindow ):
 
                 item[ TradingData.STOCK_DIVIDEND_GAIN_NON_SAVE ] = 0
                 item[ TradingData.CASH_DIVIDEND_GAIN_NON_SAVE ] = 0
-                str_buying_date = item[ TradingData.TRADING_DATE ]
                 list_buying_data = [ 0, n_trading_count ]
                 queue_buying_data.append( list_buying_data )
             elif e_trading_type == TradingType.DIVIDEND:
@@ -4023,10 +4021,10 @@ class MainWindow( QMainWindow ):
                 item[ TradingData.TRADING_COST_NON_SAVE ] = 0
 
                 item[ TradingData.STOCK_DIVIDEND_GAIN_NON_SAVE ] = n_stock_dividend_share_gain
-                if item[ TradingData.TRADING_DATE ] in dict_per_stock_dividend_position_date:
-                    item[ TradingData.STOCK_DIVIDEND_POSITION_DATE_NON_SAVE ] = dict_per_stock_dividend_position_date[ item[ TradingData.TRADING_DATE ] ]
+                if str_trading_date in dict_per_stock_dividend_position_date:
+                    item[ TradingData.STOCK_DIVIDEND_POSITION_DATE_NON_SAVE ] = dict_per_stock_dividend_position_date[ str_trading_date ]
                 else:
-                    item[ TradingData.STOCK_DIVIDEND_POSITION_DATE_NON_SAVE ] = item[ TradingData.TRADING_DATE ]
+                    item[ TradingData.STOCK_DIVIDEND_POSITION_DATE_NON_SAVE ] = str_trading_date
                 n_accumulated_inventory += n_stock_dividend_share_gain
                 
                 n_extra_insurance_fee_total = 0
@@ -4037,11 +4035,10 @@ class MainWindow( QMainWindow ):
                         if n_cash_dividend_gain + n_stock_dividend_value_gain > 20000:
                             n_extra_insurance_fee_for_cash_dividend = 0
                             n_extra_insurance_fee_for_stock_dividend = 0
-                            obj_dividend_date = datetime.datetime.strptime( item[ TradingData.TRADING_DATE ], "%Y-%m-%d")
-                            if obj_dividend_date.year >= 2013 and obj_dividend_date.year < 2021:
+                            if obj_trading_date.year >= 2013 and obj_trading_date.year < 2021:
                                 n_extra_insurance_fee_for_cash_dividend = int( math.ceil( Decimal( str( n_cash_dividend_gain ) ) * Decimal( str( '0.0191' ) ) ) )
                                 n_extra_insurance_fee_for_stock_dividend = int( math.ceil( Decimal( str( n_stock_dividend_value_gain ) ) * Decimal( str( '0.0191' ) ) ) )
-                            elif obj_dividend_date.year >= 2021:
+                            elif obj_trading_date.year >= 2021:
                                 n_extra_insurance_fee_for_cash_dividend = int( math.ceil( Decimal( str( n_cash_dividend_gain ) ) * Decimal( str( '0.0211' ) ) ) )
                                 n_extra_insurance_fee_for_stock_dividend = int( math.ceil( Decimal( str( n_stock_dividend_value_gain ) ) * Decimal( str( '0.0211' ) ) ) )
                             n_extra_insurance_fee_total = n_extra_insurance_fee_for_cash_dividend + n_extra_insurance_fee_for_stock_dividend
