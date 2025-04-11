@@ -4676,10 +4676,10 @@ class MainWindow( QMainWindow ):
 
     def get_trading_data_header( self ):
         if self.ui.qtUse1ShareUnitAction.isChecked():
-            return ['日期', '交易種類', '交易價格', '交易股數', '交易金額', '手續費 / 交易稅', '單筆總成本', '全部股票股利(股) /\n每股股票股利(元)', '全部現金股利(元) /\n每股現金股利(元)', '補充保費',
+            return ['日期', '交易種類', '交易價格', '交易股數', '交易金額', '手續費 / 交易稅', '應收付', '全部股票股利(股) /\n每股股票股利(元)', '全部現金股利(元) /\n每股現金股利(元)', '補充保費',
                     '累計總成本', '庫存股數', '平均成本', '單筆損益', '編輯', '刪除' ]
         else:
-            return ['日期', '交易種類', '交易價格', '交易張數', '交易金額', '手續費 / 交易稅', '單筆總成本', '全部股票股利(張) /\n每股股票股利(元)', '全部現金股利(元) /\n每股現金股利(元)', '補充保費',
+            return ['日期', '交易種類', '交易價格', '交易張數', '交易金額', '手續費 / 交易稅', '應收付', '全部股票股利(張) /\n每股股票股利(元)', '全部現金股利(元) /\n每股現金股利(元)', '補充保費',
                     '累計總成本', '庫存張數', '平均成本', '單筆損益', '編輯', '刪除' ]
 
     def get_per_trading_data_text_list( self, dict_per_trading_data ):
@@ -4758,28 +4758,30 @@ class MainWindow( QMainWindow ):
 
         str_selling_profit = "N/A"
         if e_trading_type == TradingType.BUY:
+            n_per_trading_total_cost = -n_per_trading_total_cost
+            str_per_trading_total_cost = format( n_per_trading_total_cost, "," )
             str_trading_type = "買進"
             str_trading_tax = "0"
             str_extra_insurance_fee = "N/A"
             str_stock_dividend = "N/A"
             str_cash_dividend = "N/A"
         elif e_trading_type == TradingType.REGULAR_BUY:
+            n_per_trading_total_cost = -n_per_trading_total_cost
+            str_per_trading_total_cost = format( n_per_trading_total_cost, "," )
             str_trading_type = "定期定額買進"
             str_trading_tax = "0"
             str_extra_insurance_fee = "N/A"
             str_stock_dividend = "N/A"
             str_cash_dividend = "N/A"
         elif e_trading_type == TradingType.SELL:
-            n_trading_value = -n_trading_value
-            str_trading_value = format( n_trading_value, "," )
-            str_per_trading_total_cost = format( n_per_trading_total_cost, "," )
-            n_per_trading_total_cost = -n_per_trading_total_cost
             str_trading_type = "賣出"
             str_extra_insurance_fee = "N/A"
             str_stock_dividend = "N/A"
             str_cash_dividend = "N/A"
             str_selling_profit = format( dict_per_trading_data[ TradingData.SELLING_PROFIT_NON_SAVE ], "," )
         elif e_trading_type == TradingType.CAPITAL_INCREASE:
+            n_per_trading_total_cost = -n_per_trading_total_cost
+            str_per_trading_total_cost = format( n_per_trading_total_cost, "," )
             str_trading_type = "增資"
             str_trading_fee = "0"
             str_trading_tax = "0"
@@ -4822,8 +4824,8 @@ class MainWindow( QMainWindow ):
                       str_trading_price,            #交易價格
                       str_trading_count,            #交易股數
                       str_trading_value,            #交易金額
-                      str_trading_fee + " / " + str_trading_tax,              #手續費 / 交易稅
-                      str_per_trading_total_cost,   #單筆總成本
+                      str_trading_fee + " / " + str_trading_tax, #手續費 / 交易稅
+                      str_per_trading_total_cost,   #應收付
                       str_stock_dividend,           #總獲得股數 / 每股股票股利
                       str_cash_dividend,            #總獲得現金 / 每股現金股利
                       str_extra_insurance_fee,      #補充保費
