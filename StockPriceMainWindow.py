@@ -175,6 +175,7 @@ class TradingData( Enum ):
     ALL_CASH_DIVIDEND_GAIN_NON_SAVE = auto() #不會記錄
     IS_REALLY_DAYING_TRADING_NON_SAVE = auto() #不會記錄
     SELLING_PROFIT_NON_SAVE = auto() #不會記錄 本次出售損益
+    CURRENT_AVERAGE_BUYING_COST_NON_SAVE = auto() #不會記錄 剩餘平均買進成本
     
 class TradingCost( Enum ):
     TRADING_VALUE = 0
@@ -1496,7 +1497,7 @@ class MainWindow( QMainWindow ):
             self.stock_pre_price_file_path = os.path.join( g_exe_dir, 'StockInventory', str_stock_pre_price_file )
             self.stock_dividend_position_date_file_path = os.path.join( g_exe_dir, 'StockInventory', str_stock_dividend_position_date_file )
 
-        self.list_stock_list_table_horizontal_header = [ '股票代碼', '總成本', '庫存股數', '平均成本', ' 收盤價', '現值', '總手續費', '總交易稅', '損益', '股利所得', '平均年化報酬率', '自動帶入股利', '匯出', '刪除' ]
+        self.list_stock_list_table_horizontal_header = [ '股票代碼及名稱', '歷史總成本', '庫存股數', '歷史平均成本', '當前成本', ' 收盤價', '現值', '總手續費', '總交易稅', '歷史總損益', '當前損益', '股利所得', '平均年化報酬率', '自動帶入股利', '匯出', '刪除' ]
         self.pick_up_stock( None )
         self.dict_all_account_ui_state = {}
         self.dict_all_account_general_data = {}
@@ -1593,7 +1594,7 @@ class MainWindow( QMainWindow ):
             self.list_previous_day_data = list_date_and_price[ 2 ]
             parsed_date = datetime.datetime.strptime(list_date_and_price[ 0 ], "%Y%m%d")  # 解析成日期對象
             str_formatted_date = parsed_date.strftime("%m/%d")  # 轉換為 MM/DD 格式
-            self.list_stock_list_table_horizontal_header[ 4 ] = str_formatted_date + ' 收盤價'
+            self.list_stock_list_table_horizontal_header[ 5 ] = str_formatted_date + ' 收盤價'
 
         self.dict_auto_stock_yearly_dividned = self.load_general_company_all_yearly_dividend_data( 2005, b_unit_test )
         self.dict_auto_stock_listed_etf_yearly_dividned = self.load_listed_etf_all_yearly_dividend_data( 2010, b_unit_test )
@@ -4099,6 +4100,18 @@ class MainWindow( QMainWindow ):
             item[ TradingData.AVERAGE_COST_WITHOUT_CONSIDERING_DIVIDEND_NON_SAVE ] = n_accumulated_cost_without_considering_dividend / n_accumulated_inventory if n_accumulated_inventory != 0 else 0
             item[ TradingData.ALL_STOCK_DIVIDEND_GAIN_NON_SAVE ] = n_accumulated_stock_dividend
             item[ TradingData.ALL_CASH_DIVIDEND_GAIN_NON_SAVE ] = n_accumulated_cash_dividend
+            if index == len( sorted_list ) - 1:
+                n_total_rest_buying_cost = 0
+                n_total_rest_buying_count = 0
+                for list_buying_data in queue_buying_data:
+                    n_total_rest_buying_cost += list_buying_data[ 0 ]
+                    n_total_rest_buying_count += list_buying_data[ 1 ]
+                if n_total_rest_buying_count != 0:
+                    item[ TradingData.CURRENT_AVERAGE_BUYING_COST_NON_SAVE ] = n_total_rest_buying_cost / n_total_rest_buying_count
+                else:
+                    item[ TradingData.CURRENT_AVERAGE_BUYING_COST_NON_SAVE ] = 0
+
+
             list_calibration_data.append( item )
 
         self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ][ str_stock_number ] = list_calibration_data.copy()
@@ -4163,6 +4176,10 @@ class MainWindow( QMainWindow ):
                     elif display_type_combobox.currentIndex() == 2:
                         if n_accumulated_inventory != 0:
                             continue
+
+                    n_current_average_cost = 0
+                    if TradingData.CURRENT_AVERAGE_BUYING_COST_NON_SAVE in dict_trading_data_last:
+                        n_current_average_cost = round( dict_trading_data_last[ TradingData.CURRENT_AVERAGE_BUYING_COST_NON_SAVE ], 2 )
 
                     if self.ui.qtUse1ShareUnitAction.isChecked():
                         str_accumulated_inventory = format( n_accumulated_inventory, "," )
@@ -4263,16 +4280,18 @@ class MainWindow( QMainWindow ):
                         str_stock_price_color = QBrush( '#FFFFFF' )
 
                     list_data = [ str_stock_number_and_name,              #股票名稱
-                                  format( n_accumulated_cost, "," ),      #總成本
+                                  format( n_accumulated_cost, "," ),      #歷史總成本
                                   str_accumulated_inventory,              #庫存股數
-                                  format( f_average_cost, "," ),          #平均成本
-                                  str_stock_price,                        #當前股價
+                                  format( f_average_cost, "," ),          #歷史平均成本
+                                  format( n_current_average_cost, "," ),  #當前成本    
+                                  str_stock_price,                        #收盤價
                                   str_net_value,                          #淨值
                                   format( n_total_trading_fee, ","),      #總手續費
                                   format( n_total_trading_tax, ","),      #總交易稅
-                                  str_profit,                             #損益
+                                  str_profit,                             #歷史總損益
+                                  '',                                     #當前損益
                                   format( n_accumulated_dividend_profit, ",") ] #股利所得
-                                    
+                                #    [ '股票代碼及名稱', '歷史總成本', '庫存股數', '歷史平均成本', '當前成本', ' 收盤價', '現值', '總手續費', '總交易稅', '歷史總損益', '當前損益', '股利所得', '平均年化報酬率', '自動帶入股利', '匯出', '刪除' ] 
                     for column, data in enumerate( list_data ):
                         standard_item = QStandardItem( data )
                         if column == 0:
