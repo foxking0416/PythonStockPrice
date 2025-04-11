@@ -1499,6 +1499,7 @@ class MainWindow( QMainWindow ):
 
         self.list_stock_list_table_horizontal_header = [ '股票代碼及名稱', '歷史總成本', '庫存股數', '歷史平均成本', '當前成本', ' 收盤價', '現值', '總手續費', '總交易稅', '歷史總損益', '當前損益', '股利所得', '平均年化報酬率', '自動帶入股利', '匯出', '刪除' ]
         self.pick_up_stock( None )
+        self.header_helpers = {}
         self.dict_all_account_ui_state = {}
         self.dict_all_account_general_data = {}
         self.dict_all_account_cash_transfer_data = {}
@@ -1839,6 +1840,7 @@ class MainWindow( QMainWindow ):
         uiqt_stock_list_table_view.verticalHeader().sectionMoved.connect( self.on_stock_list_table_vertical_header_section_moved )
         uiqt_stock_list_table_view.verticalHeader().sectionClicked.connect( self.on_stock_list_table_vertical_section_clicked )
         uiqt_stock_list_table_view.verticalHeader().setSectionResizeMode( QHeaderView.Fixed )
+        self.header_helpers[ str_tab_name ] = share_ui.InteractiveVerticalHeaderHelper( uiqt_stock_list_table_view )
         uiqt_stock_list_table_view.horizontalHeader().sectionResized.connect( self.on_stock_list_table_horizontal_section_resized )
         uiqt_stock_list_table_view.setSortingEnabled( True )
         uiqt_stock_list_table_view.setModel( stock_list_model )
