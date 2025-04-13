@@ -61,6 +61,11 @@ QPushButton:hover{ color:#c8c8c8; background-color:#707070; }
 QPushButton:pressed{ color:#000000;background-color:#c8c8c8; }
 QPushButton:disabled{ border:1px solid #3c3c3c; color:#464646; background-color:#282828;}
 
+QToolButton{ border:1px solid #f0f0f0; border-radius:3px; color:#c8c8c8; background-color:#383838; text-align:center; }
+QToolButton:hover{ color:#c8c8c8; background-color:#707070; }
+QToolButton:pressed{ color:#000000;background-color:#c8c8c8; }
+QToolButton:disabled{ border:1px solid #3c3c3c; color:#464646; background-color:#282828;}
+
 
 QSpinBox{ border:1px solid #f0f0f0; color:#ffffff; background-color:#707070; font-size:12px; font-family:Arial, Helvetica, sans-serif; }  
 QSpinBox:disabled{ border:1px solid #3c3c3c; color:#464646;}  
@@ -106,3 +111,41 @@ QMessageBox QPushButton { min-width: 100px; }
 
 QDateEdit{ border:1px solid #f0f0f0; color:#ffffff; background-color:#707070; font-size:12px; font-family:Arial, Helvetica, sans-serif; }  
 QDateEdit:disabled{ border:1px solid #3c3c3c; color:#464646;}  
+
+QListWidget {
+    border: 1px solid #c8c8c8;
+    color: white;
+    background-color: #2D2D2D;
+    show-decoration-selected: 1;
+    font-size: 12px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+QListWidget::item {
+    padding: 5px 10px;
+    border: 1px solid transparent;
+}
+
+/* QListWidget::item:selected { */
+    /* background-color: #707070; */
+    /* color: white; */
+    /* border: 1px solid #3399ff; */
+/* } */
+
+/* QListWidget::item:hover { */
+    /* background-color: #474747; */
+    /* color: white; */
+/* } */
+
+QListWidget::indicator:unchecked {
+    image: url(./resources/Elements/CheckOff.svg);
+}
+QListWidget::indicator:unchecked:hover {
+    image: url(./resources/Elements/CheckOff_hov.svg);
+}
+QListWidget::indicator:checked {
+    image: url(./resources/Elements/CheckOn_sel.svg);
+}
+QListWidget::indicator:checked:hover {
+    image: url(./resources/Elements/CheckOn_hov.svg);
+}

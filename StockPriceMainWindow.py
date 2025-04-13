@@ -29,9 +29,10 @@ from QtStockDividendTransferFeeEditDialog import Ui_Dialog as Ui_StockDividendTr
 from QtStockDividendTransferFeeEditSpinboxDialog import Ui_Dialog as Ui_StockDividendTransferFeeEditSpinboxDialog
 from QtStockMinimumTradingFeeEditDialog import Ui_Dialog as Ui_StockMinimumTradingFeeEditDialog
 from QtAboutDialog import Ui_Dialog as Ui_AboutDialog
+from QtShowItemEditDialog import Ui_Dialog as Ui_ShowItemEditDialog
 from PySide6.QtWidgets import QApplication, QMainWindow, QDialog, QButtonGroup, QMessageBox, QHeaderView, QVBoxLayout, QHBoxLayout, \
                               QLabel, QLineEdit, QTabBar, QWidget, QTableView, QComboBox, QPushButton, QSizePolicy, QSpacerItem, QCheckBox, \
-                              QProgressBar, QTabWidget, QMenu
+                              QProgressBar, QTabWidget, QMenu, QListView, QAbstractItemView, QListWidget, QListWidgetItem
 from PySide6.QtGui import QStandardItemModel, QStandardItem, QBrush
 from PySide6.QtCore import Qt, QModelIndex, QSignalBlocker, QSize, QThread, QObject, Signal, QSettings, QPoint, QItemSelection, QItemSelectionModel
 from openpyxl import Workbook
@@ -193,6 +194,35 @@ class TransferData( Enum ):
     TRANSFER_VALUE = 2
     SORTED_INDEX_NON_SAVE = 3 #不會記錄
     TOTAL_VALUE_NON_SAVE = 4 #不會記錄
+
+class StockInfoType( Enum ):
+    HISTORY_TOTAL_COST = 0 #歷史總成本
+    STOCK_INVENTORY = auto() #股票庫存
+    HISTORY_AVERAGE_COST = auto() #歷史平均成本
+    CURRENT_COST = auto() #目前成本
+    LATEST_STOCK_PRICE = auto() #最新股價
+    LATEST_NET_VALUE = auto() #最新淨值
+    HISTORY_TOTAL_TRADING_FEE = auto() #總手續費
+    HISTORY_TOTAL_TAX = auto() #總稅金
+    HISTORY_TOTAL_PROFIT = auto() #總損益
+    CURRENT_PROFIT = auto() #目前損益
+    DIVIDEND_INCOME = auto() #股利收入
+    XIRR_VALUE = auto() #XIRR值
+
+g_dict_stock_info = {
+    StockInfoType.HISTORY_TOTAL_COST: "歷史總成本",
+    StockInfoType.STOCK_INVENTORY: "股票庫存",
+    StockInfoType.HISTORY_AVERAGE_COST: "歷史平均成本",
+    StockInfoType.CURRENT_COST: "目前成本",
+    StockInfoType.LATEST_STOCK_PRICE: "最新股價",
+    StockInfoType.LATEST_NET_VALUE: "最新淨值",
+    StockInfoType.HISTORY_TOTAL_TRADING_FEE: "總手續費",
+    StockInfoType.HISTORY_TOTAL_TAX: "總稅金",
+    StockInfoType.HISTORY_TOTAL_PROFIT: "總損益",
+    StockInfoType.CURRENT_PROFIT: "目前損益",
+    StockInfoType.DIVIDEND_INCOME: "股利收入",
+    StockInfoType.XIRR_VALUE: "年化報酬率"
+}
 #endregion
 
 #region 各式Dialog
@@ -1247,8 +1277,173 @@ class AboutDialog( QDialog ):
         self.ui.setupUi( self )
         self.setWindowIcon( share_icon.get_icon( share_icon.IconType.WINDOW ) )
         self.ui.qtVersionLabel.setText( "v2.1.0" )
-#endregion
- 
+
+class ShowItemEditDialog( QDialog ):
+    def __init__( self, list_current_show_stock_info : list, list_default_show_stock_info : list, list_total_stock_info : list, parent = None ):
+        super().__init__( parent )
+
+        self.ui = Ui_ShowItemEditDialog()
+        self.ui.setupUi( self )
+        self.setWindowIcon( share_icon.get_icon( share_icon.IconType.WINDOW ) )
+
+        self.ui.qtHideSelectToolButton.clicked.connect( self.move_selected_to_hidden )
+        self.ui.qtShowSelectToolButton.clicked.connect( self.move_selected_to_visible )
+        self.ui.qtHideAllToolButton.clicked.connect( self.move_all_to_hidden )
+        self.ui.qtShowAllToolButton.clicked.connect( self.move_all_to_visible )
+
+        self.ui.qtShowListWidget.setSelectionMode(QListWidget.SingleSelection)
+        self.ui.qtShowListWidget.setDragDropMode(QListWidget.InternalMove)
+        self.ui.qtShowListWidget.setDefaultDropAction(Qt.MoveAction)
+        self.ui.qtShowListWidget.setDragEnabled(True)
+        self.ui.qtShowListWidget.setAcceptDrops(True)
+        self.ui.qtShowListWidget.setDropIndicatorShown(True)
+
+        self.ui.qtShowListWidget.itemChanged.connect(self.on_item_changed)
+        self.ui.qtHideListWidget.itemChanged.connect(self.on_item_changed)
+
+        for e_type in list_current_show_stock_info:
+            item = QListWidgetItem( f"{ g_dict_stock_info[ e_type ] }" )
+            item.setFlags( item.flags() | Qt.ItemIsUserCheckable )
+            item.setCheckState( Qt.Unchecked )
+            item.setData( Qt.UserRole, e_type )
+            self.ui.qtShowListWidget.addItem( item )
+
+        for e_type in list_total_stock_info:
+            if e_type in list_current_show_stock_info:
+                continue
+            item = QListWidgetItem( f"{ g_dict_stock_info[ e_type ] }" )
+            item.setFlags( item.flags() | Qt.ItemIsUserCheckable )
+            item.setCheckState( Qt.Unchecked )
+            item.setData( Qt.UserRole, e_type )
+            self.ui.qtHideListWidget.addItem( item )
+
+        self.list_total_stock_info = list_total_stock_info
+        self.list_default_show_stock_info = list_default_show_stock_info
+        self.ui.qtResetToDefaultPushButton.clicked.connect( self.reset_to_default )
+        self.ui.qtOkPushButton.clicked.connect( self.accept_data )
+        self.ui.qtCancelPushButton.clicked.connect( self.cancel )
+        self.list_final_show_stock_info = []
+
+        self.update_ui()
+
+    def move_selected_to_hidden( self ):
+        self.move_selected_items( self.ui.qtShowListWidget, self.ui.qtHideListWidget )
+
+    def move_selected_to_visible( self ):
+        self.move_selected_items( self.ui.qtHideListWidget, self.ui.qtShowListWidget )
+
+    def move_selected_items( self, source_widget: QListWidget, target_widget: QListWidget ):
+        items_to_move = []
+
+        # Step 1：從 source 收集被勾選的項目（順序保留）
+        for i in range( source_widget.count() ):
+            item = source_widget.item( i )
+            if item.checkState() == Qt.Checked:
+                items_to_move.append( ( i, item ) )
+
+        # Step 2：根據原始順序移除 → 加入 target
+        for index, _ in reversed( items_to_move ):  # 倒著刪除
+            source_widget.takeItem( index )
+
+        for _, item in items_to_move:  # 順著加回去
+            item.setCheckState( Qt.Unchecked )
+            target_widget.addItem( item )
+
+        self.update_ui()
+
+    def move_all_to_hidden( self ):
+        self.move_all_items( self.ui.qtShowListWidget, self.ui.qtHideListWidget )
+
+    def move_all_to_visible( self ):
+        self.move_all_items( self.ui.qtHideListWidget, self.ui.qtShowListWidget )
+
+    def move_all_items( self, source_widget: QListWidget, target_widget: QListWidget ):
+        items_to_move = []
+
+        # Step 1: 依照原順序收集 item
+        for i in range( source_widget.count() ):
+            item = source_widget.item( i )
+            items_to_move.append( ( i, item ) )
+
+        # Step 2: 倒著刪除（不破壞 index）
+        for index, _ in reversed( items_to_move ):
+            source_widget.takeItem( index )
+
+        # Step 3: 順著加入目標
+        for _, item in items_to_move:
+            item.setCheckState( Qt.Unchecked )
+            target_widget.addItem( item )
+
+        self.update_ui()
+
+    def on_item_changed( self, item: QListWidgetItem ):
+        self.update_ui()
+
+    def update_ui( self ):
+        b_item_selected_in_show_list = False
+        b_item_selected_in_hide_list = False
+        for i in range( self.ui.qtShowListWidget.count() ):
+            item = self.ui.qtShowListWidget.item(i)
+            if item.checkState() == Qt.Checked:
+                b_item_selected_in_show_list = True
+                break
+        for i in range( self.ui.qtHideListWidget.count() ):
+            item = self.ui.qtHideListWidget.item(i)
+            if item.checkState() == Qt.Checked:
+                b_item_selected_in_hide_list = True
+                break
+
+        if b_item_selected_in_show_list:
+            self.ui.qtHideSelectToolButton.setEnabled( True )
+        else:
+            self.ui.qtHideSelectToolButton.setEnabled( False )
+        if b_item_selected_in_hide_list:
+            self.ui.qtShowSelectToolButton.setEnabled( True )
+        else:
+            self.ui.qtShowSelectToolButton.setEnabled( False )
+
+        if self.ui.qtHideListWidget.count() == 0:
+            self.ui.qtShowAllToolButton.setEnabled( False )
+        else:
+            self.ui.qtShowAllToolButton.setEnabled( True )
+        if self.ui.qtShowListWidget.count() == 0:
+            self.ui.qtHideAllToolButton.setEnabled( False )
+        else:
+            self.ui.qtHideAllToolButton.setEnabled( True )
+
+    def reset_to_default( self ):
+        self.ui.qtShowListWidget.clear()
+        self.ui.qtHideListWidget.clear()
+
+        for e_type in self.list_default_show_stock_info:
+            item = QListWidgetItem( f"{ g_dict_stock_info[ e_type ] }" )
+            item.setFlags( item.flags() | Qt.ItemIsUserCheckable )
+            item.setCheckState( Qt.Unchecked )
+            item.setData( Qt.UserRole, e_type )
+            self.ui.qtShowListWidget.addItem( item )
+
+        for e_type in self.list_total_stock_info:
+            if e_type in self.list_default_show_stock_info:
+                continue
+            item = QListWidgetItem( f"{ g_dict_stock_info[ e_type ] }" )
+            item.setFlags( item.flags() | Qt.ItemIsUserCheckable )
+            item.setCheckState( Qt.Unchecked )
+            item.setData( Qt.UserRole, e_type )
+            self.ui.qtHideListWidget.addItem( item )
+
+        self.update_ui()
+
+    def accept_data( self ):
+        for i in range( self.ui.qtShowListWidget.count() ):
+            item = self.ui.qtShowListWidget.item( i )
+            e_type = item.data( Qt.UserRole )
+            self.list_final_show_stock_info.append( e_type )
+
+        self.accept()
+    
+    def cancel( self ):
+        self.reject()
+
 class Utility():
     @staticmethod
     def compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, n_minimum_common_trading_fee, n_minimum_odd_trading_fee, b_etf, b_daying_trading, b_bond ):
@@ -1473,6 +1668,8 @@ class MainWindow( QMainWindow ):
         self.ui.qtADYearAction.triggered.connect( self.on_trigger_AD_year )
         self.ui.qtROCYearAction.triggered.connect( self.on_trigger_ROC_year )
 
+        self.ui.qtEditShowItemAction.triggered.connect( self.on_trigger_edit_show_item )
+
         self.ui.qtCostWithInDividendAction.setChecked( True )
         self.ui.qtCostWithOutDividendAction.setChecked( False )
         self.ui.qtCostWithInDividendAction.triggered.connect( self.on_trigger_cost_with_in_dividend )
@@ -1505,6 +1702,20 @@ class MainWindow( QMainWindow ):
         self.dict_all_account_cash_transfer_data = {}
         self.dict_all_account_all_stock_trading_data = {}
         self.dict_all_account_all_stock_trading_data_INITIAL = {}
+        self.list_total_stock_info_INITIAL = [ StockInfoType.HISTORY_TOTAL_COST, 
+                                               StockInfoType.STOCK_INVENTORY, 
+                                               StockInfoType.HISTORY_AVERAGE_COST, 
+                                               StockInfoType.CURRENT_COST, 
+                                               StockInfoType.LATEST_STOCK_PRICE, 
+                                               StockInfoType.LATEST_NET_VALUE, 
+                                               StockInfoType.HISTORY_TOTAL_TRADING_FEE, 
+                                               StockInfoType.HISTORY_TOTAL_TAX, 
+                                               StockInfoType.HISTORY_TOTAL_PROFIT, 
+                                               StockInfoType.CURRENT_PROFIT, 
+                                               StockInfoType.DIVIDEND_INCOME, 
+                                               StockInfoType.XIRR_VALUE ]
+
+        self.list_show_stock_info = []
         self.list_stock_list_column_width = [ 85 ] * len( self.list_stock_list_table_horizontal_header )
         self.list_stock_list_column_width[ len( self.list_stock_list_table_horizontal_header ) - 2 ] = 40
         self.list_stock_list_column_width[ len( self.list_stock_list_table_horizontal_header ) - 1 ] = 40
@@ -2415,6 +2626,13 @@ class MainWindow( QMainWindow ):
                 self.ui.qtADYearAction.setChecked( False )
                 self.ui.qtROCYearAction.setChecked( True )
                 self.on_change_display_mode()
+
+    def on_trigger_edit_show_item( self ):
+        dialog = ShowItemEditDialog( self.list_show_stock_info, self.list_total_stock_info_INITIAL, self.list_total_stock_info_INITIAL, self )
+
+        if dialog.exec():
+            self.list_show_stock_info = dialog.list_final_show_stock_info
+            self.save_share_UI_state()
 
     def on_trigger_cost_with_in_dividend( self ):
         with ( QSignalBlocker( self.ui.qtCostWithInDividendAction ),
@@ -3649,6 +3867,10 @@ class MainWindow( QMainWindow ):
             for i in range( len( self.list_stock_list_column_width ) ):
                 f.write( f",{ self.list_stock_list_column_width[ i ] }" )
             f.write( "\n" )
+            f.write( "顯示欄位" )
+            for i in range( len( self.list_show_stock_info ) ):
+                f.write( f",{ self.list_show_stock_info[ i ].value }" )
+            f.write( "\n" )
 
     def load_share_UI_state( self ): 
         with ( QSignalBlocker( self.ui.qtFromNewToOldAction ),
@@ -3669,7 +3891,7 @@ class MainWindow( QMainWindow ):
                     for i, row in enumerate( data ):
                         row = row.strip().split( ',' )
                         if row[0] == "版本":
-                            continue
+                            str_version = row[ 1 ]
                         elif row[0] == "顯示排序":
                             if row[ 1 ] == 'True':
                                 self.ui.qtFromNewToOldAction.setChecked( True )
@@ -3709,6 +3931,15 @@ class MainWindow( QMainWindow ):
                             self.list_stock_list_column_width = []
                             for i in range( 1, len( row ) ):
                                 self.list_stock_list_column_width.append( int( row[ i ] ) )
+                        elif row[0] == '顯示欄位':
+                            self.list_show_stock_info = []
+                            if share_api.compare_version_order( "v2.1.0", str_version ):
+                            # if str_version
+                                for i in range( 1, len( row ) ):
+                                    self.list_show_stock_info.append( StockInfoType( row[ i ] ) )
+                            else:
+                                for e_type in StockInfoType:
+                                    self.list_show_stock_info.append( e_type )
 
     def save_stock_dividend_position_date( self ):
         with open( self.stock_dividend_position_date_file_path, 'w', encoding='utf-8' ) as f:
@@ -6023,6 +6254,7 @@ if __name__ == "__main__":
 # pyside6-uic QtStockMinimumTradingFeeEditDialog.ui -o QtStockMinimumTradingFeeEditDialog.py
 # pyside6-uic QtAboutDialog.ui -o QtAboutDialog.py
 # pyside6-uic QtStockDividendPositionDateEditDialog.ui -o QtStockDividendPositionDateEditDialog.py
+# pyside6-uic QtShowItemEditDialog.ui -o QtShowItemEditDialog.py
 
 
 # 下載上市櫃公司股利資料

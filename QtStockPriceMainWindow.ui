@@ -228,6 +228,7 @@
     <addaction name="separator"/>
     <addaction name="qtADYearAction"/>
     <addaction name="qtROCYearAction"/>
+    <addaction name="qtEditShowItemAction"/>
    </widget>
    <widget class="QMenu" name="menu_3">
     <property name="title">
@@ -395,6 +396,11 @@
   <action name="qtSetTemporaryFilePathAction">
    <property name="text">
     <string>設定暫存檔位置</string>
+   </property>
+  </action>
+  <action name="qtEditShowItemAction">
+   <property name="text">
+    <string>3</string>
    </property>
   </action>
  </widget>
