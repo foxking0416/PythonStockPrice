@@ -211,17 +211,17 @@ class StockInfoType( Enum ):
 
 g_dict_stock_info = {
     StockInfoType.HISTORY_TOTAL_COST: "歷史總成本",
-    StockInfoType.STOCK_INVENTORY: "股票庫存",
+    StockInfoType.STOCK_INVENTORY: "庫存股數",
     StockInfoType.HISTORY_AVERAGE_COST: "歷史平均成本",
-    StockInfoType.CURRENT_COST: "目前成本",
-    StockInfoType.LATEST_STOCK_PRICE: "最新股價",
-    StockInfoType.LATEST_NET_VALUE: "最新淨值",
+    StockInfoType.CURRENT_COST: "當前成本",
+    StockInfoType.LATEST_STOCK_PRICE: "收盤價",
+    StockInfoType.LATEST_NET_VALUE: "現值",
     StockInfoType.HISTORY_TOTAL_TRADING_FEE: "總手續費",
-    StockInfoType.HISTORY_TOTAL_TAX: "總稅金",
-    StockInfoType.HISTORY_TOTAL_PROFIT: "總損益",
-    StockInfoType.CURRENT_PROFIT: "目前損益",
-    StockInfoType.DIVIDEND_INCOME: "股利收入",
-    StockInfoType.XIRR_VALUE: "年化報酬率"
+    StockInfoType.HISTORY_TOTAL_TAX: "總交易稅",
+    StockInfoType.HISTORY_TOTAL_PROFIT: "歷史總損益",
+    StockInfoType.CURRENT_PROFIT: "當前損益",
+    StockInfoType.DIVIDEND_INCOME: "股利所得",
+    StockInfoType.XIRR_VALUE: "平均年化報酬率"
 }
 #endregion
 
@@ -1801,12 +1801,14 @@ class MainWindow( QMainWindow ):
         self.dict_all_suspend_company_number_to_name_and_type = self.load_all_suspend_company_stock_number()
         self.dict_all_company_number_to_name_and_type.update( self.dict_all_suspend_company_number_to_name_and_type )
         list_date_and_price = self.load_day_stock_price()
+        self.str_latest_price_column_header = '收盤價'
         if len( list_date_and_price[ 1 ] ) != 0:
             self.dict_all_company_number_to_price_info = list_date_and_price[ 1 ]
             self.list_previous_day_data = list_date_and_price[ 2 ]
             parsed_date = datetime.datetime.strptime(list_date_and_price[ 0 ], "%Y%m%d")  # 解析成日期對象
             str_formatted_date = parsed_date.strftime("%m/%d")  # 轉換為 MM/DD 格式
-            self.list_stock_list_table_horizontal_header[ 5 ] = str_formatted_date + ' 收盤價'
+            self.str_latest_price_column_header = str_formatted_date + ' 收盤價'
+            # self.list_stock_list_table_horizontal_header[ 5 ] = str_formatted_date + ' 收盤價'
 
         self.dict_auto_stock_yearly_dividned = self.load_general_company_all_yearly_dividend_data( 2005, b_unit_test )
         self.dict_auto_stock_listed_etf_yearly_dividned = self.load_listed_etf_all_yearly_dividend_data( 2010, b_unit_test )
@@ -3493,6 +3495,7 @@ class MainWindow( QMainWindow ):
                 self.dict_all_account_general_data[ str_tab_name ] = { "minimum_common_trading_fee": 20, "minimum_odd_trading_fee": 1, "dividend_transfer_fee":{} }
             self.dict_all_account_all_stock_trading_data_INITIAL = self.dict_all_account_all_stock_trading_data.copy()
             self.ui.qtTabWidget.setCurrentIndex( 0 )
+            self.list_stock_list_table_horizontal_header = self.get_stock_list_horizontal_header()
             self.process_all_trading_data()
             self.refresh_stock_list_table()
             self.process_all_transfer_data()
@@ -4387,10 +4390,6 @@ class MainWindow( QMainWindow ):
             if clear_table:
                 table_model.clear()
 
-            if self.ui.qtUse1ShareUnitAction.isChecked():
-                self.list_stock_list_table_horizontal_header[ 2 ] = "庫存股數"
-            else:
-                self.list_stock_list_table_horizontal_header[ 2 ] = "庫存張數"
             table_model.setHorizontalHeaderLabels( self.list_stock_list_table_horizontal_header )
             
             with QSignalBlocker( table_view.horizontalHeader() ):
@@ -4512,32 +4511,49 @@ class MainWindow( QMainWindow ):
                         str_color = QBrush( '#FFFFFF' )
                         str_stock_price_color = QBrush( '#FFFFFF' )
 
-                    list_data = [ str_stock_number_and_name,              #股票名稱
-                                  format( n_accumulated_cost, "," ),      #歷史總成本
-                                  str_accumulated_inventory,              #庫存股數
-                                  format( f_average_cost, "," ),          #歷史平均成本
-                                  format( n_current_average_cost, "," ),  #當前成本    
-                                  str_stock_price,                        #收盤價
-                                  str_net_value,                          #淨值
-                                  format( n_total_trading_fee, ","),      #總手續費
-                                  format( n_total_trading_tax, ","),      #總交易稅
-                                  str_profit,                             #歷史總損益
-                                  '',                                     #當前損益
-                                  format( n_accumulated_dividend_profit, ",") ] #股利所得
-                                #    [ '股票代碼及名稱', '歷史總成本', '庫存股數', '歷史平均成本', '當前成本', ' 收盤價', '現值', '總手續費', '總交易稅', '歷史總損益', '當前損益', '股利所得', '平均年化報酬率', '自動帶入股利', '匯出', '刪除' ] 
-                    for column, data in enumerate( list_data ):
-                        standard_item = QStandardItem( data )
-                        if column == 0:
-                            standard_item.setTextAlignment( Qt.AlignLeft | Qt.AlignVCenter )
-                        else:
-                            standard_item.setTextAlignment( Qt.AlignHCenter | Qt.AlignVCenter )
+
+                    standard_item = QStandardItem( str_stock_number_and_name )
+                    standard_item.setTextAlignment( Qt.AlignLeft | Qt.AlignVCenter )
+                    standard_item.setFlags( standard_item.flags() & ~Qt.ItemIsEditable )
+                    standard_item.setData( key_stock_number, Qt.UserRole )
+                    table_model.setItem( index_row, 0, standard_item ) 
+
+                    for column, e_type in enumerate( self.list_show_stock_info ):
+                        str_data = ""
+                        if e_type == StockInfoType.HISTORY_TOTAL_COST:#歷史總成本
+                            str_data = format( n_accumulated_cost, "," )
+                        elif e_type == StockInfoType.STOCK_INVENTORY:#股票庫存
+                            str_data = str_accumulated_inventory
+                        elif e_type == StockInfoType.HISTORY_AVERAGE_COST:#歷史平均成本
+                            str_data = format( f_average_cost, "," )
+                        elif e_type == StockInfoType.CURRENT_COST:#目前成本
+                            str_data =  format( n_current_average_cost, "," )
+                        elif e_type == StockInfoType.LATEST_STOCK_PRICE:#最新股價
+                            str_data = str_stock_price
+                        elif e_type == StockInfoType.LATEST_NET_VALUE:#最新淨值
+                            str_data = str_net_value
+                        elif e_type == StockInfoType.HISTORY_TOTAL_TRADING_FEE:#總手續費
+                            str_data = format( n_total_trading_fee, "," )
+                        elif e_type == StockInfoType.HISTORY_TOTAL_TAX:#總稅金
+                            str_data = format( n_total_trading_tax, "," )
+                        elif e_type == StockInfoType.HISTORY_TOTAL_PROFIT:#總損益
+                            str_data = str_profit
+                        elif e_type == StockInfoType.CURRENT_PROFIT:#目前損益
+                            str_data = ""
+                        elif e_type == StockInfoType.DIVIDEND_INCOME:#股利收入
+                            str_data = format( n_accumulated_dividend_profit, "," )
+                        elif e_type == StockInfoType.XIRR_VALUE:#XIRR值
+                            str_data = ""
+
+                        standard_item = QStandardItem( str_data )
+                        standard_item.setTextAlignment( Qt.AlignHCenter | Qt.AlignVCenter )
                         standard_item.setFlags( standard_item.flags() & ~Qt.ItemIsEditable )
                         standard_item.setData( key_stock_number, Qt.UserRole )
-                        if column == len( list_data ) - 2:
+                        if e_type == StockInfoType.HISTORY_TOTAL_PROFIT:
                             standard_item.setForeground( QBrush( str_color ) )
-                        if column == len( list_data ) - 6:
+                        if e_type == StockInfoType.LATEST_STOCK_PRICE:
                             standard_item.setForeground( QBrush( str_stock_price_color ) )
-                        table_model.setItem( index_row, column, standard_item ) 
+                        table_model.setItem( index_row, column + 1, standard_item ) 
 
                     use_auto_dividend_item = QStandardItem()
                     if dict_trading_data_first[ TradingData.USE_AUTO_DIVIDEND_DATA ] == AutoDividendType.AUTO:
@@ -4682,7 +4698,25 @@ class MainWindow( QMainWindow ):
                 xirr_value_label.setText( f"{xirr_result:.3%}" )
             except ValueError as e:
                 pass
-    
+
+    def get_stock_list_horizontal_header( self ):
+        list_header = []
+        list_header.append( '股票代碼及名稱' )
+        for e_type in self.list_show_stock_info:
+            if e_type == StockInfoType.STOCK_INVENTORY:
+                if self.ui.qtUse1ShareUnitAction.isChecked():
+                    list_header.append( "庫存股數" )
+                else:
+                    list_header.append( "庫存張數" )
+            elif e_type == StockInfoType.LATEST_STOCK_PRICE:
+                list_header.append( self.str_latest_price_column_header )
+            else:
+                list_header.append( g_dict_stock_info[ e_type ] )
+
+        list_header.append( '自動帶入股利' )
+        list_header.append( '匯出' )
+        list_header.append( '刪除' )
+
     def refresh_transfer_data_table( self ):
         str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
         list_per_account_all_cash_transfer_data = self.dict_all_account_cash_transfer_data[ str_tab_widget_name ]
