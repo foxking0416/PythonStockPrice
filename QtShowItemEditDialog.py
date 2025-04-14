@@ -108,6 +108,7 @@ class Ui_Dialog(object):
         self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
         self.label_3 = QLabel(Dialog)
         self.label_3.setObjectName(u"label_3")
+        self.label_3.setStyleSheet(u"color: rgb(255, 255, 0);")
 
         self.horizontalLayout_5.addWidget(self.label_3)
 
@@ -168,7 +169,7 @@ class Ui_Dialog(object):
         self.qtShowAllToolButton.setText(QCoreApplication.translate("Dialog", u"<<", None))
         self.label_2.setText(QCoreApplication.translate("Dialog", u"\u96b1\u85cf\u9805\u76ee", None))
         self.label_3.setText(QCoreApplication.translate("Dialog", u"\u4e0a\u4e0b\u62d6\u79fb\u986f\u793a\u9805\u76ee\u7269\u4ef6\u6539\u8b8a\u986f\u793a\u9806\u5e8f", None))
-        self.qtResetToDefaultPushButton.setText(QCoreApplication.translate("Dialog", u" \u56de\u5230\u9810\u8a2d\u503c ", None))
+        self.qtResetToDefaultPushButton.setText(QCoreApplication.translate("Dialog", u"  \u56de\u5230\u9810\u8a2d\u503c  ", None))
         self.qtOkPushButton.setText(QCoreApplication.translate("Dialog", u"\u78ba\u8a8d", None))
         self.qtCancelPushButton.setText(QCoreApplication.translate("Dialog", u"\u53d6\u6d88", None))
     # retranslateUi

@@ -228,6 +228,7 @@
     <addaction name="separator"/>
     <addaction name="qtADYearAction"/>
     <addaction name="qtROCYearAction"/>
+    <addaction name="separator"/>
     <addaction name="qtEditShowItemAction"/>
    </widget>
    <widget class="QMenu" name="menu_3">
@@ -400,7 +401,7 @@
   </action>
   <action name="qtEditShowItemAction">
    <property name="text">
-    <string>3</string>
+    <string>編輯顯示欄位及順序</string>
    </property>
   </action>
  </widget>
