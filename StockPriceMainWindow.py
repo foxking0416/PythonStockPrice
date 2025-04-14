@@ -1730,7 +1730,8 @@ class MainWindow( QMainWindow ):
                                                ]
 
         self.list_show_stock_info = copy.deepcopy( self.list_total_stock_info_INITIAL )
-        self.list_stock_list_column_width = [ 85 ] * ( len( list( StockInfoType ) ) + 2 )# +2 是給第一欄股票代碼及倒數第3欄的自動股利欄位
+        self.list_stock_list_column_width = [ 85 ] * ( len( list( StockInfoType ) ) + 1 )# +1 是給倒數第3欄的自動股利欄位
+        self.list_stock_list_column_width.insert( 0, 140 ) #股票代碼
         self.list_stock_list_column_width.append( 40 ) #匯出欄位
         self.list_stock_list_column_width.append( 40 ) #刪除欄位
         self.n_current_tab = 0
