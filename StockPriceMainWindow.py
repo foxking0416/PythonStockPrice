@@ -205,9 +205,13 @@ class StockInfoType( Enum ):
     HISTORY_TOTAL_TRADING_FEE = 7 #總手續費
     HISTORY_TOTAL_TAX = 8 #總稅金
     HISTORY_TOTAL_PROFIT = 9 #總損益
-    CURRENT_PROFIT = 10 #目前損益
+    CURRENT_PROFIT = 10 #未實現損益
     DIVIDEND_INCOME = 11 #股利收入
     XIRR_VALUE = 12 #XIRR值
+    REALIZED_PROFIT = 13 #已實現損益
+    HOLDING_STOCK_NET_RATIO = 14 #持股淨值比
+    CURRENT_PROFIT_RATIO = 15 #未實現損益報酬率
+    BALANCE_PRICE = 16 #損益平衡價格
 
 g_dict_stock_info = {
     StockInfoType.HISTORY_TOTAL_COST: "歷史總成本",
@@ -219,9 +223,13 @@ g_dict_stock_info = {
     StockInfoType.HISTORY_TOTAL_TRADING_FEE: "總手續費",
     StockInfoType.HISTORY_TOTAL_TAX: "總交易稅",
     StockInfoType.HISTORY_TOTAL_PROFIT: "歷史總損益",
-    StockInfoType.CURRENT_PROFIT: "當前損益",
+    StockInfoType.CURRENT_PROFIT: "未實現損益",
     StockInfoType.DIVIDEND_INCOME: "股利所得",
-    StockInfoType.XIRR_VALUE: "平均年化報酬率"
+    StockInfoType.XIRR_VALUE: "平均年化報酬率",
+    StockInfoType.REALIZED_PROFIT: "已實現損益",
+    StockInfoType.HOLDING_STOCK_NET_RATIO: "持股淨值比",
+    StockInfoType.CURRENT_PROFIT_RATIO: "未實現報酬率",
+    StockInfoType.BALANCE_PRICE: "損益平衡點"
 }
 #endregion
 
@@ -1703,18 +1711,22 @@ class MainWindow( QMainWindow ):
         self.dict_all_account_all_stock_trading_data = {}
         self.dict_all_account_all_stock_trading_data_INITIAL = {}
         self.list_total_stock_info_INITIAL = [ 
-                                               StockInfoType.LATEST_STOCK_PRICE, 
-                                               StockInfoType.STOCK_INVENTORY, 
-                                               StockInfoType.LATEST_NET_VALUE, 
-                                               StockInfoType.HISTORY_TOTAL_COST, 
-                                               StockInfoType.HISTORY_AVERAGE_COST, 
-                                               StockInfoType.CURRENT_COST, 
-                                               StockInfoType.HISTORY_TOTAL_TRADING_FEE, 
-                                               StockInfoType.HISTORY_TOTAL_TAX, 
-                                               StockInfoType.HISTORY_TOTAL_PROFIT, 
-                                               StockInfoType.CURRENT_PROFIT, 
-                                               StockInfoType.DIVIDEND_INCOME, 
-                                               StockInfoType.XIRR_VALUE 
+                                               StockInfoType.LATEST_STOCK_PRICE, #收盤價
+                                               StockInfoType.STOCK_INVENTORY, #庫存股數
+                                               StockInfoType.LATEST_NET_VALUE, #現值
+                                               StockInfoType.HISTORY_TOTAL_COST, #歷史總成本
+                                               StockInfoType.HISTORY_AVERAGE_COST, #歷史平均成本
+                                               StockInfoType.CURRENT_COST, #當前成本
+                                               StockInfoType.HISTORY_TOTAL_TRADING_FEE, #總手續費
+                                               StockInfoType.HISTORY_TOTAL_TAX, #總交易稅
+                                               StockInfoType.HISTORY_TOTAL_PROFIT, #歷史總損益
+                                               StockInfoType.REALIZED_PROFIT, #已實現損益
+                                               StockInfoType.CURRENT_PROFIT, #未實現損益
+                                               StockInfoType.CURRENT_PROFIT_RATIO, #未實現損益報酬率
+                                               StockInfoType.BALANCE_PRICE, #損益平衡價
+                                               StockInfoType.DIVIDEND_INCOME, #股利所得
+                                               StockInfoType.XIRR_VALUE, #平均年化報酬率
+                                               StockInfoType.HOLDING_STOCK_NET_RATIO, #持股淨值比
                                                ]
 
         self.list_show_stock_info = copy.deepcopy( self.list_total_stock_info_INITIAL )
@@ -4511,7 +4523,6 @@ class MainWindow( QMainWindow ):
 
                     n_per_stock_accumulated_dividend_profit = 0
                     if key_stock_number in self.dict_all_company_number_to_price_info:
-
                         f_stock_price = float( self.dict_all_company_number_to_price_info[ key_stock_number ] )
                         if key_stock_number in self.list_previous_day_data:
                             str_stock_price_color = QBrush( '#777777' )
@@ -4536,6 +4547,11 @@ class MainWindow( QMainWindow ):
 
                         n_current_profit = n_net_value - n_trading_fee - n_trading_tax - n_current_buying_cost
                         str_current_profit = format( n_current_profit, "," )
+                        f_current_profit_ratio = 0
+                        if n_net_value != 0:
+                            f_current_profit_ratio = ( n_current_profit / n_current_buying_cost ) * 100
+                        str_current_profit_ratio = format( f_current_profit_ratio, ".2f" ) + "%"
+
                         n_accumulated_profit = n_net_value - n_trading_fee - n_trading_tax - n_per_stock_accumulated_cost
                         n_all_stock_total_profit += n_accumulated_profit
                         n_all_stock_total_inventory += n_net_value
@@ -4560,6 +4576,7 @@ class MainWindow( QMainWindow ):
                         str_current_profit = "N/A"
                         str_stock_price_color = QBrush( '#FFFFFF' )
                         str_profit_ratio = "-"
+                        str_current_profit_ratio = "-"
 
                     standard_item = QStandardItem( str_stock_number_and_name )
                     standard_item.setTextAlignment( Qt.AlignLeft | Qt.AlignVCenter )
@@ -4590,7 +4607,7 @@ class MainWindow( QMainWindow ):
                         elif e_type == StockInfoType.HISTORY_TOTAL_PROFIT:#總損益
                             str_data = str_accumulated_profit
                             qtColor = self.get_up_down_color( "0", str_accumulated_profit )
-                        elif e_type == StockInfoType.CURRENT_PROFIT:#目前損益
+                        elif e_type == StockInfoType.CURRENT_PROFIT:#未實現損益
                             str_data = str_current_profit
                             qtColor = self.get_up_down_color( "0", str_current_profit )
                         elif e_type == StockInfoType.DIVIDEND_INCOME:#股利收入
@@ -4598,6 +4615,10 @@ class MainWindow( QMainWindow ):
                         elif e_type == StockInfoType.XIRR_VALUE:#XIRR值
                             str_data = str_profit_ratio
                             qtColor = self.get_up_down_color( "0", str_profit_ratio )
+                        elif e_type == StockInfoType.CURRENT_PROFIT_RATIO:#未實現報酬率
+                            str_data = str_current_profit_ratio
+                            qtColor = self.get_up_down_color( "0", str_current_profit_ratio )
+
 
                         standard_item = QStandardItem( str_data )
                         standard_item.setTextAlignment( Qt.AlignHCenter | Qt.AlignVCenter )
