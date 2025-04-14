@@ -176,7 +176,7 @@ class TradingData( Enum ):
     ALL_CASH_DIVIDEND_GAIN_NON_SAVE = auto() #不會記錄
     IS_REALLY_DAYING_TRADING_NON_SAVE = auto() #不會記錄
     SELLING_PROFIT_NON_SAVE = auto() #不會記錄 本次出售損益
-    CURRENT_AVERAGE_BUYING_COST_NON_SAVE = auto() #不會記錄 剩餘平均買進成本
+    CURRENT_BUYING_COST_NON_SAVE = auto() #不會記錄 剩餘平均買進成本
     
 class TradingCost( Enum ):
     TRADING_VALUE = 0
@@ -4332,6 +4332,15 @@ class MainWindow( QMainWindow ):
                     n_accumulated_cost_without_considering_dividend = n_accumulated_cost_without_considering_dividend - int( Decimal( str( n_accumulated_inventory ) ) * Decimal( str( item[ TradingData.CAPITAL_REDUCTION_PER_SHARE ] ) ) )
                     
                 n_accumulated_inventory = int( Decimal( str( n_accumulated_inventory ) ) * ( Decimal( str( '10' ) ) - Decimal( str( item[ TradingData.CAPITAL_REDUCTION_PER_SHARE ] ) ) ) / Decimal( str( '10' ) ) )
+                n_total_rest_buying_count = 0
+                for list_buying_data in queue_buying_data:
+                    list_buying_data[ 1 ]= int( Decimal( str( list_buying_data[ 1 ] ) ) * ( Decimal( str( '10' ) ) - Decimal( str( item[ TradingData.CAPITAL_REDUCTION_PER_SHARE ] ) ) ) / Decimal( str( '10' ) ) )
+                    n_total_rest_buying_count += list_buying_data[ 1 ]
+                if n_accumulated_inventory != n_total_rest_buying_count:
+                    list_buying_data = queue_buying_data[ -1 ]
+                    list_buying_data[ 1 ] += ( n_accumulated_inventory - n_total_rest_buying_count )
+                    queue_buying_data[ -1 ]= list_buying_data
+                
             elif e_trading_type == TradingType.SPLIT:
                 if n_accumulated_inventory == 0: #沒有庫存就不用算分割了
                     continue
@@ -4361,9 +4370,9 @@ class MainWindow( QMainWindow ):
                     n_total_rest_buying_cost += list_buying_data[ 0 ]
                     n_total_rest_buying_count += list_buying_data[ 1 ]
                 if n_total_rest_buying_count != 0:
-                    item[ TradingData.CURRENT_AVERAGE_BUYING_COST_NON_SAVE ] = n_total_rest_buying_cost / n_total_rest_buying_count
+                    item[ TradingData.CURRENT_BUYING_COST_NON_SAVE ] = n_total_rest_buying_cost
                 else:
-                    item[ TradingData.CURRENT_AVERAGE_BUYING_COST_NON_SAVE ] = 0
+                    item[ TradingData.CURRENT_BUYING_COST_NON_SAVE ] = 0
 
 
             list_calibration_data.append( item )
@@ -4439,7 +4448,11 @@ class MainWindow( QMainWindow ):
                         str_stock_number_and_name = f"{key_stock_number} {str_stock_name}"
 
                     #目前平均成本
-                    f_current_average_cost = round( dict_trading_data_last.get( TradingData.CURRENT_AVERAGE_BUYING_COST_NON_SAVE, 0 ), 2 )
+                    n_current_buying_cost = dict_trading_data_last.get( TradingData.CURRENT_BUYING_COST_NON_SAVE, 0 )
+                    if n_accumulated_inventory == 0:
+                        f_current_average_cost = 0
+                    else:
+                        f_current_average_cost = round( n_current_buying_cost / n_accumulated_inventory, 2 )
 
                     #目前庫存
                     if self.ui.qtUse1ShareUnitAction.isChecked():
@@ -4498,16 +4511,20 @@ class MainWindow( QMainWindow ):
 
                     n_per_stock_accumulated_dividend_profit = 0
                     if key_stock_number in self.dict_all_company_number_to_price_info:
+
                         f_stock_price = float( self.dict_all_company_number_to_price_info[ key_stock_number ] )
                         if key_stock_number in self.list_previous_day_data:
                             str_stock_price_color = QBrush( '#777777' )
                         else:
                             str_stock_price_color = QBrush( '#FFFFFF' )
                         str_stock_price = format( f_stock_price, "," )
-                        n_net_value = int( n_accumulated_inventory * f_stock_price )
+                        n_net_value = int( round( n_accumulated_inventory * f_stock_price, 0 ) )
                         str_net_value = format( n_net_value, "," )
 
-                        n_trading_fee = int( n_net_value * Decimal( '0.001425' ) )
+                        n_trading_fee = 0
+                        if n_accumulated_inventory > 0:
+                            n_minimum_common_trading_fee = self.dict_all_account_general_data[ str_tab_widget_name ][ "minimum_common_trading_fee" ]
+                            n_trading_fee = max( int( n_net_value * Decimal( '0.001425' ) ), n_minimum_common_trading_fee )
 
                         if b_etf:
                             if b_bond:
@@ -4517,12 +4534,14 @@ class MainWindow( QMainWindow ):
                         else:
                             n_trading_tax = int( n_net_value * Decimal( '0.003' ) )
 
-                        n_profit = n_net_value - n_trading_fee - n_trading_tax - n_per_stock_accumulated_cost
-                        n_all_stock_total_profit += n_profit
+                        n_current_profit = n_net_value - n_trading_fee - n_trading_tax - n_current_buying_cost
+                        str_current_profit = format( n_current_profit, "," )
+                        n_accumulated_profit = n_net_value - n_trading_fee - n_trading_tax - n_per_stock_accumulated_cost
+                        n_all_stock_total_profit += n_accumulated_profit
                         n_all_stock_total_inventory += n_net_value
                         n_all_stock_total_inventory_deduct_trading_fee_and_tax += ( n_net_value - n_trading_fee - n_trading_tax )
                         n_per_stock_accumulated_dividend_profit = int( n_per_stock_accumulated_stock_dividend * f_stock_price ) + n_per_stock_accumulated_cash_dividend
-                        str_profit = format( n_profit, "," )
+                        str_accumulated_profit = format( n_accumulated_profit, "," )
                         if n_accumulated_inventory > 0:
                             list_per_stock_trading_flows.append( n_net_value - n_trading_fee - n_trading_tax )    
                             list_per_stock_trading_date.append( obj_current_date )
@@ -4537,7 +4556,8 @@ class MainWindow( QMainWindow ):
                     else:
                         str_stock_price = "N/A"
                         str_net_value = "N/A"
-                        str_profit = "N/A"
+                        str_accumulated_profit = "N/A"
+                        str_current_profit = "N/A"
                         str_stock_price_color = QBrush( '#FFFFFF' )
                         str_profit_ratio = "-"
 
@@ -4568,10 +4588,11 @@ class MainWindow( QMainWindow ):
                         elif e_type == StockInfoType.HISTORY_TOTAL_TAX:#總稅金
                             str_data = format( n_per_stock_total_trading_tax, "," )
                         elif e_type == StockInfoType.HISTORY_TOTAL_PROFIT:#總損益
-                            str_data = str_profit
-                            qtColor = self.get_up_down_color( "0", str_profit )
+                            str_data = str_accumulated_profit
+                            qtColor = self.get_up_down_color( "0", str_accumulated_profit )
                         elif e_type == StockInfoType.CURRENT_PROFIT:#目前損益
-                            str_data = ""
+                            str_data = str_current_profit
+                            qtColor = self.get_up_down_color( "0", str_current_profit )
                         elif e_type == StockInfoType.DIVIDEND_INCOME:#股利收入
                             str_data = format( n_per_stock_accumulated_dividend_profit, "," )
                         elif e_type == StockInfoType.XIRR_VALUE:#XIRR值
