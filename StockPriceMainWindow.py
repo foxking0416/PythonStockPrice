@@ -196,18 +196,18 @@ class TransferData( Enum ):
     TOTAL_VALUE_NON_SAVE = 4 #不會記錄
 
 class StockInfoType( Enum ):
-    HISTORY_TOTAL_COST = 0 #歷史總成本
-    STOCK_INVENTORY = 1 #股票庫存
-    HISTORY_AVERAGE_COST = 2 #歷史平均成本
-    CURRENT_COST = 3 #目前成本
-    LATEST_STOCK_PRICE = 4 #最新股價
-    LATEST_NET_VALUE = 5 #最新淨值
-    HISTORY_TOTAL_TRADING_FEE = 6 #總手續費
-    HISTORY_TOTAL_TAX = 7 #總稅金
-    HISTORY_TOTAL_PROFIT = 8 #總損益
-    CURRENT_PROFIT = 9 #目前損益
-    DIVIDEND_INCOME = 10 #股利收入
-    XIRR_VALUE = 11 #XIRR值
+    HISTORY_TOTAL_COST = 1 #歷史總成本
+    STOCK_INVENTORY = 2 #股票庫存
+    HISTORY_AVERAGE_COST = 3 #歷史平均成本
+    CURRENT_COST = 4 #目前成本
+    LATEST_STOCK_PRICE = 5 #最新股價
+    LATEST_NET_VALUE = 6 #最新淨值
+    HISTORY_TOTAL_TRADING_FEE = 7 #總手續費
+    HISTORY_TOTAL_TAX = 8 #總稅金
+    HISTORY_TOTAL_PROFIT = 9 #總損益
+    CURRENT_PROFIT = 10 #目前損益
+    DIVIDEND_INCOME = 11 #股利收入
+    XIRR_VALUE = 12 #XIRR值
 
 g_dict_stock_info = {
     StockInfoType.HISTORY_TOTAL_COST: "歷史總成本",
@@ -1694,7 +1694,7 @@ class MainWindow( QMainWindow ):
             self.stock_pre_price_file_path = os.path.join( g_exe_dir, 'StockInventory', str_stock_pre_price_file )
             self.stock_dividend_position_date_file_path = os.path.join( g_exe_dir, 'StockInventory', str_stock_dividend_position_date_file )
 
-        self.list_stock_list_table_horizontal_header = [ '股票代碼及名稱', '歷史總成本', '庫存股數', '歷史平均成本', '當前成本', ' 收盤價', '現值', '總手續費', '總交易稅', '歷史總損益', '當前損益', '股利所得', '平均年化報酬率', '自動帶入股利', '匯出', '刪除' ]
+        self.list_stock_list_table_horizontal_header = []
         self.pick_up_stock( None )
         self.header_helpers = {}
         self.dict_all_account_ui_state = {}
@@ -1702,23 +1702,25 @@ class MainWindow( QMainWindow ):
         self.dict_all_account_cash_transfer_data = {}
         self.dict_all_account_all_stock_trading_data = {}
         self.dict_all_account_all_stock_trading_data_INITIAL = {}
-        self.list_total_stock_info_INITIAL = [ StockInfoType.HISTORY_TOTAL_COST, 
+        self.list_total_stock_info_INITIAL = [ 
+                                               StockInfoType.LATEST_STOCK_PRICE, 
                                                StockInfoType.STOCK_INVENTORY, 
+                                               StockInfoType.LATEST_NET_VALUE, 
+                                               StockInfoType.HISTORY_TOTAL_COST, 
                                                StockInfoType.HISTORY_AVERAGE_COST, 
                                                StockInfoType.CURRENT_COST, 
-                                               StockInfoType.LATEST_STOCK_PRICE, 
-                                               StockInfoType.LATEST_NET_VALUE, 
                                                StockInfoType.HISTORY_TOTAL_TRADING_FEE, 
                                                StockInfoType.HISTORY_TOTAL_TAX, 
                                                StockInfoType.HISTORY_TOTAL_PROFIT, 
                                                StockInfoType.CURRENT_PROFIT, 
                                                StockInfoType.DIVIDEND_INCOME, 
-                                               StockInfoType.XIRR_VALUE ]
+                                               StockInfoType.XIRR_VALUE 
+                                               ]
 
-        self.list_show_stock_info = []
-        self.list_stock_list_column_width = [ 85 ] * len( self.list_stock_list_table_horizontal_header )
-        self.list_stock_list_column_width[ len( self.list_stock_list_table_horizontal_header ) - 2 ] = 40
-        self.list_stock_list_column_width[ len( self.list_stock_list_table_horizontal_header ) - 1 ] = 40
+        self.list_show_stock_info = copy.deepcopy( self.list_total_stock_info_INITIAL )
+        self.list_stock_list_column_width = [ 85 ] * ( len( list( StockInfoType ) ) + 2 )# +2 是給第一欄股票代碼及倒數第3欄的自動股利欄位
+        self.list_stock_list_column_width.append( 40 ) #匯出欄位
+        self.list_stock_list_column_width.append( 40 ) #刪除欄位
         self.n_current_tab = 0
         self.n_tab_index = 0
         self.str_current_save_file_path = None
@@ -2355,7 +2357,15 @@ class MainWindow( QMainWindow ):
             self.update_button_enable_disable_status()
 
     def on_stock_list_table_horizontal_section_resized( self, n_logical_index, n_old_size, n_new_size ): 
-        self.list_stock_list_column_width[ n_logical_index ] = n_new_size
+        if ( n_logical_index == 0 or 
+             n_logical_index == len( self.list_stock_list_table_horizontal_header ) - 3 or
+             n_logical_index == len( self.list_stock_list_table_horizontal_header ) - 2 or
+             n_logical_index == len( self.list_stock_list_table_horizontal_header ) - 1 ):
+            self.list_stock_list_column_width[ n_logical_index ] = n_new_size
+        else:
+            e_modify_column_type = self.list_show_stock_info[ n_logical_index - 1 ]
+            self.list_stock_list_column_width[ int( e_modify_column_type.value ) ] = n_new_size
+
         self.save_share_UI_state()
 
     def on_stock_list_table_item_clicked( self, index: QModelIndex, table_model ):
@@ -3934,17 +3944,23 @@ class MainWindow( QMainWindow ):
                                 self.ui.qtCostWithOutDividendAction.setChecked( True )
                         elif row[0] == '欄寬':
                             self.list_stock_list_column_width = []
-                            for i in range( 1, len( row ) ):
-                                self.list_stock_list_column_width.append( int( row[ i ] ) )
+                            #StockInfoType 不包含"股票代碼"、"自動股利"、"匯入"、"刪除" 這四項
+                            if len( row ) + 1 < len( list( StockInfoType ) ) + 4: # row[0]='欄寬' 
+                                #進到這裡表示這個版本有新增欄位
+                                for i in range( 1, len( row ) - 2 ):
+                                    self.list_stock_list_column_width.append( int( row[ i ] ) )
+                                for i in range( len( self.list_stock_list_column_width ), len( list( StockInfoType ) ) + 2 ):
+                                    self.list_stock_list_column_width.append( 85 )
+                                for i in range( len( row ) - 2, len( row ) ):
+                                    self.list_stock_list_column_width.append( int( row[ i ] ) )
+                                pass
+                            else:
+                                for i in range( 1, len( row ) ):
+                                    self.list_stock_list_column_width.append( int( row[ i ] ) )
                         elif row[0] == '顯示欄位':
                             self.list_show_stock_info = []
-                            if share_api.compare_version_order( "v2.2.0", str_version ):
-                            # if str_version
-                                for i in range( 1, len( row ) ):
-                                    self.list_show_stock_info.append( StockInfoType( int( row[ i ] ) ) )
-                            else:
-                                for e_type in StockInfoType:
-                                    self.list_show_stock_info.append( e_type )
+                            for i in range( 1, len( row ) ):
+                                self.list_show_stock_info.append( StockInfoType( int( row[ i ] ) ) )
 
     def save_stock_dividend_position_date( self ):
         with open( self.stock_dividend_position_date_file_path, 'w', encoding='utf-8' ) as f:
@@ -4480,7 +4496,6 @@ class MainWindow( QMainWindow ):
                             list_total_trading_date.append( obj_trading_date )
                             list_per_stock_trading_date.append( obj_trading_date )
 
-
                     n_per_stock_accumulated_dividend_profit = 0
                     if key_stock_number in self.dict_all_company_number_to_price_info:
                         f_stock_price = float( self.dict_all_company_number_to_price_info[ key_stock_number ] )
@@ -4594,12 +4609,21 @@ class MainWindow( QMainWindow ):
                     table_model.setItem( index_row, len( self.list_stock_list_table_horizontal_header ) - 1, delete_icon_item )
                     index_row += 1
 
-                # for column in range( len( self.list_stock_list_table_horizontal_header ) ):
-                #     if column < len( self.list_stock_list_column_width ):
-                #         table_view.setColumnWidth( column, self.list_stock_list_column_width[ column ] )
-                #     else:
-                #         table_view.setColumnWidth( column, 100 )
-                #         self.list_stock_list_column_width.append( 100 )
+                #設定動態顯示欄位的欄寬
+                for n_column, e_type in enumerate( self.list_show_stock_info ):
+                    n_index = int( e_type.value )
+                    if n_index < len( self.list_stock_list_column_width ):
+                        table_view.setColumnWidth( n_column + 1, self.list_stock_list_column_width[ n_index ] )
+                    else:
+                        assert False, f"不該執行到這裡！"
+                
+                #設定固定顯示欄位的欄寬
+                for n_column in range( len( self.list_stock_list_table_horizontal_header ) ):
+                    if ( n_column == 0 or #股票代碼
+                         n_column == len( self.list_stock_list_table_horizontal_header ) - 3 or # 自動帶入股利
+                         n_column == len( self.list_stock_list_table_horizontal_header ) - 2 or # 匯出
+                         n_column == len( self.list_stock_list_table_horizontal_header ) - 1 ): # 刪除
+                        table_view.setColumnWidth( n_column, self.list_stock_list_column_width[ n_column ] )
 
                 for index_row in range( len( dict_per_account_all_stock_trading_data ) ):
                     table_view.setRowHeight( index_row, 25 )
