@@ -4402,16 +4402,12 @@ class MainWindow( QMainWindow ):
                     n_accumulated_inventory = 0
                     if TradingData.ACCUMULATED_INVENTORY_NON_SAVE in dict_trading_data_last:
                         n_accumulated_inventory = dict_trading_data_last[ TradingData.ACCUMULATED_INVENTORY_NON_SAVE ]
-                    if display_type_combobox.currentIndex() == 1:
-                        if n_accumulated_inventory == 0:
-                            continue
-                    elif display_type_combobox.currentIndex() == 2:
-                        if n_accumulated_inventory != 0:
-                            continue
+                    if display_type_combobox.currentIndex() == 1 and n_accumulated_inventory == 0:
+                        continue
+                    elif display_type_combobox.currentIndex() == 2 and n_accumulated_inventory != 0:
+                        continue
 
-                    n_current_average_cost = 0
-                    if TradingData.CURRENT_AVERAGE_BUYING_COST_NON_SAVE in dict_trading_data_last:
-                        n_current_average_cost = round( dict_trading_data_last[ TradingData.CURRENT_AVERAGE_BUYING_COST_NON_SAVE ], 2 )
+                    n_current_average_cost = round( dict_trading_data_last.get( TradingData.CURRENT_AVERAGE_BUYING_COST_NON_SAVE, 0 ), 2 )
 
                     if self.ui.qtUse1ShareUnitAction.isChecked():
                         str_accumulated_inventory = format( n_accumulated_inventory, "," )
@@ -4439,28 +4435,17 @@ class MainWindow( QMainWindow ):
                         n_total_trading_fee += item_trading_data[ TradingData.TRADING_FEE_NON_SAVE ]
                         n_total_trading_tax += item_trading_data[ TradingData.TRADING_TAX_NON_SAVE ]
 
-                    n_accumulated_cost = 0
-                    f_average_cost = 0
                     if self.ui.qtCostWithInDividendAction.isChecked():
-                        if TradingData.ACCUMULATED_COST_NON_SAVE in dict_trading_data_last:
-                            n_accumulated_cost = dict_trading_data_last[ TradingData.ACCUMULATED_COST_NON_SAVE ]
-                        if TradingData.AVERAGE_COST_NON_SAVE in dict_trading_data_last:
-                            f_average_cost = round( dict_trading_data_last[ TradingData.AVERAGE_COST_NON_SAVE ], 3 )
+                        n_accumulated_cost = dict_trading_data_last.get( TradingData.ACCUMULATED_COST_NON_SAVE, 0 )
+                        f_average_cost = round( dict_trading_data_last.get( TradingData.AVERAGE_COST_NON_SAVE, 0 ), 3 )
                     else:
-                        if TradingData.ACCUMULATED_COST_WITHOUT_CONSIDERING_DIVIDEND_NON_SAVE in dict_trading_data_last:
-                            n_accumulated_cost = dict_trading_data_last[ TradingData.ACCUMULATED_COST_WITHOUT_CONSIDERING_DIVIDEND_NON_SAVE ]
-                        if TradingData.AVERAGE_COST_WITHOUT_CONSIDERING_DIVIDEND_NON_SAVE in dict_trading_data_last:
-                            f_average_cost = round( dict_trading_data_last[ TradingData.AVERAGE_COST_WITHOUT_CONSIDERING_DIVIDEND_NON_SAVE ], 3 )
-
+                        n_accumulated_cost = dict_trading_data_last.get( TradingData.ACCUMULATED_COST_WITHOUT_CONSIDERING_DIVIDEND_NON_SAVE, 0 )
+                        f_average_cost = round( dict_trading_data_last.get( TradingData.AVERAGE_COST_WITHOUT_CONSIDERING_DIVIDEND_NON_SAVE, 0 ), 3 )
 
                     n_total_cost += n_accumulated_cost
 
-                    n_accumulated_stock_dividend = 0 
-                    if TradingData.ALL_STOCK_DIVIDEND_GAIN_NON_SAVE in dict_trading_data_last:
-                        n_accumulated_stock_dividend = dict_trading_data_last[ TradingData.ALL_STOCK_DIVIDEND_GAIN_NON_SAVE ]
-                    n_accumulated_cash_dividend = 0
-                    if TradingData.ALL_CASH_DIVIDEND_GAIN_NON_SAVE in dict_trading_data_last:
-                        n_accumulated_cash_dividend = dict_trading_data_last[ TradingData.ALL_CASH_DIVIDEND_GAIN_NON_SAVE ]
+                    n_accumulated_stock_dividend = dict_trading_data_last.get( TradingData.ALL_STOCK_DIVIDEND_GAIN_NON_SAVE, 0 )
+                    n_accumulated_cash_dividend = dict_trading_data_last.get( TradingData.ALL_CASH_DIVIDEND_GAIN_NON_SAVE, 0 )
 
                     n_accumulated_dividend_profit = 0
                     if key_stock_number in self.dict_all_company_number_to_price_info:
