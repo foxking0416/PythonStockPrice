@@ -363,7 +363,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>成本會扣除股利</string>
+    <string>累計成本會扣除股利</string>
    </property>
   </action>
   <action name="qtCostWithOutDividendAction">
@@ -371,7 +371,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>成本不會扣除股利</string>
+    <string>累計成本不會扣除股利</string>
    </property>
   </action>
   <action name="qtEditDividendTransferFeeAction">

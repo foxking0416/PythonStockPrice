@@ -1618,7 +1618,7 @@ class MainWindow( QMainWindow ):
         self.ui.qtTradingDataTableView.setContextMenuPolicy( Qt.CustomContextMenu )
         self.ui.qtTradingDataTableView.customContextMenuRequested.connect( self.show_context_menu )
         for row in range( len( self.get_trading_data_header() ) ):
-            if row == 10 or row == 11:
+            if row == 7 or row == 8:
                 self.ui.qtTradingDataTableView.setRowHeight( row, 40 )
             else:
                 self.ui.qtTradingDataTableView.setRowHeight( row, 25 )
@@ -1823,7 +1823,6 @@ class MainWindow( QMainWindow ):
             parsed_date = datetime.datetime.strptime(list_date_and_price[ 0 ], "%Y%m%d")  # 解析成日期對象
             str_formatted_date = parsed_date.strftime("%m/%d")  # 轉換為 MM/DD 格式
             self.str_latest_price_column_header = str_formatted_date + ' 收盤價'
-            # self.list_stock_list_table_horizontal_header[ 5 ] = str_formatted_date + ' 收盤價'
 
         self.dict_auto_stock_yearly_dividned = self.load_general_company_all_yearly_dividend_data( 2005, b_unit_test )
         self.dict_auto_stock_listed_etf_yearly_dividned = self.load_listed_etf_all_yearly_dividend_data( 2010, b_unit_test )
@@ -2666,6 +2665,7 @@ class MainWindow( QMainWindow ):
                QSignalBlocker( self.ui.qtCostWithOutDividendAction ) ):
                 self.ui.qtCostWithInDividendAction.setChecked( True )
                 self.ui.qtCostWithOutDividendAction.setChecked( False )
+                self.list_stock_list_table_horizontal_header = self.get_stock_list_horizontal_header()
                 self.refresh_stock_list_table()
                 self.on_change_display_mode()
 
@@ -2674,6 +2674,7 @@ class MainWindow( QMainWindow ):
                QSignalBlocker( self.ui.qtCostWithOutDividendAction ) ):
                 self.ui.qtCostWithInDividendAction.setChecked( False )
                 self.ui.qtCostWithOutDividendAction.setChecked( True )
+                self.list_stock_list_table_horizontal_header = self.get_stock_list_horizontal_header()
                 self.refresh_stock_list_table()
                 self.on_change_display_mode()
 
@@ -4727,6 +4728,21 @@ class MainWindow( QMainWindow ):
                     list_header.append( "庫存張數" )
             elif e_type == StockInfoType.LATEST_PRICE:
                 list_header.append( self.str_latest_price_column_header )
+            elif e_type == StockInfoType.ACCUMULATED_COST:
+                if self.ui.qtCostWithInDividendAction.isChecked():
+                    list_header.append( "累計成本\n(含股息)" )
+                else:
+                    list_header.append( "累計成本\n(不含股息)" )
+            elif e_type == StockInfoType.ACCUMULATED_AVERAGE_COST:
+                if self.ui.qtCostWithInDividendAction.isChecked():
+                    list_header.append( "累計平均成本\n(含股息)" )
+                else:
+                    list_header.append( "累計平均成本\n(不含股息)" )
+            elif e_type == StockInfoType.ACCUMULATED_PROFIT:
+                if self.ui.qtCostWithInDividendAction.isChecked():
+                    list_header.append( "累計損益\n(含股息)" )
+                else:
+                    list_header.append( "累計損益\n(不含股息)" )
             else:
                 list_header.append( g_dict_stock_info[ e_type ] )
 
@@ -4970,7 +4986,7 @@ class MainWindow( QMainWindow ):
         self.per_stock_trading_data_model.clear()
         self.per_stock_trading_data_model.setVerticalHeaderLabels( self.get_trading_data_header() )
         for row in range( len( self.get_trading_data_header() ) ):
-            if row == 10 or row == 11:
+            if row == 7 or row == 8:
                 self.ui.qtTradingDataTableView.setRowHeight( row, 40 )
             else:
                 self.ui.qtTradingDataTableView.setRowHeight( row, 25 )
@@ -4979,12 +4995,38 @@ class MainWindow( QMainWindow ):
         return [ '日期', '入金/出金', '餘額', '編輯', '刪除' ]
 
     def get_trading_data_header( self ):
+        list_vertical_header = ['日期', # 0
+                                '交易種類', # 1 
+                                '交易價格', # 2
+                                '交易股數', # 3
+                                '交易金額', # 4
+                                '手續費 / 交易稅', # 5
+                                '應收付', # 6
+                                '全部股票股利(股) /\n每股股票股利(元)', # 7
+                                '全部現金股利(元) /\n每股現金股利(元)', # 8
+                                '補充保費', # 9
+                                '累計成本', # 10
+                                '庫存股數', # 11
+                                '累計平均成本', # 12
+                                '單筆損益', # 13
+                                '編輯', # 14
+                                '刪除' ]# 15
         if self.ui.qtUse1ShareUnitAction.isChecked():
-            return ['日期', '交易種類', '交易價格', '交易股數', '交易金額', '手續費 / 交易稅', '應收付', '全部股票股利(股) /\n每股股票股利(元)', '全部現金股利(元) /\n每股現金股利(元)', '補充保費',
-                    '累計成本', '庫存股數', '累計平均成本', '單筆損益', '編輯', '刪除' ]
+            list_vertical_header[ 3 ] = '交易股數'
+            list_vertical_header[ 7 ] = '全部股票股利(股) /\n每股股票股利(元)'
+            list_vertical_header[ 11 ] = '庫存股數'
         else:
-            return ['日期', '交易種類', '交易價格', '交易張數', '交易金額', '手續費 / 交易稅', '應收付', '全部股票股利(張) /\n每股股票股利(元)', '全部現金股利(元) /\n每股現金股利(元)', '補充保費',
-                    '累計成本', '庫存張數', '累計平均成本', '單筆損益', '編輯', '刪除' ]
+            list_vertical_header[ 3 ] = '交易張數'
+            list_vertical_header[ 7 ] = '全部股票股利(張) /\n每股股票股利(元)'
+            list_vertical_header[ 11 ] = '庫存張數'
+        if self.ui.qtCostWithInDividendAction.isChecked():
+            list_vertical_header[ 10 ] = '累計成本(含股息)'
+            list_vertical_header[ 12 ] = '累計平均成本(含股息)'
+        else:
+            list_vertical_header[ 10 ] = '累計成本(不含股息)'
+            list_vertical_header[ 12 ] = '累計平均成本(不含股息)'
+
+        return list_vertical_header
 
     def get_per_trading_data_text_list( self, dict_per_trading_data ):
         e_trading_type = dict_per_trading_data[ TradingData.TRADING_TYPE ]
