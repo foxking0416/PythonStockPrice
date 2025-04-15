@@ -4998,40 +4998,40 @@ class MainWindow( QMainWindow ):
         str_weekday = share_api.get_obj_datetime_weekday_text( n_weekday )
 
         f_trading_price = dict_per_trading_data[ TradingData.PER_SHARE_TRADING_PRICE ]
-        n_trading_count = dict_per_trading_data[ TradingData.TRADING_QUANTITY ]
+        n_trading_quantity = dict_per_trading_data[ TradingData.TRADING_QUANTITY ]
         n_trading_value = dict_per_trading_data[ TradingData.TRADING_VALUE_NON_SAVE ]
         n_trading_fee = dict_per_trading_data[ TradingData.TRADING_FEE_NON_SAVE ]
         n_trading_tax = dict_per_trading_data[ TradingData.TRADING_TAX_NON_SAVE ]
         n_extra_insurance_fee = dict_per_trading_data[ TradingData.EXTRA_INSURANCE_FEE_NON_SAVE ]
         n_per_trading_total_cost = dict_per_trading_data[ TradingData.TRADING_COST_NON_SAVE ]
         e_dividend_value_type = dict_per_trading_data[ TradingData.DIVIDEND_VALUE_TYPE ]
-        n_accumulated_inventory = dict_per_trading_data[ TradingData.ACCUMULATED_QUANTITY_NON_SAVE ]
+        n_accumulated_quantity = dict_per_trading_data[ TradingData.ACCUMULATED_QUANTITY_NON_SAVE ]
         if e_dividend_value_type == DividendValueType.PER_SHARE:
             f_stock_dividend_per_share = dict_per_trading_data[ TradingData.STOCK_DIVIDEND ]
             f_cash_dividend_per_share = dict_per_trading_data[ TradingData.CASH_DIVIDEND ]
         else:
             n_stock_dividend_total = dict_per_trading_data[ TradingData.STOCK_DIVIDEND ]
             n_cash_dividend_total = dict_per_trading_data[ TradingData.CASH_DIVIDEND ]
-            n_ori_accumulated_inventory = n_accumulated_inventory - n_stock_dividend_total
+            n_ori_accumulated_quantity = n_accumulated_quantity - n_stock_dividend_total
 
-            f_stock_dividend_per_share = float( n_stock_dividend_total / n_ori_accumulated_inventory * 10 ) 
-            f_cash_dividend_per_share = float( n_cash_dividend_total / n_ori_accumulated_inventory )
+            f_stock_dividend_per_share = float( n_stock_dividend_total / n_ori_accumulated_quantity * 10 ) 
+            f_cash_dividend_per_share = float( n_cash_dividend_total / n_ori_accumulated_quantity )
         n_stock_dividend_gain = dict_per_trading_data[ TradingData.STOCK_DIVIDEND_GAIN_NON_SAVE ]
         n_cash_dividend_gain = dict_per_trading_data[ TradingData.CASH_DIVIDEND_GAIN_NON_SAVE ]
         if self.ui.qtCostWithInDividendAction.isChecked():
             n_accumulated_cost = dict_per_trading_data[ TradingData.ACCUMULATED_COST_NON_SAVE ]
-            f_average_cost = round( dict_per_trading_data[ TradingData.ACCUMULATED_AVERAGE_COST_NON_SAVE ], 3 )
+            f_accumulated_average_cost = round( dict_per_trading_data[ TradingData.ACCUMULATED_AVERAGE_COST_NON_SAVE ], 3 )
         else:
             n_accumulated_cost = dict_per_trading_data[ TradingData.ACCUMULATED_COST_WITHOUT_CONSIDERING_DIVIDEND_NON_SAVE ]
-            f_average_cost = round( dict_per_trading_data[ TradingData.ACCUMULATED_AVERAGE_COST_WITHOUT_CONSIDERING_DIVIDEND_NON_SAVE ], 3 )
+            f_accumulated_average_cost = round( dict_per_trading_data[ TradingData.ACCUMULATED_AVERAGE_COST_WITHOUT_CONSIDERING_DIVIDEND_NON_SAVE ], 3 )
         if self.ui.qtUse1ShareUnitAction.isChecked():
-            str_trading_quantity = format( n_trading_count, "," )
+            str_trading_quantity = format( n_trading_quantity, "," )
             str_stock_dividend_gain = format( n_stock_dividend_gain, "," )
-            str_accumulated_quantity = format( n_accumulated_inventory, "," )
+            str_accumulated_quantity = format( n_accumulated_quantity, "," )
         else:
-            f_trading_count = n_trading_count / 1000
+            f_trading_count = n_trading_quantity / 1000
             f_stock_dividend_gain = n_stock_dividend_gain / 1000
-            f_accumulated_inventory = n_accumulated_inventory / 1000
+            f_accumulated_inventory = n_accumulated_quantity / 1000
             if f_trading_count.is_integer():
                 str_trading_quantity = format( int( f_trading_count ), "," )
             else:
@@ -5045,7 +5045,6 @@ class MainWindow( QMainWindow ):
             else:
                 str_accumulated_quantity = format( f_accumulated_inventory, "," )
 
-
         str_trading_price = format( f_trading_price, "," )
         str_trading_value = format( n_trading_value, "," )
         str_trading_fee = format( n_trading_fee, "," )
@@ -5055,7 +5054,7 @@ class MainWindow( QMainWindow ):
         str_stock_dividend = str_stock_dividend_gain + ' / ' + str( f_stock_dividend_per_share )
         str_cash_dividend = format( n_cash_dividend_gain, "," ) + ' / ' + str( f_cash_dividend_per_share )
         str_accumulated_cost = format( n_accumulated_cost, "," )
-        str_accumulated_average_cost = format( f_average_cost, "," )
+        str_accumulated_average_cost = format( f_accumulated_average_cost, "," )
 
         str_selling_profit = "N/A"
         if e_trading_type == TradingType.BUY:
