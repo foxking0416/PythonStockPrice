@@ -4548,10 +4548,14 @@ class MainWindow( QMainWindow ):
 
                         n_current_profit = n_market_value - n_trading_fee - n_trading_tax - n_current_buying_cost
                         str_current_profit = format( n_current_profit, "," )
-                        f_current_profit_ratio = 0
                         if n_market_value != 0:
-                            f_current_profit_ratio = ( n_current_profit / n_current_buying_cost ) * 100
-                        str_current_profit_ratio = format( f_current_profit_ratio, ".2f" ) + "%"
+                            if n_current_buying_cost == 0:
+                                str_current_profit_ratio = "9999.99%"
+                            else:
+                                f_current_profit_ratio = ( n_current_profit / n_current_buying_cost ) * 100
+                                str_current_profit_ratio = format( f_current_profit_ratio, ".2f" ) + "%"
+                        else:
+                            str_current_profit_ratio = "0%"
 
                         n_accumulated_profit = n_market_value - n_trading_fee - n_trading_tax - n_per_stock_accumulated_cost
                         n_all_stock_accumulated_total_profit += n_accumulated_profit
