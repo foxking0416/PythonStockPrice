@@ -3108,7 +3108,7 @@ class MainWindow( QMainWindow ):
                 list_data_header = self.get_trading_data_header()
                 list_data_header.insert( 0, str_title )
 
-                n_row_start = int( ( len( list_data_header ) -2 + 1 ) * int( data_index / 10 ) )
+                n_row_start = int( ( len( list_data_header ) -2 + 2 ) * int( data_index / 10 ) )
                 for index_row, str_header in enumerate( list_data_header ):
                     if index_row == len( list_data_header ) - 2:
                         break
@@ -3120,7 +3120,7 @@ class MainWindow( QMainWindow ):
             worksheet.column_dimensions[ get_column_letter( index_column + 2 ) ].width = 12
 
             list_data = self.get_per_trading_data_text_list( dict_per_trading_data )
-            list_data.insert( 0, "" )
+            list_data.insert( 0, "# " + str( data_index + 1 ) )
             for index_row, str_data in enumerate( list_data ):
                 str_data = str_data.replace( ',', '' )
                 n_cell_row = n_row_start + index_row + 1
@@ -3195,12 +3195,15 @@ class MainWindow( QMainWindow ):
             worksheet.page_margins.footer = 0.3  # 頁腳邊界
             self.export_trading_data_to_excel( worksheet, str_stock_number, str_stock_name, list_trading_data )
             workbook.save( file_path )
+            share_ui.show_check_message_box_with_ok_button( "匯出成功", f"已經將 { str_stock_number } { str_stock_name } 的交易資料匯出到 { file_path }", self )
 
     def on_export_all_to_excell_button_clicked( self ): 
         file_path = share_ui.open_save_file_dialog( self, "輸出Excel", "", share_ui.FileFilter.EXCEL )
         if file_path:
             workbook = Workbook()
             str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
+            n_current_index = self.ui.qtTabWidget.currentIndex()
+            str_account_name = self.ui.qtTabWidget.tabText( n_current_index )
             dict_per_account_all_stock_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ]
 
             for index, ( key_stock_number, value_list_trading_data ) in enumerate( dict_per_account_all_stock_trading_data.items() ):
@@ -3230,6 +3233,7 @@ class MainWindow( QMainWindow ):
                     worksheet.page_margins.footer = 0.3  # 頁腳邊界
                 self.export_trading_data_to_excel( worksheet, key_stock_number, str_stock_name, value_list_trading_data )
             workbook.save( file_path )
+            share_ui.show_check_message_box_with_ok_button( "匯出成功", f"已經將{ str_account_name } 的交易資料匯出到 { file_path }", self )
 
     def on_new_file_action_triggered( self ): 
         b_need_save = False
