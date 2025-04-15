@@ -4419,34 +4419,34 @@ class MainWindow( QMainWindow ):
     def refresh_stock_list_table( self, clear_table = True ): 
         str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
         dict_per_account_all_stock_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ]
-        table_view = self.ui.qtTabWidget.currentWidget().findChild( QTableView, "StockListTableView" )
-        display_type_combobox = self.ui.qtTabWidget.currentWidget().findChild( QComboBox, "DisplayTypeComboBox")
+        qt_table_view = self.ui.qtTabWidget.currentWidget().findChild( QTableView, "StockListTableView" )
+        qt_display_type_combobox = self.ui.qtTabWidget.currentWidget().findChild( QComboBox, "DisplayTypeComboBox")
         n_all_stock_total_cost = 0
-        n_all_stock_total_inventory = 0#目前總庫存
-        n_all_stock_total_inventory_deduct_trading_fee_and_tax = 0
-        n_all_stock_total_profit = 0
+        n_all_stock_current_total_market_value = 0 #目前總市值
+        n_all_stock_current_total_market_value_after_fee_and_tax = 0 #目前總市值(扣掉手續費和稅金)
+        n_all_stock_accumulated_total_profit = 0 #累計獲利
 
-        list_total_trading_date = []
-        list_total_trading_flows = []
-        if table_view:
-            table_model = table_view.model()
+        list_all_stock_trading_date = []
+        list_all_stock_trading_flows = []
+        if qt_table_view:
+            qt_table_model = qt_table_view.model()
             if clear_table:
-                table_model.clear()
+                qt_table_model.clear()
 
-            table_model.setHorizontalHeaderLabels( self.list_stock_list_table_horizontal_header )
+            qt_table_model.setHorizontalHeaderLabels( self.list_stock_list_table_horizontal_header )
             
-            with QSignalBlocker( table_view.horizontalHeader() ):
+            with QSignalBlocker( qt_table_view.horizontalHeader() ):
                 list_vertical_labels = []
                 obj_current_date = datetime.datetime.today()
-                index_row = 0
+                n_index_row = 0
                 for key_stock_number, value_list_stock_trading_data in dict_per_account_all_stock_trading_data.items():
                     dict_trading_data_first = value_list_stock_trading_data[ 0 ] #取第一筆交易資料，因為第一筆交易資料有存是否使用自動帶入股利
                     dict_trading_data_last = value_list_stock_trading_data[ len( value_list_stock_trading_data ) - 1 ] #取最後一筆交易資料，因為最後一筆交易資料的庫存等內容才是所有累計的結果
 
-                    n_accumulated_inventory = dict_trading_data_last.get( TradingData.ACCUMULATED_QUANTITY_NON_SAVE, 0 )
-                    if display_type_combobox.currentIndex() == 1 and n_accumulated_inventory == 0:#僅顯示目前有庫存的股票
+                    n_accumulated_quantity = dict_trading_data_last.get( TradingData.ACCUMULATED_QUANTITY_NON_SAVE, 0 )
+                    if qt_display_type_combobox.currentIndex() == 1 and n_accumulated_quantity == 0:#僅顯示目前有庫存的股票
                         continue
-                    elif display_type_combobox.currentIndex() == 2 and n_accumulated_inventory != 0:#僅顯示目前沒有庫存的股票
+                    elif qt_display_type_combobox.currentIndex() == 2 and n_accumulated_quantity != 0:#僅顯示目前沒有庫存的股票
                         continue
 
                     list_vertical_labels.append( "   " )#Header用空白的字串，只是為了可以上下拖動
@@ -4460,30 +4460,30 @@ class MainWindow( QMainWindow ):
                     else:
                         str_stock_number_and_name = f"{key_stock_number} {str_stock_name}"
 
-                    #目前平均成本
+                    #現股總成本
                     n_current_buying_cost = dict_trading_data_last.get( TradingData.CURRENT_BUYING_COST_NON_SAVE, 0 )
-                    if n_accumulated_inventory == 0:
-                        f_current_average_cost = 0
+                    if n_accumulated_quantity == 0:
+                        f_current_average_cost = 0#現股成本
                     else:
-                        f_current_average_cost = round( n_current_buying_cost / n_accumulated_inventory, 2 )
+                        f_current_average_cost = round( n_current_buying_cost / n_accumulated_quantity, 2 )#現股成本
 
                     #目前庫存
                     if self.ui.qtUse1ShareUnitAction.isChecked():
-                        str_accumulated_inventory = format( n_accumulated_inventory, "," )
+                        str_accumulated_quantity = format( n_accumulated_quantity, "," )
                     else:
-                        f_accumulated_inventory_1000_share = n_accumulated_inventory / 1000
-                        if f_accumulated_inventory_1000_share.is_integer():
-                            str_accumulated_inventory = format( int( f_accumulated_inventory_1000_share ), "," )
+                        f_accumulated_quantity_1000_share = n_accumulated_quantity / 1000
+                        if f_accumulated_quantity_1000_share.is_integer():
+                            str_accumulated_quantity = format( int( f_accumulated_quantity_1000_share ), "," )
                         else:
-                            str_accumulated_inventory = format( f_accumulated_inventory_1000_share, "," )
+                            str_accumulated_quantity = format( f_accumulated_quantity_1000_share, "," )
 
-                    #歷史總成本、歷史平均成本
+                    #累計成本、累計平均成本
                     if self.ui.qtCostWithInDividendAction.isChecked():
                         n_per_stock_accumulated_cost = dict_trading_data_last.get( TradingData.ACCUMULATED_COST_NON_SAVE, 0 )
-                        f_per_stock_average_cost = round( dict_trading_data_last.get( TradingData.ACCUMULATED_AVERAGE_COST_NON_SAVE, 0 ), 3 )
+                        f_per_stock_accumulated_average_cost = round( dict_trading_data_last.get( TradingData.ACCUMULATED_AVERAGE_COST_NON_SAVE, 0 ), 3 )
                     else:
                         n_per_stock_accumulated_cost = dict_trading_data_last.get( TradingData.ACCUMULATED_COST_WITHOUT_CONSIDERING_DIVIDEND_NON_SAVE, 0 )
-                        f_per_stock_average_cost = round( dict_trading_data_last.get( TradingData.ACCUMULATED_AVERAGE_COST_WITHOUT_CONSIDERING_DIVIDEND_NON_SAVE, 0 ), 3 )
+                        f_per_stock_accumulated_average_cost = round( dict_trading_data_last.get( TradingData.ACCUMULATED_AVERAGE_COST_WITHOUT_CONSIDERING_DIVIDEND_NON_SAVE, 0 ), 3 )
                     n_all_stock_total_cost += n_per_stock_accumulated_cost
 
                     n_per_stock_accumulated_stock_dividend = dict_trading_data_last.get( TradingData.ACCUMULATED_STOCK_DIVIDEND_GAIN_NON_SAVE, 0 )
@@ -4491,15 +4491,15 @@ class MainWindow( QMainWindow ):
 
                     list_per_stock_trading_date = []
                     list_per_stock_trading_flows = []
-                    n_per_stock_total_trading_fee = 0
-                    n_per_stock_total_trading_tax = 0
+                    n_per_stock_accumulated_trading_fee = 0
+                    n_per_stock_accumulated_trading_tax = 0
                     str_profit_ratio = "-"
                     for trading_data in value_list_stock_trading_data:
                         e_trading_type = trading_data[ TradingData.TRADING_TYPE ]
                         if e_trading_type == TradingType.TEMPLATE:
                             continue
-                        n_per_stock_total_trading_fee += trading_data[ TradingData.TRADING_FEE_NON_SAVE ]
-                        n_per_stock_total_trading_tax += trading_data[ TradingData.TRADING_TAX_NON_SAVE ]
+                        n_per_stock_accumulated_trading_fee += trading_data[ TradingData.TRADING_FEE_NON_SAVE ]
+                        n_per_stock_accumulated_trading_tax += trading_data[ TradingData.TRADING_TAX_NON_SAVE ]
 
                         if key_stock_number in self.dict_all_company_number_to_price_info:
                             if ( e_trading_type == TradingType.BUY or
@@ -4514,12 +4514,12 @@ class MainWindow( QMainWindow ):
                                 #trading_data[ TradingData.TRADING_VALUE_NON_SAVE ]本身是負值，但因為是退款，所以在算XIRR時應該要用正數，因此取負號
                                 n_cost = -trading_data[ TradingData.TRADING_VALUE_NON_SAVE ] 
                             
-                            list_total_trading_flows.append( n_cost )
+                            list_all_stock_trading_flows.append( n_cost )
                             list_per_stock_trading_flows.append( n_cost )
 
                             str_trading_date = trading_data[ TradingData.TRADING_DATE ]
                             obj_trading_date = datetime.datetime.strptime( str_trading_date, "%Y-%m-%d" )
-                            list_total_trading_date.append( obj_trading_date )
+                            list_all_stock_trading_date.append( obj_trading_date )
                             list_per_stock_trading_date.append( obj_trading_date )
 
                     n_per_stock_accumulated_dividend_profit = 0
@@ -4530,71 +4530,71 @@ class MainWindow( QMainWindow ):
                         else:
                             str_stock_price_color = QBrush( '#FFFFFF' )
                         str_stock_price = format( f_stock_price, "," )
-                        n_net_value = int( round( n_accumulated_inventory * f_stock_price, 0 ) )
-                        str_net_value = format( n_net_value, "," )
+                        n_market_value = int( round( n_accumulated_quantity * f_stock_price, 0 ) )
+                        str_market_value = format( n_market_value, "," )
 
                         n_trading_fee = 0
-                        if n_accumulated_inventory > 0:
+                        if n_accumulated_quantity > 0:
                             n_minimum_common_trading_fee = self.dict_all_account_general_data[ str_tab_widget_name ][ "minimum_common_trading_fee" ]
-                            n_trading_fee = max( int( n_net_value * Decimal( '0.001425' ) ), n_minimum_common_trading_fee )
+                            n_trading_fee = max( int( n_market_value * Decimal( '0.001425' ) ), n_minimum_common_trading_fee )
 
                         if b_etf:
                             if b_bond:
                                 n_trading_tax = 0
                             else:
-                                n_trading_tax = int( n_net_value * Decimal( '0.001' ) )
+                                n_trading_tax = int( n_market_value * Decimal( '0.001' ) )
                         else:
-                            n_trading_tax = int( n_net_value * Decimal( '0.003' ) )
+                            n_trading_tax = int( n_market_value * Decimal( '0.003' ) )
 
-                        n_current_profit = n_net_value - n_trading_fee - n_trading_tax - n_current_buying_cost
+                        n_current_profit = n_market_value - n_trading_fee - n_trading_tax - n_current_buying_cost
                         str_current_profit = format( n_current_profit, "," )
                         f_current_profit_ratio = 0
-                        if n_net_value != 0:
+                        if n_market_value != 0:
                             f_current_profit_ratio = ( n_current_profit / n_current_buying_cost ) * 100
                         str_current_profit_ratio = format( f_current_profit_ratio, ".2f" ) + "%"
 
-                        n_accumulated_profit = n_net_value - n_trading_fee - n_trading_tax - n_per_stock_accumulated_cost
-                        n_all_stock_total_profit += n_accumulated_profit
-                        n_all_stock_total_inventory += n_net_value
-                        n_all_stock_total_inventory_deduct_trading_fee_and_tax += ( n_net_value - n_trading_fee - n_trading_tax )
+                        n_accumulated_profit = n_market_value - n_trading_fee - n_trading_tax - n_per_stock_accumulated_cost
+                        n_all_stock_accumulated_total_profit += n_accumulated_profit
+                        n_all_stock_current_total_market_value += n_market_value
+                        n_all_stock_current_total_market_value_after_fee_and_tax += ( n_market_value - n_trading_fee - n_trading_tax )
                         n_per_stock_accumulated_dividend_profit = int( n_per_stock_accumulated_stock_dividend * f_stock_price ) + n_per_stock_accumulated_cash_dividend
                         str_accumulated_profit = format( n_accumulated_profit, "," )
-                        if n_accumulated_inventory > 0:
-                            list_per_stock_trading_flows.append( n_net_value - n_trading_fee - n_trading_tax )    
+                        if n_accumulated_quantity > 0:
+                            list_per_stock_trading_flows.append( n_market_value - n_trading_fee - n_trading_tax )    
                             list_per_stock_trading_date.append( obj_current_date )
 
                         str_profit_ratio = "-"
                         if len( list_per_stock_trading_flows ) > 1:
                             try:
-                                xirr_result = Utility.xirr( list_per_stock_trading_flows, list_per_stock_trading_date )
-                                str_profit_ratio = f"{xirr_result:.3%}"
+                                per_stock_xirr_result = Utility.xirr( list_per_stock_trading_flows, list_per_stock_trading_date )
+                                str_profit_ratio = f"{per_stock_xirr_result:.3%}"
                             except ValueError as e:
                                 str_profit_ratio = "-"
                     else:
                         str_stock_price = "N/A"
-                        str_net_value = "N/A"
+                        str_market_value = "N/A"
                         str_accumulated_profit = "N/A"
                         str_current_profit = "N/A"
                         str_stock_price_color = QBrush( '#FFFFFF' )
                         str_profit_ratio = "-"
                         str_current_profit_ratio = "-"
 
-                    standard_item = QStandardItem( str_stock_number_and_name )
-                    standard_item.setTextAlignment( Qt.AlignLeft | Qt.AlignVCenter )
-                    standard_item.setFlags( standard_item.flags() & ~Qt.ItemIsEditable )
-                    standard_item.setData( key_stock_number, Qt.UserRole )
-                    table_model.setItem( index_row, 0, standard_item ) 
+                    qt_standard_item = QStandardItem( str_stock_number_and_name )
+                    qt_standard_item.setTextAlignment( Qt.AlignLeft | Qt.AlignVCenter )
+                    qt_standard_item.setFlags( qt_standard_item.flags() & ~Qt.ItemIsEditable )
+                    qt_standard_item.setData( key_stock_number, Qt.UserRole )
+                    qt_table_model.setItem( n_index_row, 0, qt_standard_item ) 
 
-                    for column, e_type in enumerate( self.list_show_stock_info ):
+                    for n_column, e_type in enumerate( self.list_show_stock_info ):
                         str_data = ""
                         qtColor = QBrush( '#FFFFFF' )
                         if e_type == StockInfoType.LATEST_PRICE:#收盤價
                             str_data = str_stock_price
                             qtColor = str_stock_price_color
                         elif e_type == StockInfoType.QUANTITY:#庫存股數
-                            str_data = str_accumulated_inventory
+                            str_data = str_accumulated_quantity
                         elif e_type == StockInfoType.LATEST_MARKET_VALUE:#現值
-                            str_data = str_net_value
+                            str_data = str_market_value
                         elif e_type == StockInfoType.CURRENT_COST:#現股成本
                             str_data =  format( f_current_average_cost, "," )
                         elif e_type == StockInfoType.UNREALIZED_PROFIT:#未實現損益
@@ -4610,14 +4610,14 @@ class MainWindow( QMainWindow ):
                         elif e_type == StockInfoType.ACCUMULATED_COST:#累計成本
                             str_data = format( n_per_stock_accumulated_cost, "," )
                         elif e_type == StockInfoType.ACCUMULATED_AVERAGE_COST:#累計平均成本
-                            str_data = format( f_per_stock_average_cost, "," )
+                            str_data = format( f_per_stock_accumulated_average_cost, "," )
                         elif e_type == StockInfoType.ACCUMULATED_PROFIT:#累計損益
                             str_data = str_accumulated_profit
                             qtColor = self.get_up_down_color( "0", str_accumulated_profit )
                         elif e_type == StockInfoType.ACCUMULATED_TRADING_FEE:#累計手續費
-                            str_data = format( n_per_stock_total_trading_fee, "," )
+                            str_data = format( n_per_stock_accumulated_trading_fee, "," )
                         elif e_type == StockInfoType.ACCUMULATED_TAX:#累計交易稅
-                            str_data = format( n_per_stock_total_trading_tax, "," )
+                            str_data = format( n_per_stock_accumulated_trading_tax, "," )
                         elif e_type == StockInfoType.ACCUMULATED_DIVIDEND_INCOME:#累計股利所得
                             str_data = format( n_per_stock_accumulated_dividend_profit, "," )
                         elif e_type == StockInfoType.XIRR_VALUE:#平均年化報酬率
@@ -4627,42 +4627,42 @@ class MainWindow( QMainWindow ):
                             pass
 
 
-                        standard_item = QStandardItem( str_data )
-                        standard_item.setTextAlignment( Qt.AlignHCenter | Qt.AlignVCenter )
-                        standard_item.setFlags( standard_item.flags() & ~Qt.ItemIsEditable )
-                        standard_item.setData( key_stock_number, Qt.UserRole )
-                        standard_item.setForeground( qtColor )
-                        table_model.setItem( index_row, column + 1, standard_item ) 
+                        qt_standard_item = QStandardItem( str_data )
+                        qt_standard_item.setTextAlignment( Qt.AlignHCenter | Qt.AlignVCenter )
+                        qt_standard_item.setFlags( qt_standard_item.flags() & ~Qt.ItemIsEditable )
+                        qt_standard_item.setData( key_stock_number, Qt.UserRole )
+                        qt_standard_item.setForeground( qtColor )
+                        qt_table_model.setItem( n_index_row, n_column + 1, qt_standard_item ) 
 
-                    use_auto_dividend_item = QStandardItem()
+                    qt_use_auto_dividend_item = QStandardItem()
                     if dict_trading_data_first[ TradingData.USE_AUTO_DIVIDEND_DATA ] == AutoDividendType.AUTO:
-                        use_auto_dividend_item.setIcon( share_icon.get_icon( share_icon.IconType.STAR_SOLID ) )
-                        use_auto_dividend_item.setText( "自動" )
+                        qt_use_auto_dividend_item.setIcon( share_icon.get_icon( share_icon.IconType.STAR_SOLID ) )
+                        qt_use_auto_dividend_item.setText( "自動" )
                     elif dict_trading_data_first[ TradingData.USE_AUTO_DIVIDEND_DATA ] == AutoDividendType.MANUAL:
-                        use_auto_dividend_item.setIcon( share_icon.get_icon( share_icon.IconType.STAR_DASHED ) )
-                        use_auto_dividend_item.setText( "手動" )
+                        qt_use_auto_dividend_item.setIcon( share_icon.get_icon( share_icon.IconType.STAR_DASHED ) )
+                        qt_use_auto_dividend_item.setText( "手動" )
                     elif dict_trading_data_first[ TradingData.USE_AUTO_DIVIDEND_DATA ] == AutoDividendType.MANUAL_WITH_AUTO:
-                        use_auto_dividend_item.setIcon( share_icon.get_icon( share_icon.IconType.STAR_HALF_DASHED ) )
-                        use_auto_dividend_item.setText( "混和" )
+                        qt_use_auto_dividend_item.setIcon( share_icon.get_icon( share_icon.IconType.STAR_HALF_DASHED ) )
+                        qt_use_auto_dividend_item.setText( "混和" )
 
-                    use_auto_dividend_item.setFlags( use_auto_dividend_item.flags() & ~Qt.ItemIsEditable )
-                    table_model.setItem( index_row, len( self.list_stock_list_table_horizontal_header ) - 3, use_auto_dividend_item)
+                    qt_use_auto_dividend_item.setFlags( qt_use_auto_dividend_item.flags() & ~Qt.ItemIsEditable )
+                    qt_table_model.setItem( n_index_row, len( self.list_stock_list_table_horizontal_header ) - 3, qt_use_auto_dividend_item)
                         
-                    export_icon_item = QStandardItem("")
-                    export_icon_item.setIcon( share_icon.get_icon( share_icon.IconType.EXPORT ) )
-                    export_icon_item.setFlags( export_icon_item.flags() & ~Qt.ItemIsEditable )
-                    table_model.setItem( index_row, len( self.list_stock_list_table_horizontal_header ) - 2, export_icon_item )
-                    delete_icon_item = QStandardItem("")
-                    delete_icon_item.setIcon( share_icon.get_icon( share_icon.IconType.DELETE ) )
-                    delete_icon_item.setFlags( delete_icon_item.flags() & ~Qt.ItemIsEditable )
-                    table_model.setItem( index_row, len( self.list_stock_list_table_horizontal_header ) - 1, delete_icon_item )
-                    index_row += 1
+                    qt_export_icon_item = QStandardItem("")
+                    qt_export_icon_item.setIcon( share_icon.get_icon( share_icon.IconType.EXPORT ) )
+                    qt_export_icon_item.setFlags( qt_export_icon_item.flags() & ~Qt.ItemIsEditable )
+                    qt_table_model.setItem( n_index_row, len( self.list_stock_list_table_horizontal_header ) - 2, qt_export_icon_item )
+                    qt_delete_icon_item = QStandardItem("")
+                    qt_delete_icon_item.setIcon( share_icon.get_icon( share_icon.IconType.DELETE ) )
+                    qt_delete_icon_item.setFlags( qt_delete_icon_item.flags() & ~Qt.ItemIsEditable )
+                    qt_table_model.setItem( n_index_row, len( self.list_stock_list_table_horizontal_header ) - 1, qt_delete_icon_item )
+                    n_index_row += 1
 
                 #設定動態顯示欄位的欄寬
                 for n_column, e_type in enumerate( self.list_show_stock_info ):
                     n_index = int( e_type.value )
                     if n_index < len( self.list_stock_list_column_width ):
-                        table_view.setColumnWidth( n_column + 1, self.list_stock_list_column_width[ n_index ] )
+                        qt_table_view.setColumnWidth( n_column + 1, self.list_stock_list_column_width[ n_index ] )
                     else:
                         assert False, f"不該執行到這裡！"
                 
@@ -4672,25 +4672,25 @@ class MainWindow( QMainWindow ):
                          n_column == len( self.list_stock_list_table_horizontal_header ) - 3 or # 自動帶入股利
                          n_column == len( self.list_stock_list_table_horizontal_header ) - 2 or # 匯出
                          n_column == len( self.list_stock_list_table_horizontal_header ) - 1 ): # 刪除
-                        table_view.setColumnWidth( n_column, self.list_stock_list_column_width[ n_column ] )
+                        qt_table_view.setColumnWidth( n_column, self.list_stock_list_column_width[ n_column ] )
 
-                for index_row in range( len( dict_per_account_all_stock_trading_data ) ):
-                    table_view.setRowHeight( index_row, 25 )
-                table_model.setVerticalHeaderLabels( list_vertical_labels )
+                for n_index_row in range( len( dict_per_account_all_stock_trading_data ) ):
+                    qt_table_view.setRowHeight( n_index_row, 25 )
+                qt_table_model.setVerticalHeaderLabels( list_vertical_labels )
         total_cost_value_label = self.ui.qtTabWidget.currentWidget().findChild( QLabel, "TotalCostValueLabel")
         total_cost_value_label.setText( format( n_all_stock_total_cost, "," ) )
         total_inventory_value_label = self.ui.qtTabWidget.currentWidget().findChild( QLabel, "TotalInventoryValueLabel")
-        total_inventory_value_label.setText( format( n_all_stock_total_inventory, "," ) )
+        total_inventory_value_label.setText( format( n_all_stock_current_total_market_value, "," ) )
         total_profit_value_label = self.ui.qtTabWidget.currentWidget().findChild( QLabel, "TotalProfitValueLabel")
-        total_profit_value_label.setText( format( n_all_stock_total_profit, "," ) )
+        total_profit_value_label.setText( format( n_all_stock_accumulated_total_profit, "," ) )
 
-        list_total_trading_flows.append( n_all_stock_total_inventory_deduct_trading_fee_and_tax )
-        list_total_trading_date.append( obj_current_date )
-        if len( list_total_trading_flows ) > 1:
+        list_all_stock_trading_flows.append( n_all_stock_current_total_market_value_after_fee_and_tax )
+        list_all_stock_trading_date.append( obj_current_date )
+        if len( list_all_stock_trading_flows ) > 1:
             try:
-                xirr_result = Utility.xirr( list_total_trading_flows, list_total_trading_date )
+                per_stock_xirr_result = Utility.xirr( list_all_stock_trading_flows, list_all_stock_trading_date )
                 xirr_value_label = self.ui.qtTabWidget.currentWidget().findChild( QLabel, "XIRRValueLabel")
-                xirr_value_label.setText( f"{xirr_result:.3%}" )
+                xirr_value_label.setText( f"{per_stock_xirr_result:.3%}" )
             except ValueError as e:
                 pass
 
