@@ -4424,7 +4424,7 @@ class MainWindow( QMainWindow ):
         n_all_stock_total_cost = 0
         n_all_stock_current_total_market_value = 0 #目前總市值
         n_all_stock_current_total_market_value_after_fee_and_tax = 0 #目前總市值(扣掉手續費和稅金)
-        n_all_stock_accumulated_total_profit = 0 #累計獲利
+        n_all_stock_accumulated_profit = 0 #累計獲利
 
         list_all_stock_trading_date = []
         list_all_stock_trading_flows = []
@@ -4493,7 +4493,6 @@ class MainWindow( QMainWindow ):
                     list_per_stock_trading_flows = []
                     n_per_stock_accumulated_trading_fee = 0
                     n_per_stock_accumulated_trading_tax = 0
-                    str_profit_ratio = "-"
                     for trading_data in value_list_stock_trading_data:
                         e_trading_type = trading_data[ TradingData.TRADING_TYPE ]
                         if e_trading_type == TradingType.TEMPLATE:
@@ -4526,62 +4525,62 @@ class MainWindow( QMainWindow ):
                     if key_stock_number in self.dict_all_company_number_to_price_info:
                         f_stock_price = float( self.dict_all_company_number_to_price_info[ key_stock_number ] )
                         if key_stock_number in self.list_previous_day_data:
-                            str_stock_price_color = QBrush( '#777777' )
+                            qt_stock_price_color = QBrush( '#777777' )
                         else:
-                            str_stock_price_color = QBrush( '#FFFFFF' )
+                            qt_stock_price_color = QBrush( '#FFFFFF' )
                         str_stock_price = format( f_stock_price, "," )
-                        n_market_value = int( round( n_accumulated_quantity * f_stock_price, 0 ) )
-                        str_market_value = format( n_market_value, "," )
+                        n_per_stock_market_value = int( round( n_accumulated_quantity * f_stock_price, 0 ) )
+                        str_per_stock_market_value = format( n_per_stock_market_value, "," )
 
-                        n_trading_fee = 0
+                        n_expect_trading_fee = 0
                         if n_accumulated_quantity > 0:
                             n_minimum_common_trading_fee = self.dict_all_account_general_data[ str_tab_widget_name ][ "minimum_common_trading_fee" ]
-                            n_trading_fee = max( int( n_market_value * Decimal( '0.001425' ) ), n_minimum_common_trading_fee )
+                            n_expect_trading_fee = max( int( n_per_stock_market_value * Decimal( '0.001425' ) ), n_minimum_common_trading_fee )
 
                         if b_etf:
                             if b_bond:
-                                n_trading_tax = 0
+                                n_expect_trading_tax = 0
                             else:
-                                n_trading_tax = int( n_market_value * Decimal( '0.001' ) )
+                                n_expect_trading_tax = int( n_per_stock_market_value * Decimal( '0.001' ) )
                         else:
-                            n_trading_tax = int( n_market_value * Decimal( '0.003' ) )
+                            n_expect_trading_tax = int( n_per_stock_market_value * Decimal( '0.003' ) )
 
-                        n_current_profit = n_market_value - n_trading_fee - n_trading_tax - n_current_buying_cost
-                        str_current_profit = format( n_current_profit, "," )
-                        if n_market_value != 0:
+                        n_unrealized_profit = n_per_stock_market_value - n_expect_trading_fee - n_expect_trading_tax - n_current_buying_cost
+                        str_unrealized_profit = format( n_unrealized_profit, "," )
+                        if n_per_stock_market_value != 0:
                             if n_current_buying_cost == 0:
-                                str_current_profit_ratio = "9999.99%"
+                                str_unrealized_profit_ratio = "9999.99%"
                             else:
-                                f_current_profit_ratio = ( n_current_profit / n_current_buying_cost ) * 100
-                                str_current_profit_ratio = format( f_current_profit_ratio, ".2f" ) + "%"
+                                f_current_profit_ratio = ( n_unrealized_profit / n_current_buying_cost ) * 100
+                                str_unrealized_profit_ratio = format( f_current_profit_ratio, ".2f" ) + "%"
                         else:
-                            str_current_profit_ratio = "0%"
+                            str_unrealized_profit_ratio = "0%"
 
-                        n_accumulated_profit = n_market_value - n_trading_fee - n_trading_tax - n_per_stock_accumulated_cost
-                        n_all_stock_accumulated_total_profit += n_accumulated_profit
-                        n_all_stock_current_total_market_value += n_market_value
-                        n_all_stock_current_total_market_value_after_fee_and_tax += ( n_market_value - n_trading_fee - n_trading_tax )
+                        n_per_stock_accumulated_profit = n_per_stock_market_value - n_expect_trading_fee - n_expect_trading_tax - n_per_stock_accumulated_cost
+                        n_all_stock_accumulated_profit += n_per_stock_accumulated_profit
+                        n_all_stock_current_total_market_value += n_per_stock_market_value
+                        n_all_stock_current_total_market_value_after_fee_and_tax += ( n_per_stock_market_value - n_expect_trading_fee - n_expect_trading_tax )
                         n_per_stock_accumulated_dividend_profit = int( n_per_stock_accumulated_stock_dividend * f_stock_price ) + n_per_stock_accumulated_cash_dividend
-                        str_accumulated_profit = format( n_accumulated_profit, "," )
+                        str_per_stock_accumulated_profit = format( n_per_stock_accumulated_profit, "," )
                         if n_accumulated_quantity > 0:
-                            list_per_stock_trading_flows.append( n_market_value - n_trading_fee - n_trading_tax )    
+                            list_per_stock_trading_flows.append( n_per_stock_market_value - n_expect_trading_fee - n_expect_trading_tax )    
                             list_per_stock_trading_date.append( obj_current_date )
 
-                        str_profit_ratio = "-"
+                        str_per_stock_xirr = "-"
                         if len( list_per_stock_trading_flows ) > 1:
                             try:
                                 per_stock_xirr_result = Utility.xirr( list_per_stock_trading_flows, list_per_stock_trading_date )
-                                str_profit_ratio = f"{per_stock_xirr_result:.3%}"
+                                str_per_stock_xirr = f"{per_stock_xirr_result:.3%}"
                             except ValueError as e:
-                                str_profit_ratio = "-"
+                                str_per_stock_xirr = "-"
                     else:
                         str_stock_price = "N/A"
-                        str_market_value = "N/A"
-                        str_accumulated_profit = "N/A"
-                        str_current_profit = "N/A"
-                        str_stock_price_color = QBrush( '#FFFFFF' )
-                        str_profit_ratio = "-"
-                        str_current_profit_ratio = "-"
+                        str_per_stock_market_value = "N/A"
+                        str_per_stock_accumulated_profit = "N/A"
+                        str_unrealized_profit = "N/A"
+                        qt_stock_price_color = QBrush( '#FFFFFF' )
+                        str_per_stock_xirr = "-"
+                        str_unrealized_profit_ratio = "-"
 
                     qt_standard_item = QStandardItem( str_stock_number_and_name )
                     qt_standard_item.setTextAlignment( Qt.AlignLeft | Qt.AlignVCenter )
@@ -4591,22 +4590,22 @@ class MainWindow( QMainWindow ):
 
                     for n_column, e_type in enumerate( self.list_show_stock_info ):
                         str_data = ""
-                        qtColor = QBrush( '#FFFFFF' )
+                        qt_color = QBrush( '#FFFFFF' )
                         if e_type == StockInfoType.LATEST_PRICE:#收盤價
                             str_data = str_stock_price
-                            qtColor = str_stock_price_color
+                            qt_color = qt_stock_price_color
                         elif e_type == StockInfoType.QUANTITY:#庫存股數
                             str_data = str_accumulated_quantity
                         elif e_type == StockInfoType.LATEST_MARKET_VALUE:#現值
-                            str_data = str_market_value
+                            str_data = str_per_stock_market_value
                         elif e_type == StockInfoType.CURRENT_COST:#現股成本
                             str_data =  format( f_current_average_cost, "," )
                         elif e_type == StockInfoType.UNREALIZED_PROFIT:#未實現損益
-                            str_data = str_current_profit
-                            qtColor = self.get_up_down_color( "0", str_current_profit )
+                            str_data = str_unrealized_profit
+                            qt_color = self.get_up_down_color( "0", str_unrealized_profit )
                         elif e_type == StockInfoType.UNREALIZED_PROFIT_RATIO:#未實現報酬率
-                            str_data = str_current_profit_ratio
-                            qtColor = self.get_up_down_color( "0", str_current_profit_ratio )
+                            str_data = str_unrealized_profit_ratio
+                            qt_color = self.get_up_down_color( "0", str_unrealized_profit_ratio )
                         elif e_type == StockInfoType.REALIZED_PROFIT:#已實現損益
                             pass
                         elif e_type == StockInfoType.BREAK_EVEN_PRICE:#損益平衡價
@@ -4616,8 +4615,8 @@ class MainWindow( QMainWindow ):
                         elif e_type == StockInfoType.ACCUMULATED_AVERAGE_COST:#累計平均成本
                             str_data = format( f_per_stock_accumulated_average_cost, "," )
                         elif e_type == StockInfoType.ACCUMULATED_PROFIT:#累計損益
-                            str_data = str_accumulated_profit
-                            qtColor = self.get_up_down_color( "0", str_accumulated_profit )
+                            str_data = str_per_stock_accumulated_profit
+                            qt_color = self.get_up_down_color( "0", str_per_stock_accumulated_profit )
                         elif e_type == StockInfoType.ACCUMULATED_TRADING_FEE:#累計手續費
                             str_data = format( n_per_stock_accumulated_trading_fee, "," )
                         elif e_type == StockInfoType.ACCUMULATED_TAX:#累計交易稅
@@ -4625,8 +4624,8 @@ class MainWindow( QMainWindow ):
                         elif e_type == StockInfoType.ACCUMULATED_DIVIDEND_INCOME:#累計股利所得
                             str_data = format( n_per_stock_accumulated_dividend_profit, "," )
                         elif e_type == StockInfoType.XIRR_VALUE:#平均年化報酬率
-                            str_data = str_profit_ratio
-                            qtColor = self.get_up_down_color( "0", str_profit_ratio )
+                            str_data = str_per_stock_xirr
+                            qt_color = self.get_up_down_color( "0", str_per_stock_xirr )
                         elif e_type == StockInfoType.HOLDING_MARKET_RATIO:#持股淨值比
                             pass
 
@@ -4635,7 +4634,7 @@ class MainWindow( QMainWindow ):
                         qt_standard_item.setTextAlignment( Qt.AlignHCenter | Qt.AlignVCenter )
                         qt_standard_item.setFlags( qt_standard_item.flags() & ~Qt.ItemIsEditable )
                         qt_standard_item.setData( key_stock_number, Qt.UserRole )
-                        qt_standard_item.setForeground( qtColor )
+                        qt_standard_item.setForeground( qt_color )
                         qt_table_model.setItem( n_index_row, n_column + 1, qt_standard_item ) 
 
                     qt_use_auto_dividend_item = QStandardItem()
@@ -4686,7 +4685,7 @@ class MainWindow( QMainWindow ):
         total_inventory_value_label = self.ui.qtTabWidget.currentWidget().findChild( QLabel, "TotalInventoryValueLabel")
         total_inventory_value_label.setText( format( n_all_stock_current_total_market_value, "," ) )
         total_profit_value_label = self.ui.qtTabWidget.currentWidget().findChild( QLabel, "TotalProfitValueLabel")
-        total_profit_value_label.setText( format( n_all_stock_accumulated_total_profit, "," ) )
+        total_profit_value_label.setText( format( n_all_stock_accumulated_profit, "," ) )
 
         list_all_stock_trading_flows.append( n_all_stock_current_total_market_value_after_fee_and_tax )
         list_all_stock_trading_date.append( obj_current_date )
