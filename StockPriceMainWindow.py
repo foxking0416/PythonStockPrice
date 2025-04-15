@@ -4465,6 +4465,7 @@ class MainWindow( QMainWindow ):
 
         list_all_stock_trading_date = []
         list_all_stock_trading_flows = []
+        list_all_stock_market_value = []
         if qt_table_view:
             qt_table_model = qt_table_view.model()
             if clear_table:
@@ -4581,6 +4582,7 @@ class MainWindow( QMainWindow ):
                         str_stock_price = format( f_stock_price, "," )
                         n_per_stock_market_value = int( round( n_accumulated_quantity * f_stock_price, 0 ) )
                         str_per_stock_market_value = format( n_per_stock_market_value, "," )
+                        list_all_stock_market_value.append( n_per_stock_market_value )
 
                         n_expect_trading_fee = 0
                         if n_accumulated_quantity > 0:
@@ -4624,6 +4626,7 @@ class MainWindow( QMainWindow ):
                             except ValueError as e:
                                 str_per_stock_xirr = "-"
                     else:
+                        list_all_stock_market_value.append( 0 )
                         str_stock_price = "N/A"
                         str_per_stock_market_value = "N/A"
                         str_per_stock_accumulated_profit = "N/A"
@@ -4680,7 +4683,6 @@ class MainWindow( QMainWindow ):
                         elif e_type == StockInfoType.HOLDING_MARKET_RATIO:#持股淨值比
                             pass
 
-
                         qt_standard_item = QStandardItem( str_data )
                         qt_standard_item.setTextAlignment( Qt.AlignHCenter | Qt.AlignVCenter )
                         qt_standard_item.setFlags( qt_standard_item.flags() & ~Qt.ItemIsEditable )
@@ -4731,6 +4733,22 @@ class MainWindow( QMainWindow ):
                 for n_index_row in range( len( dict_per_account_all_stock_trading_data ) ):
                     qt_table_view.setRowHeight( n_index_row, 25 )
                 qt_table_model.setVerticalHeaderLabels( list_vertical_labels )
+        for n_index_row, n_per_market_value in enumerate( list_all_stock_market_value ):
+            f_holding_ratio = n_per_market_value / n_all_stock_current_total_market_value if n_all_stock_current_total_market_value != 0 else 0
+            f_holding_ratio = f_holding_ratio * 100
+            str_holding_ratio = format( f_holding_ratio, ".1f" ) + "%"
+            for n_column, e_type in enumerate( self.list_show_stock_info ):
+                str_data = ""
+                qt_color = QBrush( '#FFFFFF' )
+                if e_type == StockInfoType.HOLDING_MARKET_RATIO:#持股淨值比
+                    qt_standard_item = QStandardItem( str_holding_ratio )
+                    qt_standard_item.setTextAlignment( Qt.AlignHCenter | Qt.AlignVCenter )
+                    qt_standard_item.setFlags( qt_standard_item.flags() & ~Qt.ItemIsEditable )
+                    qt_standard_item.setData( key_stock_number, Qt.UserRole )
+                    qt_standard_item.setForeground( qt_color )
+                    qt_table_model.setItem( n_index_row, n_column + 1, qt_standard_item ) 
+
+
         total_cost_value_label = self.ui.qtTabWidget.currentWidget().findChild( QLabel, "TotalCostValueLabel")
         total_cost_value_label.setText( format( n_all_stock_total_cost, "," ) )
         total_inventory_value_label = self.ui.qtTabWidget.currentWidget().findChild( QLabel, "TotalInventoryValueLabel")
