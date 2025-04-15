@@ -168,15 +168,15 @@ class TradingData( Enum ):
     EXTRA_INSURANCE_FEE_NON_SAVE = auto() #不會記錄
     ACCUMULATED_COST_NON_SAVE = auto() #不會記錄
     ACCUMULATED_COST_WITHOUT_CONSIDERING_DIVIDEND_NON_SAVE = auto() #不會記錄
-    ACCUMULATED_INVENTORY_NON_SAVE = auto() #不會記錄
-    AVERAGE_COST_NON_SAVE = auto() #不會記錄
-    AVERAGE_COST_WITHOUT_CONSIDERING_DIVIDEND_NON_SAVE = auto() #不會記錄
+    ACCUMULATED_QUANTITY_NON_SAVE = auto() #不會記錄
+    ACCUMULATED_AVERAGE_COST_NON_SAVE = auto() #不會記錄
+    ACCUMULATED_AVERAGE_COST_WITHOUT_CONSIDERING_DIVIDEND_NON_SAVE = auto() #不會記錄
     IS_AUTO_DIVIDEND_DATA_NON_SAVE = auto() #不會記錄
-    ALL_STOCK_DIVIDEND_GAIN_NON_SAVE = auto() #不會記錄
-    ALL_CASH_DIVIDEND_GAIN_NON_SAVE = auto() #不會記錄
+    ACCUMULATED_STOCK_DIVIDEND_GAIN_NON_SAVE = auto() #不會記錄
+    ACCUMULATED_CASH_DIVIDEND_GAIN_NON_SAVE = auto() #不會記錄
     IS_REALLY_DAYING_TRADING_NON_SAVE = auto() #不會記錄
     SELLING_PROFIT_NON_SAVE = auto() #不會記錄 本次出售損益
-    CURRENT_BUYING_COST_NON_SAVE = auto() #不會記錄 剩餘平均買進成本
+    CURRENT_BUYING_COST_NON_SAVE = auto() #不會記錄 現股總買進成本
     
 class TradingCost( Enum ):
     TRADING_VALUE = 0
@@ -4371,11 +4371,11 @@ class MainWindow( QMainWindow ):
                     queue_buying_data[ i ][ 1 ] = int( Decimal( str( queue_buying_data[ i ][ 1 ] ) ) * Decimal( str( item[ TradingData.CAPITAL_REDUCTION_PER_SHARE ] ) ) )
             item[ TradingData.ACCUMULATED_COST_NON_SAVE ] = n_accumulated_cost
             item[ TradingData.ACCUMULATED_COST_WITHOUT_CONSIDERING_DIVIDEND_NON_SAVE ] = n_accumulated_cost_without_considering_dividend
-            item[ TradingData.ACCUMULATED_INVENTORY_NON_SAVE ] = n_accumulated_inventory
-            item[ TradingData.AVERAGE_COST_NON_SAVE ] = n_accumulated_cost / n_accumulated_inventory if n_accumulated_inventory != 0 else 0
-            item[ TradingData.AVERAGE_COST_WITHOUT_CONSIDERING_DIVIDEND_NON_SAVE ] = n_accumulated_cost_without_considering_dividend / n_accumulated_inventory if n_accumulated_inventory != 0 else 0
-            item[ TradingData.ALL_STOCK_DIVIDEND_GAIN_NON_SAVE ] = n_accumulated_stock_dividend
-            item[ TradingData.ALL_CASH_DIVIDEND_GAIN_NON_SAVE ] = n_accumulated_cash_dividend
+            item[ TradingData.ACCUMULATED_QUANTITY_NON_SAVE ] = n_accumulated_inventory
+            item[ TradingData.ACCUMULATED_AVERAGE_COST_NON_SAVE ] = n_accumulated_cost / n_accumulated_inventory if n_accumulated_inventory != 0 else 0
+            item[ TradingData.ACCUMULATED_AVERAGE_COST_WITHOUT_CONSIDERING_DIVIDEND_NON_SAVE ] = n_accumulated_cost_without_considering_dividend / n_accumulated_inventory if n_accumulated_inventory != 0 else 0
+            item[ TradingData.ACCUMULATED_STOCK_DIVIDEND_GAIN_NON_SAVE ] = n_accumulated_stock_dividend
+            item[ TradingData.ACCUMULATED_CASH_DIVIDEND_GAIN_NON_SAVE ] = n_accumulated_cash_dividend
             if index == len( sorted_list ) - 1:
                 n_total_rest_buying_cost = 0
                 n_total_rest_buying_count = 0
@@ -4443,7 +4443,7 @@ class MainWindow( QMainWindow ):
                     dict_trading_data_first = value_list_stock_trading_data[ 0 ] #取第一筆交易資料，因為第一筆交易資料有存是否使用自動帶入股利
                     dict_trading_data_last = value_list_stock_trading_data[ len( value_list_stock_trading_data ) - 1 ] #取最後一筆交易資料，因為最後一筆交易資料的庫存等內容才是所有累計的結果
 
-                    n_accumulated_inventory = dict_trading_data_last.get( TradingData.ACCUMULATED_INVENTORY_NON_SAVE, 0 )
+                    n_accumulated_inventory = dict_trading_data_last.get( TradingData.ACCUMULATED_QUANTITY_NON_SAVE, 0 )
                     if display_type_combobox.currentIndex() == 1 and n_accumulated_inventory == 0:#僅顯示目前有庫存的股票
                         continue
                     elif display_type_combobox.currentIndex() == 2 and n_accumulated_inventory != 0:#僅顯示目前沒有庫存的股票
@@ -4480,14 +4480,14 @@ class MainWindow( QMainWindow ):
                     #歷史總成本、歷史平均成本
                     if self.ui.qtCostWithInDividendAction.isChecked():
                         n_per_stock_accumulated_cost = dict_trading_data_last.get( TradingData.ACCUMULATED_COST_NON_SAVE, 0 )
-                        f_per_stock_average_cost = round( dict_trading_data_last.get( TradingData.AVERAGE_COST_NON_SAVE, 0 ), 3 )
+                        f_per_stock_average_cost = round( dict_trading_data_last.get( TradingData.ACCUMULATED_AVERAGE_COST_NON_SAVE, 0 ), 3 )
                     else:
                         n_per_stock_accumulated_cost = dict_trading_data_last.get( TradingData.ACCUMULATED_COST_WITHOUT_CONSIDERING_DIVIDEND_NON_SAVE, 0 )
-                        f_per_stock_average_cost = round( dict_trading_data_last.get( TradingData.AVERAGE_COST_WITHOUT_CONSIDERING_DIVIDEND_NON_SAVE, 0 ), 3 )
+                        f_per_stock_average_cost = round( dict_trading_data_last.get( TradingData.ACCUMULATED_AVERAGE_COST_WITHOUT_CONSIDERING_DIVIDEND_NON_SAVE, 0 ), 3 )
                     n_all_stock_total_cost += n_per_stock_accumulated_cost
 
-                    n_per_stock_accumulated_stock_dividend = dict_trading_data_last.get( TradingData.ALL_STOCK_DIVIDEND_GAIN_NON_SAVE, 0 )
-                    n_per_stock_accumulated_cash_dividend = dict_trading_data_last.get( TradingData.ALL_CASH_DIVIDEND_GAIN_NON_SAVE, 0 )
+                    n_per_stock_accumulated_stock_dividend = dict_trading_data_last.get( TradingData.ACCUMULATED_STOCK_DIVIDEND_GAIN_NON_SAVE, 0 )
+                    n_per_stock_accumulated_cash_dividend = dict_trading_data_last.get( TradingData.ACCUMULATED_CASH_DIVIDEND_GAIN_NON_SAVE, 0 )
 
                     list_per_stock_trading_date = []
                     list_per_stock_trading_flows = []
@@ -5002,7 +5002,7 @@ class MainWindow( QMainWindow ):
         n_extra_insurance_fee = dict_per_trading_data[ TradingData.EXTRA_INSURANCE_FEE_NON_SAVE ]
         n_per_trading_total_cost = dict_per_trading_data[ TradingData.TRADING_COST_NON_SAVE ]
         e_dividend_value_type = dict_per_trading_data[ TradingData.DIVIDEND_VALUE_TYPE ]
-        n_accumulated_inventory = dict_per_trading_data[ TradingData.ACCUMULATED_INVENTORY_NON_SAVE ]
+        n_accumulated_inventory = dict_per_trading_data[ TradingData.ACCUMULATED_QUANTITY_NON_SAVE ]
         if e_dividend_value_type == DividendValueType.PER_SHARE:
             f_stock_dividend_per_share = dict_per_trading_data[ TradingData.STOCK_DIVIDEND ]
             f_cash_dividend_per_share = dict_per_trading_data[ TradingData.CASH_DIVIDEND ]
@@ -5017,10 +5017,10 @@ class MainWindow( QMainWindow ):
         n_cash_dividend_gain = dict_per_trading_data[ TradingData.CASH_DIVIDEND_GAIN_NON_SAVE ]
         if self.ui.qtCostWithInDividendAction.isChecked():
             n_accumulated_cost = dict_per_trading_data[ TradingData.ACCUMULATED_COST_NON_SAVE ]
-            f_average_cost = round( dict_per_trading_data[ TradingData.AVERAGE_COST_NON_SAVE ], 3 )
+            f_average_cost = round( dict_per_trading_data[ TradingData.ACCUMULATED_AVERAGE_COST_NON_SAVE ], 3 )
         else:
             n_accumulated_cost = dict_per_trading_data[ TradingData.ACCUMULATED_COST_WITHOUT_CONSIDERING_DIVIDEND_NON_SAVE ]
-            f_average_cost = round( dict_per_trading_data[ TradingData.AVERAGE_COST_WITHOUT_CONSIDERING_DIVIDEND_NON_SAVE ], 3 )
+            f_average_cost = round( dict_per_trading_data[ TradingData.ACCUMULATED_AVERAGE_COST_WITHOUT_CONSIDERING_DIVIDEND_NON_SAVE ], 3 )
         if self.ui.qtUse1ShareUnitAction.isChecked():
             str_trading_count = format( n_trading_count, "," )
             str_stock_dividend_gain = format( n_stock_dividend_gain, "," )
