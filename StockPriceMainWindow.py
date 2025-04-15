@@ -1561,6 +1561,42 @@ class Utility():
         str_weekday = share_api.get_qt_weekday_text( n_weekday )
         qt_weekday_label.setText( str_weekday )
 
+    @staticmethod
+    def get_tick_unit( f_price: float, b_etf: bool ) -> float:
+        if b_etf:
+            if f_price < 50:
+                return 0.01
+            else:
+                return 0.05
+        else:
+            if f_price < 10:
+                return 0.01
+            elif f_price < 50:
+                return 0.05
+            elif f_price < 100:
+                return 0.1
+            elif f_price < 500:
+                return 0.5
+            elif f_price < 1000:
+                return 1
+            else:
+                return 5
+            
+    @staticmethod
+    def round_to_tick_unit( f_price: float, b_etf: bool ) -> float:
+        f_tick = Utility.get_tick_unit( f_price, b_etf )
+        return round( f_price / f_tick ) * f_tick
+    
+    @staticmethod
+    def ceil_to_tick_unit( f_price: float, b_etf: bool ) -> float:
+        f_tick = Utility.get_tick_unit( f_price, b_etf )
+        return math.ceil( f_price / f_tick ) * f_tick
+    
+    @staticmethod
+    def floor_to_tick_unit( f_price: float, b_etf: bool ) -> float:
+        f_tick = Utility.get_tick_unit( f_price, b_etf )
+        return math.floor( f_price / f_tick ) * f_tick
+
 class Worker( QObject ):
     progress = Signal( int )  # Signal to emit progress updates
     finished = Signal( dict )  # Signal to emit the result when done
@@ -4465,8 +4501,19 @@ class MainWindow( QMainWindow ):
                     n_current_buying_cost = dict_trading_data_last.get( TradingData.CURRENT_BUYING_COST_NON_SAVE, 0 )
                     if n_accumulated_quantity == 0:
                         f_current_average_cost = 0#現股成本
+                        str_break_even_price = '-'
                     else:
                         f_current_average_cost = round( n_current_buying_cost / n_accumulated_quantity, 2 )#現股成本
+
+                        if b_etf:
+                            if b_bond:
+                                f_break_even_price = n_current_buying_cost / 0.998575 / n_accumulated_quantity # 1 - 0.001425 = 0.998575
+                            else:
+                                f_break_even_price = n_current_buying_cost / 0.997575 / n_accumulated_quantity # 1 - 0.001425 - 0.001 = 0.997575
+                        else:
+                            f_break_even_price = n_current_buying_cost / 0.995575 / n_accumulated_quantity # 1 - 0.001425 - 0.003 = 0.995575
+                        f_break_even_price = Utility.ceil_to_tick_unit( f_break_even_price, b_etf )
+                        str_break_even_price = format( f_break_even_price, ",.2f" )
 
                     #目前庫存
                     if self.ui.qtUse1ShareUnitAction.isChecked():
@@ -4613,7 +4660,7 @@ class MainWindow( QMainWindow ):
                             str_data = format( n_per_stock_realized_profit, "," )
                             qt_color = self.get_up_down_color( "0", str_data )
                         elif e_type == StockInfoType.BREAK_EVEN_PRICE:#損益平衡價
-                            pass
+                            str_data = str_break_even_price
                         elif e_type == StockInfoType.ACCUMULATED_COST:#累計成本
                             str_data = format( n_per_stock_accumulated_cost, "," )
                         elif e_type == StockInfoType.ACCUMULATED_AVERAGE_COST:#累計平均成本
