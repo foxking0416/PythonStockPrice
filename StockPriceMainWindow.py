@@ -2177,7 +2177,7 @@ class MainWindow( QMainWindow ):
 
 
         if not str_tab_title:
-            str_tab_title = "新群組"
+            str_tab_title = "新帳戶"
         with QSignalBlocker( self.ui.qtTabWidget ):
             n_ori_count = self.ui.qtTabWidget.count()
             self.ui.qtTabWidget.insertTab( n_ori_count - 1, increased_tab, str_tab_title )
