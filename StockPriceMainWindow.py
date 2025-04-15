@@ -196,40 +196,40 @@ class TransferData( Enum ):
     TOTAL_VALUE_NON_SAVE = 4 #不會記錄
 
 class StockInfoType( Enum ):
-    LATEST_STOCK_PRICE = 1 #收盤價
-    STOCK_INVENTORY = 2 #庫存股數
-    LATEST_NET_VALUE = 3 #現值
+    LATEST_PRICE = 1 #收盤價
+    QUANTITY = 2 #庫存股數
+    LATEST_MARKET_VALUE = 3 #現值
     CURRENT_COST = 4 #現股成本
-    CURRENT_PROFIT = 5 #未實現損益
-    CURRENT_PROFIT_RATIO = 6 #未實現報酬率
+    UNREALIZED_PROFIT = 5 #未實現損益
+    UNREALIZED_PROFIT_RATIO = 6 #未實現報酬率
     REALIZED_PROFIT = 7 #已實現損益
-    BALANCE_PRICE = 8 #損益平衡價
-    HISTORY_TOTAL_COST = 9 #累計成本
-    HISTORY_AVERAGE_COST = 10 #累計平均成本
-    HISTORY_TOTAL_PROFIT = 11 #累計損益
-    HISTORY_TOTAL_TRADING_FEE = 12 #累計手續費
-    HISTORY_TOTAL_TAX = 13 #累計交易稅
-    DIVIDEND_INCOME = 14 #累計股利所得
+    BREAK_EVEN_PRICE = 8 #損益平衡價
+    ACCUMULATED_COST = 9 #累計成本
+    ACCUMULATED_AVERAGE_COST = 10 #累計平均成本
+    ACCUMULATED_PROFIT = 11 #累計損益
+    ACCUMULATED_TRADING_FEE = 12 #累計手續費
+    ACCUMULATED_TAX = 13 #累計交易稅
+    ACCUMULATED_DIVIDEND_INCOME = 14 #累計股利所得
     XIRR_VALUE = 15 #平均年化報酬率
-    HOLDING_STOCK_NET_RATIO = 16 #持股淨值比
+    HOLDING_MARKET_RATIO = 16 #持股淨值比
 
 g_dict_stock_info = {
-    StockInfoType.LATEST_STOCK_PRICE: "收盤價",
-    StockInfoType.STOCK_INVENTORY: "庫存股數",
-    StockInfoType.LATEST_NET_VALUE: "現值",
+    StockInfoType.LATEST_PRICE: "收盤價",
+    StockInfoType.QUANTITY: "庫存股數",
+    StockInfoType.LATEST_MARKET_VALUE: "市值",
     StockInfoType.CURRENT_COST: "現股成本",
-    StockInfoType.CURRENT_PROFIT: "未實現損益",
-    StockInfoType.CURRENT_PROFIT_RATIO: "未實現報酬率",
+    StockInfoType.UNREALIZED_PROFIT: "未實現損益",
+    StockInfoType.UNREALIZED_PROFIT_RATIO: "未實現報酬率",
     StockInfoType.REALIZED_PROFIT: "已實現損益",
-    StockInfoType.BALANCE_PRICE: "損益平衡價",
-    StockInfoType.HISTORY_TOTAL_COST: "累計成本",
-    StockInfoType.HISTORY_AVERAGE_COST: "累計平均成本",
-    StockInfoType.HISTORY_TOTAL_PROFIT: "累計損益",
-    StockInfoType.HISTORY_TOTAL_TRADING_FEE: "累計手續費",
-    StockInfoType.HISTORY_TOTAL_TAX: "累計交易稅",
-    StockInfoType.DIVIDEND_INCOME: "累計股利所得",
+    StockInfoType.BREAK_EVEN_PRICE: "損益平衡價",
+    StockInfoType.ACCUMULATED_COST: "累計成本",
+    StockInfoType.ACCUMULATED_AVERAGE_COST: "累計平均成本",
+    StockInfoType.ACCUMULATED_PROFIT: "累計損益",
+    StockInfoType.ACCUMULATED_TRADING_FEE: "累計手續費",
+    StockInfoType.ACCUMULATED_TAX: "累計交易稅",
+    StockInfoType.ACCUMULATED_DIVIDEND_INCOME: "累計股利所得",
     StockInfoType.XIRR_VALUE: "平均年化報酬率",
-    StockInfoType.HOLDING_STOCK_NET_RATIO: "持股淨值比"
+    StockInfoType.HOLDING_MARKET_RATIO: "持股淨值比"
 }
 #endregion
 
@@ -1711,22 +1711,22 @@ class MainWindow( QMainWindow ):
         self.dict_all_account_all_stock_trading_data = {}
         self.dict_all_account_all_stock_trading_data_INITIAL = {}
         self.list_total_stock_info_INITIAL = [ 
-                                               StockInfoType.LATEST_STOCK_PRICE, #收盤價
-                                               StockInfoType.STOCK_INVENTORY, #庫存股數
-                                               StockInfoType.LATEST_NET_VALUE, #現值
+                                               StockInfoType.LATEST_PRICE, #收盤價
+                                               StockInfoType.QUANTITY, #庫存股數
+                                               StockInfoType.LATEST_MARKET_VALUE, #現值
                                                StockInfoType.CURRENT_COST, #現股成本
-                                               StockInfoType.CURRENT_PROFIT, #未實現損益
-                                               StockInfoType.CURRENT_PROFIT_RATIO, #未實現報酬率
+                                               StockInfoType.UNREALIZED_PROFIT, #未實現損益
+                                               StockInfoType.UNREALIZED_PROFIT_RATIO, #未實現報酬率
                                                StockInfoType.REALIZED_PROFIT, #已實現損益
-                                               StockInfoType.BALANCE_PRICE, #損益平衡價
-                                               StockInfoType.HISTORY_TOTAL_COST, #累計成本
-                                               StockInfoType.HISTORY_AVERAGE_COST, #累計平均成本
-                                               StockInfoType.HISTORY_TOTAL_PROFIT, #累計損益
-                                               StockInfoType.HISTORY_TOTAL_TRADING_FEE, #累計手續費
-                                               StockInfoType.HISTORY_TOTAL_TAX, #累計交易稅
-                                               StockInfoType.DIVIDEND_INCOME, #累計股利所得
+                                               StockInfoType.BREAK_EVEN_PRICE, #損益平衡價
+                                               StockInfoType.ACCUMULATED_COST, #累計成本
+                                               StockInfoType.ACCUMULATED_AVERAGE_COST, #累計平均成本
+                                               StockInfoType.ACCUMULATED_PROFIT, #累計損益
+                                               StockInfoType.ACCUMULATED_TRADING_FEE, #累計手續費
+                                               StockInfoType.ACCUMULATED_TAX, #累計交易稅
+                                               StockInfoType.ACCUMULATED_DIVIDEND_INCOME, #累計股利所得
                                                StockInfoType.XIRR_VALUE, #平均年化報酬率
-                                               StockInfoType.HOLDING_STOCK_NET_RATIO, #持股淨值比
+                                               StockInfoType.HOLDING_MARKET_RATIO, #持股淨值比
                                                ]
 
         self.list_show_stock_info = copy.deepcopy( self.list_total_stock_info_INITIAL )
@@ -4588,42 +4588,42 @@ class MainWindow( QMainWindow ):
                     for column, e_type in enumerate( self.list_show_stock_info ):
                         str_data = ""
                         qtColor = QBrush( '#FFFFFF' )
-                        if e_type == StockInfoType.LATEST_STOCK_PRICE:#收盤價
+                        if e_type == StockInfoType.LATEST_PRICE:#收盤價
                             str_data = str_stock_price
                             qtColor = str_stock_price_color
-                        elif e_type == StockInfoType.STOCK_INVENTORY:#庫存股數
+                        elif e_type == StockInfoType.QUANTITY:#庫存股數
                             str_data = str_accumulated_inventory
-                        elif e_type == StockInfoType.LATEST_NET_VALUE:#現值
+                        elif e_type == StockInfoType.LATEST_MARKET_VALUE:#現值
                             str_data = str_net_value
                         elif e_type == StockInfoType.CURRENT_COST:#現股成本
                             str_data =  format( f_current_average_cost, "," )
-                        elif e_type == StockInfoType.CURRENT_PROFIT:#未實現損益
+                        elif e_type == StockInfoType.UNREALIZED_PROFIT:#未實現損益
                             str_data = str_current_profit
                             qtColor = self.get_up_down_color( "0", str_current_profit )
-                        elif e_type == StockInfoType.CURRENT_PROFIT_RATIO:#未實現報酬率
+                        elif e_type == StockInfoType.UNREALIZED_PROFIT_RATIO:#未實現報酬率
                             str_data = str_current_profit_ratio
                             qtColor = self.get_up_down_color( "0", str_current_profit_ratio )
                         elif e_type == StockInfoType.REALIZED_PROFIT:#已實現損益
                             pass
-                        elif e_type == StockInfoType.BALANCE_PRICE:#損益平衡價
+                        elif e_type == StockInfoType.BREAK_EVEN_PRICE:#損益平衡價
                             pass
-                        elif e_type == StockInfoType.HISTORY_TOTAL_COST:#累計成本
+                        elif e_type == StockInfoType.ACCUMULATED_COST:#累計成本
                             str_data = format( n_per_stock_accumulated_cost, "," )
-                        elif e_type == StockInfoType.HISTORY_AVERAGE_COST:#累計平均成本
+                        elif e_type == StockInfoType.ACCUMULATED_AVERAGE_COST:#累計平均成本
                             str_data = format( f_per_stock_average_cost, "," )
-                        elif e_type == StockInfoType.HISTORY_TOTAL_PROFIT:#累計損益
+                        elif e_type == StockInfoType.ACCUMULATED_PROFIT:#累計損益
                             str_data = str_accumulated_profit
                             qtColor = self.get_up_down_color( "0", str_accumulated_profit )
-                        elif e_type == StockInfoType.HISTORY_TOTAL_TRADING_FEE:#累計手續費
+                        elif e_type == StockInfoType.ACCUMULATED_TRADING_FEE:#累計手續費
                             str_data = format( n_per_stock_total_trading_fee, "," )
-                        elif e_type == StockInfoType.HISTORY_TOTAL_TAX:#累計交易稅
+                        elif e_type == StockInfoType.ACCUMULATED_TAX:#累計交易稅
                             str_data = format( n_per_stock_total_trading_tax, "," )
-                        elif e_type == StockInfoType.DIVIDEND_INCOME:#累計股利所得
+                        elif e_type == StockInfoType.ACCUMULATED_DIVIDEND_INCOME:#累計股利所得
                             str_data = format( n_per_stock_accumulated_dividend_profit, "," )
                         elif e_type == StockInfoType.XIRR_VALUE:#平均年化報酬率
                             str_data = str_profit_ratio
                             qtColor = self.get_up_down_color( "0", str_profit_ratio )
-                        elif e_type == StockInfoType.HOLDING_STOCK_NET_RATIO:#持股淨值比
+                        elif e_type == StockInfoType.HOLDING_MARKET_RATIO:#持股淨值比
                             pass
 
 
@@ -4714,12 +4714,12 @@ class MainWindow( QMainWindow ):
         list_header = []
         list_header.append( '股票代碼及名稱' )
         for e_type in self.list_show_stock_info:
-            if e_type == StockInfoType.STOCK_INVENTORY:
+            if e_type == StockInfoType.QUANTITY:
                 if self.ui.qtUse1ShareUnitAction.isChecked():
                     list_header.append( "庫存股數" )
                 else:
                     list_header.append( "庫存張數" )
-            elif e_type == StockInfoType.LATEST_STOCK_PRICE:
+            elif e_type == StockInfoType.LATEST_PRICE:
                 list_header.append( self.str_latest_price_column_header )
             else:
                 list_header.append( g_dict_stock_info[ e_type ] )
