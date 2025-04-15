@@ -4799,19 +4799,19 @@ class MainWindow( QMainWindow ):
                 list_header.append( self.str_latest_price_column_header )
             elif e_type == StockInfoType.ACCUMULATED_COST:
                 if self.ui.qtCostWithInDividendAction.isChecked():
-                    list_header.append( "累計成本\n(含股息)" )
+                    list_header.append( "累計成本\n(含息)" )
                 else:
-                    list_header.append( "累計成本\n(不含股息)" )
+                    list_header.append( "累計成本\n(不含息)" )
             elif e_type == StockInfoType.ACCUMULATED_AVERAGE_COST:
                 if self.ui.qtCostWithInDividendAction.isChecked():
-                    list_header.append( "累計平均成本\n(含股息)" )
+                    list_header.append( "累計平均成本\n(含息)" )
                 else:
-                    list_header.append( "累計平均成本\n(不含股息)" )
+                    list_header.append( "累計平均成本\n(不含息)" )
             elif e_type == StockInfoType.ACCUMULATED_PROFIT:
                 if self.ui.qtCostWithInDividendAction.isChecked():
-                    list_header.append( "累計損益\n(含股息)" )
+                    list_header.append( "累計損益\n(含息)" )
                 else:
-                    list_header.append( "累計損益\n(不含股息)" )
+                    list_header.append( "累計損益\n(不含息)" )
             else:
                 list_header.append( g_dict_stock_info[ e_type ] )
 
@@ -5089,11 +5089,11 @@ class MainWindow( QMainWindow ):
             list_vertical_header[ 7 ] = '全部股票股利(張) /\n每股股票股利(元)'
             list_vertical_header[ 11 ] = '庫存張數'
         if self.ui.qtCostWithInDividendAction.isChecked():
-            list_vertical_header[ 10 ] = '累計成本(含股息)'
-            list_vertical_header[ 12 ] = '累計平均成本(含股息)'
+            list_vertical_header[ 10 ] = '累計成本(含息)'
+            list_vertical_header[ 12 ] = '累計平均成本(含息)'
         else:
-            list_vertical_header[ 10 ] = '累計成本(不含股息)'
-            list_vertical_header[ 12 ] = '累計平均成本(不含股息)'
+            list_vertical_header[ 10 ] = '累計成本(不含息)'
+            list_vertical_header[ 12 ] = '累計平均成本(不含息)'
 
         return list_vertical_header
 
