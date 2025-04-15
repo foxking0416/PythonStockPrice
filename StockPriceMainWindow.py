@@ -4493,12 +4493,14 @@ class MainWindow( QMainWindow ):
                     list_per_stock_trading_flows = []
                     n_per_stock_accumulated_trading_fee = 0
                     n_per_stock_accumulated_trading_tax = 0
+                    n_per_stock_realized_profit = 0
                     for trading_data in value_list_stock_trading_data:
                         e_trading_type = trading_data[ TradingData.TRADING_TYPE ]
                         if e_trading_type == TradingType.TEMPLATE:
                             continue
                         n_per_stock_accumulated_trading_fee += trading_data[ TradingData.TRADING_FEE_NON_SAVE ]
                         n_per_stock_accumulated_trading_tax += trading_data[ TradingData.TRADING_TAX_NON_SAVE ]
+                        n_per_stock_realized_profit += trading_data.get( TradingData.SELLING_PROFIT_NON_SAVE, 0 )
 
                         if key_stock_number in self.dict_all_company_number_to_price_info:
                             if ( e_trading_type == TradingType.BUY or
@@ -4607,7 +4609,8 @@ class MainWindow( QMainWindow ):
                             str_data = str_per_stock_unrealized_profit_ratio
                             qt_color = self.get_up_down_color( "0", str_per_stock_unrealized_profit_ratio )
                         elif e_type == StockInfoType.REALIZED_PROFIT:#已實現損益
-                            pass
+                            str_data = format( n_per_stock_realized_profit, "," )
+                            qt_color = self.get_up_down_color( "0", str_data )
                         elif e_type == StockInfoType.BREAK_EVEN_PRICE:#損益平衡價
                             pass
                         elif e_type == StockInfoType.ACCUMULATED_COST:#累計成本
