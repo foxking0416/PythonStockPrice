@@ -144,7 +144,7 @@ class TradingData( Enum ):
     TRADING_PRICE_TYPE = auto() # 0:每股, 1:總金額
     PER_SHARE_TRADING_PRICE = auto()
     TOTAL_TRADING_PRICE = auto()
-    TRADING_COUNT = auto()
+    TRADING_QUANTITY = auto()
     TRADING_FEE_DISCOUNT = auto()
     REGULAR_BUY_TRADING_FEE_TYPE = auto() # 0:固定, 1:變動
     REGULAR_BUY_TRADING_FEE_MINIMUM = auto()
@@ -1520,7 +1520,7 @@ class Utility():
         dict_trading_data[ TradingData.TRADING_PRICE_TYPE ] = e_trading_price_type
         dict_trading_data[ TradingData.PER_SHARE_TRADING_PRICE ] = f_per_share_trading_price
         dict_trading_data[ TradingData.TOTAL_TRADING_PRICE ] = n_total_trading_price
-        dict_trading_data[ TradingData.TRADING_COUNT ] = n_trading_count
+        dict_trading_data[ TradingData.TRADING_QUANTITY ] = n_trading_count
         dict_trading_data[ TradingData.REGULAR_BUY_TRADING_FEE_TYPE ] = e_regular_buy_trading_fee_type
         dict_trading_data[ TradingData.TRADING_FEE_DISCOUNT ] = f_trading_fee_discount
         dict_trading_data[ TradingData.REGULAR_BUY_TRADING_FEE_MINIMUM ] = n_regular_buy_trading_fee_minimum
@@ -2892,13 +2892,13 @@ class MainWindow( QMainWindow ):
                         dialog.setup_trading_type( dict_selected_data[ TradingData.TRADING_TYPE ] )
                         dialog.setup_trading_discount( dict_selected_data[ TradingData.TRADING_FEE_DISCOUNT ] )
                         dialog.setup_trading_price( dict_selected_data[ TradingData.PER_SHARE_TRADING_PRICE ] )
-                        dialog.setup_trading_count( dict_selected_data[ TradingData.TRADING_COUNT ] )
+                        dialog.setup_trading_count( dict_selected_data[ TradingData.TRADING_QUANTITY ] )
                         dialog.setup_daying_trading( dict_selected_data[ TradingData.DAYING_TRADING ] )
                         dialog.compute_cost()
                     elif dict_selected_data[ TradingData.TRADING_TYPE ] == TradingType.REGULAR_BUY:
                         dialog = StockRegularTradingEditDialog( str_stock_number, str_stock_name, TradingPriceType.PER_SHARE, TradingFeeType.VARIABLE, True, 0, 0, 0, self )
                         dialog.setup_trading_date( dict_selected_data[ TradingData.TRADING_DATE ] )
-                        dialog.setup_trading_count( dict_selected_data[ TradingData.TRADING_COUNT ] )
+                        dialog.setup_trading_count( dict_selected_data[ TradingData.TRADING_QUANTITY ] )
                         dialog.setup_trading_price_type( dict_selected_data[ TradingData.TRADING_PRICE_TYPE ] )
                         dialog.setup_per_share_trading_price( dict_selected_data[ TradingData.PER_SHARE_TRADING_PRICE ] )
                         dialog.setup_total_trading_price( dict_selected_data[ TradingData.TOTAL_TRADING_PRICE ] )
@@ -2923,7 +2923,7 @@ class MainWindow( QMainWindow ):
                     elif dict_selected_data[ TradingData.TRADING_TYPE ] == TradingType.CAPITAL_INCREASE:
                         dialog = StockCapitalIncreaseEditDialog( str_stock_number, str_stock_name, self )
                         dialog.setup_trading_date( dict_selected_data[ TradingData.TRADING_DATE ] )
-                        dialog.setup_trading_count( dict_selected_data[ TradingData.TRADING_COUNT ] )
+                        dialog.setup_trading_count( dict_selected_data[ TradingData.TRADING_QUANTITY ] )
                         dialog.setup_trading_price_type( dict_selected_data[ TradingData.TRADING_PRICE_TYPE ] )
                         dialog.setup_per_share_trading_price( dict_selected_data[ TradingData.PER_SHARE_TRADING_PRICE ] )
                         dialog.setup_total_trading_price( dict_selected_data[ TradingData.TOTAL_TRADING_PRICE ] )
@@ -3831,7 +3831,7 @@ class MainWindow( QMainWindow ):
                     else:
                         dict_per_trading_data[ "per_share_trading_price" ] = item[ TradingData.PER_SHARE_TRADING_PRICE ]
                         dict_per_trading_data[ "total_trading_price" ] = item[ TradingData.TOTAL_TRADING_PRICE ]
-                        dict_per_trading_data[ "trading_count" ] = item[ TradingData.TRADING_COUNT ]
+                        dict_per_trading_data[ "trading_count" ] = item[ TradingData.TRADING_QUANTITY ]
                     dict_per_trading_data[ "trading_fee_type" ] = int( item[ TradingData.REGULAR_BUY_TRADING_FEE_TYPE ].value )
                     dict_per_trading_data[ "trading_fee_discount" ] = item[ TradingData.TRADING_FEE_DISCOUNT ]
                     dict_per_trading_data[ "trading_fee_minimum" ] = item[ TradingData.REGULAR_BUY_TRADING_FEE_MINIMUM ]
@@ -4051,7 +4051,7 @@ class MainWindow( QMainWindow ):
                 continue
             elif e_trading_type == TradingType.BUY:
                 f_trading_price = item[ TradingData.PER_SHARE_TRADING_PRICE ]
-                n_trading_count = item[ TradingData.TRADING_COUNT ]
+                n_trading_count = item[ TradingData.TRADING_QUANTITY ]
                 f_trading_fee_discount = item[ TradingData.TRADING_FEE_DISCOUNT ]
                 
                 dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, n_minimum_common_trading_fee, n_minimum_odd_trading_fee, b_etf, False, b_bond )
@@ -4077,7 +4077,7 @@ class MainWindow( QMainWindow ):
                 queue_buying_data.append( list_buying_data )
                 queue_buying_data = deque( sorted( queue_buying_data, key = lambda x: x[ 2 ] ) )
             elif e_trading_type == TradingType.REGULAR_BUY:
-                n_trading_count = item[ TradingData.TRADING_COUNT ]
+                n_trading_count = item[ TradingData.TRADING_QUANTITY ]
                 e_trading_price_type = item[ TradingData.TRADING_PRICE_TYPE ]
                 if e_trading_price_type == TradingPriceType.PER_SHARE:
                     f_trading_price = item[ TradingData.PER_SHARE_TRADING_PRICE ]
@@ -4116,7 +4116,7 @@ class MainWindow( QMainWindow ):
             elif e_trading_type == TradingType.SELL:
                 f_trading_price = item[ TradingData.PER_SHARE_TRADING_PRICE ]
                 f_trading_fee_discount = item[ TradingData.TRADING_FEE_DISCOUNT ]
-                n_trading_count = item[ TradingData.TRADING_COUNT ]
+                n_trading_count = item[ TradingData.TRADING_QUANTITY ]
 
                 n_day_trading_selling_count = 0 #當沖數量
                 n_general_selling_count = 0 #非當沖數量
@@ -4242,7 +4242,7 @@ class MainWindow( QMainWindow ):
                 item[ TradingData.STOCK_DIVIDEND_GAIN_NON_SAVE ] = 0
                 item[ TradingData.CASH_DIVIDEND_GAIN_NON_SAVE ] = 0
             elif e_trading_type == TradingType.CAPITAL_INCREASE:
-                n_trading_count = item[ TradingData.TRADING_COUNT ]
+                n_trading_count = item[ TradingData.TRADING_QUANTITY ]
                 e_trading_price_type = item[ TradingData.TRADING_PRICE_TYPE ]
                 if e_trading_price_type == TradingPriceType.PER_SHARE:
                     f_trading_price = item[ TradingData.PER_SHARE_TRADING_PRICE ]
@@ -4332,7 +4332,7 @@ class MainWindow( QMainWindow ):
                 if n_accumulated_inventory == 0: #沒有庫存就不用算減資了
                     continue
                 item[ TradingData.PER_SHARE_TRADING_PRICE ] = -item[ TradingData.CAPITAL_REDUCTION_PER_SHARE ]
-                item[ TradingData.TRADING_COUNT ] = n_accumulated_inventory
+                item[ TradingData.TRADING_QUANTITY ] = n_accumulated_inventory
                 item[ TradingData.TRADING_VALUE_NON_SAVE ] = -int( n_accumulated_inventory * item[ TradingData.CAPITAL_REDUCTION_PER_SHARE ] )
                 item[ TradingData.TRADING_FEE_NON_SAVE ] = 0
                 item[ TradingData.TRADING_TAX_NON_SAVE ] = 0
@@ -4358,7 +4358,7 @@ class MainWindow( QMainWindow ):
                 if n_accumulated_inventory == 0: #沒有庫存就不用算分割了
                     continue
                 item[ TradingData.PER_SHARE_TRADING_PRICE ] = 0
-                item[ TradingData.TRADING_COUNT ] = 0
+                item[ TradingData.TRADING_QUANTITY ] = 0
                 item[ TradingData.TRADING_VALUE_NON_SAVE ] = 0
                 item[ TradingData.TRADING_FEE_NON_SAVE ] = 0
                 item[ TradingData.TRADING_TAX_NON_SAVE ] = 0
@@ -4886,7 +4886,7 @@ class MainWindow( QMainWindow ):
                      dict_per_trading_data[ TradingData.TOTAL_TRADING_PRICE ] == target_trading_data[ TradingData.TOTAL_TRADING_PRICE ] and 
                      dict_per_trading_data[ TradingData.STOCK_DIVIDEND ] == target_trading_data[ TradingData.STOCK_DIVIDEND ] and 
                      dict_per_trading_data[ TradingData.CASH_DIVIDEND ] == target_trading_data[ TradingData.CASH_DIVIDEND ] and 
-                     dict_per_trading_data[ TradingData.TRADING_COUNT ] == target_trading_data[ TradingData.TRADING_COUNT ] and 
+                     dict_per_trading_data[ TradingData.TRADING_QUANTITY ] == target_trading_data[ TradingData.TRADING_QUANTITY ] and 
                      dict_per_trading_data[ TradingData.PER_SHARE_TRADING_PRICE ] == target_trading_data[ TradingData.PER_SHARE_TRADING_PRICE ] ):
                     n_scroll_column = column
             column += 1
@@ -4998,7 +4998,7 @@ class MainWindow( QMainWindow ):
         str_weekday = share_api.get_obj_datetime_weekday_text( n_weekday )
 
         f_trading_price = dict_per_trading_data[ TradingData.PER_SHARE_TRADING_PRICE ]
-        n_trading_count = dict_per_trading_data[ TradingData.TRADING_COUNT ]
+        n_trading_count = dict_per_trading_data[ TradingData.TRADING_QUANTITY ]
         n_trading_value = dict_per_trading_data[ TradingData.TRADING_VALUE_NON_SAVE ]
         n_trading_fee = dict_per_trading_data[ TradingData.TRADING_FEE_NON_SAVE ]
         n_trading_tax = dict_per_trading_data[ TradingData.TRADING_TAX_NON_SAVE ]
@@ -5025,25 +5025,25 @@ class MainWindow( QMainWindow ):
             n_accumulated_cost = dict_per_trading_data[ TradingData.ACCUMULATED_COST_WITHOUT_CONSIDERING_DIVIDEND_NON_SAVE ]
             f_average_cost = round( dict_per_trading_data[ TradingData.ACCUMULATED_AVERAGE_COST_WITHOUT_CONSIDERING_DIVIDEND_NON_SAVE ], 3 )
         if self.ui.qtUse1ShareUnitAction.isChecked():
-            str_trading_count = format( n_trading_count, "," )
+            str_trading_quantity = format( n_trading_count, "," )
             str_stock_dividend_gain = format( n_stock_dividend_gain, "," )
-            str_accumulated_inventory = format( n_accumulated_inventory, "," )
+            str_accumulated_quantity = format( n_accumulated_inventory, "," )
         else:
             f_trading_count = n_trading_count / 1000
             f_stock_dividend_gain = n_stock_dividend_gain / 1000
             f_accumulated_inventory = n_accumulated_inventory / 1000
             if f_trading_count.is_integer():
-                str_trading_count = format( int( f_trading_count ), "," )
+                str_trading_quantity = format( int( f_trading_count ), "," )
             else:
-                str_trading_count = format( f_trading_count, "," )
+                str_trading_quantity = format( f_trading_count, "," )
             if f_stock_dividend_gain.is_integer():
                 str_stock_dividend_gain = format( int( f_stock_dividend_gain ), "," )
             else:
                 str_stock_dividend_gain = format( f_stock_dividend_gain, "," )
             if f_accumulated_inventory.is_integer():
-                str_accumulated_inventory = format( int( f_accumulated_inventory ), "," )
+                str_accumulated_quantity = format( int( f_accumulated_inventory ), "," )
             else:
-                str_accumulated_inventory = format( f_accumulated_inventory, "," )
+                str_accumulated_quantity = format( f_accumulated_inventory, "," )
 
 
         str_trading_price = format( f_trading_price, "," )
@@ -5055,7 +5055,7 @@ class MainWindow( QMainWindow ):
         str_stock_dividend = str_stock_dividend_gain + ' / ' + str( f_stock_dividend_per_share )
         str_cash_dividend = format( n_cash_dividend_gain, "," ) + ' / ' + str( f_cash_dividend_per_share )
         str_accumulated_cost = format( n_accumulated_cost, "," )
-        str_average_cost = format( f_average_cost, "," )
+        str_accumulated_average_cost = format( f_average_cost, "," )
 
         str_selling_profit = "N/A"
         if e_trading_type == TradingType.BUY:
@@ -5092,7 +5092,7 @@ class MainWindow( QMainWindow ):
         elif e_trading_type == TradingType.DIVIDEND:
             str_trading_type = "股利分配"
             str_trading_price = "N/A"
-            str_trading_count = "N/A"
+            str_trading_quantity = "N/A"
             str_trading_value = "N/A"
             str_trading_tax = "0"
             str_per_trading_total_cost = "N/A"
@@ -5111,7 +5111,7 @@ class MainWindow( QMainWindow ):
             str_trading_type = "股票分割"
             str_trading_price = "N/A"
             n_split_value = dict_per_trading_data[ TradingData.CAPITAL_REDUCTION_PER_SHARE ]
-            str_trading_count = "1分" + str( n_split_value ) #
+            str_trading_quantity = "1分" + str( n_split_value ) #
             str_trading_value = "N/A"
             str_trading_fee = "0"
             str_trading_tax = "0"
@@ -5123,7 +5123,7 @@ class MainWindow( QMainWindow ):
         list_data = [ str_year + "-" + str_month_date + " " + str_weekday, #交易日期
                       str_trading_type,             #交易種類
                       str_trading_price,            #交易價格
-                      str_trading_count,            #交易股數
+                      str_trading_quantity,         #交易股數
                       str_trading_value,            #交易金額
                       str_trading_fee + " / " + str_trading_tax, #手續費 / 交易稅
                       str_per_trading_total_cost,   #應收付
@@ -5131,8 +5131,8 @@ class MainWindow( QMainWindow ):
                       str_cash_dividend,            #全部現金股利 / 每股現金股利
                       str_extra_insurance_fee,      #補充保費
                       str_accumulated_cost,         #累計成本
-                      str_accumulated_inventory,    #庫存股數
-                      str_average_cost,             #累計平均成本
+                      str_accumulated_quantity,     #庫存股數
+                      str_accumulated_average_cost, #累計平均成本
                       str_selling_profit ]          #單筆損益  
         return list_data
 
