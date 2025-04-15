@@ -4545,16 +4545,16 @@ class MainWindow( QMainWindow ):
                         else:
                             n_expect_trading_tax = int( n_per_stock_market_value * Decimal( '0.003' ) )
 
-                        n_unrealized_profit = n_per_stock_market_value - n_expect_trading_fee - n_expect_trading_tax - n_current_buying_cost
-                        str_unrealized_profit = format( n_unrealized_profit, "," )
+                        n_per_stock_unrealized_profit = n_per_stock_market_value - n_expect_trading_fee - n_expect_trading_tax - n_current_buying_cost
+                        str_per_stock_unrealized_profit = format( n_per_stock_unrealized_profit, "," )
                         if n_per_stock_market_value != 0:
                             if n_current_buying_cost == 0:
-                                str_unrealized_profit_ratio = "9999.99%"
+                                str_per_stock_unrealized_profit_ratio = "9999.99%"
                             else:
-                                f_current_profit_ratio = ( n_unrealized_profit / n_current_buying_cost ) * 100
-                                str_unrealized_profit_ratio = format( f_current_profit_ratio, ".2f" ) + "%"
+                                f_per_stock_current_profit_ratio = ( n_per_stock_unrealized_profit / n_current_buying_cost ) * 100
+                                str_per_stock_unrealized_profit_ratio = format( f_per_stock_current_profit_ratio, ".2f" ) + "%"
                         else:
-                            str_unrealized_profit_ratio = "0%"
+                            str_per_stock_unrealized_profit_ratio = "0%"
 
                         n_per_stock_accumulated_profit = n_per_stock_market_value - n_expect_trading_fee - n_expect_trading_tax - n_per_stock_accumulated_cost
                         n_all_stock_accumulated_profit += n_per_stock_accumulated_profit
@@ -4577,10 +4577,10 @@ class MainWindow( QMainWindow ):
                         str_stock_price = "N/A"
                         str_per_stock_market_value = "N/A"
                         str_per_stock_accumulated_profit = "N/A"
-                        str_unrealized_profit = "N/A"
+                        str_per_stock_unrealized_profit = "N/A"
                         qt_stock_price_color = QBrush( '#FFFFFF' )
                         str_per_stock_xirr = "-"
-                        str_unrealized_profit_ratio = "-"
+                        str_per_stock_unrealized_profit_ratio = "-"
 
                     qt_standard_item = QStandardItem( str_stock_number_and_name )
                     qt_standard_item.setTextAlignment( Qt.AlignLeft | Qt.AlignVCenter )
@@ -4599,13 +4599,13 @@ class MainWindow( QMainWindow ):
                         elif e_type == StockInfoType.LATEST_MARKET_VALUE:#現值
                             str_data = str_per_stock_market_value
                         elif e_type == StockInfoType.CURRENT_COST:#現股成本
-                            str_data =  format( f_current_average_cost, "," )
+                            str_data = format( f_current_average_cost, "," )
                         elif e_type == StockInfoType.UNREALIZED_PROFIT:#未實現損益
-                            str_data = str_unrealized_profit
-                            qt_color = self.get_up_down_color( "0", str_unrealized_profit )
+                            str_data = str_per_stock_unrealized_profit
+                            qt_color = self.get_up_down_color( "0", str_per_stock_unrealized_profit )
                         elif e_type == StockInfoType.UNREALIZED_PROFIT_RATIO:#未實現報酬率
-                            str_data = str_unrealized_profit_ratio
-                            qt_color = self.get_up_down_color( "0", str_unrealized_profit_ratio )
+                            str_data = str_per_stock_unrealized_profit_ratio
+                            qt_color = self.get_up_down_color( "0", str_per_stock_unrealized_profit_ratio )
                         elif e_type == StockInfoType.REALIZED_PROFIT:#已實現損益
                             pass
                         elif e_type == StockInfoType.BREAK_EVEN_PRICE:#損益平衡價
