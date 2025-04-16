@@ -1597,6 +1597,33 @@ class Utility():
         f_tick = Utility.get_tick_unit( f_price, b_etf )
         return math.floor( f_price / f_tick ) * f_tick
 
+    @staticmethod
+    def get_up_down_color( str_base, str_compare ):
+        str_base = str_base.replace( ',', '' ).replace( '%', '' )
+        str_compare = str_compare.replace( ',', '' ).replace( '%', '' )
+        try:
+            f_base = float(str_base)
+            f_compare = float(str_compare)
+        except ValueError:
+            return QBrush('#FFFFFF')
+
+        if f_compare > f_base:
+            return QBrush('#FF0000')  # 漲紅
+        elif f_compare < f_base:
+            return QBrush('#00AA00')  # 跌綠
+        else:
+            return QBrush('#FFFFFF')  # 持平白
+        
+    @staticmethod
+    def color_text_by_value(text ):
+        try:
+            # 把逗號移除再轉 float 判斷正負
+            value = float(text.replace(",", "").replace("%", "").replace("％", ""))
+            color = "#FF0000" if value > 0 else ("#00AA00" if value < 0 else "#FFFFFF")
+        except:
+            color = "#555555"  # 無法轉換就用預設
+        return f'<span style="color:{color};">{text}</span>'
+
 class Worker( QObject ):
     progress = Signal( int )  # Signal to emit progress updates
     finished = Signal( dict )  # Signal to emit the result when done
@@ -2020,83 +2047,11 @@ class MainWindow( QMainWindow ):
         uiqt_horizontal_spacer_1_3 = QSpacerItem( 30, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum )
         uiqt_horizontal_layout_1.addItem( uiqt_horizontal_spacer_1_3 )
 
-        uiqt_total_quantity_label = QLabel( stock_inventory_tab )
-        uiqt_total_quantity_label.setText( "市值: " )
-        uiqt_total_quantity_label.setObjectName( "TotalQuantityLabel" )
-        uiqt_total_quantity_value_label = QLabel( stock_inventory_tab )
-        uiqt_total_quantity_value_label.setText( "" )
-        uiqt_total_quantity_value_label.setObjectName( "TotalQuantityValueLabel" )
-        uiqt_horizontal_layout_1.addWidget( uiqt_total_quantity_label )
-        uiqt_horizontal_layout_1.addWidget( uiqt_total_quantity_value_label )
-        uiqt_horizontal_spacer_1_4 = QSpacerItem( 30, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum )
+        uiqt_total_info_label = QLabel( stock_inventory_tab )
+        uiqt_total_info_label.setObjectName( "TotalInfoLabel" )
+        uiqt_horizontal_layout_1.addWidget( uiqt_total_info_label )
+        uiqt_horizontal_spacer_1_4 = QSpacerItem( 30, 20, QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.Minimum )
         uiqt_horizontal_layout_1.addItem( uiqt_horizontal_spacer_1_4 )
-
-        uiqt_current_cost_label = QLabel( stock_inventory_tab )
-        uiqt_current_cost_label.setText( "現股成本: " )
-        uiqt_current_cost_label.setObjectName( "CurrentCostLabel" )
-        uiqt_current_cost_value_label = QLabel( stock_inventory_tab )
-        uiqt_current_cost_value_label.setText( "" )
-        uiqt_current_cost_value_label.setObjectName( "CurrentCostValueLabel" )
-        uiqt_horizontal_layout_1.addWidget( uiqt_current_cost_label )
-        uiqt_horizontal_layout_1.addWidget( uiqt_current_cost_value_label )
-        uiqt_horizontal_spacer_1_5 = QSpacerItem( 30, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum )
-        uiqt_horizontal_layout_1.addItem( uiqt_horizontal_spacer_1_5 )
-
-        uiqt_unrealized_profit_label = QLabel( stock_inventory_tab )
-        uiqt_unrealized_profit_label.setText( "未實現損益: " )
-        uiqt_unrealized_profit_label.setObjectName( "UnrealizedProfitLabel" )
-        uiqt_unrealized_profit_value_label = QLabel( stock_inventory_tab )
-        uiqt_unrealized_profit_value_label.setText( "" )
-        uiqt_unrealized_profit_value_label.setObjectName( "UnrealizedProfitValueLabel" )
-        uiqt_horizontal_layout_1.addWidget( uiqt_unrealized_profit_label )
-        uiqt_horizontal_layout_1.addWidget( uiqt_unrealized_profit_value_label )
-        uiqt_horizontal_spacer_1_6 = QSpacerItem( 30, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum )
-        uiqt_horizontal_layout_1.addItem( uiqt_horizontal_spacer_1_6 )
-
-        uiqt_unrealized_profit_ratio_label = QLabel( stock_inventory_tab )
-        uiqt_unrealized_profit_ratio_label.setText( "未實現報酬率: " )
-        uiqt_unrealized_profit_ratio_label.setObjectName( "UnrealizedProfitRatioLabel" )
-        uiqt_unrealized_profit_ratio_value_label = QLabel( stock_inventory_tab )
-        uiqt_unrealized_profit_ratio_value_label.setText( "" )
-        uiqt_unrealized_profit_ratio_value_label.setObjectName( "UnrealizedProfitRatioValueLabel" )
-        uiqt_horizontal_layout_1.addWidget( uiqt_unrealized_profit_ratio_label )
-        uiqt_horizontal_layout_1.addWidget( uiqt_unrealized_profit_ratio_value_label )
-        uiqt_horizontal_spacer_1_7 = QSpacerItem( 30, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
-        uiqt_horizontal_layout_1.addItem( uiqt_horizontal_spacer_1_7 )
-
-        uiqt_accumulated_cost_label = QLabel( stock_inventory_tab )
-        uiqt_accumulated_cost_label.setText( "累計成本: " )
-        uiqt_accumulated_cost_label.setObjectName( "AccumulatedCostLabel" )
-        uiqt_accumulated_cost_value_label = QLabel( stock_inventory_tab )
-        uiqt_accumulated_cost_value_label.setText( "" )
-        uiqt_accumulated_cost_value_label.setObjectName( "AccumulatedCostValueLabel" )
-        uiqt_horizontal_layout_1.addWidget( uiqt_accumulated_cost_label )
-        uiqt_horizontal_layout_1.addWidget( uiqt_accumulated_cost_value_label )
-        uiqt_horizontal_spacer_1_8 = QSpacerItem( 30, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum )
-        uiqt_horizontal_layout_1.addItem( uiqt_horizontal_spacer_1_8 )
-
-        uiqt_accumulated_profit_label = QLabel( stock_inventory_tab )
-        uiqt_accumulated_profit_label.setText( "累計損益: " )
-        uiqt_accumulated_profit_label.setObjectName( "AccumulatedProfitLabel" )
-        uiqt_accumulated_profit_value_label = QLabel( stock_inventory_tab )
-        uiqt_accumulated_profit_value_label.setText( "" )
-        uiqt_accumulated_profit_value_label.setObjectName( "AccumulatedProfitValueLabel" )
-        uiqt_horizontal_layout_1.addWidget( uiqt_accumulated_profit_label )
-        uiqt_horizontal_layout_1.addWidget( uiqt_accumulated_profit_value_label )
-        uiqt_horizontal_spacer_1_9 = QSpacerItem( 30, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum )
-        uiqt_horizontal_layout_1.addItem( uiqt_horizontal_spacer_1_9 )
-
-        uiqt_xirr_label = QLabel( stock_inventory_tab )
-        uiqt_xirr_label.setText( "年化報酬率: " )
-        uiqt_xirr_label.setObjectName( "XIRRLabel" )
-        uiqt_xirr_value_label = QLabel( stock_inventory_tab )
-        uiqt_xirr_value_label.setText( "" )
-        uiqt_xirr_value_label.setObjectName( "XIRRValueLabel" )
-        uiqt_horizontal_layout_1.addWidget( uiqt_xirr_label )
-        uiqt_horizontal_layout_1.addWidget( uiqt_xirr_value_label )
-        uiqt_horizontal_spacer_1_10 = QSpacerItem( 30, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum )
-        uiqt_horizontal_layout_1.addItem( uiqt_horizontal_spacer_1_10 )
-
 
         uiqt_stock_inventory_tab_vertical_layout.addLayout( uiqt_horizontal_layout_1 )
 
@@ -4690,13 +4645,13 @@ class MainWindow( QMainWindow ):
                             str_data = format( f_current_average_cost, "," )
                         elif e_type == StockInfoType.UNREALIZED_PROFIT:#未實現損益
                             str_data = str_per_stock_unrealized_profit
-                            qt_color = self.get_up_down_color( "0", str_per_stock_unrealized_profit )
+                            qt_color = Utility.get_up_down_color( "0", str_per_stock_unrealized_profit )
                         elif e_type == StockInfoType.UNREALIZED_PROFIT_RATIO:#未實現報酬率
                             str_data = str_per_stock_unrealized_profit_ratio
-                            qt_color = self.get_up_down_color( "0", str_per_stock_unrealized_profit_ratio )
+                            qt_color = Utility.get_up_down_color( "0", str_per_stock_unrealized_profit_ratio )
                         elif e_type == StockInfoType.REALIZED_PROFIT:#已實現損益
                             str_data = format( n_per_stock_realized_profit, "," )
-                            qt_color = self.get_up_down_color( "0", str_data )
+                            qt_color = Utility.get_up_down_color( "0", str_data )
                         elif e_type == StockInfoType.BREAK_EVEN_PRICE:#損益平衡價
                             str_data = str_break_even_price
                         elif e_type == StockInfoType.ACCUMULATED_COST:#累計成本
@@ -4705,7 +4660,7 @@ class MainWindow( QMainWindow ):
                             str_data = format( f_per_stock_accumulated_average_cost, "," )
                         elif e_type == StockInfoType.ACCUMULATED_PROFIT:#累計損益
                             str_data = str_per_stock_accumulated_profit
-                            qt_color = self.get_up_down_color( "0", str_per_stock_accumulated_profit )
+                            qt_color = Utility.get_up_down_color( "0", str_per_stock_accumulated_profit )
                         elif e_type == StockInfoType.ACCUMULATED_TRADING_FEE:#累計手續費
                             str_data = format( n_per_stock_accumulated_trading_fee, "," )
                         elif e_type == StockInfoType.ACCUMULATED_TAX:#累計交易稅
@@ -4714,7 +4669,7 @@ class MainWindow( QMainWindow ):
                             str_data = format( n_per_stock_accumulated_dividend_profit, "," )
                         elif e_type == StockInfoType.XIRR_VALUE:#平均年化報酬率
                             str_data = str_per_stock_xirr
-                            qt_color = self.get_up_down_color( "0", str_per_stock_xirr )
+                            qt_color = Utility.get_up_down_color( "0", str_per_stock_xirr )
                         elif e_type == StockInfoType.HOLDING_MARKET_RATIO:#持股淨值比
                             pass
 
@@ -4784,46 +4739,37 @@ class MainWindow( QMainWindow ):
                     qt_table_model.setItem( n_index_row, n_column + 1, qt_standard_item ) 
         f_unrealized_profit_ratio = n_all_stock_unrealized_profit / n_all_stock_current_buying_cost if n_all_stock_current_buying_cost != 0 else 0
         f_unrealized_profit_ratio = f_unrealized_profit_ratio * 100
-        str_unrealized_profit_ratio = format( f_unrealized_profit_ratio, ".2f" ) + "%"
 
-        qt_total_quantity_value_label = self.ui.qtTabWidget.currentWidget().findChild( QLabel, "TotalQuantityValueLabel")
-        qt_total_quantity_value_label.setText( format( n_all_stock_current_total_market_value, "," ) )
-        qt_current_cost_value_label = self.ui.qtTabWidget.currentWidget().findChild( QLabel, "CurrentCostValueLabel")
-        qt_current_cost_value_label.setText( format( n_all_stock_current_buying_cost, "," ) )
-        qt_unrealized_profit_value_label = self.ui.qtTabWidget.currentWidget().findChild( QLabel, "UnrealizedProfitValueLabel")
-        qt_unrealized_profit_value_label.setText( format( n_all_stock_unrealized_profit, "," ) )
-        qt_unrealized_profit_ratio_value_label = self.ui.qtTabWidget.currentWidget().findChild( QLabel, "UnrealizedProfitRatioValueLabel")
-        qt_unrealized_profit_ratio_value_label.setText( str_unrealized_profit_ratio )
-        qt_accumulated_cost_value_label = self.ui.qtTabWidget.currentWidget().findChild( QLabel, "AccumulatedCostValueLabel")
-        qt_accumulated_cost_value_label.setText( format( n_all_stock_total_cost, "," ) )
-        qt_accumulated_profit_value_label = self.ui.qtTabWidget.currentWidget().findChild( QLabel, "AccumulatedProfitValueLabel")
-        qt_accumulated_profit_value_label.setText( format( n_all_stock_accumulated_profit, "," ) )
+        str_total_quantity_value = format( n_all_stock_current_total_market_value, "," )
+        str_current_cost_value = format( n_all_stock_current_buying_cost, "," )
+        str_unrealized_profit_value = format( n_all_stock_unrealized_profit, "," )
+        str_unrealized_profit_ratio_value = format( f_unrealized_profit_ratio, ".2f" ) + "%"
+        str_accumulated_cost_value = format( n_all_stock_total_cost, "," )
+        str_accumulated_profit_value = format( n_all_stock_accumulated_profit, "," )
+        str_xirr_value = "-"
 
         list_all_stock_trading_flows.append( n_all_stock_current_total_market_value_after_fee_and_tax )
         list_all_stock_trading_date.append( obj_current_date )
         if len( list_all_stock_trading_flows ) > 1:
             try:
                 per_stock_xirr_result = Utility.xirr( list_all_stock_trading_flows, list_all_stock_trading_date )
-                xirr_value_label = self.ui.qtTabWidget.currentWidget().findChild( QLabel, "XIRRValueLabel")
-                xirr_value_label.setText( f"{per_stock_xirr_result:.3%}" )
+                str_xirr_value = f"{per_stock_xirr_result:.3%}"
             except ValueError as e:
                 pass
 
-    def get_up_down_color( self, str_base, str_compare ):
-        str_base = str_base.replace( ',', '' ).replace( '%', '' )
-        str_compare = str_compare.replace( ',', '' ).replace( '%', '' )
-        try:
-            f_base = float(str_base)
-            f_compare = float(str_compare)
-        except ValueError:
-            return QBrush('#FFFFFF')
+        str_total_info = (
+            f'<span style="color:#878787;">市值:</span> <span style="color:white;">{str_total_quantity_value}</span> &nbsp;&nbsp; '
+            f'<span style="color:#878787;">現股成本:</span> <span style="color:white;">{str_current_cost_value}</span> &nbsp;&nbsp; '
+            f'<span style="color:#878787;">未實現損益:</span> {Utility.color_text_by_value(str_unrealized_profit_value)} &nbsp;&nbsp; '
+            f'<span style="color:#878787;">未實現報酬率:</span> {Utility.color_text_by_value(str_unrealized_profit_ratio_value)}<br>'
+            f'<span style="color:#878787;">累計成本:</span> <span style="color:white;">{str_accumulated_cost_value}</span> &nbsp;&nbsp; '
+            f'<span style="color:#878787;">累計損益:</span> {Utility.color_text_by_value(str_accumulated_profit_value)} &nbsp;&nbsp; '
+            f'<span style="color:#878787;">年化報酬率:</span> {Utility.color_text_by_value(str_xirr_value)}'
+        )
 
-        if f_compare > f_base:
-            return QBrush('#FF0000')  # 漲紅
-        elif f_compare < f_base:
-            return QBrush('#00AA00')  # 跌綠
-        else:
-            return QBrush('#FFFFFF')  # 持平白
+        qt_total_info_value_label = self.ui.qtTabWidget.currentWidget().findChild(QLabel, "TotalInfoLabel")
+        qt_total_info_value_label.setText( str_total_info )
+        qt_total_info_value_label.setTextFormat( Qt.RichText )
 
     def get_stock_list_horizontal_header( self ):
         list_header = []
