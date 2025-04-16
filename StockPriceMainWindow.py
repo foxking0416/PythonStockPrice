@@ -1598,6 +1598,33 @@ class Utility():
         return math.floor( f_price / f_tick ) * f_tick
 
     @staticmethod
+    def find_min_break_even_price_from_net( n_total_cost: int, n_total_quantity: int, b_etf: bool, b_bond: bool, n_minimum_trading_fee ) -> float:
+        # 初始估算從 y 開始
+        f_guess_price = float( n_total_cost / n_total_quantity )
+        # 先往上對齊 tick 單位
+        f_guess_price = Utility.ceil_to_tick_unit( f_guess_price, b_etf )
+        max_iter = 100000  # 防止死迴圈
+        count = 0
+
+        while count < max_iter:
+            n_trading_fee = max( int( f_guess_price * n_total_quantity * 0.001425 ), n_minimum_trading_fee )
+            if b_etf:
+                if b_bond:
+                    n_trading_tax = 0
+                else:
+                    n_trading_tax = int( f_guess_price * n_total_quantity * 0.001 )
+            else:
+                n_trading_tax = int( f_guess_price * n_total_quantity * 0.003 )
+            if f_guess_price * n_total_quantity - n_trading_fee - n_trading_tax >= n_total_cost:
+                return f_guess_price
+            # 下一個 tick 單位
+            tick = Utility.get_tick_unit( f_guess_price, b_etf )
+            f_guess_price += tick
+            f_guess_price = round(f_guess_price, 4)  # 防止浮點誤差
+            count += 1
+        raise ValueError("找不到符合條件的 X（超過最大迭代次數）")
+
+    @staticmethod
     def get_up_down_color( str_base, str_compare ):
         str_base = str_base.replace( ',', '' ).replace( '%', '' )
         str_compare = str_compare.replace( ',', '' ).replace( '%', '' )
@@ -4443,6 +4470,7 @@ class MainWindow( QMainWindow ):
         dict_per_account_all_stock_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ]
         qt_table_view = self.ui.qtTabWidget.currentWidget().findChild( QTableView, "StockListTableView" )
         qt_display_type_combobox = self.ui.qtTabWidget.currentWidget().findChild( QComboBox, "DisplayTypeComboBox")
+        n_minimum_common_trading_fee = self.dict_all_account_general_data[ str_tab_widget_name ][ "minimum_common_trading_fee" ]
         n_all_stock_total_cost = 0
         n_all_stock_current_total_market_value = 0 #目前總市值
         n_all_stock_current_total_market_value_after_fee_and_tax = 0 #目前總市值(扣掉手續費和稅金)
@@ -4493,15 +4521,7 @@ class MainWindow( QMainWindow ):
                         str_break_even_price = '-'
                     else:
                         f_current_average_cost = round( n_current_buying_cost / n_accumulated_quantity, 2 )#現股成本
-
-                        if b_etf:
-                            if b_bond:
-                                f_break_even_price = n_current_buying_cost / 0.998575 / n_accumulated_quantity # 1 - 0.001425 = 0.998575
-                            else:
-                                f_break_even_price = n_current_buying_cost / 0.997575 / n_accumulated_quantity # 1 - 0.001425 - 0.001 = 0.997575
-                        else:
-                            f_break_even_price = n_current_buying_cost / 0.995575 / n_accumulated_quantity # 1 - 0.001425 - 0.003 = 0.995575
-                        f_break_even_price = Utility.ceil_to_tick_unit( f_break_even_price, b_etf )
+                        f_break_even_price = Utility.find_min_break_even_price_from_net( n_current_buying_cost, n_accumulated_quantity, b_etf, b_bond, n_minimum_common_trading_fee )
                         str_break_even_price = format( f_break_even_price, ",.2f" )
 
                     #目前庫存
@@ -4574,7 +4594,6 @@ class MainWindow( QMainWindow ):
 
                         n_expect_trading_fee = 0
                         if n_accumulated_quantity > 0:
-                            n_minimum_common_trading_fee = self.dict_all_account_general_data[ str_tab_widget_name ][ "minimum_common_trading_fee" ]
                             n_expect_trading_fee = max( int( n_per_stock_market_value * Decimal( '0.001425' ) ), n_minimum_common_trading_fee )
 
                         if b_etf:
@@ -4756,14 +4775,18 @@ class MainWindow( QMainWindow ):
                 str_xirr_value = f"{per_stock_xirr_result:.3%}"
             except ValueError as e:
                 pass
-
+        
+        if self.ui.qtCostWithInDividendAction.isChecked():
+            str_extra_info = '(含息)'
+        else:
+            str_extra_info = '(不含息)'
         str_total_info = (
             f'<span style="color:#878787;">市值:</span> <span style="color:white;">{str_total_quantity_value}</span> &nbsp;&nbsp; '
             f'<span style="color:#878787;">現股成本:</span> <span style="color:white;">{str_current_cost_value}</span> &nbsp;&nbsp; '
             f'<span style="color:#878787;">未實現損益:</span> {Utility.color_text_by_value(str_unrealized_profit_value)} &nbsp;&nbsp; '
             f'<span style="color:#878787;">未實現報酬率:</span> {Utility.color_text_by_value(str_unrealized_profit_ratio_value)}<br>'
-            f'<span style="color:#878787;">累計成本:</span> <span style="color:white;">{str_accumulated_cost_value}</span> &nbsp;&nbsp; '
-            f'<span style="color:#878787;">累計損益:</span> {Utility.color_text_by_value(str_accumulated_profit_value)} &nbsp;&nbsp; '
+            f'<span style="color:#878787;">累計成本{str_extra_info}:</span> <span style="color:white;">{str_accumulated_cost_value}</span> &nbsp;&nbsp; '
+            f'<span style="color:#878787;">累計損益{str_extra_info}:</span> {Utility.color_text_by_value(str_accumulated_profit_value)} &nbsp;&nbsp; '
             f'<span style="color:#878787;">年化報酬率:</span> {Utility.color_text_by_value(str_xirr_value)}'
         )
 
