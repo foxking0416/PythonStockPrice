@@ -34,7 +34,7 @@ class TestMainWindow(unittest.TestCase):
                     found = True
                     last = records[-1]
                     self.assertEqual(last[TradingData.ACCUMULATED_COST_NON_SAVE], expected_cost)
-                    self.assertEqual(last[TradingData.ACCUMULATED_INVENTORY_NON_SAVE], expected_inventory)
+                    self.assertEqual(last[TradingData.ACCUMULATED_QUANTITY_NON_SAVE], expected_inventory)
         self.assertTrue(found, f"未找到股票編號 {stock_number} 的資料")
 
     def test_window_title(self):
