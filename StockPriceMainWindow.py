@@ -1284,7 +1284,7 @@ class AboutDialog( QDialog ):
         self.ui = Ui_AboutDialog()
         self.ui.setupUi( self )
         self.setWindowIcon( share_icon.get_icon( share_icon.IconType.WINDOW ) )
-        self.ui.qtVersionLabel.setText( "v2.1.0" )
+        self.ui.qtVersionLabel.setText( "v2.2.0" )
 
 class ShowItemEditDialog( QDialog ):
     def __init__( self, list_current_show_stock_info : list, list_default_show_stock_info : list, list_total_stock_info : list, parent = None ):
@@ -4929,7 +4929,7 @@ class MainWindow( QMainWindow ):
 
             if TradingData.IS_REALLY_DAYING_TRADING_NON_SAVE in dict_per_trading_data:
                 if dict_per_trading_data[ TradingData.IS_REALLY_DAYING_TRADING_NON_SAVE ]:
-                    list_data[ 2 ] = "當沖賣"
+                    list_data[ 1 ] = "當沖賣"
 
             for row, data in enumerate( list_data ):
                 standard_item = QStandardItem( data )
@@ -4972,9 +4972,7 @@ class MainWindow( QMainWindow ):
                 self.per_stock_trading_data_model.setItem( len( list_data ), column, edit_icon_item )
                 self.per_stock_trading_data_model.setItem( len( list_data ) + 1, column, delete_icon_item )
 
-                if self.ui.qtShow10Action.isChecked():
-                    if column == 9:
-                        break
+
 
             if target_trading_data:
                 if ( dict_per_trading_data[ TradingData.TRADING_DATE ] == target_trading_data[ TradingData.TRADING_DATE ] and 
@@ -4986,6 +4984,9 @@ class MainWindow( QMainWindow ):
                      dict_per_trading_data[ TradingData.PER_SHARE_TRADING_PRICE ] == target_trading_data[ TradingData.PER_SHARE_TRADING_PRICE ] ):
                     n_scroll_column = column
             column += 1
+            if self.ui.qtShow10Action.isChecked():
+                if column == 10:
+                    break
 
         list_horizontal_header = [ "" ] * column
         self.per_stock_trading_data_model.setHorizontalHeaderLabels( list_horizontal_header )
