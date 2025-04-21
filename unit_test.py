@@ -5,7 +5,7 @@ from PySide6.QtCore import Qt
 from StockPriceMainWindow import (
     MainWindow, TradingType, TradingPriceType, TradingFeeType,
     DividendValueType, CapitalReductionType, TradingData,
-    TradingCost, TransferType, TransferData
+    TradingCost, TransferType, TransferData, DecimalCountType
 )
 
 class TestStockTradingEditDialog(unittest.TestCase):
@@ -13,6 +13,7 @@ class TestStockTradingEditDialog(unittest.TestCase):
         self.dialog = StockTradingEditDialog(
             str_stock_number="2330",
             str_stock_name="台積電",
+            e_decimal_count_type=DecimalCountType.ROUND_DOWN,
             b_etf=False,
             b_discount=True,
             f_discount_value=0.6,

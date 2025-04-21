@@ -39,7 +39,7 @@ from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import Alignment, PatternFill, Font, Border, Side
 from enum import Enum, IntEnum, auto
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP, ROUND_CEILING
 from scipy.optimize import newton
 
 g_user_dir = os.path.expanduser("~")                     
@@ -212,6 +212,11 @@ class StockInfoType( Enum ):
     ACCUMULATED_DIVIDEND_INCOME = 14 #累計股利所得
     XIRR_VALUE = 15 #平均年化報酬率
     HOLDING_MARKET_RATIO = 16 #持股淨值比
+
+class DecimalCountType( Enum ):
+    ROUND_DOWN = 0 #無條件捨去
+    ROUND_OFF = 1 #四捨五入
+    ROUND_UP = 2 #無條件進位
 
 g_dict_stock_info = {
     StockInfoType.LATEST_PRICE: "收盤價",
@@ -447,7 +452,7 @@ class StockMinimumTradingFeeEditDialog( QDialog ):
         self.reject()
 
 class StockTradingEditDialog( QDialog ):
-    def __init__( self, str_stock_number, str_stock_name, b_etf, b_discount, f_discount_value, n_minimum_common_trading_fee, n_minimum_odd_trading_fee, parent = None ):
+    def __init__( self, str_stock_number, str_stock_name, e_decimal_count_type : DecimalCountType, b_etf, b_discount, f_discount_value, n_minimum_common_trading_fee, n_minimum_odd_trading_fee, parent = None ):
         super().__init__( parent )
 
         self.ui = Ui_StockTradingDialog()
@@ -480,6 +485,7 @@ class StockTradingEditDialog( QDialog ):
         self.n_minimum_common_trading_fee = n_minimum_common_trading_fee
         self.n_minimum_odd_trading_fee = n_minimum_odd_trading_fee
         self.str_stock_name = str_stock_name
+        self.e_decimal_count_type = e_decimal_count_type
         # self.load_stylesheet("style.css")
         self.dict_trading_data = {}
         self.compute_cost()
@@ -585,7 +591,7 @@ class StockTradingEditDialog( QDialog ):
         n_trading_count = self.get_trading_count()
         f_trading_fee_discount = self.get_trading_fee_discount() 
         b_bond = True if '債' in self.str_stock_name else False
-        dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, self.n_minimum_common_trading_fee, self.n_minimum_odd_trading_fee, self.b_etf, False, b_bond )
+        dict_result = Utility.compute_cost( e_trading_type, self.e_decimal_count_type, f_trading_price, n_trading_count, f_trading_fee_discount, self.n_minimum_common_trading_fee, self.n_minimum_odd_trading_fee, self.b_etf, False, b_bond )
 
         if e_trading_type == TradingType.BUY:
             self.ui.qtTradingValueLineEdit.setText( format( dict_result[ TradingCost.TRADING_VALUE ], ',' ) )
@@ -624,16 +630,17 @@ class StockTradingEditDialog( QDialog ):
         self.reject()
 
 class StockRegularTradingEditDialog( QDialog ):
-    def __init__( self, str_stock_number, str_stock_name, e_trading_price_type, e_trading_fee_type, b_discount, f_discount_value, n_trading_fee_minimum, n_trading_fee_constant, parent = None ):
+    def __init__( self, str_stock_number, str_stock_name, e_decimal_count_type : DecimalCountType, e_trading_price_type : TradingPriceType, e_trading_fee_type : TradingFeeType, b_discount, f_discount_value, n_trading_fee_minimum, n_trading_fee_constant, parent = None ):
         super().__init__( parent )
 
         self.ui = Ui_StockRegularTradingDialog()
         self.ui.setupUi( self )
         
         self.setWindowIcon( share_icon.get_icon( share_icon.IconType.WINDOW ) )
-
+        
         self.ui.qtStockNumberLabel.setText( str_stock_number )
         self.ui.qtStockNameLabel.setText( str_stock_name )
+        self.e_decimal_count_type = e_decimal_count_type
         obj_current_date = datetime.datetime.today()
         self.ui.qtDateEdit.setDate( obj_current_date.date() )
         self.ui.qtDateEdit.setCalendarPopup( True )
@@ -739,7 +746,7 @@ class StockRegularTradingEditDialog( QDialog ):
         with ( QSignalBlocker( self.ui.qtOddTradeCountSpinBox ) ):
             self.ui.qtOddTradeCountSpinBox.setValue( n_count )
 
-    def setup_trading_price_type( self, e_trading_price_type ):
+    def setup_trading_price_type( self, e_trading_price_type: TradingPriceType ):
         with ( QSignalBlocker( self.ui.qtPerSharePriceRadioButton ),
                QSignalBlocker( self.ui.qtTotalPriceRadioButton ) ):
             if e_trading_price_type == TradingPriceType.PER_SHARE:
@@ -757,7 +764,7 @@ class StockRegularTradingEditDialog( QDialog ):
         with ( QSignalBlocker( self.ui.qtTotalPriceSpinBox ) ):
             self.ui.qtTotalPriceSpinBox.setValue( n_total_price )
 
-    def setup_trading_fee_type( self, e_trading_fee_type ):
+    def setup_trading_fee_type( self, e_trading_fee_type : TradingFeeType ):
         with ( QSignalBlocker( self.ui.qtVariableFeeRadioButton ),
                QSignalBlocker( self.ui.qtConstantFeeRadioButton ) ):
             if e_trading_fee_type == TradingFeeType.VARIABLE:
@@ -822,7 +829,12 @@ class StockRegularTradingEditDialog( QDialog ):
         elif e_trading_fee_type == TradingFeeType.VARIABLE:
             f_trading_fee_discount = Decimal( str( self.get_trading_fee_discount() ) )
             n_trading_fee_minimum = int( self.ui.qtTradingFeeMinimumSpinBox.value() ) 
-            n_trading_fee = int( n_trading_value * Decimal( '0.001425' ) * f_trading_fee_discount )
+            if self.e_decimal_count_type == DecimalCountType.ROUND_DOWN:
+                n_trading_fee = int( n_trading_value * Decimal( '0.001425' ) * f_trading_fee_discount )
+            elif self.e_decimal_count_type == DecimalCountType.ROUND_OFF:
+                n_trading_fee = int( ( n_trading_value * Decimal( '0.001425' ) * f_trading_fee_discount ).quantize( Decimal( '1' ), rounding=ROUND_HALF_UP ) )
+            else:
+                n_trading_fee = int( ( n_trading_value * Decimal( '0.001425' ) * f_trading_fee_discount ).quantize( Decimal( '1' ), rounding=ROUND_CEILING ) )
             n_trading_fee = max( n_trading_fee_minimum, n_trading_fee )
         else:
             n_trading_fee = int( self.ui.qtTradingFeeConstantSpinBox.value() )
@@ -1454,14 +1466,19 @@ class ShowItemEditDialog( QDialog ):
 
 class Utility():
     @staticmethod
-    def compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, n_minimum_common_trading_fee, n_minimum_odd_trading_fee, b_etf, b_daying_trading, b_bond ):
+    def compute_cost( e_trading_type : TradingType, e_decimal_count_type : DecimalCountType, f_trading_price, n_trading_count, f_trading_fee_discount, n_minimum_common_trading_fee, n_minimum_odd_trading_fee, b_etf, b_daying_trading, b_bond ):
         f_trading_price = Decimal( str( f_trading_price ) )#原本10.45 * 100000 = 1044999.999999999 然後取 int 就變成1044999，所以改用Decimal
         n_trading_count = Decimal( str( n_trading_count ) )
         f_trading_fee_discount = Decimal( str( f_trading_fee_discount ) )
         dict_result = {}
         if e_trading_type == TradingType.BUY or e_trading_type == TradingType.SELL:
             n_trading_value = int( f_trading_price * n_trading_count )
-            n_trading_fee = int( n_trading_value * Decimal( '0.001425' ) * f_trading_fee_discount )
+            if e_decimal_count_type == DecimalCountType.ROUND_DOWN:
+                n_trading_fee = int( n_trading_value * Decimal( '0.001425' ) * f_trading_fee_discount )
+            elif e_decimal_count_type == DecimalCountType.ROUND_OFF:
+                n_trading_fee = int( ( n_trading_value * Decimal( '0.001425' ) * f_trading_fee_discount ).quantize( Decimal( '1' ), rounding=ROUND_HALF_UP ) )
+            else:
+                n_trading_fee = int( ( n_trading_value * Decimal( '0.001425' ) * f_trading_fee_discount ).quantize( Decimal( '1' ), rounding=ROUND_CEILING ) )
             
             if n_trading_value != 0:
                 if n_trading_count % 1000 == 0:
@@ -2760,7 +2777,8 @@ class MainWindow( QMainWindow ):
         str_stock_name = list_stock_name_and_type[ 0 ]
         str_b_etf = self.dict_all_company_number_to_name_and_type[ str_stock_number ][ 1 ]
         b_etf = True if str_b_etf == "True" else False
-        dialog = StockTradingEditDialog( str_stock_number, str_stock_name, b_etf, b_discount, f_discount_value, n_current_minimum_common_trading_fee, n_current_minimum_odd_trading_fee, self )
+        e_decimal_count_type = self.get_decimal_count_type()
+        dialog = StockTradingEditDialog( str_stock_number, str_stock_name, e_decimal_count_type, b_etf, b_discount, f_discount_value, n_current_minimum_common_trading_fee, n_current_minimum_odd_trading_fee, self )
 
         if dialog.exec():
             dict_trading_data = dialog.dict_trading_data
@@ -2794,7 +2812,8 @@ class MainWindow( QMainWindow ):
         str_stock_number = self.str_picked_stock_number
         list_stock_name_and_type = self.dict_all_company_number_to_name_and_type[ str_stock_number ]
         str_stock_name = list_stock_name_and_type[ 0 ]
-        dialog = StockRegularTradingEditDialog( str_stock_number, str_stock_name, e_trading_price_type, e_trading_fee_type, b_discount, f_discount_value, n_trading_fee_minimum, n_trading_fee_constant, self )
+        e_decimal_count_type = self.get_decimal_count_type()
+        dialog = StockRegularTradingEditDialog( str_stock_number, str_stock_name, e_decimal_count_type, e_trading_price_type, e_trading_fee_type, b_discount, f_discount_value, n_trading_fee_minimum, n_trading_fee_constant, self )
 
         if dialog.exec():
             dict_trading_data = dialog.dict_trading_data
@@ -2923,7 +2942,7 @@ class MainWindow( QMainWindow ):
                 str_stock_number = self.str_picked_stock_number
                 list_stock_name_and_type = self.dict_all_company_number_to_name_and_type[ str_stock_number ]
                 str_stock_name = list_stock_name_and_type[ 0 ]
-
+                e_decimal_count_type = self.get_decimal_count_type()
                 if n_row == len( self.get_trading_data_header() ) - 2: #編輯
                     if dict_selected_data[ TradingData.TRADING_TYPE ] == TradingType.TEMPLATE:
                         return
@@ -2932,7 +2951,8 @@ class MainWindow( QMainWindow ):
                         b_etf = True if str_b_etf == "True" else False
                         n_current_minimum_common_trading_fee = self.dict_all_account_general_data[ str_tab_widget_name ][ "minimum_common_trading_fee" ]
                         n_current_minimum_odd_trading_fee = self.dict_all_account_general_data[ str_tab_widget_name ][ "minimum_odd_trading_fee" ]
-                        dialog = StockTradingEditDialog( str_stock_number, str_stock_name, b_etf, True, 0, n_current_minimum_common_trading_fee, n_current_minimum_odd_trading_fee, self )
+                        
+                        dialog = StockTradingEditDialog( str_stock_number, str_stock_name, e_decimal_count_type, b_etf, True, 0, n_current_minimum_common_trading_fee, n_current_minimum_odd_trading_fee, self )
                         dialog.setup_trading_date( dict_selected_data[ TradingData.TRADING_DATE ] )
                         dialog.setup_trading_type( dict_selected_data[ TradingData.TRADING_TYPE ] )
                         dialog.setup_trading_discount( dict_selected_data[ TradingData.TRADING_FEE_DISCOUNT ] )
@@ -2941,7 +2961,7 @@ class MainWindow( QMainWindow ):
                         dialog.setup_daying_trading( dict_selected_data[ TradingData.DAYING_TRADING ] )
                         dialog.compute_cost()
                     elif dict_selected_data[ TradingData.TRADING_TYPE ] == TradingType.REGULAR_BUY:
-                        dialog = StockRegularTradingEditDialog( str_stock_number, str_stock_name, TradingPriceType.PER_SHARE, TradingFeeType.VARIABLE, True, 0, 0, 0, self )
+                        dialog = StockRegularTradingEditDialog( str_stock_number, str_stock_name, e_decimal_count_type, TradingPriceType.PER_SHARE, TradingFeeType.VARIABLE, True, 0, 0, 0, self )
                         dialog.setup_trading_date( dict_selected_data[ TradingData.TRADING_DATE ] )
                         dialog.setup_trading_count( dict_selected_data[ TradingData.TRADING_QUANTITY ] )
                         dialog.setup_trading_price_type( dict_selected_data[ TradingData.TRADING_PRICE_TYPE ] )
@@ -4087,6 +4107,7 @@ class MainWindow( QMainWindow ):
         n_accumulated_cash_dividend = 0
         str_last_buying_date = ''
         n_last_buying_count = 0
+        e_decimal_count_type = self.get_decimal_count_type()
         queue_buying_data = deque([])
         list_calibration_data = [] #因為若是已經沒有庫存股票，那麼股利分配或是減資的資料就不會被計算
         for index, item in enumerate( sorted_list ):
@@ -4103,7 +4124,7 @@ class MainWindow( QMainWindow ):
                 n_trading_count = item[ TradingData.TRADING_QUANTITY ]
                 f_trading_fee_discount = item[ TradingData.TRADING_FEE_DISCOUNT ]
                 
-                dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, n_minimum_common_trading_fee, n_minimum_odd_trading_fee, b_etf, False, b_bond )
+                dict_result = Utility.compute_cost( e_trading_type, e_decimal_count_type, f_trading_price, n_trading_count, f_trading_fee_discount, n_minimum_common_trading_fee, n_minimum_odd_trading_fee, b_etf, False, b_bond )
                 item[ TradingData.TRADING_VALUE_NON_SAVE ] = dict_result[ TradingCost.TRADING_VALUE ]
                 item[ TradingData.TRADING_FEE_NON_SAVE ] = dict_result[ TradingCost.TRADING_FEE ]
                 item[ TradingData.TRADING_TAX_NON_SAVE ] = dict_result[ TradingCost.TRADING_TAX ]
@@ -4141,7 +4162,16 @@ class MainWindow( QMainWindow ):
                 elif e_trading_fee_type == TradingFeeType.VARIABLE:
                     f_trading_fee_discount = Decimal( str( item[ TradingData.TRADING_FEE_DISCOUNT ] ) )
                     n_trading_fee_minimum = item[ TradingData.REGULAR_BUY_TRADING_FEE_MINIMUM ]
-                    n_trading_fee = int( n_trading_value * Decimal( '0.001425' ) * f_trading_fee_discount )
+
+                    
+                    if e_decimal_count_type == DecimalCountType.ROUND_DOWN:
+                        n_trading_fee = int( n_trading_value * Decimal( '0.001425' ) * f_trading_fee_discount )
+                    elif e_decimal_count_type == DecimalCountType.ROUND_OFF:
+                        n_trading_fee = int( ( n_trading_value * Decimal( '0.001425' ) * f_trading_fee_discount ).quantize( Decimal( '1' ), rounding=ROUND_HALF_UP ) )
+                    else:
+                        n_trading_fee = int( ( n_trading_value * Decimal( '0.001425' ) * f_trading_fee_discount ).quantize( Decimal( '1' ), rounding=ROUND_CEILING ) )
+
+
                     n_trading_fee = max( n_trading_fee_minimum, n_trading_fee )
                 else:
                     n_trading_fee = int( item[ TradingData.REGULAR_BUY_TRADING_FEE_CONSTANT ] )
@@ -4174,7 +4204,7 @@ class MainWindow( QMainWindow ):
                      obj_trading_date >= datetime.datetime.strptime( '2017-04-28', "%Y-%m-%d" ) ): #交易日期在2017-04-28之後。因為在這之後才通過當沖交易稅減半
                     item[ TradingData.IS_REALLY_DAYING_TRADING_NON_SAVE ] = True
                     if n_trading_count <= n_last_buying_count: #賣出數量小於或等於買入數量，表示全部賣出數量都可視為當沖
-                        dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, n_minimum_common_trading_fee, n_minimum_odd_trading_fee, b_etf, True, b_bond )
+                        dict_result = Utility.compute_cost( e_trading_type, e_decimal_count_type, f_trading_price, n_trading_count, f_trading_fee_discount, n_minimum_common_trading_fee, n_minimum_odd_trading_fee, b_etf, True, b_bond )
                         item[ TradingData.TRADING_VALUE_NON_SAVE ] = dict_result[ TradingCost.TRADING_VALUE ]
                         item[ TradingData.TRADING_FEE_NON_SAVE ] = dict_result[ TradingCost.TRADING_FEE ]
                         item[ TradingData.TRADING_TAX_NON_SAVE ] = dict_result[ TradingCost.TRADING_TAX ]
@@ -4186,7 +4216,7 @@ class MainWindow( QMainWindow ):
                         n_day_trading_selling_count = n_trading_count
                     else: #賣出數量大於買入數量，表示只有部分數量都可視為當沖
                         n_trading_count_1 = n_last_buying_count
-                        dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count_1, f_trading_fee_discount, n_minimum_common_trading_fee, n_minimum_odd_trading_fee, b_etf, True, b_bond )#這部分是當沖
+                        dict_result = Utility.compute_cost( e_trading_type, e_decimal_count_type, f_trading_price, n_trading_count_1, f_trading_fee_discount, n_minimum_common_trading_fee, n_minimum_odd_trading_fee, b_etf, True, b_bond )#這部分是當沖
                         n_trading_value_1 = dict_result[ TradingCost.TRADING_VALUE ]
                         n_trading_fee_1 = dict_result[ TradingCost.TRADING_FEE ]
                         n_trading_tax_1 = dict_result[ TradingCost.TRADING_TAX ]
@@ -4194,7 +4224,7 @@ class MainWindow( QMainWindow ):
                         n_day_trading_selling_count = n_trading_count_1
 
                         n_trading_count_2 = n_trading_count - n_last_buying_count
-                        dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count_2, f_trading_fee_discount, n_minimum_common_trading_fee, n_minimum_odd_trading_fee, b_etf, False, b_bond )#這部分不是當沖
+                        dict_result = Utility.compute_cost( e_trading_type, e_decimal_count_type, f_trading_price, n_trading_count_2, f_trading_fee_discount, n_minimum_common_trading_fee, n_minimum_odd_trading_fee, b_etf, False, b_bond )#這部分不是當沖
                         n_trading_value_2 = dict_result[ TradingCost.TRADING_VALUE ]
                         n_trading_fee_2 = dict_result[ TradingCost.TRADING_FEE ]
                         n_trading_tax_2 = dict_result[ TradingCost.TRADING_TAX ]
@@ -4213,7 +4243,7 @@ class MainWindow( QMainWindow ):
                     item[ TradingData.SELLING_PROFIT_NON_SAVE ] = 0
                 else:
                     item[ TradingData.IS_REALLY_DAYING_TRADING_NON_SAVE ] = False
-                    dict_result = Utility.compute_cost( e_trading_type, f_trading_price, n_trading_count, f_trading_fee_discount, n_minimum_common_trading_fee, n_minimum_odd_trading_fee, b_etf, False, b_bond )
+                    dict_result = Utility.compute_cost( e_trading_type, e_decimal_count_type, f_trading_price, n_trading_count, f_trading_fee_discount, n_minimum_common_trading_fee, n_minimum_odd_trading_fee, b_etf, False, b_bond )
                     item[ TradingData.TRADING_VALUE_NON_SAVE ] = dict_result[ TradingCost.TRADING_VALUE ]
                     item[ TradingData.TRADING_FEE_NON_SAVE ] = dict_result[ TradingCost.TRADING_FEE ]
                     item[ TradingData.TRADING_TAX_NON_SAVE ] = dict_result[ TradingCost.TRADING_TAX ]
@@ -4594,7 +4624,14 @@ class MainWindow( QMainWindow ):
 
                         n_expect_trading_fee = 0
                         if n_accumulated_quantity > 0:
-                            n_expect_trading_fee = max( int( n_per_stock_market_value * Decimal( '0.001425' ) ), n_minimum_common_trading_fee )
+                            e_decimal_count_type = self.get_decimal_count_type()
+                            if e_decimal_count_type == DecimalCountType.ROUND_DOWN:
+                                n_trading_fee = int( n_per_stock_market_value * Decimal( '0.001425' ) )
+                            elif e_decimal_count_type == DecimalCountType.ROUND_OFF:
+                                n_trading_fee = int( ( n_per_stock_market_value * Decimal( '0.001425' ) ).quantize( Decimal( '1' ), rounding=ROUND_HALF_UP ) )
+                            else:
+                                n_trading_fee = int( ( n_per_stock_market_value * Decimal( '0.001425' ) ).quantize( Decimal( '1' ), rounding=ROUND_CEILING ) )
+                            n_expect_trading_fee = max( n_trading_fee, n_minimum_common_trading_fee )
 
                         if b_etf:
                             if b_bond:
@@ -5292,6 +5329,14 @@ class MainWindow( QMainWindow ):
             self.ui.qtCurrentSelectCompanyLabel.setStyleSheet("color: yellow; ")
         else:
             self.ui.qtCurrentSelectCompanyLabel.setText( "" )
+
+    def get_decimal_count_type( self ):
+        # if self.ui.qtRoundDownAction.isChecked():
+        # return DecimalCountType.ROUND_DOWN
+        # elif self.ui.qtRoundUpAction.isChecked():
+            return DecimalCountType.ROUND_UP
+        # else:
+        #     return DecimalCountType.ROUND_OFF
 
     #region 從網上下載資料
     def check_internet_via_http( self, url="https://www.google.com", timeout=3):
