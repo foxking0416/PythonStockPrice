@@ -25,15 +25,21 @@ class Ui_Dialog(object):
     def setupUi(self, Dialog):
         if not Dialog.objectName():
             Dialog.setObjectName(u"Dialog")
-        Dialog.resize(337, 483)
-        Dialog.setMinimumSize(QSize(300, 0))
-        Dialog.setMaximumSize(QSize(16777215, 16777215))
+        Dialog.resize(340, 581)
+        Dialog.setMinimumSize(QSize(340, 0))
+        Dialog.setMaximumSize(QSize(340, 16777215))
         self.verticalLayout = QVBoxLayout(Dialog)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.qtGroupNameLabel = QLabel(Dialog)
         self.qtGroupNameLabel.setObjectName(u"qtGroupNameLabel")
 
         self.verticalLayout.addWidget(self.qtGroupNameLabel)
+
+        self.horizontalLayout_9 = QHBoxLayout()
+        self.horizontalLayout_9.setObjectName(u"horizontalLayout_9")
+        self.horizontalLayout_9.setContentsMargins(-1, -1, -1, 20)
+
+        self.verticalLayout.addLayout(self.horizontalLayout_9)
 
         self.horizontalLayout_6 = QHBoxLayout()
         self.horizontalLayout_6.setObjectName(u"horizontalLayout_6")
@@ -95,27 +101,23 @@ class Ui_Dialog(object):
 
         self.verticalLayout.addLayout(self.horizontalLayout_4)
 
-        self.groupBox_3 = QGroupBox(Dialog)
-        self.groupBox_3.setObjectName(u"groupBox_3")
-        self.horizontalLayout_8 = QHBoxLayout(self.groupBox_3)
+        self.qtDiscountTimeGroupBox = QGroupBox(Dialog)
+        self.qtDiscountTimeGroupBox.setObjectName(u"qtDiscountTimeGroupBox")
+        self.horizontalLayout_8 = QHBoxLayout(self.qtDiscountTimeGroupBox)
         self.horizontalLayout_8.setObjectName(u"horizontalLayout_8")
-        self.qtDiscountImmediateRadioButton = QRadioButton(self.groupBox_3)
+        self.qtDiscountImmediateRadioButton = QRadioButton(self.qtDiscountTimeGroupBox)
         self.qtDiscountImmediateRadioButton.setObjectName(u"qtDiscountImmediateRadioButton")
         self.qtDiscountImmediateRadioButton.setChecked(True)
 
         self.horizontalLayout_8.addWidget(self.qtDiscountImmediateRadioButton)
 
-        self.qtDiscountPostRadioButton = QRadioButton(self.groupBox_3)
+        self.qtDiscountPostRadioButton = QRadioButton(self.qtDiscountTimeGroupBox)
         self.qtDiscountPostRadioButton.setObjectName(u"qtDiscountPostRadioButton")
 
         self.horizontalLayout_8.addWidget(self.qtDiscountPostRadioButton)
 
-        self.horizontalSpacer_5 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
-        self.horizontalLayout_8.addItem(self.horizontalSpacer_5)
-
-
-        self.verticalLayout.addWidget(self.groupBox_3)
+        self.verticalLayout.addWidget(self.qtDiscountTimeGroupBox)
 
         self.groupBox = QGroupBox(Dialog)
         self.groupBox.setObjectName(u"groupBox")
@@ -136,10 +138,6 @@ class Ui_Dialog(object):
         self.qtRoundUpRadioButton.setObjectName(u"qtRoundUpRadioButton")
 
         self.horizontalLayout_7.addWidget(self.qtRoundUpRadioButton)
-
-        self.horizontalSpacer_4 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
-
-        self.horizontalLayout_7.addItem(self.horizontalSpacer_4)
 
 
         self.verticalLayout.addWidget(self.groupBox)
@@ -219,7 +217,7 @@ class Ui_Dialog(object):
         self.label_5.setText(QCoreApplication.translate("Dialog", u"\u5143", None))
         self.label_2.setText(QCoreApplication.translate("Dialog", u"\u96f6\u80a1\u4ea4\u6613\u6700\u4f4e\u624b\u7e8c\u8cbb", None))
         self.label_3.setText(QCoreApplication.translate("Dialog", u"\u5143", None))
-        self.groupBox_3.setTitle(QCoreApplication.translate("Dialog", u"\u624b\u7e8c\u8cbb\u6298\u6263\u65b9\u5f0f", None))
+        self.qtDiscountTimeGroupBox.setTitle(QCoreApplication.translate("Dialog", u"\u624b\u7e8c\u8cbb\u6298\u6263\u65b9\u5f0f", None))
         self.qtDiscountImmediateRadioButton.setText(QCoreApplication.translate("Dialog", u"\u5373\u6642\u6298\u6263", None))
         self.qtDiscountPostRadioButton.setText(QCoreApplication.translate("Dialog", u"\u4e8b\u5f8c\u9000\u4f63", None))
         self.groupBox.setTitle(QCoreApplication.translate("Dialog", u"\u624b\u7e8c\u8cbb\u5c0f\u6578\u8a08\u7b97", None))
@@ -229,6 +227,6 @@ class Ui_Dialog(object):
         self.groupBox_2.setTitle(QCoreApplication.translate("Dialog", u"\u80a1\u5229\u532f\u8cbb\u8a2d\u5b9a", None))
         self.qtAddStockPushButton.setText(QCoreApplication.translate("Dialog", u"\u65b0\u589e\u80a1\u7968", None))
         self.label.setText(QCoreApplication.translate("Dialog", u"\u6c92\u6709\u7279\u5225\u8a2d\u5b9a\u7684\u516c\u53f8\u7684\u80a1\u5229\u532f\u8cbb\uff0c\u9810\u8a2d\u5c31\u662f10\u5143", None))
-        self.qtOkPushButton.setText(QCoreApplication.translate("Dialog", u"\u5132\u5b58", None))
+        self.qtOkPushButton.setText(QCoreApplication.translate("Dialog", u"\u78ba\u5b9a", None))
     # retranslateUi
 

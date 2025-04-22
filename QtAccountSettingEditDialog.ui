@@ -6,19 +6,19 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>337</width>
-    <height>483</height>
+    <width>340</width>
+    <height>581</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>300</width>
+    <width>340</width>
     <height>0</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>16777215</width>
+    <width>340</width>
     <height>16777215</height>
    </size>
   </property>
@@ -32,6 +32,13 @@
       <string>TextLabel</string>
      </property>
     </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_9">
+     <property name="bottomMargin">
+      <number>20</number>
+     </property>
+    </layout>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_6">
@@ -127,7 +134,7 @@
     </layout>
    </item>
    <item>
-    <widget class="QGroupBox" name="groupBox_3">
+    <widget class="QGroupBox" name="qtDiscountTimeGroupBox">
      <property name="title">
       <string>手續費折扣方式</string>
      </property>
@@ -148,19 +155,6 @@
          <string>事後退佣</string>
         </property>
        </widget>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer_5">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
       </item>
      </layout>
     </widget>
@@ -194,19 +188,6 @@
          <string>無條件進入</string>
         </property>
        </widget>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer_4">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
       </item>
      </layout>
     </widget>
@@ -298,7 +279,7 @@
      <item>
       <widget class="QPushButton" name="qtOkPushButton">
        <property name="text">
-        <string>儲存</string>
+        <string>確定</string>
        </property>
       </widget>
      </item>

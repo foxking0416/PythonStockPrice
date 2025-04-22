@@ -1182,6 +1182,7 @@ class AccountSettingEditDialog( QDialog ):
         self.ui = Ui_AccountSettingEditDialog()
         self.ui.setupUi( self )
         self.setWindowIcon( share_icon.get_icon( share_icon.IconType.WINDOW ) )
+        self.ui.qtDiscountTimeGroupBox.setVisible( False )
         self.ui.qtGroupNameLabel.setText( str_current_title )
         self.ui.qtStockSelectComboBox.setVisible( False )
         self.dict_all_company_number_to_name_and_type = dict_all_company_number_to_name_and_type
@@ -1212,7 +1213,8 @@ class AccountSettingEditDialog( QDialog ):
         self.dividend_transfer_fee_model = QStandardItemModel( 0, 0 ) 
         self.ui.qtDividendTransferFeeTableView.setModel( self.dividend_transfer_fee_model )
         self.ui.qtDividendTransferFeeTableView.setItemDelegate( delegate )
-        # self.ui.qtDividendTransferFeeTableView.verticalHeader().setSectionResizeMode( QHeaderView.Fixed )
+        self.ui.qtDividendTransferFeeTableView.horizontalHeader().setSectionResizeMode( QHeaderView.Stretch )
+        self.ui.qtDividendTransferFeeTableView.verticalHeader().setSectionResizeMode( QHeaderView.Fixed )
         self.ui.qtDividendTransferFeeTableView.clicked.connect( lambda index: self.on_transfer_fee_table_item_clicked( index, self.dividend_transfer_fee_model ) )
 
         self.ui.qtStockSelectComboBox.activated.connect( self.on_stock_select_combo_box_current_index_changed )
@@ -1269,7 +1271,7 @@ class AccountSettingEditDialog( QDialog ):
 
     def refresh_table_view( self ):
         self.dividend_transfer_fee_model.clear()
-        self.dividend_transfer_fee_model.setHorizontalHeaderLabels( [ "股利匯費", "編輯", "刪除" ] )
+        self.dividend_transfer_fee_model.setHorizontalHeaderLabels( [ "匯費", "編輯", "刪除" ] )
         list_vertical_labels = []
         for index_row,( key_stock_number, value ) in enumerate( self.dict_company_number_to_transfer_fee.items() ):
             list_stock_name_and_type = self.dict_all_company_number_to_name_and_type[ key_stock_number ]
