@@ -25,9 +25,7 @@ from QtStockSplitEditDialog import Ui_Dialog as Ui_StockSplitDialog
 from QtStockDividendPositionDateEditDialog import Ui_Dialog as Ui_StockDividendPositionDateEditDialog
 from QtCashTransferEditDialog import Ui_Dialog as Ui_CashTransferDialog
 from QtDuplicateOptionDialog import Ui_Dialog as Ui_DuplicateOptionDialog
-from QtStockDividendTransferFeeEditDialog import Ui_Dialog as Ui_StockDividendTransferFeeEditDialog
 from QtStockDividendTransferFeeEditSpinboxDialog import Ui_Dialog as Ui_StockDividendTransferFeeEditSpinboxDialog
-from QtStockMinimumTradingFeeEditDialog import Ui_Dialog as Ui_StockMinimumTradingFeeEditDialog
 from QtAboutDialog import Ui_Dialog as Ui_AboutDialog
 from QtAccountSettingEditDialog import Ui_Dialog as Ui_AccountSettingEditDialog
 from QtShowItemEditDialog import Ui_Dialog as Ui_ShowItemEditDialog
@@ -297,125 +295,6 @@ class ImportDataDuplicateOptionDialog( QDialog ):
     def cancel( self ):
         self.reject()
 
-class StockDividendTransferFeeEditDialog( QDialog ):
-    def __init__( self, str_account_name, dict_all_company_number_to_name_and_type, dict_company_number_to_transfer_fee, parent = None ):
-        super().__init__( parent )
-
-        self.ui = Ui_StockDividendTransferFeeEditDialog()
-        self.ui.setupUi( self )
-        self.setWindowIcon( share_icon.get_icon( share_icon.IconType.WINDOW ) )
-        self.ui.qtGroupNameLabel.setText( str_account_name )
-        self.ui.qtStockSelectComboBox.setVisible( False )
-        self.dict_all_company_number_to_name_and_type = dict_all_company_number_to_name_and_type
-        self.dict_company_number_to_transfer_fee = dict_company_number_to_transfer_fee.copy()
-
-        delegate = share_ui.CenterIconDelegate()
-        self.dividend_transfer_fee_model = QStandardItemModel( 0, 0 ) 
-        self.ui.qtDividendTransferFeeTableView.setModel( self.dividend_transfer_fee_model )
-        self.ui.qtDividendTransferFeeTableView.setItemDelegate( delegate )
-        # self.ui.qtDividendTransferFeeTableView.verticalHeader().setSectionResizeMode( QHeaderView.Fixed )
-        self.ui.qtDividendTransferFeeTableView.clicked.connect( lambda index: self.on_transfer_fee_table_item_clicked( index, self.dividend_transfer_fee_model ) )
-
-        self.ui.qtStockSelectComboBox.activated.connect( self.on_stock_select_combo_box_current_index_changed )
-        self.ui.qtAddStockPushButton.clicked.connect( self.on_add_stock_push_button_clicked )
-        self.ui.qtStockInputLineEdit.textChanged.connect( self.on_stock_input_text_changed ) 
-        self.ui.qtOkPushButton.clicked.connect( self.accept )
-
-        self.refresh_table_view()
-
-    def on_stock_input_text_changed( self ):
-        with QSignalBlocker( self.ui.qtStockInputLineEdit ), QSignalBlocker( self.ui.qtStockSelectComboBox ):
-            self.ui.qtStockSelectComboBox.clear()
-            str_stock_input = self.ui.qtStockInputLineEdit.text()
-            str_stock_input = share_api.lowercase_english_uppercase( str_stock_input )
-            if len( str_stock_input ) == 0:
-                self.ui.qtStockSelectComboBox.setVisible( False )
-                return
-            self.ui.qtStockSelectComboBox.setVisible( True )
-
-            for stock_number, list_stock_name_and_type in self.dict_all_company_number_to_name_and_type.items():
-                str_stock_name = list_stock_name_and_type[ 0 ]
-                str_stock_name_lowercase = share_api.lowercase_english_uppercase( str_stock_name )
-                if str_stock_input in stock_number or str_stock_input in str_stock_name_lowercase:
-                    self.ui.qtStockSelectComboBox.addItem( f"{stock_number} {str_stock_name}" )
-            # self.ui.qtStockSelectComboBox.showPopup() #showPopup的話，focus會被搶走
-
-            self.ui.qtStockInputLineEdit.setFocus()
-
-    def on_stock_select_combo_box_current_index_changed( self, index ): 
-        str_stock_input = self.ui.qtStockSelectComboBox.currentText()
-        self.ui.qtStockInputLineEdit.setText( str_stock_input )
-        self.ui.qtStockSelectComboBox.setVisible( False )
-        self.ui.qtStockInputLineEdit.setFocus()
-
-    def on_add_stock_push_button_clicked( self ):
-        str_stock_input = self.ui.qtStockInputLineEdit.text()
-        self.ui.qtStockInputLineEdit.clear()
-        str_first_four_chars = str_stock_input.split(" ")[0]
-        if str_first_four_chars not in self.dict_all_company_number_to_name_and_type:
-            b_find = False
-            for stock_number, list_stock_name_and_type in self.dict_all_company_number_to_name_and_type.items():
-                str_stock_name = list_stock_name_and_type[ 0 ]
-                if str_first_four_chars == str_stock_name:
-                    str_first_four_chars = stock_number
-                    b_find = True
-                    break
-            if not b_find:
-                QMessageBox.warning( self, "警告", "輸入的股票代碼不存在", QMessageBox.Ok )
-                return
-
-        if str_first_four_chars not in self.dict_company_number_to_transfer_fee:
-            self.dict_company_number_to_transfer_fee[ str_first_four_chars ] = 10
-
-        self.refresh_table_view()
-
-    def refresh_table_view( self ):
-        self.dividend_transfer_fee_model.clear()
-        self.dividend_transfer_fee_model.setHorizontalHeaderLabels( [ "股利匯費", "編輯", "刪除" ] )
-        list_vertical_labels = []
-        for index_row,( key_stock_number, value ) in enumerate( self.dict_company_number_to_transfer_fee.items() ):
-            list_stock_name_and_type = self.dict_all_company_number_to_name_and_type[ key_stock_number ]
-            str_stock_name = list_stock_name_and_type[ 0 ]
-            list_vertical_labels.append( f"{key_stock_number} {str_stock_name}" )
-
-            transfer_fee_item = QStandardItem( str( value ) )
-            transfer_fee_item.setTextAlignment( Qt.AlignHCenter | Qt.AlignVCenter )
-            transfer_fee_item.setFlags( transfer_fee_item.flags() & ~Qt.ItemIsEditable )
-            self.dividend_transfer_fee_model.setItem( index_row, 0, transfer_fee_item ) 
-
-            edit_icon_item = QStandardItem("")
-            edit_icon_item.setIcon( share_icon.get_icon( share_icon.IconType.EDIT ) )
-            edit_icon_item.setFlags( edit_icon_item.flags() & ~Qt.ItemIsEditable )
-            self.dividend_transfer_fee_model.setItem( index_row, 1, edit_icon_item )
-
-            delete_icon_item = QStandardItem("")
-            delete_icon_item.setIcon( share_icon.get_icon( share_icon.IconType.DELETE ) )
-            delete_icon_item.setFlags( delete_icon_item.flags() & ~Qt.ItemIsEditable )
-            self.dividend_transfer_fee_model.setItem( index_row, 2, delete_icon_item )
-        self.dividend_transfer_fee_model.setVerticalHeaderLabels( list_vertical_labels )
-        self.ui.qtDividendTransferFeeTableView.setColumnWidth( 0, 60 )
-        self.ui.qtDividendTransferFeeTableView.setColumnWidth( 1, 40 )
-        self.ui.qtDividendTransferFeeTableView.setColumnWidth( 2, 40 )
-
-    def on_transfer_fee_table_item_clicked( self, index: QModelIndex, table_model ):
-        item = table_model.itemFromIndex( index )
-        if item is not None:
-            n_column = index.column()  # 獲取列索引
-            header_text = table_model.verticalHeaderItem( index.row() ).text()
-            str_stock_number = header_text.split(" ")[0]
-            n_current_fee = self.dict_company_number_to_transfer_fee[ str_stock_number ] 
-            
-            if n_column == 1:#匯出按鈕
-                dialog = StockDividendTransferFeeEditSpinboxDialog( n_current_fee, self )
-                if dialog.exec():
-                    self.dict_company_number_to_transfer_fee[ str_stock_number ] = dialog.n_new_transfer_fee
-                    self.refresh_table_view()
-            elif n_column == 2:#刪除按鈕
-                result = share_ui.show_warning_message_box_with_ok_cancel_button( "警告", f"確定要刪掉『{header_text}』的匯費資料嗎?", self )
-                if result:
-                    value = self.dict_company_number_to_transfer_fee.pop( str_stock_number, None )
-                    self.refresh_table_view()
-
 class StockDividendTransferFeeEditSpinboxDialog( QDialog ):
     def __init__( self, n_transfer_fee, parent = None ):
         super().__init__( parent )
@@ -433,26 +312,6 @@ class StockDividendTransferFeeEditSpinboxDialog( QDialog ):
         self.n_new_transfer_fee = self.ui.qtDividendTransferFeeSpinBox.value()
         self.accept()
 
-    def cancel( self ):
-        self.reject()
-
-class StockMinimumTradingFeeEditDialog( QDialog ):
-    def __init__( self, str_account_name, n_current_minimum_common_trading_fee, parent = None ):
-        super().__init__( parent )
-
-        self.ui = Ui_StockMinimumTradingFeeEditDialog()
-        self.ui.setupUi( self )
-        self.setWindowIcon( share_icon.get_icon( share_icon.IconType.WINDOW ) )
-        self.ui.qtMinimumTradingFeeSpinBox.setValue( n_current_minimum_common_trading_fee )
-        self.ui.qtGroupNameLabel.setText( str_account_name )
-        self.n_new_minimum_common_trading_fee = n_current_minimum_common_trading_fee
-        self.ui.qtOkPushButton.clicked.connect( self.accept_data )
-        self.ui.qtCancelPushButton.clicked.connect( self.cancel )
-
-    def accept_data( self ):
-        self.n_new_minimum_common_trading_fee = self.ui.qtMinimumTradingFeeSpinBox.value()
-        self.accept()
-    
     def cancel( self ):
         self.reject()
 
@@ -1933,10 +1792,6 @@ class MainWindow( QMainWindow ):
         self.ui.qtImportSingleStockAction.triggered.connect( self.on_import_single_stock_action_triggered )
         self.ui.qtSetTemporaryFilePathAction.triggered.connect( self.on_set_temporary_file_path_action_triggered )
 
-        self.ui.qtEditDividendTransferFeeAction.triggered.connect( self.on_trigger_edit_stock_dividend_transfer_fee )
-        self.ui.qtEditMinimumTradingFeeAction.triggered.connect( self.on_trigger_edit_stock_minimum_common_trading_fee )
-        self.ui.qtEditOddMinimumTradingFeeAction.triggered.connect( self.on_trigger_edit_stock_minimum_odd_trading_fee )
-
         self.ui.qtFromNewToOldAction.setChecked( True )
         self.ui.qtFromOldToNewAction.setChecked( False )
         self.ui.qtFromNewToOldAction.triggered.connect( self.on_trigger_from_new_to_old )
@@ -1963,13 +1818,6 @@ class MainWindow( QMainWindow ):
         self.ui.qtCostWithOutDividendAction.setChecked( False )
         self.ui.qtCostWithInDividendAction.triggered.connect( self.on_trigger_cost_with_in_dividend )
         self.ui.qtCostWithOutDividendAction.triggered.connect( self.on_trigger_cost_with_out_dividend )
-
-        self.ui.qtRoundDownAction.setChecked( True )
-        self.ui.qtRoundOffAction.setChecked( False )
-        self.ui.qtRoundUpAction.setChecked( False )
-        self.ui.qtRoundDownAction.triggered.connect( self.on_trigger_round_down_trading_fee )
-        self.ui.qtRoundOffAction.triggered.connect( self.on_trigger_round_off_trading_fee )
-        self.ui.qtRoundUpAction.triggered.connect( self.on_trigger_round_up_trading_fee )
 
         self.ui.qtAboutAction.triggered.connect( self.on_trigger_about )
         
@@ -2254,27 +2102,22 @@ class MainWindow( QMainWindow ):
         uiqt_horizontal_spacer_1_1 = QSpacerItem( 30, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum )
         uiqt_horizontal_layout_1.addItem( uiqt_horizontal_spacer_1_1 )
 
-        uiqt_extra_insurance_fee_check_box = QCheckBox( stock_inventory_tab )
-        uiqt_extra_insurance_fee_check_box.setText( "補充保費" )
-        uiqt_extra_insurance_fee_check_box.setObjectName( "ExtraInsuranceFeeCheckBox" )
-        uiqt_horizontal_layout_1.addWidget( uiqt_extra_insurance_fee_check_box )
-
-        uiqt_account_setting_push_button = QPushButton( stock_inventory_tab )
-        uiqt_account_setting_push_button.setMinimumSize( QSize( 75, 0 ) )
-        uiqt_account_setting_push_button.setMaximumSize( QSize( 75, 16777215 ) )
-        uiqt_account_setting_push_button.setText( "各項計算設定" )
-        uiqt_account_setting_push_button.setObjectName( "AccountSettingPushButton" )
-        uiqt_horizontal_layout_1.addWidget( uiqt_account_setting_push_button )
-
-        uiqt_horizontal_spacer_1_2 = QSpacerItem( 30, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum )
-        uiqt_horizontal_layout_1.addItem( uiqt_horizontal_spacer_1_2 )
-
         uiqt_display_type_combobox = QComboBox( stock_inventory_tab )
         uiqt_display_type_combobox.addItem( "顯示所有交易" )
         uiqt_display_type_combobox.addItem( "僅顯示目前庫存" )
         uiqt_display_type_combobox.addItem( "僅顯示已無庫存" )
         uiqt_display_type_combobox.setObjectName( "DisplayTypeComboBox" )
         uiqt_horizontal_layout_1.addWidget( uiqt_display_type_combobox )
+
+        uiqt_horizontal_spacer_1_2 = QSpacerItem( 30, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum )
+        uiqt_horizontal_layout_1.addItem( uiqt_horizontal_spacer_1_2 )
+
+        uiqt_account_setting_push_button = QPushButton( stock_inventory_tab )
+        uiqt_account_setting_push_button.setMinimumSize( QSize( 90, 0 ) )
+        uiqt_account_setting_push_button.setMaximumSize( QSize( 90, 16777215 ) )
+        uiqt_account_setting_push_button.setText( "各項計算設定" )
+        uiqt_account_setting_push_button.setObjectName( "AccountSettingPushButton" )
+        uiqt_horizontal_layout_1.addWidget( uiqt_account_setting_push_button )
 
         uiqt_horizontal_spacer_1_3 = QSpacerItem( 30, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum )
         uiqt_horizontal_layout_1.addItem( uiqt_horizontal_spacer_1_3 )
@@ -2333,7 +2176,6 @@ class MainWindow( QMainWindow ):
         uiqt_stock_select_combo_box.setMaxVisibleItems( 10 )
 
         uiqt_add_stock_push_button.clicked.connect( self.on_add_stock_push_button_clicked )
-        uiqt_extra_insurance_fee_check_box.stateChanged.connect( self.on_extra_insurance_fee_check_box_state_changed )
         uiqt_account_setting_push_button.clicked.connect( self.on_account_setting_push_button_clicked )
         uiqt_display_type_combobox.activated.connect( self.on_display_type_combo_box_current_index_changed )
         
@@ -2594,22 +2436,6 @@ class MainWindow( QMainWindow ):
                 self.refresh_trading_data_table( dict_per_company_trading_data[ self.str_picked_stock_number ] )
             self.auto_save_trading_data()
 
-    def on_extra_insurance_fee_check_box_state_changed( self, state ): 
-        str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
-        if state == 2:
-            self.dict_all_account_ui_state[ str_tab_widget_name ][ "insurance_checkbox"] = True
-        else:
-            self.dict_all_account_ui_state[ str_tab_widget_name ][ "insurance_checkbox"] = False
-        
-        dict_per_company_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ]
-        for key_stock_name, value_list_trading_data in dict_per_company_trading_data.items():
-            self.process_single_trading_data( str_tab_widget_name, key_stock_name )
-
-        self.refresh_stock_list_table()
-        if self.str_picked_stock_number != None:
-            self.refresh_trading_data_table( dict_per_company_trading_data[ self.str_picked_stock_number ] )
-        self.auto_save_trading_data()
-
     def on_display_type_combo_box_current_index_changed( self, index ):
         self.pick_up_stock( None )
         self.refresh_stock_list_table()
@@ -2827,71 +2653,6 @@ class MainWindow( QMainWindow ):
                     self.process_single_transfer_data( str_tab_widget_name )
                     self.refresh_transfer_data_table()
                     self.auto_save_trading_data()
-
-    def on_trigger_edit_stock_dividend_transfer_fee( self ):
-        n_current_index = self.ui.qtTabWidget.currentIndex()
-        current_title = self.ui.qtTabWidget.tabText( n_current_index )
-        str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
-        dict_company_number_to_transfer_fee = self.dict_all_account_general_data[ str_tab_widget_name ][ "dividend_transfer_fee" ]
-        dialog = StockDividendTransferFeeEditDialog( current_title, self.dict_all_company_number_to_name_and_type, dict_company_number_to_transfer_fee, self )
-
-        if dialog.exec():
-            self.dict_all_account_general_data[ str_tab_widget_name ][ "dividend_transfer_fee" ] = dialog.dict_company_number_to_transfer_fee
-
-            dict_per_company_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ]
-            for key_account_name, value_dict_per_company_trading_data in self.dict_all_account_all_stock_trading_data.items():
-                if key_account_name == str_tab_widget_name:
-                    for key_stock_name, value_list_trading_data in value_dict_per_company_trading_data.items():
-                        self.process_single_trading_data( key_account_name, key_stock_name )
-
-            self.refresh_stock_list_table()
-            if self.str_picked_stock_number != None:
-                self.refresh_trading_data_table( dict_per_company_trading_data[ self.str_picked_stock_number ] )
-            self.auto_save_trading_data()
-
-    def on_trigger_edit_stock_minimum_common_trading_fee( self ):
-        n_current_index = self.ui.qtTabWidget.currentIndex()
-        current_title = self.ui.qtTabWidget.tabText( n_current_index )
-        str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
-        n_current_minimum_common_trading_fee = self.dict_all_account_general_data[ str_tab_widget_name ][ "minimum_common_trading_fee" ]
-        dialog = StockMinimumTradingFeeEditDialog( current_title, n_current_minimum_common_trading_fee, self )
-
-        if dialog.exec():
-            n_new_minimum_common_trading_fee = dialog.n_new_minimum_common_trading_fee
-            self.dict_all_account_general_data[ str_tab_widget_name ][ "minimum_common_trading_fee" ] = n_new_minimum_common_trading_fee
-
-            dict_per_company_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ]
-            for key_account_name, value_dict_per_company_trading_data in self.dict_all_account_all_stock_trading_data.items():
-                if key_account_name == str_tab_widget_name:
-                    for key_stock_name, value_list_trading_data in value_dict_per_company_trading_data.items():
-                        self.process_single_trading_data( key_account_name, key_stock_name )
-
-            self.refresh_stock_list_table()
-            if self.str_picked_stock_number != None:
-                self.refresh_trading_data_table( dict_per_company_trading_data[ self.str_picked_stock_number ] )
-            self.auto_save_trading_data()
-
-    def on_trigger_edit_stock_minimum_odd_trading_fee( self ):
-        n_current_index = self.ui.qtTabWidget.currentIndex()
-        current_title = self.ui.qtTabWidget.tabText( n_current_index )
-        str_tab_widget_name = self.ui.qtTabWidget.currentWidget().objectName()
-        n_current_minimum_odd_trading_fee = self.dict_all_account_general_data[ str_tab_widget_name ][ "minimum_odd_trading_fee" ]
-        dialog = StockMinimumTradingFeeEditDialog( current_title, n_current_minimum_odd_trading_fee, self )
-
-        if dialog.exec():
-            n_new_minimum_odd_trading_fee = dialog.n_new_minimum_common_trading_fee
-            self.dict_all_account_general_data[ str_tab_widget_name ][ "minimum_odd_trading_fee" ] = n_new_minimum_odd_trading_fee
-
-            dict_per_company_trading_data = self.dict_all_account_all_stock_trading_data[ str_tab_widget_name ]
-            for key_account_name, value_dict_per_company_trading_data in self.dict_all_account_all_stock_trading_data.items():
-                if key_account_name == str_tab_widget_name:
-                    for key_stock_name, value_list_trading_data in value_dict_per_company_trading_data.items():
-                        self.process_single_trading_data( key_account_name, key_stock_name )
-
-            self.refresh_stock_list_table()
-            if self.str_picked_stock_number != None:
-                self.refresh_trading_data_table( dict_per_company_trading_data[ self.str_picked_stock_number ] )
-            self.auto_save_trading_data()
 
     def on_trigger_from_new_to_old( self ):
         with ( QSignalBlocker( self.ui.qtFromNewToOldAction ),
@@ -4036,13 +3797,6 @@ class MainWindow( QMainWindow ):
 
                     if b_create_tab:
                         str_tab_name = self.add_new_tab_and_table( item_account[ "account_name" ] )
-                        for index in range( self.ui.qtTabWidget.count() - 1 ):
-                            tab_widget = self.ui.qtTabWidget.widget( index )
-                            if tab_widget.objectName() == str_tab_name:
-                                qt_insurance_check_box = tab_widget.findChild( QCheckBox, "ExtraInsuranceFeeCheckBox" )
-                                with QSignalBlocker( qt_insurance_check_box ):
-                                    qt_insurance_check_box.setChecked( item_account[ "insurance_checkbox" ] )
-                                    break
                         dict_all_account_ui_state[ str_tab_name ] = dict_ui_state
                         dict_all_account_all_stock_trading_data[ str_tab_name ] = dict_per_stock_trading_data
                         dict_all_account_cash_transfer[ str_tab_name ] = list_per_account_cash_transfer_data
@@ -4125,13 +3879,6 @@ class MainWindow( QMainWindow ):
 
                 if b_create_tab:
                     str_tab_name = self.add_new_tab_and_table( item_account[ "account_name" ] )
-                    for index in range( self.ui.qtTabWidget.count() - 1 ):
-                        tab_widget = self.ui.qtTabWidget.widget( index )
-                        if tab_widget.objectName() == str_tab_name:
-                            qt_insurance_check_box = tab_widget.findChild( QCheckBox, "ExtraInsuranceFeeCheckBox" )
-                            with QSignalBlocker( qt_insurance_check_box ):
-                                qt_insurance_check_box.setChecked( item_account[ "insurance_checkbox" ] )
-                                break
                     dict_all_account_ui_state[ str_tab_name ] = dict_ui_state
                     dict_all_account_all_stock_trading_data[ str_tab_name ] = dict_per_stock_trading_data
                     dict_all_account_cash_transfer[ str_tab_name ] = list_per_account_cash_transfer_data
@@ -4153,8 +3900,6 @@ class MainWindow( QMainWindow ):
             if index not in list_save_tab_indice:
                 continue
             tab_widget = self.ui.qtTabWidget.widget( index )
-
-            qt_insurance_check_box = tab_widget.findChild( QCheckBox, "ExtraInsuranceFeeCheckBox" )
 
             str_tab_title = self.ui.qtTabWidget.tabText( index )
             str_tab_widget_name = tab_widget.objectName()
@@ -6738,9 +6483,7 @@ if __name__ == "__main__":
 # pyside6-uic QtStockSplitEditDialog.ui -o QtStockSplitEditDialog.py
 # pyside6-uic QtDuplicateOptionDialog.ui -o QtDuplicateOptionDialog.py
 # pyside6-uic QtCashTransferEditDialog.ui -o QtCashTransferEditDialog.py
-# pyside6-uic QtStockDividendTransferFeeEditDialog.ui -o QtStockDividendTransferFeeEditDialog.py
 # pyside6-uic QtStockDividendTransferFeeEditSpinboxDialog.ui -o QtStockDividendTransferFeeEditSpinboxDialog.py
-# pyside6-uic QtStockMinimumTradingFeeEditDialog.ui -o QtStockMinimumTradingFeeEditDialog.py
 # pyside6-uic QtAboutDialog.ui -o QtAboutDialog.py
 # pyside6-uic QtStockDividendPositionDateEditDialog.ui -o QtStockDividendPositionDateEditDialog.py
 # pyside6-uic QtShowItemEditDialog.ui -o QtShowItemEditDialog.py

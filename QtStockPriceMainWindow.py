@@ -194,8 +194,6 @@ class Ui_MainWindow(object):
         self.menu_2.setObjectName(u"menu_2")
         self.menu_3 = QMenu(self.menubar)
         self.menu_3.setObjectName(u"menu_3")
-        self.menu_4 = QMenu(self.menubar)
-        self.menu_4.setObjectName(u"menu_4")
         self.menu_5 = QMenu(self.menubar)
         self.menu_5.setObjectName(u"menu_5")
         MainWindow.setMenuBar(self.menubar)
@@ -204,7 +202,6 @@ class Ui_MainWindow(object):
         MainWindow.setStatusBar(self.statusbar)
 
         self.menubar.addAction(self.menu.menuAction())
-        self.menubar.addAction(self.menu_4.menuAction())
         self.menubar.addAction(self.menu_2.menuAction())
         self.menubar.addAction(self.menu_3.menuAction())
         self.menubar.addAction(self.menu_5.menuAction())
@@ -234,9 +231,6 @@ class Ui_MainWindow(object):
         self.menu_2.addAction(self.qtEditShowItemAction)
         self.menu_3.addAction(self.qtCostWithInDividendAction)
         self.menu_3.addAction(self.qtCostWithOutDividendAction)
-        self.menu_4.addAction(self.qtEditDividendTransferFeeAction)
-        self.menu_4.addAction(self.qtEditMinimumTradingFeeAction)
-        self.menu_4.addAction(self.qtEditOddMinimumTradingFeeAction)
         self.menu_5.addAction(self.qtAboutAction)
 
         self.retranslateUi(MainWindow)
@@ -289,7 +283,6 @@ class Ui_MainWindow(object):
         self.menu.setTitle(QCoreApplication.translate("MainWindow", u"\u6a94\u6848", None))
         self.menu_2.setTitle(QCoreApplication.translate("MainWindow", u"\u986f\u793a", None))
         self.menu_3.setTitle(QCoreApplication.translate("MainWindow", u"\u6a21\u5f0f", None))
-        self.menu_4.setTitle(QCoreApplication.translate("MainWindow", u"\u7de8\u8f2f", None))
         self.menu_5.setTitle(QCoreApplication.translate("MainWindow", u"\u8aaa\u660e", None))
     # retranslateUi
 
