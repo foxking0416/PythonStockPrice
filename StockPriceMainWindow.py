@@ -2325,7 +2325,8 @@ class MainWindow( QMainWindow ):
             for stock_number, list_stock_name_and_type in self.dict_all_company_number_to_name_and_type.items():
                 str_stock_name = list_stock_name_and_type[ 0 ]
                 str_stock_name_lowercase = share_api.lowercase_english_uppercase( str_stock_name )
-                if str_stock_input in stock_number or str_stock_input in str_stock_name_lowercase:
+                stock_number_lowercase = share_api.lowercase_english_uppercase( stock_number )
+                if str_stock_input in stock_number_lowercase or str_stock_input in str_stock_name_lowercase:
                     qt_combo_box.addItem( f"{stock_number} {str_stock_name}" )
             # self.ui.qtStockSelectComboBox.showPopup() #showPopup的話，focus會被搶走
 
@@ -2351,10 +2352,13 @@ class MainWindow( QMainWindow ):
         str_first_four_chars = str_stock_input.split(" ")[0]
         if str_first_four_chars not in self.dict_all_company_number_to_name_and_type:
             b_find = False
-            for stock_number, list_stock_name_and_type in self.dict_all_company_number_to_name_and_type.items():
+            for str_stock_number, list_stock_name_and_type in self.dict_all_company_number_to_name_and_type.items():
+                str_stock_number_lower = share_api.lowercase_english_uppercase( str_stock_number )
                 str_stock_name = list_stock_name_and_type[ 0 ]
-                if str_first_four_chars == str_stock_name:
-                    str_first_four_chars = stock_number
+                str_stock_name_lowercase = share_api.lowercase_english_uppercase( str_stock_name )
+                str_first_four_chars_lower = share_api.lowercase_english_uppercase( str_first_four_chars )
+                if str_first_four_chars_lower == str_stock_name_lowercase or str_first_four_chars_lower == str_stock_number_lower:
+                    str_first_four_chars = str_stock_number
                     b_find = True
                     break
             if not b_find:
@@ -5466,7 +5470,17 @@ class MainWindow( QMainWindow ):
                                               data[ 5 ] == 'CEOJLU' or
                                               data[ 5 ] == 'CEOIBU' or
                                               data[ 5 ] == 'CEOIEU' or
-                                              data[ 5 ] == 'CEOIRU' ): 
+                                              data[ 5 ] == 'CEOIRU' or
+                                              data[ 5 ] == 'EPNRAR' or 
+                                              data[ 5 ] == 'EPNRQR' or
+                                              data[ 5 ] == 'EPRRQR' or
+                                              data[ 5 ] == 'EPNNFB' or
+                                              data[ 5 ] == 'EPRRAR' or 
+                                              data[ 5 ] == 'EPNCAR' or 
+                                              data[ 5 ] == 'EFNRAR' or 
+                                              data[ 5 ] == 'EPNTAR' or 
+                                              data[ 5 ] == 'EPRNAR' or 
+                                              data[ 5 ] == 'EPNRFR' ): 
                         b_ETF = False if data[ 5 ] == 'ESVUFR' else True
                         if '\u3000' in data[ 0 ]:
                             modified_data = data[ 0 ].split("\u3000")
@@ -5489,7 +5503,8 @@ class MainWindow( QMainWindow ):
                                               data[ 5 ] == 'CEOJBU' or 
                                               data[ 5 ] == 'CEOIBU' or
                                               data[ 5 ] == 'CEOIEU' or
-                                              data[ 5 ] == 'CEOIRU' ): 
+                                              data[ 5 ] == 'CEOIRU' or
+                                              data[ 5 ] == 'EPNRAR'  ): 
                         b_ETF = False if data[ 5 ] == 'ESVUFR' else True
                         if '\u3000' in data[ 0 ]:
                             modified_data = data[ 0 ].split("\u3000")
@@ -6046,7 +6061,9 @@ class MainWindow( QMainWindow ):
                 for index, item in enumerate( list_yearly_dividend ):
                     f_stock_dividend_per_share = self.get_value_from_string( item[4] ) + self.get_value_from_string( item[5] )
                     str_stock_dividend_date = item[6]
-                    f_cash_dividend_per_share = self.get_value_from_string( item[7] ) + self.get_value_from_string( item[8] )
+                    f_cash_dividend_per_share = self.get_value_from_string( item[7] ) + self.get_value_from_string( item[8] ) + self.get_value_from_string( item[9] )
+                    if ( self.get_value_from_string( item[7] ) + self.get_value_from_string( item[8] ) ) != 0 and self.get_value_from_string( item[9] ) != 0 :
+                        assert False, f"不該執行到這裡！"
                     str_cash_dividend_date = item[10]
                     str_cash_dividend_distribute_date = item[11]
                     str_year_month_date = ''
@@ -6060,13 +6077,7 @@ class MainWindow( QMainWindow ):
                             str_year = str( int( list_year_month_date[0] ) + 1911 )
                             str_year_month_date = str_year + '-' + list_year_month_date[1] + '-' + list_year_month_date[2]
                         else:
-                            #股票股利和現金股利日期不同，理論上不應該出現
-                            print("ERRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR")
-                            print("ERRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR")
-                            print("ERRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR")
-                            print("ERRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR")
-                            print("ERRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR")
-                            pass
+                            assert False, f"不該執行到這裡！"
                     elif ( f_stock_dividend_per_share != 0  and str_stock_dividend_date != '' ):
                         #只有股票股利
                         list_year_month_date = str_stock_dividend_date.split( '/' )
