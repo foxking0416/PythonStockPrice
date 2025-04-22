@@ -402,11 +402,15 @@ class StockTradingEditDialog( QDialog ):
             if f_count % 1000 == 0:
                 self.ui.qtCommonTradeRadioButton.setChecked( True )
                 self.ui.qtCommonTradeCountSpinBox.setValue( f_count / 1000 )
+                self.ui.qtCommonTradeCountSpinBox.setEnabled( True )
                 self.ui.qtOddTradeCountSpinBox.setValue( 0 )
+                self.ui.qtOddTradeCountSpinBox.setEnabled( False )
             else:
                 self.ui.qtOddTradeRadioButton.setChecked( True )
                 self.ui.qtCommonTradeCountSpinBox.setValue( 0 )
+                self.ui.qtCommonTradeCountSpinBox.setEnabled( False )
                 self.ui.qtOddTradeCountSpinBox.setValue( f_count )
+                self.ui.qtOddTradeCountSpinBox.setEnabled( True )
 
     def setup_trading_price( self, f_price ):
         with ( QSignalBlocker( self.ui.qtPriceDoubleSpinBox ) ):
