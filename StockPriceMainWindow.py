@@ -40,6 +40,7 @@ from openpyxl.styles import Alignment, PatternFill, Font, Border, Side
 from enum import Enum, IntEnum, auto
 from decimal import Decimal, ROUND_HALF_UP, ROUND_CEILING
 from scipy.optimize import newton
+from typing import Union
 
 g_user_dir = os.path.expanduser("~")                     
 g_exe_dir = os.path.dirname(__file__)                    
@@ -697,12 +698,7 @@ class StockRegularTradingEditDialog( QDialog ):
         elif e_trading_fee_type == TradingFeeType.VARIABLE:
             f_trading_fee_discount = Decimal( str( self.get_trading_fee_discount() ) )
             n_trading_fee_minimum = int( self.ui.qtTradingFeeMinimumSpinBox.value() ) 
-            if self.e_decimal_round_type == DecimalRoundType.ROUND_DOWN:
-                n_trading_fee = int( n_trading_value * Decimal( '0.001425' ) * f_trading_fee_discount )
-            elif self.e_decimal_round_type == DecimalRoundType.ROUND_OFF:
-                n_trading_fee = int( ( n_trading_value * Decimal( '0.001425' ) * f_trading_fee_discount ).quantize( Decimal( '1' ), rounding=ROUND_HALF_UP ) )
-            else:
-                n_trading_fee = int( ( n_trading_value * Decimal( '0.001425' ) * f_trading_fee_discount ).quantize( Decimal( '1' ), rounding=ROUND_CEILING ) )
+            n_trading_fee =  Utility.round_to( n_trading_value * Decimal( '0.001425' ) * f_trading_fee_discount, self.e_decimal_round_type )
             n_trading_fee = max( n_trading_fee_minimum, n_trading_fee )
         else:
             n_trading_fee = int( self.ui.qtTradingFeeConstantSpinBox.value() )
@@ -1504,6 +1500,17 @@ class ShowItemEditDialog( QDialog ):
         self.reject()
 
 class Utility():
+
+    @staticmethod
+    def round_to( u_value: Union[int, float, Decimal], e_round_type : DecimalRoundType) -> int:
+        dec_value = Decimal(u_value)
+        if e_round_type == DecimalRoundType.ROUND_DOWN:
+            return int( dec_value )
+        elif e_round_type == DecimalRoundType.ROUND_OFF:
+            return int( dec_value.quantize( Decimal('1'), rounding=ROUND_HALF_UP ) )
+        else:  # ROUND_UP or default
+            return int( dec_value.quantize( Decimal('1'), rounding=ROUND_CEILING ) )
+
     @staticmethod
     def compute_cost( e_trading_type : TradingType, e_decimal_round_type : DecimalRoundType, f_trading_price, n_trading_count, f_trading_fee_discount, n_minimum_common_trading_fee, n_minimum_odd_trading_fee, b_etf, b_daying_trading, b_bond ):
         f_trading_price = Decimal( str( f_trading_price ) )#原本10.45 * 100000 = 1044999.999999999 然後取 int 就變成1044999，所以改用Decimal
@@ -1512,12 +1519,7 @@ class Utility():
         dict_result = {}
         if e_trading_type == TradingType.BUY or e_trading_type == TradingType.SELL:
             n_trading_value = int( f_trading_price * n_trading_count )
-            if e_decimal_round_type == DecimalRoundType.ROUND_DOWN:
-                n_trading_fee = int( n_trading_value * Decimal( '0.001425' ) * f_trading_fee_discount )
-            elif e_decimal_round_type == DecimalRoundType.ROUND_OFF:
-                n_trading_fee = int( ( n_trading_value * Decimal( '0.001425' ) * f_trading_fee_discount ).quantize( Decimal( '1' ), rounding=ROUND_HALF_UP ) )
-            else:
-                n_trading_fee = int( ( n_trading_value * Decimal( '0.001425' ) * f_trading_fee_discount ).quantize( Decimal( '1' ), rounding=ROUND_CEILING ) )
+            n_trading_fee = Utility.round_to( n_trading_value * Decimal( '0.001425' ) * f_trading_fee_discount, e_decimal_round_type )
             
             if n_trading_value != 0:
                 if n_trading_count % 1000 == 0:
@@ -4199,15 +4201,7 @@ class MainWindow( QMainWindow ):
                     f_trading_fee_discount = Decimal( str( item[ TradingData.TRADING_FEE_DISCOUNT ] ) )
                     n_trading_fee_minimum = item[ TradingData.REGULAR_BUY_TRADING_FEE_MINIMUM ]
 
-                    
-                    if e_decimal_round_type == DecimalRoundType.ROUND_DOWN:
-                        n_trading_fee = int( n_trading_value * Decimal( '0.001425' ) * f_trading_fee_discount )
-                    elif e_decimal_round_type == DecimalRoundType.ROUND_OFF:
-                        n_trading_fee = int( ( n_trading_value * Decimal( '0.001425' ) * f_trading_fee_discount ).quantize( Decimal( '1' ), rounding=ROUND_HALF_UP ) )
-                    else:
-                        n_trading_fee = int( ( n_trading_value * Decimal( '0.001425' ) * f_trading_fee_discount ).quantize( Decimal( '1' ), rounding=ROUND_CEILING ) )
-
-
+                    n_trading_fee = Utility.round_to( n_trading_value * Decimal( '0.001425' ) * f_trading_fee_discount, e_decimal_round_type )
                     n_trading_fee = max( n_trading_fee_minimum, n_trading_fee )
                 else:
                     n_trading_fee = int( item[ TradingData.REGULAR_BUY_TRADING_FEE_CONSTANT ] )
@@ -4661,12 +4655,7 @@ class MainWindow( QMainWindow ):
 
                         n_expect_trading_fee = 0
                         if n_accumulated_quantity > 0:
-                            if e_decimal_round_type == DecimalRoundType.ROUND_DOWN:
-                                n_trading_fee = int( n_per_stock_market_value * Decimal( '0.001425' ) )
-                            elif e_decimal_round_type == DecimalRoundType.ROUND_OFF:
-                                n_trading_fee = int( ( n_per_stock_market_value * Decimal( '0.001425' ) ).quantize( Decimal( '1' ), rounding=ROUND_HALF_UP ) )
-                            else:
-                                n_trading_fee = int( ( n_per_stock_market_value * Decimal( '0.001425' ) ).quantize( Decimal( '1' ), rounding=ROUND_CEILING ) )
+                            n_trading_fee = Utility.round_to( n_per_stock_market_value * Decimal( '0.001425' ), e_decimal_round_type )
                             n_expect_trading_fee = max( n_trading_fee, n_minimum_common_trading_fee )
 
                         if b_etf:
