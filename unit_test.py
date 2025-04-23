@@ -393,5 +393,69 @@ class TestMainWindow(unittest.TestCase):
 
         self.window.close()
 
+    def test_custom_column(self): #測試自訂欄位
+        self.window = self.create_window('TradingDataUnitTest_#11_已實現未實現.json', "UISetting_reorder.config", "StockPrice_20250416.txt")
+        #顯示欄位,11,1,2,3,4,5,6,7,8,9,10,15,16
+        # 刷新 QTableView 的資料
+        self.window.refresh_stock_list_table( clear_table = True )
+
+        # 抓出第一個 tab 的 QTableView 與 model
+        first_tab_widget = self.window.ui.qtTabWidget.widget( 0 )
+        qt_table_view = first_tab_widget.findChild( QTableView, "StockListTableView" )
+        qt_model = qt_table_view.model()
+        header_labels = [ qt_model.headerData(i, Qt.Horizontal) for i in range(qt_model.columnCount()) ]
+        
+        self.assertEqual( header_labels[ 0 ], '股票代碼及名稱')
+        self.assertEqual( header_labels[ 1 ], '累計損益\n(含息)')
+        self.assertEqual( header_labels[ 2 ], '04/16 收盤價')
+        self.assertEqual( header_labels[ 3 ], '庫存股數')
+        self.assertEqual( header_labels[ 4 ], '市值')
+        self.assertEqual( header_labels[ 5 ], '現股成本')
+        self.assertEqual( header_labels[ 6 ], '未實現損益')
+        self.assertEqual( header_labels[ 7 ], '未實現報酬率')
+        self.assertEqual( header_labels[ 8 ], '已實現損益')
+        self.assertEqual( header_labels[ 9 ], '損益平衡價')
+        self.assertEqual( header_labels[ 10 ], '累計成本\n(含息)')
+        self.assertEqual( header_labels[ 11 ], '累計平均成本\n(含息)')
+        self.assertEqual( header_labels[ 12 ], '平均年化報酬率')
+        self.assertEqual( header_labels[ 13 ], '持股淨值比')
+        self.assertEqual( header_labels[ 14 ], '自動帶入股利')
+        self.assertEqual( header_labels[ 15 ], '匯出')
+        self.assertEqual( header_labels[ 16 ], '刪除')
+
+        self.assertEqual( qt_model.columnCount(), 17 )
+        self.assertEqual( qt_model.rowCount(), 16 )
+        self.window.close()
+
+    def test_decimal_compute_round_down( self ):
+        self.window = self.create_window('TradingDataUnitTest_#12_round_down.json')
+        self.assert_data_loaded_and_verified(self.window.dict_all_account_all_stock_trading_data, '2888', 10008, 1000)
+        self.window.close()
+
+    def test_decimal_compute_round_down_2( self ):
+        self.window = self.create_window('TradingDataUnitTest_#13_round_down_2.json')
+        self.assert_data_loaded_and_verified(self.window.dict_all_account_all_stock_trading_data, '2888', 10007, 1000)
+        self.window.close()
+
+    def test_decimal_compute_round_off( self ):
+        self.window = self.create_window('TradingDataUnitTest_#14_round_off.json')
+        self.assert_data_loaded_and_verified(self.window.dict_all_account_all_stock_trading_data, '2888', 10009, 1000)
+        self.window.close()
+
+    def test_decimal_compute_round_off_2( self ):
+        self.window = self.create_window('TradingDataUnitTest_#15_round_off_2.json')
+        self.assert_data_loaded_and_verified(self.window.dict_all_account_all_stock_trading_data, '2888', 10007, 1000)
+        self.window.close()
+
+    def test_decimal_compute_round_up( self ):
+        self.window = self.create_window('TradingDataUnitTest_#16_round_up.json')
+        self.assert_data_loaded_and_verified(self.window.dict_all_account_all_stock_trading_data, '2888', 10009, 1000)
+        self.window.close()
+
+    def test_decimal_compute_round_up_2( self ):
+        self.window = self.create_window('TradingDataUnitTest_#17_round_up_2.json')
+        self.assert_data_loaded_and_verified(self.window.dict_all_account_all_stock_trading_data, '2888', 10008, 1000)
+        self.window.close()
+
 if __name__ == "__main__":
     unittest.main()
