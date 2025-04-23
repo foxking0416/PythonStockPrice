@@ -1680,7 +1680,8 @@ class Utility():
             f_guess_price += tick
             f_guess_price = round(f_guess_price, 4)  # 防止浮點誤差
             count += 1
-        raise ValueError("找不到符合條件的 X（超過最大迭代次數）")
+        return 0
+        # raise ValueError("找不到符合條件的 X（超過最大迭代次數）")
 
     @staticmethod
     def get_up_down_color( str_base, str_compare ):
@@ -4461,8 +4462,7 @@ class MainWindow( QMainWindow ):
                 if n_accumulated_inventory != n_total_rest_buying_count:
                     list_buying_data = queue_buying_data[ -1 ]
                     list_buying_data[ 1 ] += ( n_accumulated_inventory - n_total_rest_buying_count )
-                    queue_buying_data[ -1 ]= list_buying_data
-                
+                    queue_buying_data[ -1 ]= list_buying_data           
             elif e_trading_type == TradingType.SPLIT:
                 if n_accumulated_inventory == 0: #沒有庫存就不用算分割了
                     continue
@@ -4964,7 +4964,11 @@ class MainWindow( QMainWindow ):
     def refresh_trading_data_table( self, sorted_list, target_trading_data = None ):
         self.clear_per_stock_trading_table()
         self.per_stock_trading_data_model.setVerticalHeaderLabels( self.get_trading_data_header() )
-
+        n_invalid_data_index = -1
+        for index, dict_per_trading_data in enumerate( sorted_list ):
+            if TradingData.ACCUMULATED_QUANTITY_NON_SAVE in dict_per_trading_data and dict_per_trading_data[ TradingData.ACCUMULATED_QUANTITY_NON_SAVE ] < 0:
+                n_invalid_data_index = index
+                break
         if self.ui.qtFromNewToOldAction.isChecked():
             loop_list = sorted_list[::-1]
         else:
@@ -4973,8 +4977,8 @@ class MainWindow( QMainWindow ):
         e_auto_dividend_type = sorted_list[ 0 ][ TradingData.USE_AUTO_DIVIDEND_DATA ]
         column = 0
         n_scroll_column = -1
-        
-        for dict_per_trading_data in loop_list:
+
+        for index, dict_per_trading_data in enumerate( loop_list ):
             e_trading_type = dict_per_trading_data[ TradingData.TRADING_TYPE ]
             if e_trading_type == TradingType.TEMPLATE:
                 continue
@@ -5009,6 +5013,14 @@ class MainWindow( QMainWindow ):
                     standard_item.setBackground( QBrush( '#FABF8F' ) )
                 elif data == "股票分割":
                     standard_item.setBackground( QBrush( '#732BF5' ) )
+                else:
+                    if n_invalid_data_index != -1:
+                        if self.ui.qtFromNewToOldAction.isChecked():
+                            if index < len( loop_list ) - n_invalid_data_index:
+                                standard_item.setBackground( QBrush( '#FF0000' ) )
+                        else:
+                            if index >= n_invalid_data_index:
+                                standard_item.setBackground( QBrush( '#FF0000' ) )
 
                 if e_trading_type == TradingType.DIVIDEND and dict_per_trading_data[ TradingData.STOCK_DIVIDEND ] != 0:
                     str_dividend_tooltip = f"股票股利入帳日：{ dict_per_trading_data[ TradingData.STOCK_DIVIDEND_POSITION_DATE_NON_SAVE ] }\n可使用滑鼠右鍵設定"
