@@ -4646,8 +4646,16 @@ class MainWindow( QMainWindow ):
                             list_per_stock_trading_date.append( obj_trading_date )
 
                     n_per_stock_accumulated_dividend_profit = 0
+
+                    b_valid_price = False
                     if key_stock_number in self.dict_all_company_number_to_price_info:
-                        f_stock_price = float( self.dict_all_company_number_to_price_info[ key_stock_number ] )
+                        try:
+                            f_stock_price = float( self.dict_all_company_number_to_price_info[ key_stock_number ] )
+                            b_valid_price = True
+                        except ValueError:
+                            b_valid_price = False
+
+                    if b_valid_price:
                         if key_stock_number in self.list_previous_day_data:
                             qt_stock_price_color = QBrush( '#777777' )
                         else:
