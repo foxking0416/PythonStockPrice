@@ -3966,8 +3966,7 @@ class MainWindow( QMainWindow ):
 
             export_dict_per_account_all_info[ "account_name" ] = str_tab_title
             export_dict_per_account_all_info[ "trading_data" ] = export_dict_per_account_all_stock_trading_data
-            export_dict_per_account_all_info[ "discount_checkbox" ] = self.dict_all_account_ui_state[ str_tab_widget_name ][ "discount_checkbox"]
-            export_dict_per_account_all_info[ "discount_value" ] = self.dict_all_account_ui_state[ str_tab_widget_name ][ "discount_value"]
+            export_dict_per_account_all_info[ "transfer_data" ] = list_transfer_data
             
             export_dict_per_account_all_info[ "insurance_checkbox" ] = self.dict_all_account_general_data[ str_tab_widget_name ][ "insurance_checkbox" ]
             export_dict_per_account_all_info[ "minimum_common_trading_fee" ] = self.dict_all_account_general_data[ str_tab_widget_name ][ "minimum_common_trading_fee" ]#現股交易最低手續費
@@ -3975,11 +3974,13 @@ class MainWindow( QMainWindow ):
             export_dict_per_account_all_info[ "dividend_transfer_fee" ] = self.dict_all_account_general_data[ str_tab_widget_name ][ "dividend_transfer_fee" ]
             export_dict_per_account_all_info[ "decimal_round_type" ] = int( self.dict_all_account_general_data[ str_tab_widget_name ][ "decimal_round_type" ].value )
             export_dict_per_account_all_info[ "discount_time_type" ] = int( self.dict_all_account_general_data[ str_tab_widget_name ][ "discount_time_type" ].value )
+            
+            export_dict_per_account_all_info[ "discount_checkbox" ] = self.dict_all_account_ui_state[ str_tab_widget_name ][ "discount_checkbox"]
+            export_dict_per_account_all_info[ "discount_value" ] = self.dict_all_account_ui_state[ str_tab_widget_name ][ "discount_value"]
             export_dict_per_account_all_info[ "regular_buy_trading_price_type" ] = int( self.dict_all_account_ui_state[ str_tab_widget_name ][ "regular_buy_trading_price_type"].value )
             export_dict_per_account_all_info[ "regular_buy_trading_fee_type" ] = int( self.dict_all_account_ui_state[ str_tab_widget_name ][ "regular_buy_trading_fee_type"].value )
             export_dict_per_account_all_info[ "regular_buy_trading_fee_minimum" ] = self.dict_all_account_ui_state[ str_tab_widget_name ][ "regular_buy_trading_fee_minimum"]
             export_dict_per_account_all_info[ "regular_buy_trading_fee_constant" ] = self.dict_all_account_ui_state[ str_tab_widget_name ][ "regular_buy_trading_fee_constant"]
-            export_dict_per_account_all_info[ "transfer_data" ] = list_transfer_data
             
             export_list_all_account_all_stock_trading_data.append( export_dict_per_account_all_info )
 
