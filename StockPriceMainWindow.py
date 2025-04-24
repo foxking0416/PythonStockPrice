@@ -1499,6 +1499,96 @@ class ShowItemEditDialog( QDialog ):
     def cancel( self ):
         self.reject()
 
+class UndoRedoManager:
+    def __init__( self, max_steps = 20 ):
+        self.undo_stack = []
+        self.redo_stack = []
+        self.max_steps = max_steps
+
+    def save_state( self, state: dict ):
+        # 存之前 deep copy 一份
+        self.undo_stack.append( copy.deepcopy( state ) )
+        if len( self.undo_stack ) > self.max_steps:
+            self.undo_stack.pop( 0 )
+        self.redo_stack.clear()
+
+    def undo( self, current_state: dict ):
+        if not self.undo_stack:
+            return current_state  # 沒有可以 undo 的
+        self.redo_stack.append( copy.deepcopy( current_state ) )
+        return self.undo_stack.pop()
+
+    def redo(self, current_state: dict):
+        if not self.redo_stack:
+            return current_state  # 沒有可以 redo 的
+        self.undo_stack.append(copy.deepcopy(current_state))
+        return self.redo_stack.pop()
+
+class DiffUndoRedoManager:
+    def __init__(self, max_steps=20):
+        self.undo_stack = []
+        self.redo_stack = []
+        self.max_steps = max_steps
+
+    def record_changes( self, old_dict: dict, new_dict: dict ):
+        changes = []
+        keys = set(old_dict.keys()).union(new_dict.keys())
+
+        for key in keys:
+            old_val = old_dict.get(key)
+            new_val = new_dict.get(key)
+            if old_val != new_val:
+                changes.append({
+                    'key': key,
+                    'old_value': old_val,
+                    'new_value': new_val
+                })
+
+        if changes:
+            self.undo_stack.append(changes)
+            if len(self.undo_stack) > self.max_steps:
+                self.undo_stack.pop(0)
+            self.redo_stack.clear()
+
+    def undo(self, target_dict: dict):
+        if not self.undo_stack:
+            return
+
+        changes = self.undo_stack.pop()
+        reverse_changes = []
+        for change in reversed(changes):
+            key = change['key']
+            reverse_changes.append({
+                'key': key,
+                'old_value': target_dict.get(key),
+                'new_value': change['old_value']
+            })
+            # apply old value
+            if change['old_value'] is None:
+                target_dict.pop(key, None)  # key was added, so remove
+            else:
+                target_dict[key] = change['old_value']
+        self.redo_stack.append(reverse_changes)
+
+    def redo(self, target_dict: dict):
+        if not self.redo_stack:
+            return
+
+        changes = self.redo_stack.pop()
+        reverse_changes = []
+        for change in reversed(changes):
+            key = change['key']
+            reverse_changes.append({
+                'key': key,
+                'old_value': target_dict.get(key),
+                'new_value': change['new_value']
+            })
+            if change['new_value'] is None:
+                target_dict.pop(key, None)
+            else:
+                target_dict[key] = change['new_value']
+        self.undo_stack.append(reverse_changes)
+
 class Utility():
 
     @staticmethod
@@ -1800,6 +1890,9 @@ class MainWindow( QMainWindow ):
         self.ui.qtImportSingleStockAction.setShortcut( "Ctrl+I" )
         self.ui.qtImportSingleStockAction.triggered.connect( self.on_import_single_stock_action_triggered )
         self.ui.qtSetTemporaryFilePathAction.triggered.connect( self.on_set_temporary_file_path_action_triggered )
+
+        self.ui.qtUndoAction.triggered.connect( self.on_undo_action_triggered )
+        self.ui.qtRedoAction.triggered.connect( self.on_redo_action_triggered )
 
         self.ui.qtFromNewToOldAction.setChecked( True )
         self.ui.qtFromOldToNewAction.setChecked( False )
@@ -3604,6 +3697,12 @@ class MainWindow( QMainWindow ):
             self.trading_data_json_file_path = os.path.join( g_data_dir, 'StockInventory', 'TradingData.json' )
             self.UISetting_file_path = os.path.join( g_data_dir, 'StockInventory', 'UISetting.config' )
             self.stock_dividend_position_date_file_path = os.path.join( g_data_dir, 'StockInventory', 'StockDividendPositionDate.json' )
+
+    def on_undo_action_triggered( self ):
+        pass
+
+    def on_redo_action_triggered( self ):
+        pass
 
     def load_initialize_data( self ): 
         with QSignalBlocker( self.ui.qtTabWidget ):

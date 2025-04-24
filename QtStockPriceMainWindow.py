@@ -82,6 +82,10 @@ class Ui_MainWindow(object):
         self.qtSetTemporaryFilePathAction.setObjectName(u"qtSetTemporaryFilePathAction")
         self.qtEditShowItemAction = QAction(MainWindow)
         self.qtEditShowItemAction.setObjectName(u"qtEditShowItemAction")
+        self.qtUndoAction = QAction(MainWindow)
+        self.qtUndoAction.setObjectName(u"qtUndoAction")
+        self.qtRedoAction = QAction(MainWindow)
+        self.qtRedoAction.setObjectName(u"qtRedoAction")
         self.scrollArea = QScrollArea(MainWindow)
         self.scrollArea.setObjectName(u"scrollArea")
         self.scrollArea.setWidgetResizable(True)
@@ -196,12 +200,15 @@ class Ui_MainWindow(object):
         self.menu_3.setObjectName(u"menu_3")
         self.menu_5 = QMenu(self.menubar)
         self.menu_5.setObjectName(u"menu_5")
+        self.menu_4 = QMenu(self.menubar)
+        self.menu_4.setObjectName(u"menu_4")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QStatusBar(MainWindow)
         self.statusbar.setObjectName(u"statusbar")
         MainWindow.setStatusBar(self.statusbar)
 
         self.menubar.addAction(self.menu.menuAction())
+        self.menubar.addAction(self.menu_4.menuAction())
         self.menubar.addAction(self.menu_2.menuAction())
         self.menubar.addAction(self.menu_3.menuAction())
         self.menubar.addAction(self.menu_5.menuAction())
@@ -232,6 +239,8 @@ class Ui_MainWindow(object):
         self.menu_3.addAction(self.qtCostWithInDividendAction)
         self.menu_3.addAction(self.qtCostWithOutDividendAction)
         self.menu_5.addAction(self.qtAboutAction)
+        self.menu_4.addAction(self.qtUndoAction)
+        self.menu_4.addAction(self.qtRedoAction)
 
         self.retranslateUi(MainWindow)
 
@@ -266,6 +275,8 @@ class Ui_MainWindow(object):
         self.qtAboutAction.setText(QCoreApplication.translate("MainWindow", u"\u95dc\u65bc", None))
         self.qtSetTemporaryFilePathAction.setText(QCoreApplication.translate("MainWindow", u"\u8a2d\u5b9a\u66ab\u5b58\u6a94\u4f4d\u7f6e", None))
         self.qtEditShowItemAction.setText(QCoreApplication.translate("MainWindow", u"\u7de8\u8f2f\u986f\u793a\u6b04\u4f4d\u53ca\u9806\u5e8f", None))
+        self.qtUndoAction.setText(QCoreApplication.translate("MainWindow", u"\u5fa9\u539f", None))
+        self.qtRedoAction.setText(QCoreApplication.translate("MainWindow", u"\u53d6\u6d88\u5fa9\u539f", None))
 #if QT_CONFIG(tooltip)
         self.tab_add.setToolTip(QCoreApplication.translate("MainWindow", u"\u96d9\u64ca\u65b0\u589e", None))
 #endif // QT_CONFIG(tooltip)
@@ -284,5 +295,6 @@ class Ui_MainWindow(object):
         self.menu_2.setTitle(QCoreApplication.translate("MainWindow", u"\u986f\u793a", None))
         self.menu_3.setTitle(QCoreApplication.translate("MainWindow", u"\u6a21\u5f0f", None))
         self.menu_5.setTitle(QCoreApplication.translate("MainWindow", u"\u8aaa\u660e", None))
+        self.menu_4.setTitle(QCoreApplication.translate("MainWindow", u"\u7de8\u8f2f", None))
     # retranslateUi
 

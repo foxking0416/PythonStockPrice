@@ -244,7 +244,15 @@
     </property>
     <addaction name="qtAboutAction"/>
    </widget>
+   <widget class="QMenu" name="menu_4">
+    <property name="title">
+     <string>編輯</string>
+    </property>
+    <addaction name="qtUndoAction"/>
+    <addaction name="qtRedoAction"/>
+   </widget>
    <addaction name="menu"/>
+   <addaction name="menu_4"/>
    <addaction name="menu_2"/>
    <addaction name="menu_3"/>
    <addaction name="menu_5"/>
@@ -393,6 +401,16 @@
   <action name="qtEditShowItemAction">
    <property name="text">
     <string>編輯顯示欄位及順序</string>
+   </property>
+  </action>
+  <action name="qtUndoAction">
+   <property name="text">
+    <string>復原</string>
+   </property>
+  </action>
+  <action name="qtRedoAction">
+   <property name="text">
+    <string>取消復原</string>
    </property>
   </action>
  </widget>
