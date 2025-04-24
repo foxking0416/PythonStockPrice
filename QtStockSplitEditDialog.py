@@ -16,16 +16,16 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QDateEdit, QDialog, QHBoxLayout,
-    QLabel, QPushButton, QRadioButton, QSizePolicy,
-    QSpacerItem, QSpinBox, QVBoxLayout, QWidget)
+    QLabel, QPushButton, QSizePolicy, QSpacerItem,
+    QSpinBox, QVBoxLayout, QWidget)
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
         if not Dialog.objectName():
             Dialog.setObjectName(u"Dialog")
-        Dialog.resize(240, 175)
-        Dialog.setMinimumSize(QSize(240, 175))
-        Dialog.setMaximumSize(QSize(240, 175))
+        Dialog.resize(192, 175)
+        Dialog.setMinimumSize(QSize(192, 175))
+        Dialog.setMaximumSize(QSize(192, 175))
         self.verticalLayout = QVBoxLayout(Dialog)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.horizontalLayout_2 = QHBoxLayout()
@@ -73,17 +73,15 @@ class Ui_Dialog(object):
 
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName(u"horizontalLayout")
-        self.qtSplitRadioButton = QRadioButton(Dialog)
-        self.qtSplitRadioButton.setObjectName(u"qtSplitRadioButton")
-        self.qtSplitRadioButton.setChecked(True)
+        self.label = QLabel(Dialog)
+        self.label.setObjectName(u"label")
 
-        self.horizontalLayout.addWidget(self.qtSplitRadioButton)
+        self.horizontalLayout.addWidget(self.label)
 
         self.qtStockSplitSpinBox = QSpinBox(Dialog)
         self.qtStockSplitSpinBox.setObjectName(u"qtStockSplitSpinBox")
-        self.qtStockSplitSpinBox.setMinimumSize(QSize(50, 0))
         self.qtStockSplitSpinBox.setMinimum(2)
-        self.qtStockSplitSpinBox.setMaximum(99)
+        self.qtStockSplitSpinBox.setMaximum(20)
 
         self.horizontalLayout.addWidget(self.qtStockSplitSpinBox)
 
@@ -98,33 +96,6 @@ class Ui_Dialog(object):
 
 
         self.verticalLayout.addLayout(self.horizontalLayout)
-
-        self.horizontalLayout_6 = QHBoxLayout()
-        self.horizontalLayout_6.setObjectName(u"horizontalLayout_6")
-        self.qtMergeRadioButton = QRadioButton(Dialog)
-        self.qtMergeRadioButton.setObjectName(u"qtMergeRadioButton")
-
-        self.horizontalLayout_6.addWidget(self.qtMergeRadioButton)
-
-        self.qtStockMergeSpinBox = QSpinBox(Dialog)
-        self.qtStockMergeSpinBox.setObjectName(u"qtStockMergeSpinBox")
-        self.qtStockMergeSpinBox.setMinimumSize(QSize(50, 0))
-        self.qtStockMergeSpinBox.setMinimum(2)
-        self.qtStockMergeSpinBox.setValue(2)
-
-        self.horizontalLayout_6.addWidget(self.qtStockMergeSpinBox)
-
-        self.label_4 = QLabel(Dialog)
-        self.label_4.setObjectName(u"label_4")
-
-        self.horizontalLayout_6.addWidget(self.label_4)
-
-        self.horizontalSpacer_2 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
-
-        self.horizontalLayout_6.addItem(self.horizontalSpacer_2)
-
-
-        self.verticalLayout.addLayout(self.horizontalLayout_6)
 
         self.horizontalLayout_4 = QHBoxLayout()
         self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
@@ -153,10 +124,8 @@ class Ui_Dialog(object):
         self.qtStockNameLabel.setText(QCoreApplication.translate("Dialog", u"TextLabel", None))
         self.label_2.setText(QCoreApplication.translate("Dialog", u"\u65e5\u671f", None))
         self.qtWeekdayLabel.setText(QCoreApplication.translate("Dialog", u"TextLabel", None))
-        self.qtSplitRadioButton.setText(QCoreApplication.translate("Dialog", u"\u5206\u62c6\uff1a\u6bcf\u80a1\u5206\u62c6\u6210", None))
+        self.label.setText(QCoreApplication.translate("Dialog", u"\u6bcf\u80a1\u5206\u62c6\u6210", None))
         self.label_3.setText(QCoreApplication.translate("Dialog", u"\u80a1", None))
-        self.qtMergeRadioButton.setText(QCoreApplication.translate("Dialog", u"\u5408\u4f75\uff1a\u6bcf", None))
-        self.label_4.setText(QCoreApplication.translate("Dialog", u"\u80a1\u5408\u4f75\u6210\u4e00\u80a1", None))
         self.qtOkPushButton.setText(QCoreApplication.translate("Dialog", u"\u78ba\u8a8d", None))
         self.qtCancelPushButton.setText(QCoreApplication.translate("Dialog", u"\u53d6\u6d88", None))
     # retranslateUi

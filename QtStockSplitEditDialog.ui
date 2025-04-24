@@ -6,19 +6,19 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>240</width>
+    <width>192</width>
     <height>175</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>240</width>
+    <width>192</width>
     <height>175</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>240</width>
+    <width>192</width>
     <height>175</height>
    </size>
   </property>
@@ -94,28 +94,19 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QRadioButton" name="qtSplitRadioButton">
+      <widget class="QLabel" name="label">
        <property name="text">
-        <string>分拆：每股分拆成</string>
-       </property>
-       <property name="checked">
-        <bool>true</bool>
+        <string>每股分拆成</string>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QSpinBox" name="qtStockSplitSpinBox">
-       <property name="minimumSize">
-        <size>
-         <width>50</width>
-         <height>0</height>
-        </size>
-       </property>
        <property name="minimum">
         <number>2</number>
        </property>
        <property name="maximum">
-        <number>99</number>
+        <number>20</number>
        </property>
       </widget>
      </item>
@@ -128,53 +119,6 @@
      </item>
      <item>
       <spacer name="horizontalSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_6">
-     <item>
-      <widget class="QRadioButton" name="qtMergeRadioButton">
-       <property name="text">
-        <string>合併：每</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QSpinBox" name="qtStockMergeSpinBox">
-       <property name="minimumSize">
-        <size>
-         <width>50</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="minimum">
-        <number>2</number>
-       </property>
-       <property name="value">
-        <number>2</number>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="label_4">
-       <property name="text">
-        <string>股合併成一股</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer_2">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
