@@ -1160,7 +1160,7 @@ class AboutDialog( QDialog ):
         self.ui = Ui_AboutDialog()
         self.ui.setupUi( self )
         self.setWindowIcon( share_icon.get_icon( share_icon.IconType.WINDOW ) )
-        self.ui.qtVersionLabel.setText( "v2.2.0" )
+        self.ui.qtVersionLabel.setText( "v2.3.0" )
 
 class AccountSettingEditDialog( QDialog ):
     def __init__( self, 
@@ -4612,10 +4612,13 @@ class MainWindow( QMainWindow ):
                     n_per_stock_accumulated_trading_fee = 0
                     n_per_stock_accumulated_trading_tax = 0
                     n_per_stock_realized_profit = 0
+                    b_invalid_data = False
                     for trading_data in value_list_stock_trading_data:
                         e_trading_type = trading_data[ TradingData.TRADING_TYPE ]
                         if e_trading_type == TradingType.TEMPLATE:
                             continue
+                        if TradingData.ACCUMULATED_QUANTITY_NON_SAVE in trading_data and trading_data[ TradingData.ACCUMULATED_QUANTITY_NON_SAVE ] < 0:
+                            b_invalid_data = True
                         n_per_stock_accumulated_trading_fee += trading_data[ TradingData.TRADING_FEE_NON_SAVE ]
                         n_per_stock_accumulated_trading_tax += trading_data[ TradingData.TRADING_TAX_NON_SAVE ]
                         n_per_stock_realized_profit += trading_data.get( TradingData.SELLING_PROFIT_NON_SAVE, 0 )
@@ -4710,6 +4713,8 @@ class MainWindow( QMainWindow ):
                     qt_standard_item.setTextAlignment( Qt.AlignLeft | Qt.AlignVCenter )
                     qt_standard_item.setFlags( qt_standard_item.flags() & ~Qt.ItemIsEditable )
                     qt_standard_item.setData( key_stock_number, Qt.UserRole )
+                    if b_invalid_data:
+                        qt_standard_item.setBackground( QBrush( '#FF0000' ) )
                     qt_table_model.setItem( n_index_row, 0, qt_standard_item ) 
 
                     for n_column, e_type in enumerate( self.list_show_stock_info ):
