@@ -6273,27 +6273,29 @@ if __name__ == "__main__":
 # https://mopsov.twse.com.tw/mops/web/t51sb09
 
 
-# 證交所  上市公司股票減資 恢復買賣參考價格
-# https://www.twse.com.tw/zh/announcement/reduction/twtauu.html
 
 # 證交所  上市公司變更股票面額恢復買賣參考價格( 分割 )
 # https://www.twse.com.tw/zh/announcement/change/twtb8u.html
 
-# 證交所  上市ETF "分割" 及 "反分割" 恢復買賣參考價格
-# https://www.twse.com.tw/zh/announcement/split/twtcau.html
-
-# 櫃買中心  上市公司股票減資 恢復買賣參考價格
-# https://www.tpex.org.tw/zh-tw/announce/market/reduction/reference.html
-
 # 櫃買中心  上櫃公司變更股票面額恢復買賣參考價格( 分割 )
 # https://www.tpex.org.tw/zh-tw/announce/market/change/reference.html
 # https://www.tpex.org.tw/zh-tw/mainboard/listed/flexible-face-value.html 這個好像更完整
+
+# 證交所  上市ETF "分割" 及 "反分割" 恢復買賣參考價格
+# https://www.twse.com.tw/zh/announcement/split/twtcau.html
 
 # 櫃買中心  上櫃ETF "分割" 恢復買賣參考價格
 # https://www.tpex.org.tw/zh-tw/announce/market/etf-split/reference.html
 
 # 櫃買中心  上櫃ETF "反分割" 恢復買賣參考價格
 # https://www.tpex.org.tw/zh-tw/announce/market/etf-rev-split/reference.html
+
+
+# 證交所  上市公司股票減資 恢復買賣參考價格
+# https://www.twse.com.tw/zh/announcement/reduction/twtauu.html
+# 櫃買中心  上市公司股票減資 恢復買賣參考價格
+# https://www.tpex.org.tw/zh-tw/announce/market/reduction/reference.html
+
 
 # 靜態掃描
 # pylint --disable=all --enable=E1120,E1121 StockPriceMainWindow.py 只顯示參數數量錯誤

@@ -1,6 +1,7 @@
 import foxinfo_share_utility.share_api as share_api
 from bs4 import BeautifulSoup
 import json
+import re
 
 class Download():
 
@@ -427,6 +428,118 @@ class Download():
         try:
             res = share_api.send_post_request( url, payload )
             return_json_value = json.loads( res.text )
+        except Exception as e:
+            print(f"Final error: {e}")
+
+        return return_json_value
+    
+    @staticmethod
+    def download_listed_stock_split_merge_by_year( n_start_year, n_end_year ): #上市公司 分割、反分割
+        return_json_value = None
+        # https://www.twse.com.tw/rwd/zh/change/TWTB8U?startDate=20240101&endDate=20241231&response=json&_=1745546342137
+        url = "https://www.twse.com.tw/rwd/zh/change/TWTB8U?startDate=" + str( n_start_year ) + "0101&endDate=" + str( n_end_year ) + "1231&response=json&_=1745546342137"
+        try:
+            res = share_api.send_get_request( url )
+            return_json_value = json.loads( res.text )
+        except Exception as e:
+            print(f"Final error: {e}")
+
+        return return_json_value['data']
+    
+    @staticmethod
+    def download_OTC_and_ROTC_stock_split_merge(): #上櫃、興櫃公司 分割、反分割
+        results = []
+        url = "https://www.tpex.org.tw/zh-tw/mainboard/listed/flexible-face-value.html"
+        try:
+            res = share_api.send_get_request( url )
+            res.encoding = 'utf-8'  # 設定正確編碼
+            soup = BeautifulSoup( res.text, "lxml" )
+            table = soup.find("table", class_="infotable align_c")
+            for row in table.find_all("tr")[1:]:
+                cols = row.find_all("td")
+                if len(cols) == 8:
+                    stock_code = cols[2].get_text(strip=True)
+                    change_date = cols[5].get_text(strip=True)
+                    face_value = cols[6].get_text(strip=True)
+                elif len(cols) == 7:
+                    stock_code = cols[1].get_text(strip=True)
+                    change_date = cols[4].get_text(strip=True)
+                    face_value = cols[5].get_text(strip=True)
+                if '-' != change_date and change_date.count('.') >= 2 and change_date.count('.') % 2 == 0:
+                    dates = re.findall(r'\d{3}\.\d{2}\.\d{2}', change_date)
+                    values = re.findall(r"新台幣.*?元", face_value)
+                    if len( dates ) == len( values ):
+                        for i in range( len( dates ) ):
+                            change_date = dates[ i ]
+                            face_value = values[ i ]
+                            results.append( [ stock_code, change_date, face_value ] )
+        except Exception as e:
+            print(f"Final error: {e}")
+
+        return results
+
+    @staticmethod
+    def download_listed_etf_split_merge_by_year( n_start_year, n_end_year ): #上市 etf 分割、反分割
+        # https://www.twse.com.tw/rwd/zh/split/TWTCAU?startDate=20240101&endDate=20250219&response=json&_=1745559156488
+        return_json_value = None
+        url = "https://www.twse.com.tw/rwd/zh/split/TWTCAU?startDate=" + str( n_start_year ) + "0101&endDate=" + str( n_end_year ) + "1231&response=json&_=1745559156488"
+        try:
+            res = share_api.send_get_request( url )
+            return_json_value = json.loads( res.text )
+        except Exception as e:
+            print(f"Final error: {e}")
+
+        return return_json_value['data']
+
+    @staticmethod
+    def download_OTC_etf_split_merge_by_year(): #上櫃 etf 分割
+        # 上櫃的 etf 尚未有任何分割 反分割的資料
+        pass
+
+    @staticmethod
+    def download_listed_company_capital_reduction_by_year( n_start_year, n_end_year ): #上市公司 減資
+        # https://www.twse.com.tw/rwd/zh/reducation/TWTAUU?startDate=20110101&endDate=20250425&response=json&_=1745560741649
+        return_json_value = []
+        url = "https://www.twse.com.tw/rwd/zh/reducation/TWTAUU?startDate=" + str( n_start_year ) + "0101&endDate=" + str( n_end_year ) + "1231&response=json&_=1745560741649"
+        try:
+            res = share_api.send_get_request( url )
+            json_value_from_request = json.loads( res.text )
+        except Exception as e:
+            print(f"Final error: {e}")
+
+        for per_data in json_value_from_request['data']:
+            # per_reduction_url = "https://www.twse.com.tw/zh/announcement/reduction/twtavu-detail.html?" + per_data[10].replace( ' ', '' )
+            list_number_and_date = per_data[10].replace( ' ', '' ).split( ',' )
+            per_reduction_url = "https://www.twse.com.tw/rwd/zh/reducation/TWTAVUDetail?STK_NO=" + list_number_and_date[ 0 ] + "&FILE_DATE=" + list_number_and_date[ 1 ] + "&response=json&_=1745569612993"
+            try:
+                res = share_api.send_get_request( per_reduction_url )
+                json_value_per_reduction_from_request = json.loads( res.text )
+                per_data.append( json_value_per_reduction_from_request['data'][ 0 ][ 3 ] )
+                per_data.append( json_value_per_reduction_from_request['data'][ 0 ][ 4 ] )
+                return_json_value.append( per_data )
+            except Exception as e:
+                print(f"Final error: {e}")
+
+        return return_json_value
+    
+    @staticmethod
+    def download_OTC_company_capital_reduction_by_year( n_start_year, n_end_year ): #上櫃公司 減資
+        return_json_value = []
+        url = "https://www.tpex.org.tw/www/zh-tw/bulletin/revivt?startDate=" + str( n_start_year ) + "%2F01%2F01&endDate=" + str( n_end_year ) + "%2F12%2F31&id="
+        try:
+            res = share_api.send_get_request( url )
+            json_value_from_request = json.loads( res.text )
+            for per_data in json_value_from_request['tables'][0]['data']:
+                soup = BeautifulSoup(per_data[10], "html.parser")
+
+                target_th = soup.find("th", string="每壹仟股換發新股票:")
+                if target_th:
+                    value_td = target_th.find_next_sibling("td")
+                    if value_td:
+                        result = value_td.get_text(strip=True)
+                        clean_text = result.replace('\xa0', '').replace('股', '').strip()
+                        per_data[10] = clean_text
+                        return_json_value.append( per_data )
         except Exception as e:
             print(f"Final error: {e}")
 
