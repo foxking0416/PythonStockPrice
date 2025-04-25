@@ -1,0 +1,5 @@
+Copyright (c) 2025 foxking0416
+
+本程式碼為公開閱覽用途，未經授權不得轉載、改作、複製、用於商業用途或其他二次散布。
+All rights reserved.
+This source code is for reference only. No reproduction, modification, distribution or commercial use is allowed without explicit permission from the author.
