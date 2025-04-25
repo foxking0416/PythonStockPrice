@@ -434,7 +434,7 @@ class Download():
         return return_json_value
     
     @staticmethod
-    def download_listed_stock_split_merge_by_year( n_start_year, n_end_year ): #上市公司 分割、反分割
+    def download_listed_stock_split_by_year( n_start_year, n_end_year ): #上市公司 分割、反分割
         return_json_value = None
         # https://www.twse.com.tw/rwd/zh/change/TWTB8U?startDate=20240101&endDate=20241231&response=json&_=1745546342137
         url = "https://www.twse.com.tw/rwd/zh/change/TWTB8U?startDate=" + str( n_start_year ) + "0101&endDate=" + str( n_end_year ) + "1231&response=json&_=1745546342137"
@@ -444,7 +444,7 @@ class Download():
         except Exception as e:
             print(f"Final error: {e}")
 
-        return return_json_value['data']
+        return return_json_value
     
     @staticmethod
     def download_OTC_and_ROTC_stock_split_merge(): #上櫃、興櫃公司 分割、反分割
