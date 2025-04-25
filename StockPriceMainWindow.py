@@ -1,6 +1,7 @@
 import foxinfo_share_utility.share_api as share_api
 import foxinfo_share_utility.share_ui as share_ui
 import foxinfo_share_utility.share_icon as share_icon
+from DownloadData import Download
 import requests
 from bs4 import BeautifulSoup
 import json
@@ -5481,63 +5482,6 @@ class MainWindow( QMainWindow ):
             self.ui.qtCurrentSelectCompanyLabel.setText( "" )
 
     #region 從網上下載資料
-    def check_internet_via_http( self, url="https://www.google.com", timeout=3):
-        """
-        檢測是否有網路連線（透過 HTTP 請求）
-        :param url: 用於測試的 URL
-        :param timeout: 超時時間（秒）
-        :return: True（有網路連線）或 False（無網路連線）
-        """
-        try:
-            response = requests.get(url, timeout=timeout)
-            return response.status_code == 200
-        except requests.RequestException:
-            return False
-
-    def send_get_request( self, url ):
-        retries = 0
-        while retries < 3:
-            try:
-                headers = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36' }
-                res = requests.get( url )
-                if res.status_code == 200:
-                    return res
-                else:
-                    print("\033[1;31mRequest failed\033[0m")
-                    print(f"Status code {res.status_code}. Retrying...")
-            except requests.exceptions.Timeout:
-                print("\033[1;31mTimeout\033[0m")
-            except requests.exceptions.TooManyRedirects:
-                print("\033[1;31mTooManyRedirects\033[0m")
-            
-            retries += 1
-            time.sleep(2)  # 等待2秒後重試
-    
-        raise Exception("Max retries exceeded. Failed to get a successful response.")
-
-    def send_post_request( self, url, payload, max_retries = 3, timeout = 10 ):
-        retries = 0
-        while retries < max_retries:
-
-            try:
-                # 發送 POST 請求
-                res = requests.post( url, data = payload, timeout=timeout )
-                # 檢查回應的狀態碼，確保是成功的 2xx 系列
-                if res.status_code == 200:
-                    return res
-                else:
-                    print("\033[1;31mRequest failed\033[0m")
-                    print(f"Status code {res.status_code}. Retrying...")
-            except requests.exceptions.Timeout:
-                print("\033[1;31mTimeout\033[0m")
-            except requests.exceptions.TooManyRedirects:
-                print("\033[1;31mTooManyRedirects\033[0m")
-
-            retries += 1
-            time.sleep(2)  # 等待2秒後重試
-        
-        raise Exception("Max retries exceeded. Failed to get a successful response.")
-
     def download_all_company_stock_number( self, str_date ): 
         dict_company_number_to_name = {}
         b_need_to_download = False
@@ -5547,7 +5491,7 @@ class MainWindow( QMainWindow ):
                 for i, row in enumerate( data ):
                     if i == 0:
                         if row.strip() != str_date:
-                            if self.check_internet_via_http(): #日期不一樣，且又有網路時才重新下載，不然就用舊的
+                            if share_api.check_internet_via_http(): #日期不一樣，且又有網路時才重新下載，不然就用舊的
                                 b_need_to_download = True
                         else:
                             break
@@ -5562,87 +5506,7 @@ class MainWindow( QMainWindow ):
             b_need_to_download = True
 
         if b_need_to_download:
-            tds = []
-            # 上市公司股票代碼
-            companyNymUrl = "https://isin.twse.com.tw/isin/C_public.jsp?strMode=2"
-            try:
-                res = self.send_get_request( companyNymUrl )
-                soup = BeautifulSoup( res.text, "lxml" )
-                tr = soup.findAll( 'tr' )
-
-                for raw in tr:
-                    data = [ td.get_text() for td in raw.findAll("td" )]
-                    if len( data ) == 7 and ( data[ 5 ] == 'ESVUFR' or 
-                                              data[ 5 ] == 'ESVTFR' or
-                                              data[ 5 ] == 'CEOGBU' or
-                                              data[ 5 ] == 'CEOGCU' or
-                                              data[ 5 ] == 'CEOGDU' or 
-                                              data[ 5 ] == 'CEOGEU' or 
-                                              data[ 5 ] == 'CEOGMU' or
-                                              data[ 5 ] == 'CEOJBU' or 
-                                              data[ 5 ] == 'CEOJEU' or
-                                              data[ 5 ] == 'CEOJLU' or
-                                              data[ 5 ] == 'CEOIBU' or
-                                              data[ 5 ] == 'CEOIEU' or
-                                              data[ 5 ] == 'CEOIRU' or
-                                              data[ 5 ] == 'EPNRAR' or 
-                                              data[ 5 ] == 'EPNRQR' or
-                                              data[ 5 ] == 'EPRRQR' or
-                                              data[ 5 ] == 'EPNNFB' or
-                                              data[ 5 ] == 'EPRRAR' or 
-                                              data[ 5 ] == 'EPNCAR' or 
-                                              data[ 5 ] == 'EFNRAR' or 
-                                              data[ 5 ] == 'EPNTAR' or 
-                                              data[ 5 ] == 'EPRNAR' or 
-                                              data[ 5 ] == 'EPNRFR' ): 
-                        b_ETF = False if data[ 5 ] == 'ESVUFR' else True
-                        if '\u3000' in data[ 0 ]:
-                            modified_data = data[ 0 ].split("\u3000")
-                            modified_data_after_strip = [ modified_data[ 0 ].strip(), modified_data[ 1 ].strip(), b_ETF ]
-                            tds.append( modified_data_after_strip )
-            except Exception as e:
-                pass                
-
-            # 上櫃公司股票代碼
-            companyNymUrl = "https://isin.twse.com.tw/isin/C_public.jsp?strMode=4"
-            try:
-                res = self.send_get_request( companyNymUrl )
-                soup = BeautifulSoup( res.text, "lxml" )
-                tr = soup.findAll( 'tr' )
-                for raw in tr:
-                    data = [ td.get_text() for td in raw.findAll("td") ]
-                    if len( data ) == 7 and ( data[ 5 ] == 'ESVUFR' or 
-                                              data[ 5 ] == 'CEOGBU' or
-                                              data[ 5 ] == 'CEOGEU' or 
-                                              data[ 5 ] == 'CEOJBU' or 
-                                              data[ 5 ] == 'CEOIBU' or
-                                              data[ 5 ] == 'CEOIEU' or
-                                              data[ 5 ] == 'CEOIRU' or
-                                              data[ 5 ] == 'EPNRAR'  ): 
-                        b_ETF = False if data[ 5 ] == 'ESVUFR' else True
-                        if '\u3000' in data[ 0 ]:
-                            modified_data = data[ 0 ].split("\u3000")
-                            modified_data_after_strip = [ modified_data[ 0 ].strip(), modified_data[ 1 ].strip(), b_ETF ]
-                            tds.append( modified_data_after_strip )
-            except Exception as e:
-                pass
-
-            # 興櫃公司股票代碼
-            companyNymUrl = "https://isin.twse.com.tw/isin/C_public.jsp?strMode=5"
-            try:
-                res = self.send_get_request( companyNymUrl )
-                soup = BeautifulSoup( res.text, "lxml" )
-                tr = soup.findAll( 'tr' )
-                for raw in tr:
-                    data = [ td.get_text() for td in raw.findAll("td") ]
-                    if len( data ) == 7 and data[ 5 ] == 'ESVUFR': 
-                        if '\u3000' in data[ 0 ]:
-                            modified_data = data[ 0 ].split("\u3000")
-                            modified_data_after_strip = [ modified_data[ 0 ].strip(), modified_data[ 1 ].strip(), False ]
-                            tds.append( modified_data_after_strip )
-            except Exception as e:
-                pass
-
+            tds = Download.download_company_stock_number()
             if len( tds ) == 0:
                 return
             
@@ -5679,7 +5543,7 @@ class MainWindow( QMainWindow ):
                 for i, row in enumerate( data ):
                     if i == 0:
                         if row.strip() != str_date:
-                            if self.check_internet_via_http(): #日期不一樣，且又有網路時才重新下載，不然就用舊的
+                            if share_api.check_internet_via_http(): #日期不一樣，且又有網路時才重新下載，不然就用舊的
                                 b_need_to_download = True
                         else:
                             break
@@ -5689,20 +5553,8 @@ class MainWindow( QMainWindow ):
         else:
             b_need_to_download = True
 
-
         if b_need_to_download:
-            tds = []
-            companyNymUrl = "https://www.twse.com.tw/rwd/zh/company/suspendListing"
-            try:
-                res = self.send_get_request( companyNymUrl )
-                json_data = res.json()
-                if "data" in json_data:
-                    for item in json_data["data"]:
-                        modified_data_after_strip = [ item[ 2 ].strip(), item[ 1 ].strip(), False, item[ 0 ].strip() ]
-                        tds.append( modified_data_after_strip )
-            except Exception as e:
-                pass
-
+            tds = Download.download_suspend_company_stock_number()
             if len( tds ) == 0:
                 return
             
@@ -5736,130 +5588,31 @@ class MainWindow( QMainWindow ):
             with open( stock_price_file_path, 'r', encoding='utf-8' ) as f:
                 data = f.readlines()
                 if data[ 0 ].strip() != str_date or data[ 1 ].strip() != 'O':
-                    if self.check_internet_via_http(): #日期不一樣，且又有網路時才重新下載，不然就用舊的
+                    if share_api.check_internet_via_http(): #日期不一樣，且又有網路時才重新下載，不然就用舊的
                         b_need_to_download = True
         else:
             b_need_to_download = True
 
         if b_need_to_download:
-            # 上市公司股價從證交所取得
-            # https://www.twse.com.tw/rwd/zh/afterTrading/MI_INDEX?date=20240912&type=ALLBUT0999&response=json&_=1726121461234
-            url = 'https://www.twse.com.tw/rwd/zh/afterTrading/MI_INDEX?date=' + str_date + '&type=ALLBUT0999&response=json&_=1726121461234'
+            all_stock_price = []
             b_get_listed_company_stock_price = False
-            try:
-                res = self.send_get_request( url )
-                soup = BeautifulSoup( res.content, 'html.parser' )
-
-                all_stock_price = []
-                json_str = soup.get_text()
-                json_data = json.loads(json_str)
-                if 'tables' in json_data:
-                    for item in json_data['tables']:
-                        if 'title' in item:
-                            if '每日收盤行情' in item['title']:
-                                for data in item['data']:
-                                    #index 0 證券代號    "0050",
-                                    #index 1 證券名稱    "元大台灣50",
-                                    #index 2 成交股數    "16,337,565",
-                                    #index 3 成交筆數    "15,442",
-                                    #index 4 成交金額    "2,900,529,886",
-                                    #index 5 開盤價      "176.10",
-                                    #index 6 最高價      "178.65",
-                                    #index 7 最低價      "176.10",
-                                    #index 8 收盤價      "178.30",
-                                    #index 9 漲跌(+/-)   "<p style= color:red>+<\u002fp>",
-                                    #index 10 漲跌價差    "6.45",
-                                    #index 11 最後揭示買價 "178.20",
-                                    #index 12 最後揭示買量 "5",
-                                    #index 13 最後揭示賣價 "178.30",
-                                    #index 14 最後揭示賣量 "103",
-                                    #index 15 本益比 
-
-                                    list_stock_price = [ data[ 0 ], data[ 1 ], data[ 8 ].replace( ',', '' ) ] 
-                                    all_stock_price.append( list_stock_price )
-                                    b_get_listed_company_stock_price = True
-            except Exception as e:
-                pass
-
-            # 上櫃公司股價從櫃買中心取得
-            # https://www.tpex.org.tw/www/zh-tw/afterTrading/dailyQuotes?date=2024%2F12%2F09&id=&response=html
-            formatted_date = f"{str_date[:4]}%2F{str_date[4:6]}%2F{str_date[6:]}"
-            url = 'https://www.tpex.org.tw/www/zh-tw/afterTrading/dailyQuotes?date=' + formatted_date + '&id=&response=html'
+            listed_company_stock_price = Download.download_listed_stock_price_by_date( str_date )
+            if len( listed_company_stock_price ) != 0:
+                b_get_listed_company_stock_price = True
+                all_stock_price.extend( listed_company_stock_price )
+            
             b_get_OTC_company_stock_price = False
-            try:
-                res = self.send_get_request( url )
-                
-                soup = BeautifulSoup( res.text, "lxml" )
-                tr = soup.findAll( 'tr' )
-                for raw in tr:
-                    if not raw.find( 'th' ):
-                        td_elements = raw.findAll( "td" )
-                        if len( td_elements ) == 19:
-                            # index 0 證券代號	
-                            # index 1 證券名稱	
-                            # index 2 收盤	
-                            # index 3 漲跌	
-                            # index 4 開盤
-                            # index 5 最高	
-                            # index 6 最低
-                            # index 7 均價	
-                            # index 8 成交股數
-                            # index 9 成交金額(元)
-                            # index 10 成交筆數	
-                            # index 11 最後買價	
-                            # index 12 最後買量(千股)	2020/4/29 開始才有這筆資訊
-                            # index 13 最後賣價	
-                            # index 14 最後賣量(千股)   2020/4/29 開始才有這筆資訊
-                            # index 15 發行股數	次日
-                            # index 16 參考價	次日
-                            # index 17 漲停價	次日
-                            # index 18 跌停價
-                            str_stock_number = td_elements[ 0 ].get_text().strip()
-                            str_stock_name = td_elements[ 1 ].get_text().strip()
-                            str_stock_price = td_elements[ 2 ].get_text().strip()
-                            list_stock_price = [ str_stock_number, str_stock_name, str_stock_price.replace( ',', '' ) ] 
-                            all_stock_price.append( list_stock_price )
-                            b_get_OTC_company_stock_price = True
-            except Exception as e:
-                pass    
+            OTC_company_stock_price = Download.download_OTC_stock_price_by_date( str_date )
+            if len( OTC_company_stock_price ) != 0:
+                b_get_OTC_company_stock_price = True
+                all_stock_price.extend( OTC_company_stock_price )
 
-            formatted_date = f"{str_date[:4]}/{str_date[4:6]}/{str_date[6:]}"
-            url = "https://www.tpex.org.tw/www/zh-tw/emerging/des010"
-            payload = {
-                'date': formatted_date
-            }
             b_get_ROTC_company_stock_price = False
-            try:
-                res = self.send_post_request( url, payload )
-                soup = BeautifulSoup( res.text, "lxml" )
-                json_str = soup.get_text()
-                json_data = json.loads(json_str)
-                if 'tables' in json_data:
-                    for item in json_data['tables']:
-                        if 'data' in item:
-                            for data in item['data']:
-                                #index 0 證券代號       "1260",
-                                #index 1 證券名稱       "富味鄉",
-                                #index 2 最後最佳報買價  "23.00",
-                                #index 3 最後最佳報賣價  "23.55",
-                                #index 4 日均價         "23.50",
-                                #index 5 前日均價       "23.54",
-                                #index 6 漲跌           "-0.04",
-                                #index 7 漲跌幅         "-0.17",
-                                #index 8 最高           "23.65",
-                                #index 9 最低           "23.45",
-                                #index 10 最後          "23.55",
-                                #index 11 成交量        "4074",
-                                #index 12 成交金額      "95742",
-                                #index 13 筆數          "5",
-                                #index 14 發行股數      "102098182",
-                                #index 15 上市櫃進度日期 
-                                #index 16 上市櫃進度 
-                                list_stock_price = [ data[ 0 ], data[ 1 ], data[ 4 ].replace( ',', '' ) ] 
-                                all_stock_price.append( list_stock_price )
-                                b_get_ROTC_company_stock_price = True
-            except Exception as e:
-                    pass
+            ROTC_company_stock_price = Download.download_ROTC_stock_price_by_date( str_date )
+            if len( ROTC_company_stock_price ) != 0:
+                b_get_ROTC_company_stock_price = True
+                all_stock_price.extend( ROTC_company_stock_price )
+            
 
             if len( all_stock_price ) == 0:
                 print( "no data" )
@@ -5965,181 +5718,14 @@ class MainWindow( QMainWindow ):
             with open( str_output_path, 'r', encoding='utf-8' ) as f:
                 date = f.readline().strip()
                 if date != str_date:
-                    if self.check_internet_via_http(): #日期不一樣，且又有網路時才重新下載，不然就用舊的
+                    if share_api.check_internet_via_http(): #日期不一樣，且又有網路時才重新下載，不然就用舊的
                         b_need_to_download = True
         else:
             b_need_to_download = True
 
         if b_need_to_download:
-            # 請求的 URL
-            url = 'https://mopsov.twse.com.tw/mops/web/ajax_t108sb27'
-
-            # POST 請求的數據
-            payload = {
-                # 'TYPEK': 'sii' if e_company_type2 == CompanyType2.LISTED else 'otc',
-                'encodeURIComponent': '1',
-                'firstin': '1',
-                'off': '1',
-                'step': '1',
-                'year': str(n_year)
-            }
-
-            all_company_dividend = []
-            try:
-                for n_type in range( 3 ):
-                    if n_type == 0:
-                        payload[ 'TYPEK' ] = 'sii'
-                    elif n_type == 1:
-                        payload[ 'TYPEK' ] = 'otc'
-                    else:
-                        payload[ 'TYPEK' ] = 'rotc'
-                    res = self.send_post_request( url, payload )
-
-                    soup = BeautifulSoup( res.text, "lxml" )
-                    tr = soup.findAll( 'tr' )
-                    for raw in tr:
-                        if not raw.find( 'th' ):
-                            data = []
-                            td_elements = raw.findAll( "td" )
-                            if n_year >= 94 and n_year < 105:
-                                if len( td_elements ) == 23:
-                                    # [0]公司代號
-                                    # [1]公司名稱	
-                                    # [2]股利所屬年度	
-                                    # [3]權利分派基準日	
-                                    # [4]股票股利_盈餘轉增資配股(元/股)
-                                    # [5]股票股利_法定盈餘公積、資本公積轉增資配股(元/股)
-                                    # [6]股票股利_除權交易日
-                                    # X [7]配股總股數(股)
-                                    # X [8]配股總金額(元)
-                                    # X [9]配股總股數佔盈餘配股總股數之比例(%)
-                                    # X [10]員工紅利配股率
-                                    # [11]現金股利_盈餘分配之股東現金股利(元/股)
-                                    # [12]現金股利_法定盈餘公積、資本公積發放之現金(元/股)
-                                    # [13]現金股利_除息交易日
-                                    # [14]現金股利_現金股利發放日
-                                    # X [15]員工紅利總金額(元)
-                                    # [16]現金增資總股數(股)	
-                                    # [17]現金增資認股比率(%)	
-                                    # [18]現金增資認購價(元/股)		
-                                    # X [19]董監酬勞(元)
-                                    # [20]公告日期
-                                    # [21]公告時間
-                                    # [22]普通股每股面額
-                                    for index, td in enumerate( td_elements ):
-                                        text = td.get_text().strip()
-                                        if index == 4 or index == 5 or index == 11 or index == 12 or index == 17 or index == 18:
-                                            if text == '\xa0' or text == ''  or text == '-' or text == '--':
-                                                data.append( 0 )
-                                            else:
-                                                number = float( text.replace( ',', '' ) ) 
-                                                data.append( number )
-                                            if index == 12:
-                                                data.append( 0 ) # 為了跟後續的格式有一致性，因為105年之後的表格有「現金股利_特別股配發現金股利(元/股)」，但因為現在沒有，所以直接補0
-                                        elif index == 16:
-                                            if text == '\xa0' or text == ''  or text == '-' or text == '--':
-                                                data.append( 0 )
-                                            else:
-                                                number = int( text.replace( ',', '' ) ) 
-                                                data.append( number )
-                                        elif index == 7 or index == 8 or index == 9 or index == 10 or index == 15 or index == 19:
-                                            continue
-                                        else:
-                                            if text == '\xa0' or text == ''  or text == '-' or text == '--':
-                                                data.append( '--' )
-                                            else:
-                                                data.append( text )
-
-                                    all_company_dividend.append( data )
-                            elif n_year >= 105 and n_year < 108:
-                                if len( td_elements ) == 18:
-                                    # [0]公司代號,
-                                    # [1]公司名稱,
-                                    # [2]股利所屬期間,
-                                    # [3]權利分派基準日,
-                                    # [4]股票股利_盈餘轉增資配股(元/股),
-                                    # [5]股票股利_法定盈餘公積、資本公積轉增資配股(元/股),                        
-                                    # [6]股票股利_除權交易日,
-                                    # [7]現金股利_盈餘分配之股東現金股利(元/股),
-                                    # [8]現金股利_法定盈餘公積、資本公積發放之現金(元/股),
-                                    # [9]現金股利_特別股配發現金股利(元/股),                        
-                                    # [10]現金股利_除息交易日,
-                                    # [11]現金股利_現金股利發放日,
-                                    # [12]現金增資總股數(股),
-                                    # [13]現金增資認股比率(%),
-                                    # [14]現金增資認購價(元/股),                        
-                                    # [15]公告日期,
-                                    # [16]公告時間,
-                                    # [17]普通股每股面額
-                                    for index, td in enumerate( td_elements ):
-                                        text = td.get_text().strip()
-                                        if index == 4 or index == 5 or index == 7 or index == 8 or index == 9 or index == 13 or index == 14:
-                                            if text == '\xa0' or text == ''  or text == '-' or text == '--':
-                                                data.append( 0 )
-                                            else:
-                                                number = float( text.replace( ',', '' ) ) 
-                                                data.append( number )
-                                        elif index == 12:
-                                            if text == '\xa0' or text == ''  or text == '-' or text == '--':
-                                                data.append( 0 )
-                                            else:
-                                                number = int( text.replace( ',', '' ) ) 
-                                                data.append( number )
-                                        else:
-                                            if text == '\xa0' or text == ''  or text == '-' or text == '--':
-                                                data.append( '--' )
-                                            else:
-                                                data.append( text )
-
-                                    all_company_dividend.append( data )
-                            elif n_year >= 108:
-                                if len( td_elements ) == 19:
-                                    # [0]公司代號,
-                                    # [1]公司名稱,
-                                    # [2]股利所屬期間,
-                                    # [3]權利分派基準日,
-                                    # [4]股票股利_盈餘轉增資配股(元/股),
-                                    # [5]股票股利_法定盈餘公積、資本公積轉增資配股(元/股),                        
-                                    # [6]股票股利_除權交易日,
-                                    # [7]現金股利_盈餘分配之股東現金股利(元/股),
-                                    # [8]現金股利_法定盈餘公積、資本公積發放之現金(元/股),
-                                    # [9]現金股利_特別股配發現金股利(元/股),                        
-                                    # [10]現金股利_除息交易日,
-                                    # [11]現金股利_現金股利發放日,
-                                    # [12]現金增資總股數(股),
-                                    # [13]現金增資認股比率(%),
-                                    # [14]現金增資認購價(元/股),                        
-                                    # [15]參加分派總股數,
-                                    # [16]公告日期,
-                                    # [17]公告時間,
-                                    # [18]普通股每股面額
-                                    for index, td in enumerate( td_elements ):
-                                        text = td.get_text().strip()
-                                        if index == 4 or index == 5 or index == 7 or index == 8 or index == 9 or index == 13 or index == 14:
-                                            if text == '\xa0' or text == ''  or text == '-' or text == '--':
-                                                data.append( 0 )
-                                            else:
-                                                number = float( text.replace( ',', '' ) ) 
-                                                data.append( number )
-                                        elif index == 12:
-                                            if text == '\xa0' or text == ''  or text == '-' or text == '--':
-                                                data.append( 0 )
-                                            else:
-                                                number = int( text.replace( ',', '' ) ) 
-                                                data.append( number )
-                                        elif index == 15:
-                                            continue
-                                        else:
-                                            if text == '\xa0' or text == ''  or text == '-' or text == '--':
-                                                data.append( '--' )
-                                            else:
-                                                data.append( text )
-
-                                    all_company_dividend.append( data )
-            except Exception as e:
-                print(f"Final error: {e}")
-
-
+            all_company_dividend = Download.download_general_company_dividend_by_year( n_year )
+            
             if len( all_company_dividend ) == 0:
                 print( "no data" )
                 return
@@ -6295,7 +5881,7 @@ class MainWindow( QMainWindow ):
             with open( str_output_path, 'r', encoding='utf-8' ) as f:
                 date = f.readline().strip()
                 if date != str_date:
-                    if self.check_internet_via_http(): #日期不一樣，且又有網路時才重新下載，不然就用舊的
+                    if share_api.check_internet_via_http(): #日期不一樣，且又有網路時才重新下載，不然就用舊的
                         b_need_to_download = True
         else:
             b_need_to_download = True
@@ -6304,10 +5890,8 @@ class MainWindow( QMainWindow ):
             n_year += 1911
 
         if b_need_to_download:
-            url = "https://www.twse.com.tw/rwd/zh/ETF/etfDiv?stkNo=&startDate=" + str( n_year ) + "0101&endDate=" + str( n_year ) + "0101&response=json&_=1734754779791"
             try:
-                res = self.send_get_request( url )
-                json_value = json.loads( res.text )
+                json_value = Download.download_listed_etf_dividend_by_year( n_year )
                 with open( str_output_path, 'w', encoding='utf-8' ) as f:
                     f.write( str_date + '\n' )
                     # 證券代號	
@@ -6429,27 +6013,14 @@ class MainWindow( QMainWindow ):
             with open( str_output_path, 'r', encoding='utf-8' ) as f:
                 date = f.readline().strip()
                 if date != str_date:
-                    if self.check_internet_via_http(): #日期不一樣，且又有網路時才重新下載，不然就用舊的
+                    if share_api.check_internet_via_http(): #日期不一樣，且又有網路時才重新下載，不然就用舊的
                         b_need_to_download = True
         else:
             b_need_to_download = True
 
         if b_need_to_download:
-            # 請求的 URL
-            url = 'https://www.tpex.org.tw/www/zh-tw/bulletin/exDailyQ'
-
-            if n_year < 1990:
-                n_year += 1911
-            # POST 請求的數據
-            payload = {
-                'startDate': str( n_year ) + '/01/01',
-                'endDate': str( n_year ) + '/12/31',
-                'response': 'json'
-            }
-
             try:
-                res = self.send_post_request( url, payload )
-                json_value = json.loads( res.text )
+                json_value = Download.download_OTC_etf_dividend_by_year( n_year )
                 with open( str_output_path, 'w', encoding='utf-8' ) as f:
                     f.write( str_date + '\n' )
                     # 民國104年之前(包含104年)   
