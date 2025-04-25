@@ -117,6 +117,7 @@ class TradingType( IntEnum ):
     DIVIDEND = 5
     CAPITAL_REDUCTION = 6
     SPLIT = 7
+    MERGE = 8
 
 class TradingPriceType( Enum ):
     PER_SHARE = 0
@@ -1042,23 +1043,53 @@ class StockSplitEditDialog( QDialog ):
         self.ui.qtDateEdit.setCalendarPopup( True )
         self.ui.qtDateEdit.dateChanged.connect( lambda: Utility.update_weekly_text_by_date( self.ui.qtDateEdit, self.ui.qtWeekdayLabel ) )
 
+        self.ui.qtSplitRadioButton.toggled.connect( self.update_ui )
+        self.ui.qtMergeRadioButton.toggled.connect( self.update_ui )
+
         self.ui.qtOkPushButton.clicked.connect( self.accept_data )
         self.ui.qtCancelPushButton.clicked.connect( self.cancel )
         self.dict_trading_data = {}
         Utility.update_weekly_text_by_date( self.ui.qtDateEdit, self.ui.qtWeekdayLabel )
+        self.update_ui()
+
+    def update_ui( self ):
+        with ( QSignalBlocker( self.ui.qtSplitRadioButton ),
+               QSignalBlocker( self.ui.qtMergeRadioButton ),
+               QSignalBlocker( self.ui.qtStockSplitSpinBox ),
+               QSignalBlocker( self.ui.qtStockMergeSpinBox ) ):
+
+            if self.ui.qtSplitRadioButton.isChecked():
+                self.ui.qtStockSplitSpinBox.setEnabled( True )
+                self.ui.qtStockMergeSpinBox.setEnabled( False )
+            else:
+                self.ui.qtStockSplitSpinBox.setEnabled( False )
+                self.ui.qtStockMergeSpinBox.setEnabled( True )
 
     def setup_trading_date( self, str_date ):
         self.ui.qtDateEdit.setDate( datetime.datetime.strptime( str_date, "%Y-%m-%d" ).date() )
 
-    def setup_stock_split_value( self, n_stock_split_share ):
-        self.ui.qtStockSplitSpinBox.setValue( n_stock_split_share )
+    def setup_trading_type_and_value( self, e_trading_type, n_stock_split_merge_share ):
+        with ( QSignalBlocker( self.ui.qtSplitRadioButton ),
+               QSignalBlocker( self.ui.qtMergeRadioButton ) ):
+            if e_trading_type == TradingType.SPLIT:
+                self.ui.qtSplitRadioButton.setChecked( True )
+                self.ui.qtStockSplitSpinBox.setValue( n_stock_split_merge_share )
+            else:
+                self.ui.qtMergeRadioButton.setChecked( True )
+                self.ui.qtStockMergeSpinBox.setValue( n_stock_split_merge_share )
+
+            self.update_ui()
 
     def accept_data( self ):
-        n_stock_split_share = self.ui.qtStockSplitSpinBox.value()
-        if n_stock_split_share != 0:
-
+        if self.ui.qtSplitRadioButton.isChecked():
+            n_stock_split_merge_share = self.ui.qtStockSplitSpinBox.value()
+            e_trading_type = TradingType.SPLIT
+        else:
+            n_stock_split_merge_share = self.ui.qtStockMergeSpinBox.value()
+            e_trading_type = TradingType.MERGE
+        if n_stock_split_merge_share != 0:
             self.dict_trading_data = Utility.generate_trading_data( self.ui.qtDateEdit.date().toString( "yyyy-MM-dd" ), #交易日期
-                                                                    TradingType.SPLIT,                                  #交易種類
+                                                                    e_trading_type,                                     #交易種類
                                                                     TradingPriceType.PER_SHARE,                         #交易價格種類
                                                                     0,                                                  #每股交易價格
                                                                     0,                                                  #總交易價格                         
@@ -1071,7 +1102,7 @@ class StockSplitEditDialog( QDialog ):
                                                                     0,                                                  #股票股利
                                                                     0,                                                  #現金股利
                                                                     -1,                                                 #自訂的補充保費
-                                                                    n_stock_split_share,                                #每股減資金額
+                                                                    n_stock_split_merge_share,                          #每股減資金額
                                                                     CapitalReductionType.CASH_RETURN,                   #減資種類
                                                                     False )                                             #是否為當沖交易
             self.accept()
@@ -3105,10 +3136,11 @@ class MainWindow( QMainWindow ):
                         dialog.setup_trading_date( dict_selected_data[ TradingData.TRADING_DATE ] )
                         dialog.setup_stock_capital_reduction_value( dict_selected_data[ TradingData.CAPITAL_REDUCTION_PER_SHARE ] )
                         dialog.setup_stock_capital_reduction_type( dict_selected_data[ TradingData.CAPITAL_REDUCTION_TYPE ] )
-                    elif dict_selected_data[ TradingData.TRADING_TYPE ] == TradingType.SPLIT:
+                    elif dict_selected_data[ TradingData.TRADING_TYPE ] == TradingType.SPLIT or dict_selected_data[ TradingData.TRADING_TYPE ] == TradingType.MERGE:
                         dialog = StockSplitEditDialog( str_stock_number, str_stock_name, self )
                         dialog.setup_trading_date( dict_selected_data[ TradingData.TRADING_DATE ] )
-                        dialog.setup_stock_split_value( dict_selected_data[ TradingData.CAPITAL_REDUCTION_PER_SHARE ] )
+                        dialog.setup_trading_type_and_value( dict_selected_data[ TradingData.TRADING_TYPE ], 
+                                                             dict_selected_data[ TradingData.CAPITAL_REDUCTION_PER_SHARE ] )
 
                     if dialog.exec():
                         dict_trading_data = dialog.dict_trading_data
@@ -3281,6 +3313,9 @@ class MainWindow( QMainWindow ):
                     cell.fill = color_fill
                 elif str_data == "股票分割":
                     color_fill = PatternFill( start_color = "732BF5", end_color = "732BF5", fill_type="solid")
+                    cell.fill = color_fill
+                elif str_data == "股票合併":
+                    color_fill = PatternFill( start_color = "EF88BE", end_color = "EF88BE", fill_type="solid")
                     cell.fill = color_fill
 
                 str_cell = get_column_letter( n_cell_column ) + str( n_cell_row )
@@ -4579,6 +4614,21 @@ class MainWindow( QMainWindow ):
                 n_accumulated_inventory = int( Decimal( str( n_accumulated_inventory ) ) * Decimal( str( item[ TradingData.CAPITAL_REDUCTION_PER_SHARE ] ) ) )
                 for i in range ( len( queue_buying_data ) ):
                     queue_buying_data[ i ][ 1 ] = int( Decimal( str( queue_buying_data[ i ][ 1 ] ) ) * Decimal( str( item[ TradingData.CAPITAL_REDUCTION_PER_SHARE ] ) ) )
+            elif e_trading_type == TradingType.MERGE:
+                if n_accumulated_inventory == 0: #沒有庫存就不用算合併了
+                    continue
+                item[ TradingData.PER_SHARE_TRADING_PRICE ] = 0
+                item[ TradingData.TRADING_QUANTITY ] = 0
+                item[ TradingData.TRADING_VALUE_NON_SAVE ] = 0
+                item[ TradingData.TRADING_FEE_NON_SAVE ] = 0
+                item[ TradingData.TRADING_TAX_NON_SAVE ] = 0
+                item[ TradingData.EXTRA_INSURANCE_FEE_NON_SAVE ] = 0 
+                item[ TradingData.TRADING_COST_NON_SAVE ] = 0
+                item[ TradingData.STOCK_DIVIDEND_GAIN_NON_SAVE ] = 0
+                item[ TradingData.CASH_DIVIDEND_GAIN_NON_SAVE ] = 0
+                n_accumulated_inventory = int( Decimal( str( n_accumulated_inventory ) ) / Decimal( str( item[ TradingData.CAPITAL_REDUCTION_PER_SHARE ] ) ) )
+                for i in range ( len( queue_buying_data ) ):
+                    queue_buying_data[ i ][ 1 ] = int( Decimal( str( queue_buying_data[ i ][ 1 ] ) ) / Decimal( str( item[ TradingData.CAPITAL_REDUCTION_PER_SHARE ] ) ) )
             item[ TradingData.ACCUMULATED_COST_NON_SAVE ] = n_accumulated_cost
             item[ TradingData.ACCUMULATED_COST_WITHOUT_CONSIDERING_DIVIDEND_NON_SAVE ] = n_accumulated_cost_without_considering_dividend
             item[ TradingData.ACCUMULATED_QUANTITY_NON_SAVE ] = n_accumulated_inventory
@@ -5127,6 +5177,8 @@ class MainWindow( QMainWindow ):
                     standard_item.setBackground( QBrush( '#FABF8F' ) )
                 elif data == "股票分割":
                     standard_item.setBackground( QBrush( '#732BF5' ) )
+                elif data == "股票合併":
+                    standard_item.setBackground( QBrush( '#EF88BE' ) )
                 else:
                     if n_invalid_data_index != -1:
                         if self.ui.qtFromNewToOldAction.isChecked():
@@ -5422,6 +5474,18 @@ class MainWindow( QMainWindow ):
             str_trading_price = "N/A"
             n_split_value = dict_per_trading_data[ TradingData.CAPITAL_REDUCTION_PER_SHARE ]
             str_trading_quantity = "1分" + str( n_split_value ) #
+            str_trading_value = "N/A"
+            str_trading_fee = "0"
+            str_trading_tax = "0"
+            str_extra_insurance_fee = "N/A"
+            str_per_trading_total_cost = "N/A"
+            str_stock_dividend = "N/A"
+            str_cash_dividend = "N/A"
+        elif e_trading_type == TradingType.MERGE:
+            str_trading_type = "股票合併"
+            str_trading_price = "N/A"
+            n_split_value = dict_per_trading_data[ TradingData.CAPITAL_REDUCTION_PER_SHARE ]
+            str_trading_quantity = str( n_split_value ) + "合1" #
             str_trading_value = "N/A"
             str_trading_fee = "0"
             str_trading_tax = "0"

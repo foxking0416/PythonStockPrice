@@ -155,7 +155,7 @@
           <bool>false</bool>
          </property>
          <property name="text">
-          <string>新增股票分割紀錄(T)</string>
+          <string>新增分割/反分割紀錄(T)</string>
          </property>
         </widget>
        </item>

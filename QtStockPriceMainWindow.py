@@ -288,7 +288,7 @@ class Ui_MainWindow(object):
         self.qtAddDividendDataPushButton.setText(QCoreApplication.translate("MainWindow", u"\u65b0\u589e\u914d\u80a1\u914d\u606f\u7d00\u9304(D)", None))
         self.qtAddLimitBuyingDataPushButton.setText(QCoreApplication.translate("MainWindow", u"\u65b0\u589e\u589e\u8cc7\u8a8d\u8cfc\u7d00\u9304(A)", None))
         self.qtAddCapitalReductionDataPushButton.setText(QCoreApplication.translate("MainWindow", u"\u65b0\u589e\u73fe\u91d1\u6e1b\u8cc7\u7d00\u9304(R)", None))
-        self.qtAddStockSplitDataPushButton.setText(QCoreApplication.translate("MainWindow", u"\u65b0\u589e\u80a1\u7968\u5206\u5272\u7d00\u9304(T)", None))
+        self.qtAddStockSplitDataPushButton.setText(QCoreApplication.translate("MainWindow", u"\u65b0\u589e\u5206\u5272/\u53cd\u5206\u5272\u7d00\u9304(T)", None))
         self.qtExportAllStockTradingDataPushButton.setText(QCoreApplication.translate("MainWindow", u"\u8f38\u51fa\u6240\u6709\u80a1\u7968\u4ea4\u6613\u7d00\u9304\u6210Excel", None))
         self.qtExportSelectedStockTradingDataPushButton.setText(QCoreApplication.translate("MainWindow", u"\u8f38\u51fa\u55ae\u652f\u80a1\u7968\u4ea4\u6613\u7d00\u9304\u6210Excel", None))
         self.menu.setTitle(QCoreApplication.translate("MainWindow", u"\u6a94\u6848", None))
