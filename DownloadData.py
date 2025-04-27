@@ -40,7 +40,21 @@ class Download():
                                           data[ 5 ] == 'EPNTAR' or 
                                           data[ 5 ] == 'EPRNAR' or 
                                           data[ 5 ] == 'EPNRFR' ): 
-                    b_ETF = False if data[ 5 ] == 'ESVUFR' else True
+                    if ( data[ 5 ] == 'ESVUFR' or 
+                         data[ 5 ] == 'ESVTFR' or 
+                         data[ 5 ] == 'EPNRAR' or
+                         data[ 5 ] == 'EPNRQR' or
+                         data[ 5 ] == 'EPRRQR' or
+                         data[ 5 ] == 'EPNNFB' or
+                         data[ 5 ] == 'EPRRAR' or
+                         data[ 5 ] == 'EPNCAR' or
+                         data[ 5 ] == 'EFNRAR' or
+                         data[ 5 ] == 'EPNTAR' or
+                         data[ 5 ] == 'EPRNAR' or
+                         data[ 5 ] == 'EPNRFR' ):
+                        b_ETF = False
+                    else:
+                        b_ETF = True
                     if '\u3000' in data[ 0 ]:
                         modified_data = data[ 0 ].split("\u3000")
                         modified_data_after_strip = [ modified_data[ 0 ].strip(), modified_data[ 1 ].strip(), b_ETF ]
@@ -64,7 +78,11 @@ class Download():
                                             data[ 5 ] == 'CEOIEU' or
                                             data[ 5 ] == 'CEOIRU' or
                                             data[ 5 ] == 'EPNRAR'  ): 
-                    b_ETF = False if data[ 5 ] == 'ESVUFR' else True
+                    if ( data[ 5 ] == 'ESVUFR' or 
+                         data[ 5 ] == 'EPNRAR' ):
+                        b_ETF = False
+                    else:
+                        b_ETF = True
                     if '\u3000' in data[ 0 ]:
                         modified_data = data[ 0 ].split("\u3000")
                         modified_data_after_strip = [ modified_data[ 0 ].strip(), modified_data[ 1 ].strip(), b_ETF ]
