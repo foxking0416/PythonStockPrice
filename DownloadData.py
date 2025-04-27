@@ -489,7 +489,7 @@ class Download():
         except Exception as e:
             print(f"Final error: {e}")
 
-        return return_json_value['data']
+        return return_json_value
 
     @staticmethod
     def download_OTC_etf_split_merge_by_year(): #上櫃 etf 分割

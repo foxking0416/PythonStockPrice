@@ -2072,6 +2072,7 @@ class MainWindow( QMainWindow ):
         self.set_progress_value( update_progress_callback, 20 )
         self.download_general_company_all_yearly_dividend_data( 2025, str_yesterday_date )
         self.download_listed_company_all_yearly_split_data( 2020, str_yesterday_date )
+        self.download_listed_etf_all_yearly_split_data( 2023, str_yesterday_date )
         self.set_progress_value( update_progress_callback, 50 )
         self.download_listed_etf_all_yearly_dividend_data( 2025, str_yesterday_date )
         self.set_progress_value( update_progress_callback, 80 )
@@ -6256,6 +6257,49 @@ class MainWindow( QMainWindow ):
                 print(f"Final error: {e}")
         pass
 
+    def download_listed_etf_all_yearly_split_data( self, n_split_data_start_year, str_date ):
+        print( "\033[32m>>>>>>>>>>>>>>> Start to download all yearly split data.\033[0m" )
+        current_date = datetime.datetime.today()
+        n_current_year = current_date.year
+
+        for n_year in range( n_split_data_start_year, n_current_year + 1 ):
+            b_overwrite = False
+            file_exist = [ True ]
+            str_output_path = self.process_output_file_path( None, file_exist, 'SplitMerge', 'ListedEtfSplit_', n_year, 0, b_overwrite, False )
+            if not file_exist[0] or n_year == n_current_year:
+                self.download_listed_etf_yearly_split_data( n_year, str_date, str_output_path, True )
+                print(f"Finish {n_year} yearly split " )
+
+        print( "\033[32m<<<<<<<<<<<<<<< Finish downloading all yearly split data.\033[0m" )
+    
+    def download_listed_etf_yearly_split_data( self, n_year, str_date, str_output_path, b_overwrite ):
+        file_exist = [ True ]
+        str_output_path = self.process_output_file_path( str_output_path, file_exist, 'SplitMerge', 'ListedEtfSplit_', n_year, 0, b_overwrite, False )
+        if file_exist[0]:
+            print("split file exists")
+            return
+
+        b_need_to_download = False
+        if os.path.exists( str_output_path ):
+            with open( str_output_path, 'r', encoding='utf-8' ) as f:
+                date = f.readline().strip()
+                if date != str_date:
+                    if share_api.check_internet_via_http(): #日期不一樣，且又有網路時才重新下載，不然就用舊的
+                        b_need_to_download = True
+        else:
+            b_need_to_download = True
+
+        if b_need_to_download:
+            try:
+                json_value = Download.download_listed_etf_split_merge_by_year( n_year, n_year )
+                if json_value != None:
+                    with open( str_output_path, 'w', encoding='utf-8' ) as f:
+                        f.write( str_date + '\n' )
+                        json.dump( json_value['data'], f, ensure_ascii=False, indent=4 )
+
+            except Exception as e:
+                print(f"Final error: {e}")
+        pass
     #endregion
 
 def run_app():
@@ -6330,10 +6374,10 @@ if __name__ == "__main__":
 # 證交所  上市ETF "分割" 及 "反分割" 恢復買賣參考價格
 # https://www.twse.com.tw/zh/announcement/split/twtcau.html
 
-# 櫃買中心  上櫃ETF "分割" 恢復買賣參考價格
+# 櫃買中心  上櫃ETF "分割" 恢復買賣參考價格 *目前尚無發生過
 # https://www.tpex.org.tw/zh-tw/announce/market/etf-split/reference.html
 
-# 櫃買中心  上櫃ETF "反分割" 恢復買賣參考價格
+# 櫃買中心  上櫃ETF "反分割" 恢復買賣參考價格 *目前尚無發生過
 # https://www.tpex.org.tw/zh-tw/announce/market/etf-rev-split/reference.html
 
 
